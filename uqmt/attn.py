@@ -17,6 +17,7 @@ Cache layouts
   seq_lens includes the K speculative tokens; query j attends to
   seq_len - K + j + 1 positions (causal among spec tokens).
 """
+import os
 import torch
 import triton
 import triton.language as tl
@@ -57,11 +58,10 @@ def dequantize_fp4(packed: torch.Tensor, scales: torch.Tensor):
 # ------------------------------------------------------------------ kernels
 @triton.jit
 def _fp4(c):
-    m = c & 7
-    e = m >> 1
-    man = (m & 1).to(tl.float32)
-    v = tl.where(e == 0, man * 0.5, (1.0 + 0.5 * man) * tl.exp2((e - 1).to(tl.float32)))
-    return tl.where((c & 8) != 0, -v, v)
+    # e2m1 -> value via bit placement: (sign<<15 | code3<<6) as bf16 bits, times 2**126
+    # (exact incl. the subnormal 0.5 case).
+    bits = ((c & 8) << 12) | ((c & 7) << 6)
+    return bits.to(tl.int16).to(tl.bfloat16, bitcast=True).to(tl.float32) * 8.507059173023462e37
 
 
 @triton.jit
@@ -168,7 +168,7 @@ def _run(q, kc, ks, vc, vs, block_table, seq_lens, sm_scale, nsplit):
     _split_kernel[(B, HKV, nsplit)](
         q, kc, ks, vc, vs, block_table, seq_lens, mo, ml, sm_scale,
         K=K, G=G, G_PAD=G_PAD, BLOCK_M=BLOCK_M, HQ=HQ, HKV=HKV, D=D, PAGE=PAGE,
-        MAX_PAGES=max_pages, NSPLIT=nsplit, PPS=pps, num_warps=4, num_stages=2)
+        MAX_PAGES=max_pages, NSPLIT=nsplit, PPS=pps, num_warps=int(os.environ.get('UQ_WARPS', 2)), num_stages=int(os.environ.get('UQ_STAGES', 2)))
     _reduce_kernel[(B, HKV, K * G_PAD)](
         mo, ml, out, K=K, G=G, G_PAD=G_PAD, BLOCK_M=BLOCK_M, HQ=HQ, HKV=HKV, D=D,
         NSPLIT=nsplit)
