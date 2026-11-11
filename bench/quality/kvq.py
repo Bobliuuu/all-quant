@@ -120,25 +120,51 @@ def kivi_v_block(v, bits, G=32):  # per-token, groups of G along channels
     return _asym(_grp(v, G), bits, -1).reshape(v.shape).to(v.dtype)
 
 
+def _nuq_norm(x, bits, dim, outlier=0.01):
+    """KVQuant-style (simplified): normalise to [-1,1] along `dim` stats, equal-mass (quantile) non-uniform levels from the data itself,
+    top `outlier` fraction (by |x|) kept in fp16 (dense-and-sparse)."""
+    xf = x.float(); lo = xf.amin(dim, keepdim=True); hi = xf.amax(dim, keepdim=True)
+    thr = torch.quantile(xf.abs().flatten(0, -1)[:: max(1, xf.numel() // 100000)], 1 - outlier)
+    out = xf.abs() > thr
+    xin = torch.where(out, torch.zeros_like(xf), xf)
+    lo = xin.amin(dim, keepdim=True); hi = xin.amax(dim, keepdim=True)
+    n = ((xin - lo) / (hi - lo).clamp_min(1e-8))
+    qs = torch.linspace(0, 1, 2 ** bits + 1, device=x.device)
+    samp = n.flatten()[:: max(1, n.numel() // 100000)]
+    edges = torch.quantile(samp, qs)
+    cents = torch.stack([samp[(samp >= edges[i]) & (samp <= edges[i + 1])].mean() if ((samp >= edges[i]) & (samp <= edges[i + 1])).any() else (edges[i] + edges[i + 1]) / 2 for i in range(2 ** bits)])
+    idx = (n.unsqueeze(-1) - cents).abs().argmin(-1)
+    deq = cents[idx] * (hi - lo) + lo
+    return torch.where(out, xf, deq)
+
+def kvq_k_block(k, bits, G=32):
+    B, H, T, D = k.shape
+    return _nuq_norm(k.reshape(B, H, T // G, G, D), bits, 3).reshape(B, H, T, D).to(k.dtype)
+
+def kvq_v_block(v, bits, G=32):
+    return _nuq_norm(v, bits, -1).reshape(v.shape).to(v.dtype)
+
+
 class KiviCache(DynamicCache):
     """KIVI: recent R tokens stay fp16; older tokens in blocks of G are quantised in place (K per-channel, V per-token)."""
-    def __init__(self, bits, G=32, R=128):
+    def __init__(self, bits, G=32, R=128, kf=None, vf=None):
         super().__init__(); self.bits, self.G, self.R = bits, G, R; self.flushed = {}
+        self.kf, self.vf = kf or kivi_k_block, vf or kivi_v_block
     def update(self, k, v, layer_idx, cache_kwargs=None):
         K, V = super().update(k, v, layer_idx, cache_kwargs)
         n = K.shape[2]; f = self.flushed.get(layer_idx, 0)
         t = ((n - self.R) // self.G) * self.G if n > self.R else 0
         if t > f:
-            K[:, :, f:t] = kivi_k_block(K[:, :, f:t], self.bits, self.G)
-            V[:, :, f:t] = kivi_v_block(V[:, :, f:t], self.bits, self.G)
+            K[:, :, f:t] = self.kf(K[:, :, f:t], self.bits, self.G)
+            V[:, :, f:t] = self.vf(V[:, :, f:t], self.bits, self.G)
             self.flushed[layer_idx] = t
         return K, V
 
 
-def kivi_seq(x, is_key, bits, G=32, R=128):  # whole-sequence equivalent, for the attention-error metric
+def kivi_seq(x, is_key, bits, G=32, R=128, kf=None, vf=None):  # whole-sequence equivalent, for the attention-error metric
     T = x.shape[2]; t = ((T - R) // G) * G if T > R else 0
     if t == 0: return x
-    y = x.clone(); y[:, :, :t] = (kivi_k_block if is_key else kivi_v_block)(x[:, :, :t], bits, G); return y
+    y = x.clone(); y[:, :, :t] = ((kf or kivi_k_block) if is_key else (vf or kivi_v_block))(x[:, :, :t], bits, G); return y
 
 
 # ---------------------------------------------------------------- KVQuant-style (simulated): per-channel K + non-uniform codebook + 1% outliers
@@ -206,6 +232,11 @@ def build_registry():
         add(Method(f"kivi{b}", "KIVI", b + 1.0, "simulated", lambda D, b=b: D * b // 8 + (D // 32) * 4,
                    cache=lambda b=b: KiviCache(b), seq=lambda x, k, b=b: kivi_seq(x, k, b),
                    note="K per-channel (32-token blocks), V per-token (group 32), fp16 residual 128 tokens, asym fp16 scale/zero; bytes exclude fp16 residual"))
+    for b in (3, 4):
+        add(Method(f"kvquant{b}", "KVQuant-style", b + 1.0, "simulated", lambda D, b=b: D * b // 8 + (D // 32) * 4 + int(D * 0.01 * 4),
+                   cache=lambda b=b: KiviCache(b, kf=kvq_k_block, vf=kvq_v_block),
+                   seq=lambda x, k, b=b: kivi_seq(x, k, b, kf=kvq_k_block, vf=kvq_v_block),
+                   note="simplified KVQuant: per-channel K (32-token blocks, post-RoPE, not pre-RoPE), equal-mass non-uniform levels fitted on the block (no offline sensitivity-weighted k-means), 1% fp16 outliers, fp16 residual 128; bytes include ~1% outliers at 4B each"))
     for meth, fam in (("turbo", "TurboQuant"), ("planar", "PlanarQuant"), ("iso", "IsoQuant"), ("rotor", "RotorQuant")):
         for b in ((2, 3, 4) if meth == "turbo" else (3, 4)):
             f = make_amd_fq(meth, b)
