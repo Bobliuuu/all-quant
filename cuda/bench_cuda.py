@@ -70,6 +70,11 @@ for K in a.ks:
         nws = {16: (1, 2, 4), 32: (2, 4), 64: (4, 8), 128: (8,)}[bm]
         cands = [dict(nwarps=nw, stages=st, nsplit=ns, variant=1) for nw in nws for st in (2, 3, 4) for ns in NS]
         cands += [dict(nwarps=nw, stages=st, nsplit=ns, variant=2, mb=mb) for mb in (1, 2) for nw in (2, 4, 8, 16) for st in (2, 3, 4) for ns in NS]
+    from uq_cuda import ext as _ext
+    if a.tune and _ext().has_sm90() and K >= 4:      # Hopper wgmma variant (variant 3): mw = MMA warpgroups, stages code, mb = dequant warpgroups
+        cands += [dict(variant=3, nwarps=mw, stages=st, mb=nd, nsplit=ns) for mw in (1, 2) for st in (2, 3, 32, 33) for nd in (2, 3) for ns in (2, 3, 4)]
+    if a.tune and torch.cuda.get_device_capability()[0] == 10 and K * 8 <= 128:   # Blackwell tcgen05 variant (variant 4), explicit request
+        cands += [dict(variant=4, stages=st, nsplit=ns) for st in (2, 3, 4) for ns in (6, 9, 12, 16)]
     best = None
     for c in cands:
         try:

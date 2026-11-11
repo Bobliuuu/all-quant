@@ -52,10 +52,13 @@ DEV uint64_t sdesc(uint32_t addr, uint32_t lbo_bytes, uint32_t sbo_bytes) {
   return (uint64_t)((addr & 0x3FFFF) >> 4) | ((uint64_t)(lbo_bytes >> 4) << 16) | ((uint64_t)(sbo_bytes >> 4) << 32) | (1ull << 62);
 }
 
-template <int MW, int DS, int RS, int ND>
+template <int MW, int DS, int RS, int ND, int NV>
 struct Cfg90 {
-  static constexpr int QB = 0, STG = 32768, RAWB = 8704;   // raw = K codes 4096, K sc 256, V codes 4096, V sc 256
-  static constexpr int OFF_Q = 0, OFF_DEQ = QB, OFF_RAW = OFF_DEQ + DS * STG, OFF_LUT = (OFF_RAW + RS * RAWB + 127) & ~127, OFF_CB = OFF_LUT + 32768;
+  static constexpr int QB = 0, STG = 32768;
+  static constexpr int SCB = NV ? 512 : 256, NGK = NV ? 8 : 4;       // scale bytes per page tensor / per key
+  static constexpr int RAWB = 8192 + 2 * SCB;                        // raw = K codes 4096, K scales SCB, V codes 4096, V scales SCB
+  static constexpr int VOFF = 4096 + SCB;
+  static constexpr int OFF_Q = 0, OFF_DEQ = QB, OFF_RAW = OFF_DEQ + DS * STG, OFF_LUT = (OFF_RAW + RS * RAWB + 127) & ~127, OFF_LUT2 = OFF_LUT + 32768, OFF_CB = OFF_LUT2 + 1024;
   static constexpr int CBB = MW > 1 ? 128 * 16 * 16 + 128 * 16 : 0;
   static constexpr int OFF_BAR = (OFF_CB + CBB + 127) & ~127;
   static constexpr int SMEM = OFF_BAR + 512 + 1024;
@@ -71,12 +74,12 @@ struct Cfg90 {
   static constexpr bool OK = SMEM <= 227 * 1024 && (MW == 1 || MW == 2);
 };
 
-template <int MW, int DS, int RS, int ND>
+template <int MW, int DS, int RS, int ND, int NV>
 __global__ void __launch_bounds__(128 * (MW + ND + 1), 1)
 uq_sm90_kernel(const UQParams a, int G, int gp_shift, int bme) {
 #if defined(__CUDA_ARCH_FEAT_SM90_ALL)
-  using C = Cfg90<MW, DS, RS, ND>;
-  constexpr int D = 128, PAGE = 64, DH = 64, NG = 4;
+  using C = Cfg90<MW, DS, RS, ND, NV>;
+  constexpr int D = 128, PAGE = 64, DH = 64, NG = C::NGK;
   extern __shared__ __align__(16) uint8_t smem_raw[];
   const uint32_t sbase0 = smem_u32(smem_raw);
   const uint32_t sb = (sbase0 + 1023u) & ~1023u;
@@ -108,6 +111,9 @@ uq_sm90_kernel(const UQParams a, int G, int gp_shift, int bme) {
       *(uint32_t*)(gb + C::OFF_LUT + e * 4) = v0 | (v1 << 16);
     }
   }
+  if constexpr (NV) {   // E4M3 scale byte -> bf16x2 (exact)
+    if (tid < 256) { float v = __half2float(__ushort_as_half((unsigned short)((tid & 0x7F) << 7))) * 256.f; uint32_t bits = __float_as_uint(v) >> 16; *(uint32_t*)(gb + C::OFF_LUT2 + tid * 4) = bits | (bits << 16); }
+  }
   if (tid == 0) {
     for (int i = 0; i < RS; i++) mbar_init(bar_full(i), 1);
     for (int i = 0; i < DS; i++) { mbar_init(bar_dfull(i), C::NDQ); mbar_init(bar_dfree(i), 4); }
@@ -132,9 +138,9 @@ uq_sm90_kernel(const UQParams a, int G, int gp_shift, int bme) {
         uint32_t d = sRaw + rs * C::RAWB;
         mbar_expect(bar_full(rs), C::RAWB);
         bulk_g2s(d, a.kc + cb * DH, 4096, bar_full(rs));
-        bulk_g2s(d + 4096, a.ks + cb * NG, 256, bar_full(rs));
-        bulk_g2s(d + 4352, a.vc + cb * DH, 4096, bar_full(rs));
-        bulk_g2s(d + 8448, a.vs + cb * NG, 256, bar_full(rs));
+        bulk_g2s(d + 4096, a.ks + cb * C::NGK, C::SCB, bar_full(rs));
+        bulk_g2s(d + C::VOFF, a.vc + cb * DH, 4096, bar_full(rs));
+        bulk_g2s(d + C::VOFF + 4096, a.vs + cb * C::NGK, C::SCB, bar_full(rs));
       }
     }
     return;
@@ -143,6 +149,7 @@ uq_sm90_kernel(const UQParams a, int G, int gp_shift, int bme) {
     // ============================ dequant warpgroups ============================
     const int t = tid - 128 * MW;   // 0..NDQ-1
     const uint32_t lb = sLut + (tid & 31) * 4;
+    const uint32_t sLut2 = sb + C::OFF_LUT2;
     asm volatile("setmaxnreg.dec.sync.aligned.u32 %0;\n" ::"n"(C::REG_DQ));
 #ifdef UQ90_PROF
     long long pacc[8] = {0}, _tp = clock64();
@@ -159,10 +166,11 @@ uq_sm90_kernel(const UQParams a, int G, int gp_shift, int bme) {
         const int c = t + j * C::NDQ;
         const int w = (c >> 8) & 1, u = c & 255;
         const int key = (u & 7) | ((u >> 5) << 3), g = (u >> 3) & 3;
-        uint32_t ca = raw + (w ? 4352 : 0) + key * 64 + g * 16;
-        uint32_t sa = raw + (w ? 4352 : 0) + 4096 + key * 4 + g;
+        uint32_t ca = raw + (w ? C::VOFF : 0) + key * 64 + g * 16;
+        uint32_t sa = raw + (w ? C::VOFF : 0) + 4096 + key * C::NGK + g * (NV ? 2 : 1);
         asm volatile("ld.shared.v4.u32 {%0,%1,%2,%3}, [%4];\n" : "=r"(rv[j].x), "=r"(rv[j].y), "=r"(rv[j].z), "=r"(rv[j].w) : "r"(ca));
-        asm volatile("ld.shared.u8 %0, [%1];\n" : "=r"(scv[j]) : "r"(sa));
+        if constexpr (NV) { uint32_t t16; asm volatile("ld.shared.u16 %0, [%1];\n" : "=r"(t16) : "r"(sa)); scv[j] = t16; }
+        else asm volatile("ld.shared.u8 %0, [%1];\n" : "=r"(scv[j]) : "r"(sa));
       }
       mbar_arrive(bar_rfree(rs));       // raw stage fully read by this thread (arrive has release semantics for the loads)
       mbar_wait(bar_dfree(ds), ((it / DS) & 1) ^ 1);
@@ -175,7 +183,11 @@ uq_sm90_kernel(const UQParams a, int G, int gp_shift, int bme) {
         const int key = (u & 7) | ((u >> 5) << 3), g = (u >> 3) & 3;   // quarter-warp = 8 distinct keys, same group: conflict-free swizzled stores
         uint32_t o[4][4];
         uint32_t wv[4] = {rv[j].x, rv[j].y, rv[j].z, rv[j].w};
-        const uint32_t f = (scv[j] << 7) * 0x10001u;   // bf16x2 of 2^(sc-127)
+        uint32_t fA, fB;
+        if constexpr (NV) {   // two E4M3 scales (16 elements each) -> exact bf16x2 via a 256-entry table
+          asm volatile("ld.shared.u32 %0, [%1];\n" : "=r"(fA) : "r"(sLut2 + (scv[j] & 0xFFu) * 4u));
+          asm volatile("ld.shared.u32 %0, [%1];\n" : "=r"(fB) : "r"(sLut2 + ((scv[j] >> 8) & 0xFFu) * 4u));
+        } else { fA = fB = (scv[j] << 7) * 0x10001u; }   // bf16x2 of 2^(sc-127)
         #pragma unroll
         for (int k = 0; k < 4; k++) {
           #pragma unroll
@@ -184,7 +196,7 @@ uq_sm90_kernel(const UQParams a, int G, int gp_shift, int bme) {
             uint32_t addr = idx * 128u + lb;
             uint32_t v;
             asm volatile("ld.shared.u32 %0, [%1];\n" : "=r"(v) : "r"(addr));
-            o[k][jj] = mul_bf16x2(v, f);
+            o[k][jj] = mul_bf16x2(v, k < 2 ? fA : fB);
           }
         }
         const uint32_t tile = sDeq + ds * C::STG + w * 16384;
@@ -376,15 +388,15 @@ uq_sm90_kernel(const UQParams a, int G, int gp_shift, int bme) {
 #endif
 }
 
-template <int MW, int DS, int RS, int ND>
+template <int MW, int DS, int RS, int ND, int NV>
 static cudaError_t launch_sm90(const UQParams& p, cudaStream_t s) {
-  using C = Cfg90<MW, DS, RS, ND>;
+  using C = Cfg90<MW, DS, RS, ND, NV>;
   if constexpr (!C::OK) return cudaErrorInvalidValue; else {
     int bm = uq_block_m(p.K, p.HQ, p.HKV);
     if (p.D != 128 || p.PAGE != 64 || bm > 64) return cudaErrorInvalidValue;
     int dev = 0, maj = 0; cudaGetDevice(&dev); cudaDeviceGetAttribute(&maj, cudaDevAttrComputeCapabilityMajor, dev);
     if (maj != 9) return cudaErrorInvalidValue;
-    auto kern = uq_sm90_kernel<MW, DS, RS, ND>;
+    auto kern = uq_sm90_kernel<MW, DS, RS, ND, NV>;
     static bool init = false;
     if (!init) {
       cudaError_t e = cudaFuncSetAttribute(kern, cudaFuncAttributeMaxDynamicSharedMemorySize, C::SMEM);
@@ -401,14 +413,17 @@ static cudaError_t launch_sm90(const UQParams& p, cudaStream_t s) {
 }
 
 // mw = # MMA warpgroups (1,2); stages = dequant stages; nd = # dequant warpgroups (2,3) encoded in p.mb (0 -> 2)
-#define SM90_CASE(MW_, DS_, RS_, ND_) if (mw == MW_ && stages == (RS_ == 4 ? DS_ : DS_ + 10 * (RS_ / 2 - 1)) && nd == ND_) return launch_sm90<MW_, DS_, RS_, ND_>(p, s);
-// stages code: DS (raw ring 4), or DS + 10*(RS/2-1) for deeper raw rings (RS=6 -> +20, RS=8 -> +30, RS=12 -> +50)
+#define SM90_CASE(MW_, DS_, RS_, ND_) if (mw == MW_ && stages == (RS_ == 4 ? DS_ : DS_ + 10 * (RS_ / 2 - 1)) && nd == ND_) { if (p.fmt == 1) return launch_sm90<MW_, DS_, RS_, ND_, 1>(p, s); return launch_sm90<MW_, DS_, RS_, ND_, 0>(p, s); }
+// stages code: DS (raw ring 4), or DS + 10*(RS/2-1) for deeper raw rings (RS=8 -> +30)
 static cudaError_t dispatch_sm90(const UQParams& p, int mw, int stages, cudaStream_t s) {
   if (mw == 0) mw = 2;
   if (stages == 0) stages = 3;
   int nd = p.mb == 0 ? 2 : p.mb;
+  SM90_CASE(2, 3, 4, 2) SM90_CASE(2, 2, 4, 2)
+#ifndef UQ_SM90_MIN
   SM90_CASE(1, 2, 4, 2) SM90_CASE(1, 3, 4, 2) SM90_CASE(1, 2, 4, 3) SM90_CASE(1, 3, 4, 3)
   SM90_CASE(1, 2, 8, 2) SM90_CASE(1, 3, 8, 2) SM90_CASE(1, 2, 8, 3) SM90_CASE(1, 3, 8, 3)
-  SM90_CASE(2, 2, 4, 2) SM90_CASE(2, 3, 4, 2) SM90_CASE(2, 2, 8, 2) SM90_CASE(2, 3, 8, 2)
+  SM90_CASE(2, 2, 8, 2) SM90_CASE(2, 3, 8, 2)
+#endif
   return cudaErrorInvalidValue;
 }

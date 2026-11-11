@@ -23,7 +23,10 @@ struct UQParams {
   int nsplit;              // any value 1..128
   float sm_scale;
   int variant;             // 0 auto, 1 = smem-dequant design, 2 = warp-independent design W
-  int mb;                  // design W: 16-row m-blocks per warp (0 = auto)
+  int mb;                  // design W: 16-row m-blocks per warp (0 = auto); variant 3: # dequant warpgroups (0 = 2)
+  // cuda2 (appended; zero-init = UE8M0/32 format as before)
+  int fmt;                 // 0 = UE8M0 per 32 (UltraQuant), 1 = NVFP4: E4M3 scale per 16 (ks/vs [.., D/16]) + per-tensor fp32 k_ts/v_ts
+  float k_ts, v_ts;        // fmt==1: k_ts is folded into sm_scale, v_ts multiplies the output (set both, 1.0 = none)
 };
 
 // Rows per CTA tile: max(16, pow2(K * pow2(G))).  Scratch sizes depend on it.
@@ -34,3 +37,7 @@ size_t uq_ml_elems(const UQParams& p);   // fp32 elements of ml
 // nwarps: 0 = auto (4, or 8 for BLOCK_M=128); stages: 0 = auto (3).
 // Returns cudaErrorInvalidValue for unsupported (D, PAGE, K*G) combos.
 cudaError_t uq_decode_launch(const UQParams& p, int nwarps, int stages, cudaStream_t s);
+// CUDA-graph friendly entry: no allocation, no sync, no host reads of device memory.  Workspace = fp32 mo/ml scratch (uq_workspace_bytes(p)).
+size_t uq_workspace_bytes(const UQParams& p);
+cudaError_t uq_decode_launch_ws(UQParams p, void* workspace, int nwarps, int stages, cudaStream_t s);
+int uq_has_sm90();   // 1 if this build contains the sm_90a wgmma variant (variant 3) and the current device is sm_90

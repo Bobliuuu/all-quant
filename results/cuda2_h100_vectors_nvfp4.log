@@ -1,0 +1,2 @@
+NVIDIA H100 80GB HBM3, 9.0, 610.57.04
+RESULT runs=2016 fails=0 worst_max_abs_err=7.811e-03 worst_err_beyond_bf16_rounding=1.698e-03 tol=1.0e-02

@@ -2,6 +2,7 @@
 // mma.sync m16n8k16 bf16 tensor cores, software FP4 -> bf16 dequant, cp.async multi-stage.
 #include "uq_decode.h"
 #include <cuda_bf16.h>
+#include <cuda_fp16.h>
 #include <cstdio>
 #include <algorithm>
 
@@ -74,11 +75,28 @@ DEV void dequant_chunk(uint4 raw, uint32_t s, uint4* dst) {
   for (int i = 0; i < 4; i++) dst[i] = make_uint4(o[4 * i], o[4 * i + 1], o[4 * i + 2], o[4 * i + 3]);
 }
 
+// NVFP4 E4M3 (positive, fn) scale byte -> bf16x2 (value duplicated): exact via fp16 bit placement (see uqmt/nvfp4.py)
+DEV uint32_t e4m3_bf16x2(uint32_t b) {
+  float v = __half2float(__ushort_as_half((unsigned short)((b & 0x7Fu) << 7))) * 256.f;
+  uint32_t bits = __float_as_uint(v) >> 16;   // <= 4 significant bits: exact in bf16
+  return bits | (bits << 16);
+}
+// 16 elements (8 bytes) times one bf16x2 scale f (exact: fp4 x e4m3 product has <= 5 significant bits)
+DEV void dequant_chunk16(uint2 raw, uint32_t f, uint4* dst) {
+  uint32_t w[2] = {raw.x, raw.y};
+  uint32_t o[8];
+  #pragma unroll
+  for (int i = 0; i < 2; i++)
+    #pragma unroll
+    for (int j = 0; j < 4; j++) o[i * 4 + j] = mul_bf16x2(mul_bf16x2(fp4x2_raw((w[i] >> (8 * j)) & 0xFFu), 0x7E807E80u), f);
+  dst[0] = make_uint4(o[0], o[1], o[2], o[3]); dst[1] = make_uint4(o[4], o[5], o[6], o[7]);
+}
+
 #include "uq_decode_w.cuh"
 
-template <int D, int PAGE, int BM, int NW, int ST>
+template <int D, int PAGE, int BM, int NW, int ST, int GS>
 struct Cfg {
-  static constexpr int DH = D / 2, NG = D / 32, LD = D + 8;
+  static constexpr int DH = D / 2, NG = D / GS, LD = D + 8;
   static constexpr int NWM = BM / 16;
   static constexpr int NWK = NW / NWM > 0 ? NW / NWM : 1;
   static constexpr int KPW = PAGE / NWK > 0 ? PAGE / NWK : 1;       // keys per warp per page
@@ -93,10 +111,10 @@ struct Cfg {
   static constexpr bool OK = (NW % NWM == 0) && (NW / NWM >= 1) && (PAGE / (NW / NWM)) % 16 == 0 && (PAGE / (NW / NWM)) >= 16;
 };
 
-template <int D, int PAGE, int BM, int NW, int ST>
+template <int D, int PAGE, int BM, int NW, int ST, int GS>
 __global__ void __launch_bounds__(NW * 32)
 uq_split_kernel(const UQParams a, int G, int gp_shift) {
-  using C = Cfg<D, PAGE, BM, NW, ST>;
+  using C = Cfg<D, PAGE, BM, NW, ST, GS>;
   constexpr int DH = C::DH, NG = C::NG, LD = C::LD, NWM = C::NWM, NWK = C::NWK, KPW = C::KPW, NT = C::NT;
   constexpr int T = NW * 32;
   extern __shared__ __align__(16) uint8_t smem[];
@@ -188,9 +206,15 @@ uq_split_kernel(const UQParams a, int G, int gp_shift) {
       for (int c = tid; c < 2 * PAGE * NG; c += T) {
         int which = c >= PAGE * NG; int r = which ? c - PAGE * NG : c;
         int key = r / NG, g = r % NG;
-        uint4 raw = *(const uint4*)((which ? vr : kr) + key * DH + g * 16);
-        uint32_t s = (which ? vsc : ksc)[key * NG + g];
-        dequant_chunk(raw, s, (uint4*)((which ? sV : sK) + key * LD + g * 32));
+        if constexpr (GS == 32) {
+          uint4 raw = *(const uint4*)((which ? vr : kr) + key * DH + g * 16);
+          uint32_t s = (which ? vsc : ksc)[key * NG + g];
+          dequant_chunk(raw, s, (uint4*)((which ? sV : sK) + key * LD + g * 32));
+        } else {   // NVFP4: 8 bytes (16 elements) per E4M3 scale
+          uint2 raw = *(const uint2*)((which ? vr : kr) + key * DH + g * 8);
+          uint32_t f = e4m3_bf16x2((which ? vsc : ksc)[key * NG + g]);
+          dequant_chunk16(raw, f, (uint4*)((which ? sV : sK) + key * LD + g * 16));
+        }
       }
     }
     __syncthreads();
@@ -357,9 +381,10 @@ __global__ void uq_reduce_kernel(const UQParams a, int G, int BM, int gp_shift) 
     }
   }
   float inv = wsum > 0.f ? 1.f / wsum : 0.f;
+  const float vts = a.fmt ? a.v_ts : 1.f;
   __nv_bfloat16* out = (__nv_bfloat16*)a.out + ((size_t)(b * a.K + j) * a.HQ + hk * G + g) * D;
   #pragma unroll
-  for (int i = 0; i < D / 32; i++) out[lane + 32 * i] = __float2bfloat16(acc[i] * inv);
+  for (int i = 0; i < D / 32; i++) out[lane + 32 * i] = __float2bfloat16(acc[i] * inv * vts);
 }
 
 // ------------------------------------------------------------------ host
@@ -374,11 +399,11 @@ int uq_block_m(int K, int HQ, int HKV) { return std::max(16, pow2ceil(K * pow2ce
 size_t uq_mo_elems(const UQParams& p) { return (size_t)p.B * p.HKV * p.nsplit * uq_block_m(p.K, p.HQ, p.HKV) * p.D; }
 size_t uq_ml_elems(const UQParams& p) { return (size_t)p.B * p.HKV * p.nsplit * uq_block_m(p.K, p.HQ, p.HKV); }
 
-template <int D, int PAGE, int BM, int NW, int ST>
+template <int D, int PAGE, int BM, int NW, int ST, int GS>
 static cudaError_t launch_cfg(const UQParams& p, cudaStream_t s) {
-  using C = Cfg<D, PAGE, BM, NW, ST>;
+  using C = Cfg<D, PAGE, BM, NW, ST, GS>;
   if constexpr (!C::OK) { return cudaErrorInvalidValue; } else {
-  auto kern = uq_split_kernel<D, PAGE, BM, NW, ST>;
+  auto kern = uq_split_kernel<D, PAGE, BM, NW, ST, GS>;
   static bool init = false;
   if (!init) {
     if (!smem_fits(C::SMEM)) return cudaErrorInvalidValue;
@@ -397,12 +422,12 @@ static cudaError_t launch_cfg(const UQParams& p, cudaStream_t s) {
 
 #define NW_CASE(D_, PAGE_, BM_, NW_)                                                   \
   case NW_: switch (stages) {                                                         \
-    case 2: return launch_cfg<D_, PAGE_, BM_, NW_, 2>(p, s);                          \
-    case 3: return launch_cfg<D_, PAGE_, BM_, NW_, 3>(p, s);                          \
-    case 4: return launch_cfg<D_, PAGE_, BM_, NW_, 4>(p, s);                          \
+    case 2: return launch_cfg<D_, PAGE_, BM_, NW_, 2, GS>(p, s);                          \
+    case 3: return launch_cfg<D_, PAGE_, BM_, NW_, 3, GS>(p, s);                          \
+    case 4: return launch_cfg<D_, PAGE_, BM_, NW_, 4, GS>(p, s);                          \
     default: return cudaErrorInvalidValue; }
 
-template <int D, int PAGE, int BM>
+template <int D, int PAGE, int BM, int GS>
 static cudaError_t dispatch_nw(const UQParams& p, int nw, int stages, cudaStream_t s) {
   if (stages == 0) stages = 3;
   if constexpr (BM == 16) {
@@ -420,13 +445,13 @@ static cudaError_t dispatch_nw(const UQParams& p, int nw, int stages, cudaStream
   }
 }
 
-template <int D, int PAGE>
+template <int D, int PAGE, int GS>
 static cudaError_t dispatch_bm(const UQParams& p, int nw, int stages, cudaStream_t s) {
   switch (uq_block_m(p.K, p.HQ, p.HKV)) {
-    case 16: return dispatch_nw<D, PAGE, 16>(p, nw, stages, s);
-    case 32: return dispatch_nw<D, PAGE, 32>(p, nw, stages, s);
-    case 64: return dispatch_nw<D, PAGE, 64>(p, nw, stages, s);
-    case 128: return dispatch_nw<D, PAGE, 128>(p, nw, stages, s);
+    case 16: return dispatch_nw<D, PAGE, 16, GS>(p, nw, stages, s);
+    case 32: return dispatch_nw<D, PAGE, 32, GS>(p, nw, stages, s);
+    case 64: return dispatch_nw<D, PAGE, 64, GS>(p, nw, stages, s);
+    case 128: return dispatch_nw<D, PAGE, 128, GS>(p, nw, stages, s);
     default: return cudaErrorInvalidValue;
   }
 }
@@ -528,41 +553,81 @@ static cudaError_t dispatch_w(const UQParams& p, int nw, int stages, cudaStream_
 #ifdef UQ_ENABLE_SM90
 #include "uq_decode_sm90.cuh"
 #endif
+#ifdef UQ_ENABLE_SM100
+#include "uq_decode_sm100.cuh"
+#endif
 
-template <int D, int PAGE>
+template <int D, int PAGE, int GS>
 static cudaError_t dispatch_dp(const UQParams& p, int nw, int stages, cudaStream_t s) {
-  if (p.variant != 1) {
-    cudaError_t e = dispatch_w<D, PAGE>(p, nw, stages, s);
-    if (e != cudaErrorInvalidValue || p.variant == 2) return e;
-    cudaGetLastError();
+  if constexpr (GS == 32) {
+    if (p.variant != 1) {
+      cudaError_t e = dispatch_w<D, PAGE>(p, nw, stages, s);
+      if (e != cudaErrorInvalidValue || p.variant == 2) return e;
+      cudaGetLastError();
+    }
   }
-  return dispatch_bm<D, PAGE>(p, nw, stages, s);
+  return dispatch_bm<D, PAGE, GS>(p, nw, stages, s);
 }
 
-cudaError_t uq_decode_launch(const UQParams& p, int nw, int stages, cudaStream_t s) {
-  if (p.nsplit < 1 || p.nsplit > 128) return cudaErrorInvalidValue;
-#ifdef UQ_ENABLE_SM90
-  if (p.variant == 3) return dispatch_sm90(p, nw, stages, s);   // nw = # MMA warpgroups, stages = dequant stages
-#endif
-#ifdef UQ_SM90_ONLY
-  return cudaErrorInvalidValue;   // dev build (fast compile): only variant 3
-#else
+template <int GS>
+static cudaError_t launch_gs(const UQParams& p, int nw, int stages, cudaStream_t s) {
   if (p.D == 128) {
     switch (p.PAGE) {
-      case 16: return dispatch_dp<128, 16>(p, nw, stages, s);
-      case 32: return dispatch_dp<128, 32>(p, nw, stages, s);
-      case 64: return dispatch_dp<128, 64>(p, nw, stages, s);
-      case 128: return dispatch_dp<128, 128>(p, nw, stages, s);
+      case 16: return dispatch_dp<128, 16, GS>(p, nw, stages, s);
+      case 32: return dispatch_dp<128, 32, GS>(p, nw, stages, s);
+      case 64: return dispatch_dp<128, 64, GS>(p, nw, stages, s);
+      case 128: return dispatch_dp<128, 128, GS>(p, nw, stages, s);
     }
   } else if (p.D == 64) {
     switch (p.PAGE) {
-      case 16: return dispatch_dp<64, 16>(p, nw, stages, s);
-      case 32: return dispatch_dp<64, 32>(p, nw, stages, s);
-      case 64: return dispatch_dp<64, 64>(p, nw, stages, s);
+      case 16: return dispatch_dp<64, 16, GS>(p, nw, stages, s);
+      case 32: return dispatch_dp<64, 32, GS>(p, nw, stages, s);
+      case 64: return dispatch_dp<64, 64, GS>(p, nw, stages, s);
     }
   }
   return cudaErrorInvalidValue;
+}
+
+int uq_has_sm90() {
+#ifdef UQ_ENABLE_SM90
+  int dev = 0, maj = 0, mnr = 0; cudaGetDevice(&dev);
+  cudaDeviceGetAttribute(&maj, cudaDevAttrComputeCapabilityMajor, dev); cudaDeviceGetAttribute(&mnr, cudaDevAttrComputeCapabilityMinor, dev);
+  return maj == 9 && mnr == 0;
+#else
+  return 0;
 #endif
+}
+
+cudaError_t uq_decode_launch(const UQParams& p0, int nw, int stages, cudaStream_t s) {
+  UQParams p = p0;
+  if (p.fmt == 1) p.sm_scale *= p.k_ts;   // NVFP4: per-tensor K scale folded into the softmax scale
+  if (p.nsplit < 0 || p.nsplit > 128) return cudaErrorInvalidValue;
+#ifdef UQ_ENABLE_SM90
+  // auto: H100 wgmma path for >= 32 query rows (K >= 4 with G = 8), D = 128, PAGE = 64
+  if (p.variant == 0 && p.D == 128 && p.PAGE == 64 && uq_block_m(p.K, p.HQ, p.HKV) >= 32 && uq_block_m(p.K, p.HQ, p.HKV) <= 64 && uq_has_sm90()) {
+    p.variant = 3; if (nw == 0) nw = 2; if (stages == 0) stages = 3;
+    int dev = 0, sms = 0; cudaGetDevice(&dev); cudaDeviceGetAttribute(&sms, cudaDevAttrMultiProcessorCount, dev);   // one CTA per SM
+    int bh = p.B * p.HKV; p.nsplit = std::max(1, std::min(p.nsplit, (sms + bh / 2) / bh));
+  }
+  if (p.variant == 3) {
+    return dispatch_sm90(p, nw, stages, s);   // nw = # MMA warpgroups, stages = dequant stages, p.mb = # dequant warpgroups
+  }
+#endif
+#ifdef UQ_ENABLE_SM100
+  if (p.variant == 4 && p.fmt == 0) return dispatch_sm100(p, nw, stages, s);   // tcgen05 (B200/B300), explicit request only
+#endif
+  if (p.nsplit < 1) return cudaErrorInvalidValue;
+#ifdef UQ_SM90_ONLY
+  return cudaErrorInvalidValue;   // dev build (fast compile): only variant 3
+#else
+  return p.fmt == 1 ? launch_gs<16>(p, nw, stages, s) : launch_gs<32>(p, nw, stages, s);
+#endif
+}
+
+size_t uq_workspace_bytes(const UQParams& p) { return (uq_mo_elems(p) + uq_ml_elems(p)) * sizeof(float); }
+cudaError_t uq_decode_launch_ws(UQParams p, void* ws, int nw, int stages, cudaStream_t s) {
+  p.mo = (float*)ws; p.ml = (float*)ws + uq_mo_elems(p);
+  return uq_decode_launch(p, nw, stages, s);
 }
 
 #ifdef UQ_PROF

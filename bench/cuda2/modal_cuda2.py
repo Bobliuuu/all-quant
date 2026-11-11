@@ -28,7 +28,7 @@ def body(gpu, mode, extra, defs=""):
     P(sh("nvidia-smi --query-gpu=name,compute_cap,driver_version --format=csv,noheader"))
     arch = "-gencode arch=compute_90a,code=sm_90a" if "H100" in gpu else "-arch=native"
     F = f"-O3 -std=c++17 {arch} -DUQ_ENABLE_SM90 -I /work/cuda {defs}"
-    fast = mode.endswith("f")
+    fast = mode.endswith("f") and mode not in ("sh",)
     if fast: F += " -DUQ_SM90_ONLY"; mode = mode[:-1]
     if mode == "sm90":
         P(sh(f"cd /work && nvcc {F} -o bench_sm90 bench/cuda2/bench_sm90.cu cuda/uq_decode.cu 2>&1 | grep -v Remark | tail -40"))
@@ -36,6 +36,11 @@ def body(gpu, mode, extra, defs=""):
     elif mode == "check":
         P(sh(f"cd /work/cuda && nvcc {F} -o tv test_vectors.cu uq_decode.cu 2>&1 | tail -30"))
         P(sh("cd /work/cuda && ./tv vectors 1e-2 2>&1 | tail -40"))
+    elif mode == "checknv":   # NVFP4 vectors (variant 1 everywhere, variant 3 on H100)
+        P(sh(f"cd /work/cuda && nvcc {F} -o tvnv ../bench/cuda2/test_vectors_nv.cu uq_decode.cu 2>&1 | grep -E 'error|fatal' | head -20"))
+        P(sh("cd /work/cuda && ./tvnv vectors_nvfp4 1e-2 2>&1 | grep -E 'first fail|RESULT|FAIL' | head -12"))
+    elif mode == "bench":   # torch bench vs Triton snapshot (JIT-builds uq_cuda_ext); extra = args of cuda/bench_cuda.py
+        P(sh(f"cd /work/cuda && python bench_cuda.py {extra} --out /out/{gpu}_bench/result.json 2>&1 | grep -vE 'Remark|warning|instantiation|detected during|^\\s*$' | tail -60"))
     elif mode == "ptxas":
         P(sh(f"cd /work/cuda && nvcc {F} -Xptxas -v -c -o /tmp/x.o uq_decode.cu 2>&1 | grep -A2 -E 'uq_sm90' | grep -E 'registers|spill|Compiling' | head -40"))
     elif mode == "sh":
