@@ -1,45 +1,52 @@
 # UltraQuant explainer: narration script
 Each `##` is a scene; each line is one narrated sentence (drives timing, captions and the .srt).
-Numbers are read from results/*.json at build time; the text below must match them (build.py asserts the headline ones).
+Numbers shown on screen are read from results/*.json and results/*.md at build time; keep the text below consistent with them.
 
 ## title
 UltraQuant: four-bit KV caching for context-heavy agents.
-This is a short tour of the idea, and of one fused decode kernel that makes speculative decoding cheap on a four-bit cache.
+This is a tour of one fused decode kernel, and of what it takes to run it on three vendors.
 
 ## vendors
-<!-- Included only when results/cuda_*.json or results/sycl_*.json exist. -->
-The same fused operation now runs on three vendors: AMD, NVIDIA and Intel.
-Here is the fused speedup at the largest K measured on each backend, read straight from the results files.
-Every bar uses the same op and the same four-bit cache format.
+The same operation, a fused multi-token decode over a four-bit KV cache, now runs on AMD, NVIDIA and Intel GPUs.
+Each port is checked against reference vectors from the same quantiser, and passes.
+At K equals eight, fusing beats K independent passes everywhere: from about two point four times to six point eight times.
 
 ## memory
-When a language model generates text, each new token attends to every earlier token, so the GPU must read the whole key-value cache from memory.
-That is almost no arithmetic per byte: about one floating point operation for every byte read in half precision.
-To keep its matrix units busy, an MI300X needs roughly one hundred sixty operations per byte, and a B300 about two hundred seventy. These ratios come from our measured peaks.
-So decode waits on memory, and for long-context agents the KV cache is the bottleneck. Fewer bytes means faster tokens.
+Why it matters: decode is memory-bound. Every new token reads the whole KV cache, about one operation per byte, while these GPUs need over one hundred sixty.
+So for long-context agents, fewer KV bytes means faster tokens.
 
 ## pack
-UltraQuant stores each value as a four-bit float, E2M1: one sign bit, two exponent bits, one mantissa bit.
-Every group of thirty-two values shares one eight-bit power-of-two scale, called UE8M0.
-For a head dimension of one hundred twenty-eight, that is sixty-four bytes of values plus four bytes of scales: sixty-eight bytes per head and token.
-Half precision needs two hundred fifty-six, and FP8 needs one hundred twenty-eight. That is about three point eight times smaller than half precision.
+UltraQuant stores four-bit E2M1 floats, with one eight-bit power-of-two UE8M0 scale per thirty-two values.
+That is sixty-eight bytes per head and token, against two hundred fifty-six for half precision and one hundred twenty-eight for FP8.
+About three point eight times smaller than half precision.
 
 ## kquery
-Speculative decoding and multi-token prediction verify K candidate tokens in a single step.
-A straightforward kernel treats them as K independent queries, and each one re-reads every page of the cache.
-At K equals eight, that is eight times the memory traffic for the very same data.
-Our fused kernel reads each page once. The query rows for all K tokens are stacked along the M dimension of the matrix multiply, so one loaded tile serves every token.
-Same pages, same four-bit dequantisation, one pass.
+Speculative decoding verifies K candidate tokens per step.
+A straightforward kernel runs K independent queries, so each re-reads every page of the cache: eight times the traffic at K equals eight.
+Our fused kernel reads each page once, with the K tokens stacked along the M dimension of the matrix multiply.
+One loaded tile serves every token.
 
 ## results
-Here are measurements at batch eight, thirty-two thousand tokens of context, sixty-four query heads and eight KV heads.
-On an MI300X, at K equals eight, the fused kernel takes 0.54 milliseconds, versus 2.22 for independent queries: 4.1 times faster.
-On a B300, after tuning, K equals eight takes 0.42 milliseconds, versus 2.85: 6.8 times faster.
-At K equals one there is nothing to share, so the two match. The gain grows with K, because page reads are shared.
-Tuning mattered: bit-trick dequantisation, a tuned warp count and pipeline depth, and sixteen-way KV splits.
+In Triton at batch eight and thirty-two thousand tokens, K equals eight takes 0.54 milliseconds on an MI300X against 2.22 for independent queries, and 0.42 on a B300 against 2.85.
+At K equals one there is nothing to share, so the two match.
+Tuning mattered: bit-trick dequantisation, warps, pipeline depth and sixteen-way KV splits.
+
+## position
+Now, honest positioning. On a B300, NVIDIA's own FlashInfer kernels for NVFP4 are faster than ours, and already fuse K-query verify.
+Our contribution is the UltraQuant format with fused verify, on three vendors. We found no public CUDA or SYCL port of it.
+BitDecoding-FP4 handles one query at a time, so it re-reads the cache K times.
+
+## quality
+On Qwen3-8B, FP8 and int8 are lossless in perplexity, and KIVI-4 and NVFP4 are the best four-bit-class formats.
+The UltraQuant MXFP4-style format costs about half a perplexity point, about the same as TurboQuant-4.
+NVFP4 scales through our kernel cost only 0.06, against 0.55 for MXFP4, for four more bytes per vector.
+
+## step
+End to end on MI300X, the whole decode step is about one point three to one point six times faster than fp16 at batch eight with K equals eight.
+At batch one there is almost no gain, because attention is a small slice of the step.
+The real value is a cache three point eight times smaller, and cheap verification at large batch and long context.
 
 ## caveats
-What does this mean in practice? A long-context agent keeps more history in the same memory, and speculative verification stops multiplying the cost of reading it.
-Now the honest caveats. On MI300X, which is gfx942, FP4 is dequantised in software; the paper's native scaled matrix instructions live on CDNA4, gfx950.
-Our kernels reach about half a terabyte to one terabyte per second of FP4 bytes, well below the HBM peaks of three point nine and six point four terabytes per second, so there is headroom.
-Outputs match the baseline to about one in ten thousand. The paper is arXiv 2606.20474, and the code and results are in the repository.
+Caveats. MI300X dequantises FP4 in software, and NVIDIA's vendor kernels are faster on B300.
+These are kernel microbenchmarks and a projected step model, not serving throughput, and K equals one gains nothing.
+The paper is arXiv 2606.20474. Code and results are in the repository.

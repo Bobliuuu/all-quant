@@ -12,12 +12,10 @@ import scenes as S
 HERE = pathlib.Path(__file__).parent
 WORK = HERE / ".work"; WORK.mkdir(exist_ok=True)
 VOICE, RATE = os.environ.get("UQ_VOICE", "Samantha"), os.environ.get("UQ_RATE", "170")
-PAD, GAP = 1.2, 0.35
+PAD, GAP = 0.9, 0.3
 
 def parse_script():
-    d = _parse()
-    if "vendors" in d and not S.vendor_rows(): del d["vendors"]
-    return d
+    return _parse()
 
 def _parse():
     out, cur = {}, None
@@ -46,7 +44,7 @@ def narrate(script):
                 subprocess.check_call(["say", "-v", VOICE, "-r", RATE, "-o", str(WORK / "t.aiff"), s])
                 subprocess.check_call(["ffmpeg", "-y", "-v", "error", "-i", str(WORK / "t.aiff"), "-ar", "44100", "-ac", "1", str(f)])
             d = dur(f); cues.append(t); parts.append((t, f)); t += d + GAP
-        T = t + 0.9
+        T = t + 0.7
         plan.append(dict(name=name, sents=sents, cues=cues, T=T, parts=parts))
     return plan
 
@@ -110,7 +108,7 @@ def main():
         for b in pool.imap(render, jobs, chunksize=8): ff.stdin.write(b)
     ff.stdin.close(); ff.wait()
     # poster + gif
-    pt = next(j for j in jobs if j[1] == "results" and j[2] > plan[4]["cues"][4] + 1.5)
+    pt = next(j for j in jobs if j[1] == "vendors" and j[2] > plan[1]["cues"][2] + 1.5)
     from PIL import Image
     Image.frombytes("RGB", (W, H), render(pt[:6] + (None,))).save(HERE / "poster.png")
     if not quick:
