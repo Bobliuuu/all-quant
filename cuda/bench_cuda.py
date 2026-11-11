@@ -67,7 +67,8 @@ for K in a.ks:
     if a.tune:
         bm = max(16, 1 << (K * 8 - 1).bit_length())
         nws = {16: (1, 2, 4), 32: (2, 4), 64: (4, 8), 128: (8,)}[bm]
-        cands = [dict(nwarps=nw, stages=st, nsplit=ns) for nw in nws for st in (2, 3, 4) for ns in (8, 16, 24, 32, 48, 64, 96)]
+        cands = [dict(nwarps=nw, stages=st, nsplit=ns, variant=1) for nw in nws for st in (2, 3, 4) for ns in (8, 16, 24, 32, 48, 64, 96)]
+        cands += [dict(nwarps=nw, stages=st, nsplit=ns, variant=2, mb=mb) for mb in (1, 2) for nw in (2, 4, 8, 16) for st in (2, 3, 4) for ns in (4, 8, 12, 16, 24, 32, 48)]
     best = None
     for c in cands:
         try:

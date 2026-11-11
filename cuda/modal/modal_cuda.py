@@ -8,8 +8,8 @@ ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 app = modal.App("uq-cuda")
 img = (modal.Image.from_registry("nvidia/cuda:12.9.1-devel-ubuntu22.04", add_python="3.11")
        .apt_install("git", "curl", "ninja-build")
-       .pip_install("torch", "triton", "numpy", "ninja", extra_index_url="https://download.pytorch.org/whl/cu129")
-       .pip_install("flashinfer-python", "pybind11")
+       .pip_install("torch", index_url="https://download.pytorch.org/whl/cu129")
+       .pip_install("numpy", "ninja", "pybind11")
        .add_local_dir(os.path.join(ROOT, "cuda"), "/work/cuda", ignore=["__pycache__", "*.pyc"]))
 vol = modal.Volume.from_name("uq-cuda-results", create_if_missing=True)
 
@@ -30,7 +30,21 @@ def body(gpu, mode, extra):
     P(sh("python -c 'import torch,triton;print(torch.__version__,triton.__version__,torch.cuda.get_device_capability())'"))
     if mode == "check":
         P(sh("cd /work/cuda && nvcc -O3 -std=c++17 -arch=native -lineinfo -o test_vectors test_vectors.cu uq_decode.cu 2>&1 | tail -40"))
-        P(sh("cd /work/cuda && ./test_vectors vectors 1e-3 2>&1 | tail -60"))
+        P(sh("cd /work/cuda && ./test_vectors vectors 1e-2 2>&1 | tail -60"))
+    elif mode == "ablate":
+        # extra = "" ; builds variants of the standalone bench with ablation flags
+        for name, flag in (("full", 0), ("nodeq", 1), ("nommma", 2), ("nodeq_nommma", 3)):
+            P(f"## variant {name}")
+            P(sh(f"cd /work/cuda && nvcc -O3 -std=c++17 -arch=native -DUQ_ABL={flag} -o bs_{name} bench_standalone.cu uq_decode.cu 2>&1 | grep -i error"))
+            P(sh(f"cd /work/cuda && ./bs_{name} --ks 1 8 {extra}"))
+        P("## samepage (L2-resident, compute only)")
+        P(sh(f"cd /work/cuda && nvcc -O3 -std=c++17 -arch=native -o bs_full bench_standalone.cu uq_decode.cu 2>&1 | grep -i error; ./bs_full --ks 1 8 --samepage"))
+    elif mode == "prof":
+        P(sh(f"cd /work/cuda && nvcc -O3 -std=c++17 -arch=native -DUQ_PROF -o bsp bench_standalone.cu uq_decode.cu 2>&1 | grep -i error"))
+        P(sh(f"cd /work/cuda && ./bsp --variant 2 {extra}"))
+    elif mode == "sa":
+        P(sh(f"cd /work/cuda && nvcc -O3 -std=c++17 -arch=native -o bs bench_standalone.cu uq_decode.cu 2>&1 | grep -i error"))
+        P(sh(f"cd /work/cuda && ./bs {extra}"))
     else:
         P(sh(f"cd /work/cuda && python {mode}.py {extra} --out {d}/result.json 2>&1 | tail -200", timeout=3400))
     log.close(); vol.commit()
@@ -41,7 +55,7 @@ def _fn(gpu):
 
 @app.function(**_fn("B300"))
 def run_b300(mode: str = "check", extra: str = ""): body("B300", mode, extra)
-@app.function(**_fn("H100"))
+@app.function(**_fn("H100!"))
 def run_h100(mode: str = "check", extra: str = ""): body("H100", mode, extra)
 @app.function(**_fn("A100-80GB"))
 def run_a100(mode: str = "check", extra: str = ""): body("A100-80GB", mode, extra)

@@ -22,6 +22,8 @@ struct UQParams {
   int B, K, HQ, HKV, D, PAGE, max_pages;
   int nsplit;              // any value 1..128
   float sm_scale;
+  int variant;             // 0 auto, 1 = smem-dequant design, 2 = warp-independent design W
+  int mb;                  // design W: 16-row m-blocks per warp (0 = auto)
 };
 
 // Rows per CTA tile: max(16, pow2(K * pow2(G))).  Scratch sizes depend on it.

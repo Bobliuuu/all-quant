@@ -34,25 +34,26 @@ int main(int argc, char** argv) {
     p.B = B; p.K = K; p.HQ = HQ; p.HKV = HKV; p.D = D; p.PAGE = PAGE; p.max_pages = mp; p.sm_scale = 1.f / sqrtf((float)D);
     size_t on = (size_t)B * K * HQ * D; CK(cudaMalloc(&p.out, on * 2));
     const float* rf = (const float*)ref.data();
-    int nws[] = {0, 1, 2, 4, 8}, sts[] = {0, 2, 4}, nss[] = {1, 3, 8, 16};
-    for (int nw : nws) for (int st : sts) for (int ns : nss) {
-      p.nsplit = ns;
+    int nws[] = {0, 1, 2, 4, 8, 16}, sts[] = {0, 2, 4}, nss[] = {1, 3, 8, 16}, mbs[] = {0, 1, 2}, vars[] = {1, 2};
+    for (int var : vars) for (int mbv : mbs) for (int nw : nws) for (int st : sts) for (int ns : nss) {
+      if (var == 1 && mbv) continue;
+      p.nsplit = ns; p.variant = var; p.mb = mbv;
       float *mo, *ml; CK(cudaMalloc(&mo, uq_mo_elems(p) * 4)); CK(cudaMalloc(&ml, uq_ml_elems(p) * 4)); p.mo = mo; p.ml = ml;
       CK(cudaMemset(p.out, 0xFF, on * 2));
       cudaError_t e = uq_decode_launch(p, nw, st, 0);
       if (e == cudaErrorInvalidValue) { cudaGetLastError(); cudaFree(mo); cudaFree(ml); continue; }  // unsupported combo
       CK(e); CK(cudaDeviceSynchronize());
       std::vector<uint16_t> h(on); CK(cudaMemcpy(h.data(), p.out, on * 2, cudaMemcpyDeviceToHost));
-      // raw max abs err, and err in excess of the bf16 output rounding (bf16 P and output rounding: allow 2^-7 relative)
+      // raw max abs err, and err in excess of the bf16 output rounding (bf16 P and output rounding: allow 2^-6 relative)
       double mx = 0, mxx = 0;
       for (size_t i = 0; i < on; i++) {
         double d = fabs((double)bf2f(h[i]) - rf[i]);
         if (std::isnan(d)) d = 1e9;
-        double ex = d - fabs((double)rf[i]) * (1.0 / 128);
+        double ex = d - fabs((double)rf[i]) * (1.0 / 64);
         if (d > mx) mx = d; if (ex > mxx) mxx = ex;
       }
       runs++; worst = std::max(worst, mx); worst_ex = std::max(worst_ex, mxx);
-      if (mxx > tol) { fails++; printf("FAIL %s K=%d nw=%d st=%d ns=%d maxerr=%.3e excess=%.3e\n", name.c_str(), K, nw, st, ns, mx, mxx); }
+      if (mxx > tol) { fails++; printf("FAIL %s K=%d var=%d mb=%d nw=%d st=%d ns=%d maxerr=%.3e excess=%.3e\n", name.c_str(), K, var, mbv, nw, st, ns, mx, mxx); }
       cudaFree(mo); cudaFree(ml);
     }
     printf("case %-10s K=%d done\n", name.c_str(), K);

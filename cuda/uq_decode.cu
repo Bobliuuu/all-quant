@@ -6,6 +6,9 @@
 #include <algorithm>
 
 #define DEV __device__ __forceinline__
+#ifndef UQ_ABL
+#define UQ_ABL 0   // ablation bitmask (perf experiments only): 1 = no dequant ALU, 2 = no MMA
+#endif
 
 DEV uint32_t smem_u32(const void* p) { return (uint32_t)__cvta_generic_to_shared(p); }
 DEV void cp_async16(uint32_t dst, const void* src) {
@@ -48,6 +51,9 @@ DEV uint32_t fp4x2_raw(uint32_t b) {
 
 // Dequantise one 16-byte chunk (32 elements, one UE8M0 group) into 32 bf16 at dst (16B aligned).
 DEV void dequant_chunk(uint4 raw, uint32_t s, uint4* dst) {
+#if UQ_ABL & 1
+  dst[0] = raw; dst[1] = raw; dst[2] = raw; dst[3] = raw; return;
+#endif
   uint32_t w[4] = {raw.x, raw.y, raw.z, raw.w};
   uint32_t o[16];
   #pragma unroll
@@ -67,6 +73,8 @@ DEV void dequant_chunk(uint4 raw, uint32_t s, uint4* dst) {
   #pragma unroll
   for (int i = 0; i < 4; i++) dst[i] = make_uint4(o[4 * i], o[4 * i + 1], o[4 * i + 2], o[4 * i + 3]);
 }
+
+#include "uq_decode_w.cuh"
 
 template <int D, int PAGE, int BM, int NW, int ST>
 struct Cfg {
@@ -199,8 +207,12 @@ uq_split_kernel(const UQParams a, int G, int gp_shift) {
         int col = ks * 16 + (mi & 1) * 8;
         uint32_t b0, b1, b2, b3;
         ldsm4(b0, b1, b2, b3, smem_u32(sK + key * LD + col));
+#if !(UQ_ABL & 2)
         mma16816(s[2 * np], qa[ks], b0, b1);
         mma16816(s[2 * np + 1], qa[ks], b2, b3);
+#else
+        s[2*np][0] += __uint_as_float(b0); s[2*np+1][0] += __uint_as_float(b2);
+#endif
       }
     }
     // ---- mask + online softmax
@@ -242,8 +254,12 @@ uq_split_kernel(const UQParams a, int G, int gp_shift) {
         int col = dt * 16 + (lane >> 4) * 8;
         uint32_t b0, b1, b2, b3;
         ldsm4t(b0, b1, b2, b3, smem_u32(sV + key * LD + col));
+#if !(UQ_ABL & 2)
         mma16816(acc[2 * dt], pa, b0, b1);
         mma16816(acc[2 * dt + 1], pa, b2, b3);
+#else
+        acc[2*dt][0] += __uint_as_float(b0 ^ pa[0]); acc[2*dt+1][0] += __uint_as_float(b2 ^ pa[1]);
+#endif
       }
     }
   }
@@ -347,6 +363,12 @@ __global__ void uq_reduce_kernel(const UQParams a, int G, int BM, int gp_shift) 
 }
 
 // ------------------------------------------------------------------ host
+static bool smem_fits(int bytes) {
+  int dev = 0, lim = 0;
+  cudaGetDevice(&dev);
+  cudaDeviceGetAttribute(&lim, cudaDevAttrMaxSharedMemoryPerBlockOptin, dev);
+  return bytes <= lim;
+}
 static int pow2ceil(int x) { int p = 1; while (p < x) p <<= 1; return p; }
 int uq_block_m(int K, int HQ, int HKV) { return std::max(16, pow2ceil(K * pow2ceil(HQ / HKV))); }
 size_t uq_mo_elems(const UQParams& p) { return (size_t)p.B * p.HKV * p.nsplit * uq_block_m(p.K, p.HQ, p.HKV) * p.D; }
@@ -359,8 +381,9 @@ static cudaError_t launch_cfg(const UQParams& p, cudaStream_t s) {
   auto kern = uq_split_kernel<D, PAGE, BM, NW, ST>;
   static bool init = false;
   if (!init) {
+    if (!smem_fits(C::SMEM)) return cudaErrorInvalidValue;
     cudaError_t e = cudaFuncSetAttribute(kern, cudaFuncAttributeMaxDynamicSharedMemorySize, C::SMEM);
-    if (e != cudaSuccess) return e;
+    if (e != cudaSuccess) { cudaGetLastError(); return e; }
     init = true;
   }
   int G = p.HQ / p.HKV, gp = pow2ceil(G), shift = 0;
@@ -408,21 +431,130 @@ static cudaError_t dispatch_bm(const UQParams& p, int nw, int stages, cudaStream
   }
 }
 
-cudaError_t uq_decode_launch(const UQParams& p, int nw, int stages, cudaStream_t s) {
-  if (p.nsplit < 1 || p.nsplit > 128) return cudaErrorInvalidValue;
-  if (p.D == 128) {
-    switch (p.PAGE) {
-      case 16: return dispatch_bm<128, 16>(p, nw, stages, s);
-      case 32: return dispatch_bm<128, 32>(p, nw, stages, s);
-      case 64: return dispatch_bm<128, 64>(p, nw, stages, s);
-      case 128: return dispatch_bm<128, 128>(p, nw, stages, s);
+template <int D, int PAGE, int BM, int MB, int NW, int ST>
+static cudaError_t launch_w(const UQParams& p, cudaStream_t s) {
+  using C = CfgW<D, PAGE, BM, MB, NW, ST>;
+  if constexpr (!C::OK) { return cudaErrorInvalidValue; } else {
+    auto kern = uq_split_w<D, PAGE, BM, MB, NW, ST>;
+    static bool init = false;
+    if (!init) {
+      if (!smem_fits(C::SMEM)) return cudaErrorInvalidValue;
+      cudaError_t e = cudaFuncSetAttribute(kern, cudaFuncAttributeMaxDynamicSharedMemorySize, C::SMEM);
+      if (e != cudaSuccess) { cudaGetLastError(); return e; }
+      init = true;
     }
-  } else if (p.D == 64) {
-    switch (p.PAGE) {
-      case 16: return dispatch_bm<64, 16>(p, nw, stages, s);
-      case 32: return dispatch_bm<64, 32>(p, nw, stages, s);
-      case 64: return dispatch_bm<64, 64>(p, nw, stages, s);
+    int G = p.HQ / p.HKV, gp = pow2ceil(G), shift = 0;
+    while ((1 << shift) < gp) shift++;
+    kern<<<dim3(p.B, p.HKV, p.nsplit), NW * 32, C::SMEM, s>>>(p, G, shift);
+    int rows = p.B * p.HKV * p.K * G;
+    uq_reduce_kernel<D><<<(rows + 3) / 4, 128, 0, s>>>(p, G, BM, shift);
+    return cudaGetLastError();
+  }
+}
+
+#define W_ST(D_, PAGE_, BM_, MB_, NW_)                                                  \
+  case NW_: switch (stages) {                                                           \
+    case 2: return launch_w<D_, PAGE_, BM_, MB_, NW_, 2>(p, s);                         \
+    case 3: return launch_w<D_, PAGE_, BM_, MB_, NW_, 3>(p, s);                         \
+    case 4: return launch_w<D_, PAGE_, BM_, MB_, NW_, 4>(p, s);                         \
+    default: return cudaErrorInvalidValue; }
+#define W_ST3(D_, PAGE_, BM_, MB_, NW_) case NW_: return launch_w<D_, PAGE_, BM_, MB_, NW_, 3>(p, s);
+
+// full tuning grid for the main shape (D=128, PAGE=64)
+template <int BM>
+static cudaError_t dispatch_w_main(const UQParams& p, int mb, int nw, int stages, cudaStream_t s) {
+  if (stages == 0) stages = 3;
+  if constexpr (BM == 16) {
+    if (mb == 0) mb = 1; if (nw == 0) nw = 4;
+    if (mb == 1) switch (nw) { W_ST(128, 64, 16, 1, 2) W_ST(128, 64, 16, 1, 4) W_ST(128, 64, 16, 1, 8) default: break; }
+  } else if constexpr (BM == 32) {
+    if (mb == 0) mb = 2; if (nw == 0) nw = 4;
+    if (mb == 1) switch (nw) { W_ST(128, 64, 32, 1, 4) W_ST(128, 64, 32, 1, 8) default: break; }
+    if (mb == 2) switch (nw) { W_ST(128, 64, 32, 2, 2) W_ST(128, 64, 32, 2, 4) W_ST(128, 64, 32, 2, 8) default: break; }
+  } else if constexpr (BM == 64) {
+    if (mb == 0) mb = 2; if (nw == 0) nw = 8;
+    if (mb == 1) switch (nw) { W_ST(128, 64, 64, 1, 8) W_ST(128, 64, 64, 1, 16) default: break; }
+    if (mb == 2) switch (nw) { W_ST(128, 64, 64, 2, 4) W_ST(128, 64, 64, 2, 8) default: break; }
+  } else {
+    if (mb == 0) mb = 2; if (nw == 0) nw = 8;
+    if (mb == 2) switch (nw) { W_ST(128, 64, 128, 2, 8) default: break; }
+  }
+  return cudaErrorInvalidValue;
+}
+
+// other shapes: small default set (ST = 3)
+template <int D, int PAGE, int BM>
+static cudaError_t dispatch_w_default(const UQParams& p, int mb, int nw, cudaStream_t s) {
+  int stages = 3;
+  if constexpr (BM == 16) {
+    if (mb == 0) mb = 1; if (nw == 0) nw = PAGE >= 64 ? 4 : PAGE / 16;
+    if (mb == 1) switch (nw) { W_ST3(D, PAGE, 16, 1, 1) W_ST3(D, PAGE, 16, 1, 2) W_ST3(D, PAGE, 16, 1, 4) W_ST3(D, PAGE, 16, 1, 8) default: break; }
+  } else if constexpr (BM == 32) {
+    if (mb == 0) mb = 2; if (nw == 0) nw = PAGE >= 32 ? 2 * (PAGE / 32) : 1;
+    if (mb == 2) switch (nw) { W_ST3(D, PAGE, 32, 2, 1) W_ST3(D, PAGE, 32, 2, 2) W_ST3(D, PAGE, 32, 2, 4) W_ST3(D, PAGE, 32, 2, 8) default: break; }
+    if (mb == 1) switch (nw) { W_ST3(D, PAGE, 32, 1, 2) W_ST3(D, PAGE, 32, 1, 4) W_ST3(D, PAGE, 32, 1, 8) default: break; }
+  } else if constexpr (BM == 64) {
+    if (mb == 0) mb = 2; if (nw == 0) nw = 2 * (PAGE / 16 > 4 ? 4 : PAGE / 16);
+    if (mb == 2) switch (nw) { W_ST3(D, PAGE, 64, 2, 2) W_ST3(D, PAGE, 64, 2, 4) W_ST3(D, PAGE, 64, 2, 8) default: break; }
+    if (mb == 1) switch (nw) { W_ST3(D, PAGE, 64, 1, 4) W_ST3(D, PAGE, 64, 1, 8) W_ST3(D, PAGE, 64, 1, 16) default: break; }
+  } else {
+    if (mb == 0) mb = 2; if (nw == 0) nw = 8;
+    if (mb == 2) switch (nw) { W_ST3(D, PAGE, 128, 2, 4) W_ST3(D, PAGE, 128, 2, 8) default: break; }
+  }
+  return cudaErrorInvalidValue;
+}
+
+template <int D, int PAGE>
+static cudaError_t dispatch_w(const UQParams& p, int nw, int stages, cudaStream_t s) {
+  int bm = uq_block_m(p.K, p.HQ, p.HKV);
+  if constexpr (D == 128 && PAGE == 64) {
+    switch (bm) {
+      case 16: return dispatch_w_main<16>(p, p.mb, nw, stages, s);
+      case 32: return dispatch_w_main<32>(p, p.mb, nw, stages, s);
+      case 64: return dispatch_w_main<64>(p, p.mb, nw, stages, s);
+      case 128: return dispatch_w_main<128>(p, p.mb, nw, stages, s);
+    }
+  } else {
+    switch (bm) {
+      case 16: return dispatch_w_default<D, PAGE, 16>(p, p.mb, nw, s);
+      case 32: return dispatch_w_default<D, PAGE, 32>(p, p.mb, nw, s);
+      case 64: return dispatch_w_default<D, PAGE, 64>(p, p.mb, nw, s);
+      case 128: return dispatch_w_default<D, PAGE, 128>(p, p.mb, nw, s);
     }
   }
   return cudaErrorInvalidValue;
 }
+
+template <int D, int PAGE>
+static cudaError_t dispatch_dp(const UQParams& p, int nw, int stages, cudaStream_t s) {
+  if (p.variant != 1) {
+    cudaError_t e = dispatch_w<D, PAGE>(p, nw, stages, s);
+    if (e != cudaErrorInvalidValue || p.variant == 2) return e;
+    cudaGetLastError();
+  }
+  return dispatch_bm<D, PAGE>(p, nw, stages, s);
+}
+
+cudaError_t uq_decode_launch(const UQParams& p, int nw, int stages, cudaStream_t s) {
+  if (p.nsplit < 1 || p.nsplit > 128) return cudaErrorInvalidValue;
+  if (p.D == 128) {
+    switch (p.PAGE) {
+      case 16: return dispatch_dp<128, 16>(p, nw, stages, s);
+      case 32: return dispatch_dp<128, 32>(p, nw, stages, s);
+      case 64: return dispatch_dp<128, 64>(p, nw, stages, s);
+      case 128: return dispatch_dp<128, 128>(p, nw, stages, s);
+    }
+  } else if (p.D == 64) {
+    switch (p.PAGE) {
+      case 16: return dispatch_dp<64, 16>(p, nw, stages, s);
+      case 32: return dispatch_dp<64, 32>(p, nw, stages, s);
+      case 64: return dispatch_dp<64, 64>(p, nw, stages, s);
+    }
+  }
+  return cudaErrorInvalidValue;
+}
+
+#ifdef UQ_PROF
+void uq_prof_read(unsigned long long* out8) { cudaMemcpyFromSymbol(out8, g_prof, 8 * sizeof(unsigned long long)); }
+void uq_prof_reset() { unsigned long long z[8] = {0}; cudaMemcpyToSymbol(g_prof, z, sizeof(z)); }
+#endif

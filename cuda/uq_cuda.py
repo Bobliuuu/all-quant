@@ -28,7 +28,7 @@ def auto_nsplit(B, HKV, n_pages, sms, K=1, G=8):
     return max(1, min(want, n_pages, 128))
 
 
-def uq_decode_cuda(q, kc, ks, vc, vs, block_table, seq_lens, *, fused=True, nsplit=None, nwarps=0, stages=0,
+def uq_decode_cuda(q, kc, ks, vc, vs, block_table, seq_lens, *, fused=True, nsplit=None, nwarps=0, stages=0, variant=0, mb=0,
                    sm_scale=None, out=None):
     B, K, HQ, D = q.shape
     HKV = kc.shape[1]
@@ -41,8 +41,8 @@ def uq_decode_cuda(q, kc, ks, vc, vs, block_table, seq_lens, *, fused=True, nspl
         nsplit = auto_nsplit(B, HKV, block_table.shape[1], torch.cuda.get_device_properties(q.device).multi_processor_count, K, HQ // HKV)
     e = ext()
     if fused or K == 1:
-        return e.decode(q, kc, ks, vc, vs, block_table, seq_lens, nsplit, nwarps, stages, sm_scale, None, None, out)
+        return e.decode(q, kc, ks, vc, vs, block_table, seq_lens, nsplit, nwarps, stages, variant, mb, sm_scale, None, None, out)
     qs = q.reshape(B * K, 1, HQ, D)
     bt = block_table.repeat_interleave(K, 0)
     sl = (seq_lens.repeat_interleave(K) - K + torch.arange(K, device=q.device).repeat(B) + 1).to(torch.int32)
-    return e.decode(qs, kc, ks, vc, vs, bt, sl, nsplit, nwarps, stages, sm_scale, None, None, None).reshape(B, K, HQ, D)
+    return e.decode(qs, kc, ks, vc, vs, bt, sl, nsplit, nwarps, stages, variant, mb, sm_scale, None, None, None).reshape(B, K, HQ, D)
