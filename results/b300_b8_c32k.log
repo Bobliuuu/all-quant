@@ -1,0 +1,10 @@
+/usr/local/lib/python3.11/site-packages/triton/knobs.py:504: UserWarning: TRITON_DEFAULT_FP_FUSION is unset: defaulting to FP fusion ENABLED for backward compatibility in Triton 3.9. The default will change to DISABLED in Triton 3.10; set TRITON_DEFAULT_FP_FUSION=1 to keep fusion enabled or =0 to adopt the new default early and silence this warning.
+  warn_once(FP_FUSION_DEFAULT_WARNING)
+K=1 max|err| fused=0.0001 baseline=0.0001
+{"K": 1, "fused_ms": 0.643, "base_ms": 0.642, "speedup": 0.998, "fused_GBps": 443.777}
+K=2 max|err| fused=0.0001 baseline=0.0001
+{"K": 2, "fused_ms": 0.643, "base_ms": 1.187, "speedup": 1.846, "fused_GBps": 443.578}
+K=4 max|err| fused=0.0001 baseline=0.0001
+{"K": 4, "fused_ms": 0.823, "base_ms": 2.283, "speedup": 2.773, "fused_GBps": 346.438}
+K=8 max|err| fused=0.0001 baseline=0.0001
+{"K": 8, "fused_ms": 0.708, "base_ms": 4.464, "speedup": 6.304, "fused_GBps": 402.775}
