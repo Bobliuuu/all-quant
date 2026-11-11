@@ -34,7 +34,14 @@ int main(int argc, char** argv) {
     p.B = B; p.K = K; p.HQ = HQ; p.HKV = HKV; p.D = D; p.PAGE = PAGE; p.max_pages = mp; p.sm_scale = 1.f / sqrtf((float)D);
     size_t on = (size_t)B * K * HQ * D; CK(cudaMalloc(&p.out, on * 2));
     const float* rf = (const float*)ref.data();
-    int nws[] = {0, 1, 2, 4, 8, 16}, sts[] = {0, 2, 4}, nss[] = {1, 3, 8, 16}, mbs[] = {0, 1, 2}, vars[] = {1, 2};
+    int nws[] = {0, 1, 2, 4, 8, 16}, sts[] = {0, 2, 4}, nss[] = {1, 3, 8, 16}, mbs[] = {0, 1, 2}, vars[] = {
+#ifndef UQ_SM90_ONLY
+      1, 2,
+#endif
+#ifdef UQ_ENABLE_SM90
+      3
+#endif
+    };
     for (int var : vars) for (int mbv : mbs) for (int nw : nws) for (int st : sts) for (int ns : nss) {
       if (var == 1 && mbv) continue;
       p.nsplit = ns; p.variant = var; p.mb = mbv;
