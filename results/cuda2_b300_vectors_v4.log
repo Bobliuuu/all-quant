@@ -1,0 +1,10 @@
+ptxas info    : Used 103 registers, used 4 barriers
+ptxas info    : Used 103 registers, used 4 barriers
+ptxas info    : Used 48 registers, used 0 barriers
+ptxas info    : Used 18 registers, used 0 barriers
+case main       K=1 done
+case main       K=2 done
+case main       K=4 done
+case main       K=8 done
+case edge_short K=8 done
+RESULT variant4 vectors runs=40 fails=0 worst_err_beyond_bf16_rounding=2.073e-03
