@@ -235,3 +235,33 @@ def test_fp8k_rejects_non128(monkeypatch):
     q, c = _make(1, 8, 2, 64, 64, [100], K=1)
     with pytest.raises(ValueError):
         c.decode(q)
+
+
+# ------------------------------------------------------------ adapter (CPU)
+def test_adapter_eligibility_and_append_cpu():
+    from uqmt import vllm_adapter as VA
+    q = torch.randn(8, 4, 64).bfloat16()
+    ok, why, K = VA.eligible(q, torch.tensor([0, 4, 8]), 64)
+    assert (ok, why, K) == (True, "ok", 4)
+    assert VA.eligible(q, torch.tensor([0, 3, 8]), 64)[1] == "non_uniform_k"
+    assert VA.eligible(q.float(), torch.tensor([0, 4, 8]), 64)[1] == "q_dtype"
+    assert VA.eligible(q, torch.tensor([0, 4, 8]), 48)[1] == "page_size"
+    assert VA.eligible(q, torch.tensor([0, 4, 8]), 64, sliding_window=128)[1] == "sliding_window"
+    # append_kv writes the same bytes as build_paged_cache
+    P, H, D = 16, 2, 64
+    kc = torch.zeros(3, H, P, D // 2, dtype=torch.uint8); vc = kc.clone()
+    ks = torch.zeros(3, H, P, D // 32, dtype=torch.uint8); vs = ks.clone()
+    key = torch.randn(5, H, D); val = torch.randn(5, H, D)
+    slots = torch.tensor([16, 17, 18, 32, 33])
+    VA.append_kv(kc, ks, vc, vs, key, val, slots)
+    ref_k, ref_s = uqmt.quantize_fp4(key)
+    assert torch.equal(kc[1, :, 0], ref_k[0]) and torch.equal(ks[2, :, 1], ref_s[4])
+    assert (kc[0] == 0).all()
+
+
+@gpu
+def test_adapter_verify_matches_decode():
+    from uqmt import vllm_adapter as VA
+    q, c = _make(3, 16, 2, 128, 64, [300, 200, 90], K=4)
+    out = VA.uq_verify_attention(q.reshape(12, 16, 128), c.kc, c.ks, c.vc, c.vs, c.block_table, c.seq_lens, 4)
+    torch.testing.assert_close(out.reshape(3, 4, 16, 128), c.decode(q), atol=0, rtol=0)

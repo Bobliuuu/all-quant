@@ -1,0 +1,243 @@
+[
+ {
+  "name": "main",
+  "K": 1,
+  "B": 4,
+  "HQ": 16,
+  "HKV": 2,
+  "D": 128,
+  "PAGE": 64,
+  "pages": 32,
+  "max_pages": 8,
+  "seq_lens": [
+   300,
+   129,
+   64,
+   511
+  ]
+ },
+ {
+  "name": "main",
+  "K": 2,
+  "B": 4,
+  "HQ": 16,
+  "HKV": 2,
+  "D": 128,
+  "PAGE": 64,
+  "pages": 32,
+  "max_pages": 8,
+  "seq_lens": [
+   300,
+   129,
+   64,
+   511
+  ]
+ },
+ {
+  "name": "main",
+  "K": 4,
+  "B": 4,
+  "HQ": 16,
+  "HKV": 2,
+  "D": 128,
+  "PAGE": 64,
+  "pages": 32,
+  "max_pages": 8,
+  "seq_lens": [
+   300,
+   129,
+   64,
+   511
+  ]
+ },
+ {
+  "name": "main",
+  "K": 8,
+  "B": 4,
+  "HQ": 16,
+  "HKV": 2,
+  "D": 128,
+  "PAGE": 64,
+  "pages": 32,
+  "max_pages": 8,
+  "seq_lens": [
+   300,
+   129,
+   64,
+   511
+  ]
+ },
+ {
+  "name": "gqa8_p128",
+  "K": 1,
+  "B": 3,
+  "HQ": 32,
+  "HKV": 4,
+  "D": 128,
+  "PAGE": 128,
+  "pages": 24,
+  "max_pages": 8,
+  "seq_lens": [
+   1000,
+   257,
+   9
+  ]
+ },
+ {
+  "name": "gqa8_p128",
+  "K": 2,
+  "B": 3,
+  "HQ": 32,
+  "HKV": 4,
+  "D": 128,
+  "PAGE": 128,
+  "pages": 24,
+  "max_pages": 8,
+  "seq_lens": [
+   1000,
+   257,
+   9
+  ]
+ },
+ {
+  "name": "gqa8_p128",
+  "K": 4,
+  "B": 3,
+  "HQ": 32,
+  "HKV": 4,
+  "D": 128,
+  "PAGE": 128,
+  "pages": 24,
+  "max_pages": 8,
+  "seq_lens": [
+   1000,
+   257,
+   9
+  ]
+ },
+ {
+  "name": "gqa8_p128",
+  "K": 8,
+  "B": 3,
+  "HQ": 32,
+  "HKV": 4,
+  "D": 128,
+  "PAGE": 128,
+  "pages": 24,
+  "max_pages": 8,
+  "seq_lens": [
+   1000,
+   257,
+   9
+  ]
+ },
+ {
+  "name": "d64_p32",
+  "K": 1,
+  "B": 3,
+  "HQ": 16,
+  "HKV": 4,
+  "D": 64,
+  "PAGE": 32,
+  "pages": 21,
+  "max_pages": 7,
+  "seq_lens": [
+   200,
+   33,
+   97
+  ]
+ },
+ {
+  "name": "d64_p32",
+  "K": 2,
+  "B": 3,
+  "HQ": 16,
+  "HKV": 4,
+  "D": 64,
+  "PAGE": 32,
+  "pages": 21,
+  "max_pages": 7,
+  "seq_lens": [
+   200,
+   33,
+   97
+  ]
+ },
+ {
+  "name": "d64_p32",
+  "K": 4,
+  "B": 3,
+  "HQ": 16,
+  "HKV": 4,
+  "D": 64,
+  "PAGE": 32,
+  "pages": 21,
+  "max_pages": 7,
+  "seq_lens": [
+   200,
+   33,
+   97
+  ]
+ },
+ {
+  "name": "p16_g4",
+  "K": 1,
+  "B": 2,
+  "HQ": 8,
+  "HKV": 2,
+  "D": 128,
+  "PAGE": 16,
+  "pages": 10,
+  "max_pages": 5,
+  "seq_lens": [
+   77,
+   31
+  ]
+ },
+ {
+  "name": "p16_g4",
+  "K": 3,
+  "B": 2,
+  "HQ": 8,
+  "HKV": 2,
+  "D": 128,
+  "PAGE": 16,
+  "pages": 10,
+  "max_pages": 5,
+  "seq_lens": [
+   77,
+   31
+  ]
+ },
+ {
+  "name": "p16_g4",
+  "K": 8,
+  "B": 2,
+  "HQ": 8,
+  "HKV": 2,
+  "D": 128,
+  "PAGE": 16,
+  "pages": 10,
+  "max_pages": 5,
+  "seq_lens": [
+   77,
+   31
+  ]
+ },
+ {
+  "name": "edge_short",
+  "K": 8,
+  "B": 3,
+  "HQ": 16,
+  "HKV": 2,
+  "D": 128,
+  "PAGE": 64,
+  "pages": 6,
+  "max_pages": 2,
+  "seq_lens": [
+   3,
+   8,
+   65
+  ]
+ }
+]

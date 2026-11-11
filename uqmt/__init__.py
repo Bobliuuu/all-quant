@@ -10,6 +10,8 @@ from .attn import (
     uq_decode,
 )
 
+from . import vllm_adapter  # noqa: E402,F401
+
 __version__ = "0.1.0"
 __all__ = [
     "uq_decode", "quantize_fp4", "dequantize_fp4", "reference", "build_paged_cache",
