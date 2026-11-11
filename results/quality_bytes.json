@@ -1,0 +1,342 @@
+{
+ "qwen3_8b": {
+  "fp16": {
+   "bytes_per_vec128": 256,
+   "compression": 1.0,
+   "kv_bytes_per_token_model": 147456,
+   "kind": "reference",
+   "note": ""
+  },
+  "fp8_e4m3": {
+   "bytes_per_vec128": 128,
+   "compression": 2.0,
+   "kv_bytes_per_token_model": 73728,
+   "kind": "simulated",
+   "note": "plain e4m3 cast, scale 1.0"
+  },
+  "fp8_e4m3_scaled": {
+   "bytes_per_vec128": 130,
+   "compression": 1.9692307692307693,
+   "kv_bytes_per_token_model": 74880,
+   "kind": "simulated",
+   "note": "per-token-head dynamic scale"
+  },
+  "int8": {
+   "bytes_per_vec128": 130,
+   "compression": 1.9692307692307693,
+   "kv_bytes_per_token_model": 74880,
+   "kind": "simulated",
+   "note": "per-token-head symmetric"
+  },
+  "uq_fp4": {
+   "bytes_per_vec128": 68,
+   "compression": 3.764705882352941,
+   "kv_bytes_per_token_model": 39168,
+   "kind": "official",
+   "note": "repo quantize_fp4 (E2M1 + UE8M0/32, ceil scale, no rotation), exactly what uqmt kernel reads"
+  },
+  "uq_fp4_c156": {
+   "bytes_per_vec128": 68,
+   "compression": 3.764705882352941,
+   "kv_bytes_per_token_model": 39168,
+   "kind": "simulated",
+   "note": "paper scale rule: E=round(log2(0.156*amax)) with clip, no rotation"
+  },
+  "uq_fp4_whtk": {
+   "bytes_per_vec128": 68,
+   "compression": 3.764705882352941,
+   "kv_bytes_per_token_model": 39168,
+   "kind": "simulated",
+   "note": "repo quantiser + WHT on K only (paper's rotation)"
+  },
+  "uq_fp4_paper": {
+   "bytes_per_vec128": 68,
+   "compression": 3.764705882352941,
+   "kv_bytes_per_token_model": 39168,
+   "kind": "simulated",
+   "note": "paper recipe: c=0.156 clip scale + WHT on K (Q rotated, q.k invariant) + BF16 first/last 2 layers; Q kept bf16 (paper: FP8); bytes exclude BF16 edge layers"
+  },
+  "mxfp4": {
+   "bytes_per_vec128": 68,
+   "compression": 3.764705882352941,
+   "kv_bytes_per_token_model": 39168,
+   "kind": "simulated",
+   "note": "OCP MX floor-exponent scale / 32"
+  },
+  "nvfp4": {
+   "bytes_per_vec128": 72,
+   "compression": 3.5555555555555554,
+   "kv_bytes_per_token_model": 41472,
+   "kind": "simulated",
+   "note": "E4M3 scale / 16 + fp32 global per write"
+  },
+  "int4_qserve": {
+   "bytes_per_vec128": 68,
+   "compression": 3.764705882352941,
+   "kv_bytes_per_token_model": 39168,
+   "kind": "simulated",
+   "note": "per-token-head asym int4, fp16 scale+zero; no SmoothAttention"
+  },
+  "kivi4": {
+   "bytes_per_vec128": 80,
+   "compression": 3.2,
+   "kv_bytes_per_token_model": 46080,
+   "kind": "simulated",
+   "note": "K per-channel (32-token blocks), V per-token (group 32), fp16 residual 128 tokens, asym fp16 scale/zero; bytes exclude fp16 residual"
+  },
+  "kivi2": {
+   "bytes_per_vec128": 48,
+   "compression": 5.333333333333333,
+   "kv_bytes_per_token_model": 27648,
+   "kind": "simulated",
+   "note": "K per-channel (32-token blocks), V per-token (group 32), fp16 residual 128 tokens, asym fp16 scale/zero; bytes exclude fp16 residual"
+  },
+  "kvquant4": {
+   "bytes_per_vec128": 85,
+   "compression": 3.011764705882353,
+   "kv_bytes_per_token_model": 48960,
+   "kind": "simulated",
+   "note": "simplified KVQuant: per-channel K (32-token blocks, post-RoPE, not pre-RoPE), equal-mass non-uniform levels fitted on the block (no offline sensitivity-weighted k-means), 1% fp16 outliers, fp16 residual 128; bytes include ~1% outliers at 4B each"
+  },
+  "kvquant3": {
+   "bytes_per_vec128": 69,
+   "compression": 3.710144927536232,
+   "kv_bytes_per_token_model": 39744,
+   "kind": "simulated",
+   "note": "simplified KVQuant: per-channel K (32-token blocks, post-RoPE, not pre-RoPE), equal-mass non-uniform levels fitted on the block (no offline sensitivity-weighted k-means), 1% fp16 outliers, fp16 residual 128; bytes include ~1% outliers at 4B each"
+  },
+  "turbo4": {
+   "bytes_per_vec128": 68,
+   "compression": 3.764705882352941,
+   "kv_bytes_per_token_model": 39168,
+   "kind": "official-port",
+   "note": "amd-experiments kernels (torch/Triton) run unchanged on CUDA; no QJL"
+  },
+  "turbo3": {
+   "bytes_per_vec128": 52,
+   "compression": 4.923076923076923,
+   "kv_bytes_per_token_model": 29952,
+   "kind": "official-port",
+   "note": "amd-experiments kernels (torch/Triton) run unchanged on CUDA; no QJL"
+  },
+  "turbo2": {
+   "bytes_per_vec128": 36,
+   "compression": 7.111111111111111,
+   "kv_bytes_per_token_model": 20736,
+   "kind": "official-port",
+   "note": "amd-experiments kernels (torch/Triton) run unchanged on CUDA; no QJL"
+  },
+  "planar4": {
+   "bytes_per_vec128": 68,
+   "compression": 3.764705882352941,
+   "kv_bytes_per_token_model": 39168,
+   "kind": "official-port",
+   "note": "amd-experiments kernels (torch/Triton) run unchanged on CUDA; no QJL"
+  },
+  "planar3": {
+   "bytes_per_vec128": 52,
+   "compression": 4.923076923076923,
+   "kv_bytes_per_token_model": 29952,
+   "kind": "official-port",
+   "note": "amd-experiments kernels (torch/Triton) run unchanged on CUDA; no QJL"
+  },
+  "iso4": {
+   "bytes_per_vec128": 68,
+   "compression": 3.764705882352941,
+   "kv_bytes_per_token_model": 39168,
+   "kind": "official-port",
+   "note": "amd-experiments kernels (torch/Triton) run unchanged on CUDA; no QJL"
+  },
+  "iso3": {
+   "bytes_per_vec128": 52,
+   "compression": 4.923076923076923,
+   "kv_bytes_per_token_model": 29952,
+   "kind": "official-port",
+   "note": "amd-experiments kernels (torch/Triton) run unchanged on CUDA; no QJL"
+  },
+  "rotor4": {
+   "bytes_per_vec128": 68,
+   "compression": 3.764705882352941,
+   "kv_bytes_per_token_model": 39168,
+   "kind": "official-port",
+   "note": "amd-experiments kernels (torch/Triton) run unchanged on CUDA; no QJL"
+  },
+  "rotor3": {
+   "bytes_per_vec128": 52,
+   "compression": 4.923076923076923,
+   "kv_bytes_per_token_model": 29952,
+   "kind": "official-port",
+   "note": "amd-experiments kernels (torch/Triton) run unchanged on CUDA; no QJL"
+  }
+ },
+ "mistral7b": {
+  "fp16": {
+   "bytes_per_vec128": 256,
+   "compression": 1.0,
+   "kv_bytes_per_token_model": 131072,
+   "kind": "reference",
+   "note": ""
+  },
+  "fp8_e4m3": {
+   "bytes_per_vec128": 128,
+   "compression": 2.0,
+   "kv_bytes_per_token_model": 65536,
+   "kind": "simulated",
+   "note": "plain e4m3 cast, scale 1.0"
+  },
+  "fp8_e4m3_scaled": {
+   "bytes_per_vec128": 130,
+   "compression": 1.9692307692307693,
+   "kv_bytes_per_token_model": 66560,
+   "kind": "simulated",
+   "note": "per-token-head dynamic scale"
+  },
+  "int8": {
+   "bytes_per_vec128": 130,
+   "compression": 1.9692307692307693,
+   "kv_bytes_per_token_model": 66560,
+   "kind": "simulated",
+   "note": "per-token-head symmetric"
+  },
+  "uq_fp4": {
+   "bytes_per_vec128": 68,
+   "compression": 3.764705882352941,
+   "kv_bytes_per_token_model": 34816,
+   "kind": "official",
+   "note": "repo quantize_fp4 (E2M1 + UE8M0/32, ceil scale, no rotation), exactly what uqmt kernel reads"
+  },
+  "uq_fp4_c156": {
+   "bytes_per_vec128": 68,
+   "compression": 3.764705882352941,
+   "kv_bytes_per_token_model": 34816,
+   "kind": "simulated",
+   "note": "paper scale rule: E=round(log2(0.156*amax)) with clip, no rotation"
+  },
+  "uq_fp4_whtk": {
+   "bytes_per_vec128": 68,
+   "compression": 3.764705882352941,
+   "kv_bytes_per_token_model": 34816,
+   "kind": "simulated",
+   "note": "repo quantiser + WHT on K only (paper's rotation)"
+  },
+  "uq_fp4_paper": {
+   "bytes_per_vec128": 68,
+   "compression": 3.764705882352941,
+   "kv_bytes_per_token_model": 34816,
+   "kind": "simulated",
+   "note": "paper recipe: c=0.156 clip scale + WHT on K (Q rotated, q.k invariant) + BF16 first/last 2 layers; Q kept bf16 (paper: FP8); bytes exclude BF16 edge layers"
+  },
+  "mxfp4": {
+   "bytes_per_vec128": 68,
+   "compression": 3.764705882352941,
+   "kv_bytes_per_token_model": 34816,
+   "kind": "simulated",
+   "note": "OCP MX floor-exponent scale / 32"
+  },
+  "nvfp4": {
+   "bytes_per_vec128": 72,
+   "compression": 3.5555555555555554,
+   "kv_bytes_per_token_model": 36864,
+   "kind": "simulated",
+   "note": "E4M3 scale / 16 + fp32 global per write"
+  },
+  "int4_qserve": {
+   "bytes_per_vec128": 68,
+   "compression": 3.764705882352941,
+   "kv_bytes_per_token_model": 34816,
+   "kind": "simulated",
+   "note": "per-token-head asym int4, fp16 scale+zero; no SmoothAttention"
+  },
+  "kivi4": {
+   "bytes_per_vec128": 80,
+   "compression": 3.2,
+   "kv_bytes_per_token_model": 40960,
+   "kind": "simulated",
+   "note": "K per-channel (32-token blocks), V per-token (group 32), fp16 residual 128 tokens, asym fp16 scale/zero; bytes exclude fp16 residual"
+  },
+  "kivi2": {
+   "bytes_per_vec128": 48,
+   "compression": 5.333333333333333,
+   "kv_bytes_per_token_model": 24576,
+   "kind": "simulated",
+   "note": "K per-channel (32-token blocks), V per-token (group 32), fp16 residual 128 tokens, asym fp16 scale/zero; bytes exclude fp16 residual"
+  },
+  "kvquant4": {
+   "bytes_per_vec128": 85,
+   "compression": 3.011764705882353,
+   "kv_bytes_per_token_model": 43520,
+   "kind": "simulated",
+   "note": "simplified KVQuant: per-channel K (32-token blocks, post-RoPE, not pre-RoPE), equal-mass non-uniform levels fitted on the block (no offline sensitivity-weighted k-means), 1% fp16 outliers, fp16 residual 128; bytes include ~1% outliers at 4B each"
+  },
+  "kvquant3": {
+   "bytes_per_vec128": 69,
+   "compression": 3.710144927536232,
+   "kv_bytes_per_token_model": 35328,
+   "kind": "simulated",
+   "note": "simplified KVQuant: per-channel K (32-token blocks, post-RoPE, not pre-RoPE), equal-mass non-uniform levels fitted on the block (no offline sensitivity-weighted k-means), 1% fp16 outliers, fp16 residual 128; bytes include ~1% outliers at 4B each"
+  },
+  "turbo4": {
+   "bytes_per_vec128": 68,
+   "compression": 3.764705882352941,
+   "kv_bytes_per_token_model": 34816,
+   "kind": "official-port",
+   "note": "amd-experiments kernels (torch/Triton) run unchanged on CUDA; no QJL"
+  },
+  "turbo3": {
+   "bytes_per_vec128": 52,
+   "compression": 4.923076923076923,
+   "kv_bytes_per_token_model": 26624,
+   "kind": "official-port",
+   "note": "amd-experiments kernels (torch/Triton) run unchanged on CUDA; no QJL"
+  },
+  "turbo2": {
+   "bytes_per_vec128": 36,
+   "compression": 7.111111111111111,
+   "kv_bytes_per_token_model": 18432,
+   "kind": "official-port",
+   "note": "amd-experiments kernels (torch/Triton) run unchanged on CUDA; no QJL"
+  },
+  "planar4": {
+   "bytes_per_vec128": 68,
+   "compression": 3.764705882352941,
+   "kv_bytes_per_token_model": 34816,
+   "kind": "official-port",
+   "note": "amd-experiments kernels (torch/Triton) run unchanged on CUDA; no QJL"
+  },
+  "planar3": {
+   "bytes_per_vec128": 52,
+   "compression": 4.923076923076923,
+   "kv_bytes_per_token_model": 26624,
+   "kind": "official-port",
+   "note": "amd-experiments kernels (torch/Triton) run unchanged on CUDA; no QJL"
+  },
+  "iso4": {
+   "bytes_per_vec128": 68,
+   "compression": 3.764705882352941,
+   "kv_bytes_per_token_model": 34816,
+   "kind": "official-port",
+   "note": "amd-experiments kernels (torch/Triton) run unchanged on CUDA; no QJL"
+  },
+  "iso3": {
+   "bytes_per_vec128": 52,
+   "compression": 4.923076923076923,
+   "kv_bytes_per_token_model": 26624,
+   "kind": "official-port",
+   "note": "amd-experiments kernels (torch/Triton) run unchanged on CUDA; no QJL"
+  },
+  "rotor4": {
+   "bytes_per_vec128": 68,
+   "compression": 3.764705882352941,
+   "kv_bytes_per_token_model": 34816,
+   "kind": "official-port",
+   "note": "amd-experiments kernels (torch/Triton) run unchanged on CUDA; no QJL"
+  },
+  "rotor3": {
+   "bytes_per_vec128": 52,
+   "compression": 4.923076923076923,
+   "kv_bytes_per_token_model": 26624,
+   "kind": "official-port",
+   "note": "amd-experiments kernels (torch/Triton) run unchanged on CUDA; no QJL"
+  }
+ }
+}
