@@ -1,0 +1,273 @@
+{
+ "llama_cpp": "b12283 (f3b407ca1) win-sycl release",
+ "model": "Qwen3-0.6B-Q8_0 (28 layers, 16 heads, 8 KV heads, head_dim 128, GQA 2)",
+ "device": "Arc B390 box (Intel Arc B390 GPU, 96 CU)",
+ "sequences": 1,
+ "note": "attn_marginal_ms = step time at depth minus step time at depth 0, whole model (model weights cancel; summed over 28 layers). eff_GBps = KV bytes at that depth / attn_marginal_ms. n_query>1 measured as llama-bench prompt-processing of n tokens at depth (one ubatch). Not a standalone kernel measurement; n_head 32/GQA4/batch 2,8 not expressible.",
+ "rows": [
+  {
+   "kv": "f16",
+   "n_query": 1,
+   "depth": 4096,
+   "tok_s": 72.82,
+   "step_ms": 13.73,
+   "step_ms_depth0": 7.71,
+   "attn_marginal_ms": 6.02,
+   "kv_bytes_MB": 469.8,
+   "eff_GBps": 78.0
+  },
+  {
+   "kv": "f16",
+   "n_query": 1,
+   "depth": 16384,
+   "tok_s": 30.43,
+   "step_ms": 32.86,
+   "step_ms_depth0": 7.71,
+   "attn_marginal_ms": 25.15,
+   "kv_bytes_MB": 1879.0,
+   "eff_GBps": 74.7
+  },
+  {
+   "kv": "f16",
+   "n_query": 2,
+   "depth": 4096,
+   "tok_s": 129.58,
+   "step_ms": 15.43,
+   "step_ms_depth0": 11.21,
+   "attn_marginal_ms": 4.22,
+   "kv_bytes_MB": 469.8,
+   "eff_GBps": 111.3
+  },
+  {
+   "kv": "f16",
+   "n_query": 2,
+   "depth": 16384,
+   "tok_s": 62.1,
+   "step_ms": 32.21,
+   "step_ms_depth0": 11.21,
+   "attn_marginal_ms": 20.99,
+   "kv_bytes_MB": 1879.0,
+   "eff_GBps": 89.5
+  },
+  {
+   "kv": "f16",
+   "n_query": 4,
+   "depth": 4096,
+   "tok_s": 267.55,
+   "step_ms": 14.95,
+   "step_ms_depth0": 10.55,
+   "attn_marginal_ms": 4.4,
+   "kv_bytes_MB": 469.8,
+   "eff_GBps": 106.8
+  },
+  {
+   "kv": "f16",
+   "n_query": 4,
+   "depth": 16384,
+   "tok_s": 120.19,
+   "step_ms": 33.28,
+   "step_ms_depth0": 10.55,
+   "attn_marginal_ms": 22.73,
+   "kv_bytes_MB": 1879.0,
+   "eff_GBps": 82.7
+  },
+  {
+   "kv": "f16",
+   "n_query": 8,
+   "depth": 4096,
+   "tok_s": 510.37,
+   "step_ms": 15.67,
+   "step_ms_depth0": 8.62,
+   "attn_marginal_ms": 7.06,
+   "kv_bytes_MB": 469.8,
+   "eff_GBps": 66.5
+  },
+  {
+   "kv": "f16",
+   "n_query": 8,
+   "depth": 16384,
+   "tok_s": 216.44,
+   "step_ms": 36.96,
+   "step_ms_depth0": 8.62,
+   "attn_marginal_ms": 28.35,
+   "kv_bytes_MB": 1879.0,
+   "eff_GBps": 66.3
+  },
+  {
+   "kv": "q8_0",
+   "n_query": 1,
+   "depth": 4096,
+   "tok_s": 83.56,
+   "step_ms": 11.97,
+   "step_ms_depth0": 7.95,
+   "attn_marginal_ms": 4.02,
+   "kv_bytes_MB": 249.6,
+   "eff_GBps": 62.1
+  },
+  {
+   "kv": "q8_0",
+   "n_query": 1,
+   "depth": 16384,
+   "tok_s": 44.19,
+   "step_ms": 22.63,
+   "step_ms_depth0": 7.95,
+   "attn_marginal_ms": 14.68,
+   "kv_bytes_MB": 998.2,
+   "eff_GBps": 68.0
+  },
+  {
+   "kv": "q8_0",
+   "n_query": 2,
+   "depth": 4096,
+   "tok_s": 154.53,
+   "step_ms": 12.94,
+   "step_ms_depth0": 12.1,
+   "attn_marginal_ms": 0.85,
+   "kv_bytes_MB": 249.6,
+   "eff_GBps": 294.9
+  },
+  {
+   "kv": "q8_0",
+   "n_query": 2,
+   "depth": 16384,
+   "tok_s": 83.62,
+   "step_ms": 23.92,
+   "step_ms_depth0": 12.1,
+   "attn_marginal_ms": 11.82,
+   "kv_bytes_MB": 998.2,
+   "eff_GBps": 84.4
+  },
+  {
+   "kv": "q8_0",
+   "n_query": 4,
+   "depth": 4096,
+   "tok_s": 299.64,
+   "step_ms": 13.35,
+   "step_ms_depth0": 10.73,
+   "attn_marginal_ms": 2.62,
+   "kv_bytes_MB": 249.6,
+   "eff_GBps": 95.4
+  },
+  {
+   "kv": "q8_0",
+   "n_query": 4,
+   "depth": 16384,
+   "tok_s": 163.01,
+   "step_ms": 24.54,
+   "step_ms_depth0": 10.73,
+   "attn_marginal_ms": 13.8,
+   "kv_bytes_MB": 998.2,
+   "eff_GBps": 72.3
+  },
+  {
+   "kv": "q8_0",
+   "n_query": 8,
+   "depth": 4096,
+   "tok_s": 560.93,
+   "step_ms": 14.26,
+   "step_ms_depth0": 9.04,
+   "attn_marginal_ms": 5.22,
+   "kv_bytes_MB": 249.6,
+   "eff_GBps": 47.8
+  },
+  {
+   "kv": "q8_0",
+   "n_query": 8,
+   "depth": 16384,
+   "tok_s": 303.17,
+   "step_ms": 26.39,
+   "step_ms_depth0": 9.04,
+   "attn_marginal_ms": 17.35,
+   "kv_bytes_MB": 998.2,
+   "eff_GBps": 57.6
+  },
+  {
+   "kv": "q4_0",
+   "n_query": 1,
+   "depth": 4096,
+   "tok_s": 91.92,
+   "step_ms": 10.88,
+   "step_ms_depth0": 7.56,
+   "attn_marginal_ms": 3.32,
+   "kv_bytes_MB": 132.1,
+   "eff_GBps": 39.8
+  },
+  {
+   "kv": "q4_0",
+   "n_query": 1,
+   "depth": 16384,
+   "tok_s": 50.72,
+   "step_ms": 19.72,
+   "step_ms_depth0": 7.56,
+   "attn_marginal_ms": 12.15,
+   "kv_bytes_MB": 528.5,
+   "eff_GBps": 43.5
+  },
+  {
+   "kv": "q4_0",
+   "n_query": 2,
+   "depth": 4096,
+   "tok_s": 163.14,
+   "step_ms": 12.26,
+   "step_ms_depth0": 11.28,
+   "attn_marginal_ms": 0.98,
+   "kv_bytes_MB": 132.1,
+   "eff_GBps": 135.4
+  },
+  {
+   "kv": "q4_0",
+   "n_query": 2,
+   "depth": 16384,
+   "tok_s": 95.14,
+   "step_ms": 21.02,
+   "step_ms_depth0": 11.28,
+   "attn_marginal_ms": 9.74,
+   "kv_bytes_MB": 528.5,
+   "eff_GBps": 54.3
+  },
+  {
+   "kv": "q4_0",
+   "n_query": 4,
+   "depth": 4096,
+   "tok_s": 322.34,
+   "step_ms": 12.41,
+   "step_ms_depth0": 10.64,
+   "attn_marginal_ms": 1.77,
+   "kv_bytes_MB": 132.1,
+   "eff_GBps": 74.8
+  },
+  {
+   "kv": "q4_0",
+   "n_query": 4,
+   "depth": 16384,
+   "tok_s": 185.88,
+   "step_ms": 21.52,
+   "step_ms_depth0": 10.64,
+   "attn_marginal_ms": 10.88,
+   "kv_bytes_MB": 528.5,
+   "eff_GBps": 48.6
+  },
+  {
+   "kv": "q4_0",
+   "n_query": 8,
+   "depth": 4096,
+   "tok_s": 607.85,
+   "step_ms": 13.16,
+   "step_ms_depth0": 8.57,
+   "attn_marginal_ms": 4.59,
+   "kv_bytes_MB": 132.1,
+   "eff_GBps": 28.8
+  },
+  {
+   "kv": "q4_0",
+   "n_query": 8,
+   "depth": 16384,
+   "tok_s": 348.99,
+   "step_ms": 22.92,
+   "step_ms_depth0": 8.57,
+   "attn_marginal_ms": 14.36,
+   "kv_bytes_MB": 528.5,
+   "eff_GBps": 36.8
+  }
+ ]
+}
