@@ -26,3 +26,16 @@ def main(model="mistral7b", methods="fp16", metrics="ppl,attn,verify,needle", ne
     res = job.remote(model, methods, metrics, needle_lens, nwin, tag)
     os.makedirs(os.path.join(ROOT, "results", "quality_raw"), exist_ok=True)
     for f, d in res.items(): json.dump(d, open(os.path.join(ROOT, "results", "quality_raw", f), "w"), indent=1)
+
+
+@app.function(gpu="A100-80GB", image=img, timeout=1800, volumes={"/out": vol, "/hf": hfv})
+def sanity():
+    import subprocess, sys
+    env = dict(os.environ, HF_HOME="/hf", PYTHONPATH="/work", AMD_KERNELS="/work/amdk")
+    p = subprocess.run([sys.executable, "/work/q/sanity_blockquant.py"], env=env, capture_output=True, text=True); vol.commit()
+    return p.stdout[-5000:] + p.stderr[-1500:]
+
+
+@app.local_entrypoint()
+def sanity_main():
+    print(sanity.remote())
