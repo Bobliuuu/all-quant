@@ -1,0 +1,312 @@
+{
+ "gpu": "NVIDIA H100 80GB HBM3",
+ "cc": "9.0",
+ "sms": 132,
+ "torch": "2.15.0+cu132",
+ "shape": {
+  "B": 8,
+  "ctx": 32768,
+  "Hq": 64,
+  "Hkv": 8,
+  "D": 128,
+  "page": 64
+ },
+ "hbm_copy_GBps": 3049.7,
+ "hbm_readsum_GBps": 3152.9,
+ "hbm_peak_GBps": 3152.9,
+ "sources": [
+  "priorart_H100strict_flashinfer.json",
+  "priorart_H100strict_fimq_fi_mq.json",
+  "priorart_H100strict_fimq_fa3.json"
+ ],
+ "rows": [
+  {
+   "impl": "flashinfer.BatchDecodeWithPagedKVCacheWrapper",
+   "K": 1,
+   "kv_format": "bf16",
+   "note": "single-query decode, tensor-core path",
+   "ms": 0.3473,
+   "kv_bytes_MB": 1073.7,
+   "reads": 1,
+   "GBps": 3091.3,
+   "pct_hbm_peak": 98.0
+  },
+  {
+   "impl": "flashinfer.BatchDecodeWithPagedKVCacheWrapper",
+   "K": 1,
+   "kv_format": "fp8",
+   "note": "single-query decode, tensor-core path",
+   "ms": 0.2051,
+   "kv_bytes_MB": 536.9,
+   "reads": 1,
+   "GBps": 2617.6,
+   "pct_hbm_peak": 83.0
+  },
+  {
+   "impl": "flashinfer.BatchPrefillWithPagedKVCacheWrapper[fa2]",
+   "K": 1,
+   "kv_format": "bf16",
+   "note": "qo_len=K causal; reads=1 assumed",
+   "ms": 0.3502,
+   "kv_bytes_MB": 1073.7,
+   "reads": 1,
+   "GBps": 3066.4,
+   "pct_hbm_peak": 97.3
+  },
+  {
+   "impl": "flashinfer.BatchPrefillWithPagedKVCacheWrapper[fa2]",
+   "K": 1,
+   "kv_format": "fp8",
+   "note": "qo_len=K causal; reads=1 assumed",
+   "ms": 0.2046,
+   "kv_bytes_MB": 536.9,
+   "reads": 1,
+   "GBps": 2623.8,
+   "pct_hbm_peak": 83.2
+  },
+  {
+   "impl": "flashinfer.BatchPrefillWithPagedKVCacheWrapper[fa2]",
+   "K": 2,
+   "kv_format": "bf16",
+   "note": "qo_len=K causal; reads=1 assumed",
+   "ms": 0.3517,
+   "kv_bytes_MB": 1073.7,
+   "reads": 1,
+   "GBps": 3053.4,
+   "pct_hbm_peak": 96.8
+  },
+  {
+   "impl": "flashinfer.BatchPrefillWithPagedKVCacheWrapper[fa2]",
+   "K": 2,
+   "kv_format": "fp8",
+   "note": "qo_len=K causal; reads=1 assumed",
+   "ms": 0.2058,
+   "kv_bytes_MB": 536.9,
+   "reads": 1,
+   "GBps": 2608.1,
+   "pct_hbm_peak": 82.7
+  },
+  {
+   "impl": "flashinfer.BatchPrefillWithPagedKVCacheWrapper[fa2]",
+   "K": 4,
+   "kv_format": "bf16",
+   "note": "qo_len=K causal; reads=1 assumed",
+   "ms": 0.3614,
+   "kv_bytes_MB": 1073.7,
+   "reads": 1,
+   "GBps": 2971.0,
+   "pct_hbm_peak": 94.2
+  },
+  {
+   "impl": "flashinfer.BatchPrefillWithPagedKVCacheWrapper[fa2]",
+   "K": 4,
+   "kv_format": "fp8",
+   "note": "qo_len=K causal; reads=1 assumed",
+   "ms": 0.3658,
+   "kv_bytes_MB": 536.9,
+   "reads": 1,
+   "GBps": 1467.7,
+   "pct_hbm_peak": 46.6
+  },
+  {
+   "impl": "flashinfer.BatchPrefillWithPagedKVCacheWrapper[fa2]",
+   "K": 8,
+   "kv_format": "bf16",
+   "note": "qo_len=K causal; reads=1 assumed",
+   "ms": 0.3689,
+   "kv_bytes_MB": 1073.7,
+   "reads": 1,
+   "GBps": 2911.0,
+   "pct_hbm_peak": 92.3
+  },
+  {
+   "impl": "flashinfer.BatchPrefillWithPagedKVCacheWrapper[fa2]",
+   "K": 8,
+   "kv_format": "fp8",
+   "note": "qo_len=K causal; reads=1 assumed",
+   "ms": 0.3718,
+   "kv_bytes_MB": 536.9,
+   "reads": 1,
+   "GBps": 1443.8,
+   "pct_hbm_peak": 45.8
+  },
+  {
+   "impl": "flashinfer.BatchPrefillWithPagedKVCacheWrapper[fa3]",
+   "K": 1,
+   "kv_format": "bf16",
+   "note": "qo_len=K causal; reads=1 assumed",
+   "ms": 1.7122,
+   "kv_bytes_MB": 1073.7,
+   "reads": 1,
+   "GBps": 627.1,
+   "pct_hbm_peak": 19.9
+  },
+  {
+   "impl": "flashinfer.BatchPrefillWithPagedKVCacheWrapper[fa3]",
+   "K": 1,
+   "kv_format": "fp8",
+   "note": "",
+   "error": "bf16_dtype_idx_i32_head_dim_qk_128_head_dim_vo_128_posenc_0_use_swa_False_use_logits_cap_False_f16qk_False_sm90/batch_prefill_paged_sm90_kernel_mask_2.cu\n\n3 errors detected in the compilation of \"/root/.cache/flashinfer/0.7.4/90a/generated/batch_prefill_with_kv_cache_dtype_q_bf16_dtype_kv_e4m3_dtype_o_bf16_dtype_idx_i32_head_dim_qk_128_head_dim_vo_128_posenc_0_use_swa_False_use_logits_cap_False_f16qk_False_sm90/batch_prefill_paged_sm90_kernel_mask_2.cu\".\nninja: build stopped: subcommand failed.\n"
+  },
+  {
+   "impl": "flashinfer.BatchPrefillWithPagedKVCacheWrapper[fa3]",
+   "K": 2,
+   "kv_format": "bf16",
+   "note": "qo_len=K causal; reads=1 assumed",
+   "ms": 1.7751,
+   "kv_bytes_MB": 1073.7,
+   "reads": 1,
+   "GBps": 604.9,
+   "pct_hbm_peak": 19.2
+  },
+  {
+   "impl": "flashinfer.BatchPrefillWithPagedKVCacheWrapper[fa3]",
+   "K": 2,
+   "kv_format": "fp8",
+   "note": "",
+   "error": "16_dtype_idx_i32_head_dim_qk_128_head_dim_vo_128_posenc_0_use_swa_False_use_logits_cap_False_f16qk_False_sm90/batch_prefill_ragged_sm90_kernel_mask_2.cu\n\n3 errors detected in the compilation of \"/root/.cache/flashinfer/0.7.4/90a/generated/batch_prefill_with_kv_cache_dtype_q_bf16_dtype_kv_e4m3_dtype_o_bf16_dtype_idx_i32_head_dim_qk_128_head_dim_vo_128_posenc_0_use_swa_False_use_logits_cap_False_f16qk_False_sm90/batch_prefill_ragged_sm90_kernel_mask_2.cu\".\nninja: build stopped: subcommand failed.\n"
+  },
+  {
+   "impl": "flashinfer.BatchPrefillWithPagedKVCacheWrapper[fa3]",
+   "K": 4,
+   "kv_format": "bf16",
+   "note": "qo_len=K causal; reads=1 assumed",
+   "ms": 1.7352,
+   "kv_bytes_MB": 1073.7,
+   "reads": 1,
+   "GBps": 618.8,
+   "pct_hbm_peak": 19.6
+  },
+  {
+   "impl": "flashinfer.nvfp4_quantize_paged_kv_cache",
+   "K": 0,
+   "kv_format": "nvfp4",
+   "note": "",
+   "error": "fp4_quantize requires SM100 or newer; got SM90"
+  },
+  {
+   "impl": "flashinfer.trtllm_batch_decode_with_kv_cache[xqa]",
+   "K": 1,
+   "kv_format": "fp8",
+   "note": "q_len_per_req=1, q dtype bfloat16; reads=1 assumed; NVFP4 = 16-block E4M3 scale + fp32 global scale (not UE8M0)",
+   "ms": 0.2352,
+   "kv_bytes_MB": 536.9,
+   "reads": 1,
+   "GBps": 2282.6,
+   "pct_hbm_peak": 72.4
+  },
+  {
+   "impl": "flashinfer.trtllm_batch_decode_with_kv_cache[xqa]",
+   "K": 1,
+   "kv_format": "fp8",
+   "note": "q_len_per_req=1, q dtype float8_e4m3fn; reads=1 assumed; NVFP4 = 16-block E4M3 scale + fp32 global scale (not UE8M0)",
+   "error": "ValueError: Invalid dtype: torch.float8_e4m3fn for XQA, only float16 and bfloat16 input are supported"
+  },
+  {
+   "impl": "flashinfer.trtllm_batch_decode_with_kv_cache[xqa]",
+   "K": 1,
+   "kv_format": "bf16",
+   "note": "q_len_per_req=1, q dtype bfloat16; reads=1 assumed; NVFP4 = 16-block E4M3 scale + fp32 global scale (not UE8M0)",
+   "ms": 0.3497,
+   "kv_bytes_MB": 1073.7,
+   "reads": 1,
+   "GBps": 3070.9,
+   "pct_hbm_peak": 97.4
+  },
+  {
+   "impl": "flashinfer.trtllm_batch_decode_with_kv_cache[xqa]",
+   "K": 2,
+   "kv_format": "fp8",
+   "note": "q_len_per_req=2, q dtype bfloat16; reads=1 assumed; NVFP4 = 16-block E4M3 scale + fp32 global scale (not UE8M0)",
+   "ms": 0.226,
+   "kv_bytes_MB": 536.9,
+   "reads": 1,
+   "GBps": 2375.4,
+   "pct_hbm_peak": 75.3
+  },
+  {
+   "impl": "flashinfer.trtllm_batch_decode_with_kv_cache[xqa]",
+   "K": 2,
+   "kv_format": "fp8",
+   "note": "q_len_per_req=2, q dtype float8_e4m3fn; reads=1 assumed; NVFP4 = 16-block E4M3 scale + fp32 global scale (not UE8M0)",
+   "error": "ValueError: Invalid dtype: torch.float8_e4m3fn for XQA, only float16 and bfloat16 input are supported"
+  },
+  {
+   "impl": "flashinfer.trtllm_batch_decode_with_kv_cache[xqa]",
+   "K": 2,
+   "kv_format": "bf16",
+   "note": "q_len_per_req=2, q dtype bfloat16; reads=1 assumed; NVFP4 = 16-block E4M3 scale + fp32 global scale (not UE8M0)",
+   "ms": 0.3568,
+   "kv_bytes_MB": 1073.7,
+   "reads": 1,
+   "GBps": 3009.4,
+   "pct_hbm_peak": 95.4
+  },
+  {
+   "impl": "flashinfer.trtllm_batch_decode_with_kv_cache[xqa]",
+   "K": 4,
+   "kv_format": "fp8",
+   "note": "q_len_per_req=4, q dtype bfloat16; reads=1 assumed; NVFP4 = 16-block E4M3 scale + fp32 global scale (not UE8M0)",
+   "ms": 0.2269,
+   "kv_bytes_MB": 536.9,
+   "reads": 1,
+   "GBps": 2366.6,
+   "pct_hbm_peak": 75.1
+  },
+  {
+   "impl": "flashinfer.trtllm_batch_decode_with_kv_cache[xqa]",
+   "K": 4,
+   "kv_format": "fp8",
+   "note": "q_len_per_req=4, q dtype float8_e4m3fn; reads=1 assumed; NVFP4 = 16-block E4M3 scale + fp32 global scale (not UE8M0)",
+   "error": "ValueError: Invalid dtype: torch.float8_e4m3fn for XQA, only float16 and bfloat16 input are supported"
+  },
+  {
+   "impl": "flashinfer.trtllm_batch_decode_with_kv_cache[xqa]",
+   "K": 4,
+   "kv_format": "bf16",
+   "note": "q_len_per_req=4, q dtype bfloat16; reads=1 assumed; NVFP4 = 16-block E4M3 scale + fp32 global scale (not UE8M0)",
+   "ms": 0.3576,
+   "kv_bytes_MB": 1073.7,
+   "reads": 1,
+   "GBps": 3002.9,
+   "pct_hbm_peak": 95.2
+  },
+  {
+   "impl": "flashinfer.trtllm_batch_decode_with_kv_cache[xqa]",
+   "K": 8,
+   "kv_format": "fp8",
+   "note": "q_len_per_req=8, q dtype bfloat16; reads=1 assumed; NVFP4 = 16-block E4M3 scale + fp32 global scale (not UE8M0)",
+   "ms": 0.2124,
+   "kv_bytes_MB": 536.9,
+   "reads": 1,
+   "GBps": 2527.4,
+   "pct_hbm_peak": 80.2
+  },
+  {
+   "impl": "flashinfer.trtllm_batch_decode_with_kv_cache[xqa]",
+   "K": 8,
+   "kv_format": "fp8",
+   "note": "q_len_per_req=8, q dtype float8_e4m3fn; reads=1 assumed; NVFP4 = 16-block E4M3 scale + fp32 global scale (not UE8M0)",
+   "error": "ValueError: Invalid dtype: torch.float8_e4m3fn for XQA, only float16 and bfloat16 input are supported"
+  },
+  {
+   "impl": "flashinfer.trtllm_batch_decode_with_kv_cache[xqa]",
+   "K": 8,
+   "kv_format": "bf16",
+   "note": "q_len_per_req=8, q dtype bfloat16; reads=1 assumed; NVFP4 = 16-block E4M3 scale + fp32 global scale (not UE8M0)",
+   "ms": 0.4262,
+   "kv_bytes_MB": 1073.7,
+   "reads": 1,
+   "GBps": 2519.2,
+   "pct_hbm_peak": 79.9
+  },
+  {
+   "impl": "FlashAttention-3.flash_attn_with_kvcache",
+   "K": 0,
+   "kv_format": "fp8",
+   "note": "",
+   "error": "not importable: No module named 'flash_attn_interface'"
+  }
+ ],
+ "flashinfer": "0.7.4"
+}
