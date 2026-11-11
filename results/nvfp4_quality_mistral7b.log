@@ -1,0 +1,9 @@
+mistral7b fp16 4.872520159946278 33s
+mistral7b nvfp4 4.920007115624757 71s
+mistral7b mxfp4 5.002832671171923 69s
+{'nv_cos': 0.9887602217495441, 'nv_rel': 0.15335556049831212, 'mx_cos': 0.9606497120112181, 'mx_rel': 0.28165900660678744, 'nv_kernel_vs_ref': 0.001739385123073589, 'mx_kernel_vs_ref': 0.0017375314419041388, 'T': 2048, 'K': 8}
+
+Loading checkpoint shards:   0%|          | 0/2 [00:00<?, ?it/s]
+Loading checkpoint shards:  50%|█████     | 1/2 [00:08<00:08,  8.91s/it]
+Loading checkpoint shards: 100%|██████████| 2/2 [00:12<00:00,  5.99s/it]
+Loading checkpoint shards: 100%|██████████| 2/2 [00:12<00:00,  6.43s/it]
