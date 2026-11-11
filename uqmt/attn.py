@@ -18,19 +18,42 @@ Cache layouts
   seq_len - K + j + 1 positions (causal among spec tokens).
 """
 import os
+from dataclasses import dataclass
+from typing import Optional
+
 import torch
-import triton
-import triton.language as tl
+
+try:  # importing must work without a GPU / without triton (CPU-only quantize + reference)
+    import triton
+    import triton.language as tl
+    HAVE_TRITON = True
+except ImportError:  # pragma: no cover - exercised on machines without triton
+    HAVE_TRITON = False
+
+    class _Stub:
+        def __getattr__(self, _):
+            return _Stub()
+        def __call__(self, *a, **k):
+            return _Stub()
+        def __getitem__(self, _):
+            return _Stub()
+
+    triton = tl = _Stub()
+    triton.jit = lambda f: f
+    triton.cdiv = lambda a, b: -(-a // b)
+    triton.next_power_of_2 = lambda n: 1 if n <= 1 else 1 << (n - 1).bit_length()
 
 FP4_VALUES = [0.0, 0.5, 1.0, 1.5, 2.0, 3.0, 4.0, 6.0]
-GROUP = tl.constexpr(32)
+BLOCK = 32          # FP4 scale group size along head_dim (plain int for torch code)
+GROUP = tl.constexpr(32)  # same value, usable inside @triton.jit code
 
 
 # ----------------------------------------------------------------- quantize
 def quantize_fp4(x: torch.Tensor):
     """x [..., D] float -> (packed uint8 [..., D/2], scales uint8 [..., D/32])."""
     D = x.shape[-1]
-    xg = x.float().reshape(*x.shape[:-1], D // GROUP, GROUP)
+    assert D % BLOCK == 0, 'head_dim must be a multiple of 32'
+    xg = x.float().reshape(*x.shape[:-1], D // BLOCK, BLOCK)
     amax = xg.abs().amax(-1, keepdim=True).clamp_min(1e-30)
     e = torch.ceil(torch.log2(amax / 6.0)).clamp(-127, 127)
     scale = torch.exp2(e)
@@ -51,7 +74,7 @@ def dequantize_fp4(packed: torch.Tensor, scales: torch.Tensor):
         return torch.where((c & 8) != 0, -v, v)
     D = packed.shape[-1] * 2
     out = torch.stack([dec(lo), dec(hi)], -1).reshape(*packed.shape[:-1], D)
-    sc = torch.exp2(scales.float() - 127).repeat_interleave(GROUP, -1)
+    sc = torch.exp2(scales.float() - 127).repeat_interleave(BLOCK, -1)
     return out * sc
 
 
@@ -92,10 +115,10 @@ def _qgroup(qbase, rows_ok, g: tl.constexpr):
 
 @triton.jit
 def _split_kernel(
-    Q, KC, KS, VC, VS, BT, SL, MO, ML, sm_scale,
+    Q, KC, KS, VC, VS, BT, SL, MO, ML, sm_scale, MAX_PAGES, PPS,
     K: tl.constexpr, G: tl.constexpr, G_PAD: tl.constexpr, BLOCK_M: tl.constexpr,
     HQ: tl.constexpr, HKV: tl.constexpr, D: tl.constexpr, PAGE: tl.constexpr,
-    MAX_PAGES: tl.constexpr, NSPLIT: tl.constexpr, PPS: tl.constexpr, FP8K: tl.constexpr,
+    NSPLIT: tl.constexpr, FP8K: tl.constexpr,
 ):
     b = tl.program_id(0)
     hk = tl.program_id(1)
@@ -184,14 +207,67 @@ def _reduce_kernel(
     offs_d = tl.arange(0, D)
     lse = tl.load(ML + ((b * HKV + hk) * NSPLIT + sps) * BLOCK_M + r)
     mx = tl.max(lse, 0)
+    mx = tl.where(mx == float("-inf"), 0.0, mx)  # fully-masked row (seq_len < K, empty seq): w=0 -> out=0, no NaN
     w = tl.exp2(lse - mx)
     o = tl.load(MO + (((b * HKV + hk) * NSPLIT + sps[:, None]) * BLOCK_M + r) * D + offs_d[None, :])
-    out = tl.sum(o * w[:, None], 0) / tl.sum(w, 0)
+    out = tl.sum(o * w[:, None], 0) / tl.maximum(tl.sum(w, 0), 1e-30)
     if (j < K) & (g < G):
         tl.store(OUT + ((b * K + j) * HQ + hk * G + g) * D + offs_d, out.to(tl.bfloat16))
 
 
-def _run(q, kc, ks, vc, vs, block_table, seq_lens, sm_scale, nsplit):
+_CU_COUNT = {}
+
+
+def _num_cus(device):
+    idx = torch.device(device).index
+    idx = torch.cuda.current_device() if idx is None else idx
+    if idx not in _CU_COUNT:
+        _CU_COUNT[idx] = torch.cuda.get_device_properties(idx).multi_processor_count
+    return _CU_COUNT[idx]
+
+
+def auto_nsplit(batch, hkv, max_pages, device=None, k=1, g=1):
+    """Pick the number of KV splits (power of two) for the split-KV grid.
+
+    Heuristic: the grid is (B, Hkv, nsplit) programs; aim for ~4 programs per
+    compute unit (304 on MI300X, 148 on B300) so every CU is busy and loads in
+    flight hide HBM latency, then round DOWN to a power of two (tl.arange needs
+    it) and clamp to [1, min(64, pow2 <= max_pages)] so no split is empty by
+    construction (trailing empty splits are still handled correctly if the
+    caller's seq_lens are shorter than max_pages).  Wide verify tiles
+    (K*G_PAD > 64 rows) already carry more work per program, so the target is
+    halved for them.  Pure host arithmetic: no device sync.
+    """
+    cus = _num_cus(device) if device is not None and torch.cuda.is_available() else 304
+    target = 4 * cus
+    if k * triton.next_power_of_2(g) > 64:
+        target //= 2
+    want = max(1, target // max(1, batch * hkv))
+    ns = 1 << (want.bit_length() - 1)             # floor pow2
+    cap = 1 << (max(1, max_pages).bit_length() - 1)  # floor pow2 of pages
+    return max(1, min(ns, cap, 64))
+
+
+@dataclass
+class UQWorkspace:
+    """Preallocated scratch for CUDA-graph capture (allocate once, reuse every step)."""
+    mo: torch.Tensor
+    ml: torch.Tensor
+    out: torch.Tensor
+    nsplit: int
+
+    @staticmethod
+    def create(B, K, HQ, HKV, D, nsplit, device="cuda"):
+        G = HQ // HKV
+        BLOCK_M = max(16, triton.next_power_of_2(K * triton.next_power_of_2(G)))
+        return UQWorkspace(
+            torch.empty(B, HKV, nsplit, BLOCK_M, D, device=device, dtype=torch.float32),
+            torch.empty(B, HKV, nsplit, BLOCK_M, device=device, dtype=torch.float32),
+            torch.empty(B, K, HQ, D, device=device, dtype=torch.bfloat16),
+            nsplit)
+
+
+def _run(q, kc, ks, vc, vs, block_table, seq_lens, sm_scale, nsplit, ws=None, out=None):
     B, K, HQ, D = q.shape
     _, HKV, PAGE, _ = kc.shape
     G = HQ // HKV
@@ -199,25 +275,62 @@ def _run(q, kc, ks, vc, vs, block_table, seq_lens, sm_scale, nsplit):
     BLOCK_M = max(16, triton.next_power_of_2(K * G_PAD))
     max_pages = block_table.shape[1]
     pps = triton.cdiv(max_pages, nsplit)
-    mo = torch.empty(B, HKV, nsplit, BLOCK_M, D, device=q.device, dtype=torch.float32)
-    ml = torch.empty(B, HKV, nsplit, BLOCK_M, device=q.device, dtype=torch.float32)
-    out = torch.empty_like(q)
+    if ws is not None:
+        assert ws.nsplit == nsplit and ws.mo.shape == (B, HKV, nsplit, BLOCK_M, D), "workspace shape mismatch"
+        mo, ml = ws.mo, ws.ml
+        out = ws.out if out is None else out
+    else:
+        mo = torch.empty(B, HKV, nsplit, BLOCK_M, D, device=q.device, dtype=torch.float32)
+        ml = torch.empty(B, HKV, nsplit, BLOCK_M, device=q.device, dtype=torch.float32)
+        out = torch.empty_like(q) if out is None else out
     _split_kernel[(B, HKV, nsplit)](
-        q, kc, ks, vc, vs, block_table, seq_lens, mo, ml, sm_scale,
+        q, kc, ks, vc, vs, block_table, seq_lens, mo, ml, sm_scale, max_pages, pps,
         K=K, G=G, G_PAD=G_PAD, BLOCK_M=BLOCK_M, HQ=HQ, HKV=HKV, D=D, PAGE=PAGE,
-        MAX_PAGES=max_pages, NSPLIT=nsplit, PPS=pps, FP8K=bool(int(os.environ.get('UQ_FP8K', 0))), num_warps=int(os.environ.get('UQ_WARPS', 2)), num_stages=int(os.environ.get('UQ_STAGES', 2)))
+        NSPLIT=nsplit, FP8K=_fp8k(D), num_warps=int(os.environ.get('UQ_WARPS', 2)), num_stages=int(os.environ.get('UQ_STAGES', 2)))
     _reduce_kernel[(B, HKV, K * G_PAD)](
         mo, ml, out, K=K, G=G, G_PAD=G_PAD, BLOCK_M=BLOCK_M, HQ=HQ, HKV=HKV, D=D,
         NSPLIT=nsplit)
     return out
 
 
-def uq_decode(q, kc, ks, vc, vs, block_table, seq_lens, *, fused=True, nsplit=8,
-              sm_scale=None):
+def _fp8k(D):
+    on = bool(int(os.environ.get('UQ_FP8K', 0)))
+    if on and D != 128:
+        raise ValueError("UQ_FP8K experimental path supports head_dim=128 only")
+    return on
+
+
+def uq_decode(q, kc, ks, vc, vs, block_table, seq_lens, *, fused=True, nsplit=None,
+              sm_scale=None, workspace: Optional[UQWorkspace] = None, out=None):
+    """Fused K-query FP4 paged decode attention.
+
+    q [B,K,Hq,D] bf16 (K = 1 + number of speculative tokens, 1..16);
+    kc/vc uint8 [pages,Hkv,PAGE,D/2], ks/vs uint8 [pages,Hkv,PAGE,D/32];
+    block_table int32/int64 [B,max_pages]; seq_lens int [B] *including* the K
+    query tokens (query j sees seq_len-K+j+1 positions).  Rows with
+    seq_len-K+j+1 <= 0 return zeros.
+    nsplit: None -> auto_nsplit(); else a power of two.
+    workspace: UQWorkspace to avoid per-call allocation (CUDA-graph capture:
+    pass workspace and out, keep every tensor at a fixed address, replay).
+    Never synchronises with the host.  Returns bf16 [B,K,Hq,D].
+    """
+    assert q.dim() == 4 and q.dtype == torch.bfloat16, "q must be bf16 [B,K,Hq,D]"
     B, K, HQ, D = q.shape
-    sm_scale = sm_scale or D ** -0.5
+    HKV, PAGE = kc.shape[1], kc.shape[2]
+    assert D in (64, 128) and kc.shape[3] == D // 2 and ks.shape[3] == D // 32, "head_dim must be 64 or 128"
+    assert HQ % HKV == 0 and 1 <= K <= 16
+    assert PAGE >= 16 and PAGE & (PAGE - 1) == 0, "page size must be a power of two >= 16"
+    if seq_lens.dtype != torch.int32:
+        seq_lens = seq_lens.to(torch.int32)
+    q = q.contiguous()
+    sm_scale = sm_scale if sm_scale is not None else D ** -0.5
+    if workspace is not None:
+        nsplit = workspace.nsplit
+    elif nsplit is None:
+        nsplit = auto_nsplit(B, HKV, block_table.shape[1], q.device, K, HQ // HKV)
+    assert nsplit & (nsplit - 1) == 0, "nsplit must be a power of two"
     if fused or K == 1:
-        return _run(q, kc, ks, vc, vs, block_table, seq_lens, sm_scale, nsplit)
+        return _run(q, kc, ks, vc, vs, block_table, seq_lens, sm_scale, nsplit, workspace, out)
     # baseline: K independent single-query problems, KV re-read K times
     qs = q.reshape(B * K, 1, HQ, D)
     bt = block_table.repeat_interleave(K, 0)
@@ -225,20 +338,84 @@ def uq_decode(q, kc, ks, vc, vs, block_table, seq_lens, *, fused=True, nsplit=8,
     return _run(qs, kc, ks, vc, vs, bt, sl.to(torch.int32), sm_scale, nsplit).reshape(B, K, HQ, D)
 
 
+# ------------------------------------------------------------ paged cache
+@dataclass
+class PagedFP4Cache:
+    kc: torch.Tensor
+    ks: torch.Tensor
+    vc: torch.Tensor
+    vs: torch.Tensor
+    block_table: torch.Tensor   # int32 [B, max_pages]
+    seq_lens: torch.Tensor      # int32 [B]  (tokens stored; add K for the verify step, see decode())
+
+    @property
+    def page_size(self):
+        return self.kc.shape[2]
+
+    def decode(self, q, **kw):
+        """Attend q [B,K,Hq,D] over the cache; the K query tokens are assumed to be the
+        *last* K stored tokens (seq_lens includes them)."""
+        return uq_decode(q, self.kc, self.ks, self.vc, self.vs, self.block_table, self.seq_lens, **kw)
+
+    def nbytes(self):
+        return sum(t.numel() * t.element_size() for t in (self.kc, self.ks, self.vc, self.vs))
+
+
+def build_paged_cache(k, v, page_size=64, seq_lens=None, shuffle=False, generator=None):
+    """Quantise a dense KV tensor into a paged FP4 cache.
+
+    k, v: [B, Hkv, T, D] (any float dtype); seq_lens: optional int [B] <= T
+    (ragged batch; positions >= seq_len are stored but never attended).
+    shuffle=True scatters physical pages randomly (exercises the page table).
+    Returns PagedFP4Cache.  Page p of sequence b lives at physical page
+    block_table[b, p]; the tail of the last page is zero padded.
+    """
+    B, HKV, T, D = k.shape
+    assert v.shape == k.shape
+    P = page_size
+    npg = (T + P - 1) // P
+    pad = npg * P - T
+    if pad:
+        k = torch.nn.functional.pad(k, (0, 0, 0, pad))
+        v = torch.nn.functional.pad(v, (0, 0, 0, pad))
+    # [B,Hkv,npg,P,D] -> [B*npg,Hkv,P,D]
+    def paged(x):
+        return x.reshape(B, HKV, npg, P, D).permute(0, 2, 1, 3, 4).reshape(B * npg, HKV, P, D)
+    kc, ks = quantize_fp4(paged(k))
+    vc, vs = quantize_fp4(paged(v))
+    ids = torch.arange(B * npg, device=k.device, dtype=torch.int32)
+    if shuffle:
+        perm = torch.randperm(B * npg, device=k.device, generator=generator).to(torch.int32)
+        inv = torch.empty_like(perm)
+        inv[perm.long()] = ids
+        kc, ks, vc, vs = (t[inv.long()] for t in (kc, ks, vc, vs))  # logical page i -> physical perm[i]
+        ids = perm
+    bt = ids.reshape(B, npg).contiguous()
+    if seq_lens is None:
+        sl = torch.full((B,), T, device=k.device, dtype=torch.int32)
+    else:
+        sl = torch.as_tensor(seq_lens, device=k.device).to(torch.int32)
+    return PagedFP4Cache(kc.contiguous(), ks.contiguous(), vc.contiguous(), vs.contiguous(), bt, sl)
+
+
 # ---------------------------------------------------------------- reference
 def reference(q, kc, ks, vc, vs, block_table, seq_lens, sm_scale=None):
     B, K, HQ, D = q.shape
     _, HKV, PAGE, _ = kc.shape
     G = HQ // HKV
-    sm_scale = sm_scale or D ** -0.5
+    sm_scale = sm_scale if sm_scale is not None else D ** -0.5
     out = torch.zeros(B, K, HQ, D, device=q.device, dtype=torch.float32)
     for b in range(B):
         n = int(seq_lens[b])
+        if n <= 0:
+            continue
         pages = block_table[b, : (n + PAGE - 1) // PAGE].long()
         k = dequantize_fp4(kc[pages], ks[pages]).permute(1, 0, 2, 3).reshape(HKV, -1, D)[:, :n]
         v = dequantize_fp4(vc[pages], vs[pages]).permute(1, 0, 2, 3).reshape(HKV, -1, D)[:, :n]
         for j in range(K):
             lim = n - K + j + 1
+            if lim <= 0:
+                continue  # fully masked row -> zeros (matches the kernel)
             qq = q[b, j].float().reshape(HKV, G, D)
             sc = torch.einsum("hgd,hnd->hgn", qq, k[:, :lim]) * sm_scale
             out[b, j] = torch.einsum("hgn,hnd->hgd", sc.softmax(-1), v[:, :lim]).reshape(HQ, D)

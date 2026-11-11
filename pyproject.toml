@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "uqmt"
+version = "0.1.0"
+description = "Fused K-query FP4 paged decode attention for AMD MI300X (Triton)"
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = ["torch"]
+
+[project.optional-dependencies]
+gpu = ["triton"]
+test = ["pytest"]
+
+[tool.setuptools]
+packages = ["uqmt"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
