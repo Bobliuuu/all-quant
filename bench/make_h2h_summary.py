@@ -53,7 +53,7 @@ if os.path.exists(f"{R}/h2h_fp16_baselines.json"):
         gbs = r["B"] * r["ctx"] * 8 * 2 * 256 / 1e9 / (r["best_fp16_ms"] / 1e3)
         tq = T.get((r["B"], r["ctx"], 32, 1), {}).get("tq3_gqa_K1_incl_outrot", {}).get("ms") if r["K"] == 1 else None
         L.append(f"| {r['B']} | {r['ctx']} | {r['K']} | {r['sdpa_ms']:.3f} | {r['bmm_ms']:.3f} | {r['splitkv_bmm_ms']:.3f} | {r['best_fp16_ms']:.3f} | {gbs:.0f} | {f(u)} | {f(r['best_fp16_ms']/u,2)+'x' if u else '-'} | {f(r['sdpa_ms']/u,2)+'x' if u else '-'} | {f(tq)} |")
-    L += ["", "UQ moves 3.76x fewer KV bytes than fp16 but reaches only 0.3-1.0 TB/s of the 3.9 TB/s measured HBM peak (dequant ALU + tile structure bound, see results/mi300x_tuning_notes.md), so against a bandwidth-efficient fp16 kernel the per-call gain is ~1.0-1.6x, not 3.76x."]
+    L += ["", "NOTE: this table is warm-cache (same layer repeated), which favours fp16 at small shapes because KV fits in the 256 MB Infinity Cache; the cold-cache table below is the realistic one (UQ 1.2-1.75x faster than best fp16 there). UQ moves 3.76x fewer KV bytes than fp16 but reaches only 0.3-1.0 TB/s of the 3.9 TB/s measured HBM peak (dequant ALU + tile structure bound, see results/mi300x_tuning_notes.md), so against a bandwidth-efficient fp16 kernel the per-call gain is ~1.0-1.6x, not 3.76x."]
 cf = sorted(glob.glob(f"{R}/h2h_cold_raw_B*_c*.json"))
 if cf:
     cr = []

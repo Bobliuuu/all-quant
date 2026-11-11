@@ -1,0 +1,16 @@
+== B=32 ctx=32768: build
+[MFMARotate] MFMA rotation kernel ready (tq_mfma_rotate_cov5.hsaco)
+   built in 1s  mem=6.3GB
+{"B": 32, "ctx": 32768, "Hq": 32, "Hkv": 8, "K": 1, "method": "fp16_sdpa_fused", "ms": 1.924, "kv_bytes_per_vec": 256, "GBps_single_pass": 2231.756}
+{"B": 32, "ctx": 32768, "Hq": 32, "Hkv": 8, "K": 1, "method": "fp16_bmm_fused", "ms": 1.504, "kv_bytes_per_vec": 256, "GBps_single_pass": 2856.21}
+{"B": 32, "ctx": 32768, "Hq": 32, "Hkv": 8, "K": 1, "method": "tq3_gqa_K1_incl_outrot", "ms": 3.746, "kv_bytes_per_vec": 52, "GBps_single_pass": 232.876}
+{"B": 32, "ctx": 32768, "Hq": 32, "Hkv": 8, "K": 1, "method": "tq3_gqa_K1_incl_qrot_outrot", "ms": 3.739, "kv_bytes_per_vec": 52, "GBps_single_pass": 233.324}
+{"B": 32, "ctx": 32768, "Hq": 32, "Hkv": 8, "K": 1, "method": "uq_fp4_fused", "ms": 1.265, "kv_bytes_per_vec": 68, "GBps_single_pass": 901.894, "nsplit": 32}
+{"B": 32, "ctx": 32768, "Hq": 32, "Hkv": 8, "K": 8, "method": "fp16_sdpa_fused", "ms": 2.001, "kv_bytes_per_vec": 256, "GBps_single_pass": 2146.213}
+{"B": 32, "ctx": 32768, "Hq": 32, "Hkv": 8, "K": 8, "method": "fp16_bmm_fused", "ms": 2.911, "kv_bytes_per_vec": 256, "GBps_single_pass": 1475.525}
+{"B": 32, "ctx": 32768, "Hq": 32, "Hkv": 8, "K": 8, "method": "fp16_sdpa_Kindep", "ms": 15.316, "kv_bytes_per_vec": 256, "GBps_single_pass": 2243.406}
+{"B": 32, "ctx": 32768, "Hq": 32, "Hkv": 8, "K": 8, "method": "tq3_gqa_Kindep", "ms": 29.964, "kv_bytes_per_vec": 52, "GBps_single_pass": 232.923}
+{"B": 32, "ctx": 32768, "Hq": 32, "Hkv": 8, "K": 8, "method": "tq3_gqa_SqK_noncausal", "ms": 27.59, "kv_bytes_per_vec": 52, "GBps_single_pass": 31.621, "note": "their kernel with S_q=K, no causal mask, q not rotated: timing only"}
+{"B": 32, "ctx": 32768, "Hq": 32, "Hkv": 8, "K": 8, "method": "uq_fp4_fused", "ms": 1.654, "kv_bytes_per_vec": 68, "GBps_single_pass": 689.551, "nsplit": 16}
+{"B": 32, "ctx": 32768, "Hq": 32, "Hkv": 8, "K": 8, "method": "uq_fp4_Kindep", "ms": 8.573, "kv_bytes_per_vec": 68, "GBps_single_pass": 1064.575, "nsplit": 16}
+DONE

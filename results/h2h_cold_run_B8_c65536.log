@@ -1,0 +1,16 @@
+== B=8 ctx=65536: build
+[MFMARotate] MFMA rotation kernel ready (tq_mfma_rotate_cov5.hsaco)
+   built in 1s  mem=3.2GB
+{"B": 8, "ctx": 65536, "Hq": 32, "Hkv": 8, "K": 1, "method": "fp16_sdpa_fused", "ms": 2.881, "kv_bytes_per_vec": 256, "GBps_single_pass": 745.302}
+{"B": 8, "ctx": 65536, "Hq": 32, "Hkv": 8, "K": 1, "method": "fp16_bmm_fused", "ms": 0.874, "kv_bytes_per_vec": 256, "GBps_single_pass": 2457.727}
+{"B": 8, "ctx": 65536, "Hq": 32, "Hkv": 8, "K": 1, "method": "tq3_gqa_K1_incl_outrot", "ms": 1.942, "kv_bytes_per_vec": 52, "GBps_single_pass": 224.578}
+{"B": 8, "ctx": 65536, "Hq": 32, "Hkv": 8, "K": 1, "method": "tq3_gqa_K1_incl_qrot_outrot", "ms": 1.947, "kv_bytes_per_vec": 52, "GBps_single_pass": 224.071}
+{"B": 8, "ctx": 65536, "Hq": 32, "Hkv": 8, "K": 1, "method": "uq_fp4_fused", "ms": 0.67, "kv_bytes_per_vec": 68, "GBps_single_pass": 850.909, "nsplit": 64}
+{"B": 8, "ctx": 65536, "Hq": 32, "Hkv": 8, "K": 8, "method": "fp16_sdpa_fused", "ms": 2.888, "kv_bytes_per_vec": 256, "GBps_single_pass": 743.477}
+{"B": 8, "ctx": 65536, "Hq": 32, "Hkv": 8, "K": 8, "method": "fp16_bmm_fused", "ms": 1.469, "kv_bytes_per_vec": 256, "GBps_single_pass": 1462.244}
+{"B": 8, "ctx": 65536, "Hq": 32, "Hkv": 8, "K": 8, "method": "fp16_sdpa_Kindep", "ms": 22.793, "kv_bytes_per_vec": 256, "GBps_single_pass": 753.728}
+{"B": 8, "ctx": 65536, "Hq": 32, "Hkv": 8, "K": 8, "method": "tq3_gqa_Kindep", "ms": 15.413, "kv_bytes_per_vec": 52, "GBps_single_pass": 226.406}
+{"B": 8, "ctx": 65536, "Hq": 32, "Hkv": 8, "K": 8, "method": "tq3_gqa_SqK_noncausal", "ms": 13.824, "kv_bytes_per_vec": 52, "GBps_single_pass": 31.554, "note": "their kernel with S_q=K, no causal mask, q not rotated: timing only"}
+{"B": 8, "ctx": 65536, "Hq": 32, "Hkv": 8, "K": 8, "method": "uq_fp4_fused", "ms": 0.839, "kv_bytes_per_vec": 68, "GBps_single_pass": 680.099, "nsplit": 64}
+{"B": 8, "ctx": 65536, "Hq": 32, "Hkv": 8, "K": 8, "method": "uq_fp4_Kindep", "ms": 4.366, "kv_bytes_per_vec": 68, "GBps_single_pass": 1045.184, "nsplit": 64}
+DONE

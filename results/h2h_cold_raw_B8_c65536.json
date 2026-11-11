@@ -1,0 +1,147 @@
+{
+ "device": "AMD Instinct MI300X VF",
+ "bytes_per_vec": {
+  "fp16": 256,
+  "tq3": 52,
+  "uq_fp4": 68
+ },
+ "rows": [
+  {
+   "B": 8,
+   "ctx": 65536,
+   "Hq": 32,
+   "Hkv": 8,
+   "K": 1,
+   "method": "fp16_sdpa_fused",
+   "ms": 2.881361722946167,
+   "kv_bytes_per_vec": 256,
+   "GBps_single_pass": 745.3016505696539
+  },
+  {
+   "B": 8,
+   "ctx": 65536,
+   "Hq": 32,
+   "Hkv": 8,
+   "K": 1,
+   "method": "fp16_bmm_fused",
+   "ms": 0.8737682998180389,
+   "kv_bytes_per_vec": 256,
+   "GBps_single_pass": 2457.726663289582
+  },
+  {
+   "B": 8,
+   "ctx": 65536,
+   "Hq": 32,
+   "Hkv": 8,
+   "K": 1,
+   "method": "tq3_gqa_K1_incl_outrot",
+   "ms": 1.9423463106155396,
+   "kv_bytes_per_vec": 52,
+   "GBps_single_pass": 224.57767372171833
+  },
+  {
+   "B": 8,
+   "ctx": 65536,
+   "Hq": 32,
+   "Hkv": 8,
+   "K": 1,
+   "method": "tq3_gqa_K1_incl_qrot_outrot",
+   "ms": 1.9467402935028075,
+   "kv_bytes_per_vec": 52,
+   "GBps_single_pass": 224.07077998838932
+  },
+  {
+   "B": 8,
+   "ctx": 65536,
+   "Hq": 32,
+   "Hkv": 8,
+   "K": 1,
+   "method": "uq_fp4_fused",
+   "ms": 0.6703715920448303,
+   "kv_bytes_per_vec": 68,
+   "GBps_single_pass": 850.9091834575435,
+   "nsplit": 64
+  },
+  {
+   "B": 8,
+   "ctx": 65536,
+   "Hq": 32,
+   "Hkv": 8,
+   "K": 8,
+   "method": "fp16_sdpa_fused",
+   "ms": 2.8884331226348876,
+   "kv_bytes_per_vec": 256,
+   "GBps_single_pass": 743.477019139367
+  },
+  {
+   "B": 8,
+   "ctx": 65536,
+   "Hq": 32,
+   "Hkv": 8,
+   "K": 8,
+   "method": "fp16_bmm_fused",
+   "ms": 1.4686221122741698,
+   "kv_bytes_per_vec": 256,
+   "GBps_single_pass": 1462.2438475167783
+  },
+  {
+   "B": 8,
+   "ctx": 65536,
+   "Hq": 32,
+   "Hkv": 8,
+   "K": 8,
+   "method": "fp16_sdpa_Kindep",
+   "ms": 22.793209648132326,
+   "kv_bytes_per_vec": 256,
+   "GBps_single_pass": 753.7275113602843
+  },
+  {
+   "B": 8,
+   "ctx": 65536,
+   "Hq": 32,
+   "Hkv": 8,
+   "K": 8,
+   "method": "tq3_gqa_Kindep",
+   "ms": 15.41331214904785,
+   "kv_bytes_per_vec": 52,
+   "GBps_single_pass": 226.40564819908434
+  },
+  {
+   "B": 8,
+   "ctx": 65536,
+   "Hq": 32,
+   "Hkv": 8,
+   "K": 8,
+   "method": "tq3_gqa_SqK_noncausal",
+   "ms": 13.824061012268066,
+   "kv_bytes_per_vec": 52,
+   "GBps_single_pass": 31.554231105670805,
+   "note": "their kernel with S_q=K, no causal mask, q not rotated: timing only"
+  },
+  {
+   "B": 8,
+   "ctx": 65536,
+   "Hq": 32,
+   "Hkv": 8,
+   "K": 8,
+   "method": "uq_fp4_fused",
+   "ms": 0.838738602399826,
+   "kv_bytes_per_vec": 68,
+   "GBps_single_pass": 680.0990706375986,
+   "nsplit": 64
+  },
+  {
+   "B": 8,
+   "ctx": 65536,
+   "Hq": 32,
+   "Hkv": 8,
+   "K": 8,
+   "method": "uq_fp4_Kindep",
+   "ms": 4.36612491607666,
+   "kv_bytes_per_vec": 68,
+   "GBps_single_pass": 1045.1837360852726,
+   "nsplit": 64
+  }
+ ],
+ "accuracy": []
+}

@@ -1,0 +1,30 @@
+# Overnight report: UltraQuant on MI300X vs amd-experiments, real KV, end-to-end
+
+Box: AMD Instinct MI300X (gfx942), torch 2.13+rocm7.1, triton 3.9. Kernel pinned to `uqmt/attn.py` at commit `1ec6fbe` (never edited by this work). Mistral-7B-v0.1 (same model as amd-experiments), real wikitext-2 / real python source. All numbers come from `results/*.json`; tables in `h2h_summary.md`, `real_kv_summary.md`, `e2e_summary.md`. Scripts in `bench/`.
+
+## Three headline numbers
+
+1. **Kernel, per call (cold cache, Hq/Hkv 32/8, D=128):** the fused FP4 kernel is **1.2-1.75x faster than the best fp16 decode attention** (bmm formulation; 3.0-3.8x faster than torch SDPA at B=1-8) while reading 3.76x fewer bytes, e.g. B=8/ctx32k/K=8: 0.48 ms vs 0.75 ms fp16-best vs 8.5 ms for K calls of amd-experiments' TQ3 kernel (**18x**), and **5.2x** vs K independent calls of our own kernel. It runs at only 10-26% of the measured 3.9 TB/s HBM peak, so the 3.76x byte reduction is mostly not converted into time.
+2. **Quality on real Mistral-7B KV:** attention-output cosine **0.975 (FP4/UE8M0) vs 0.975 (TQ3)** vs fp16, K=1..8 all equal within noise (0.9755-0.979); perplexity (wikitext-2, 4k windows) **4.880 fp16 -> 5.026 FP4 (+3.0%) vs 5.013 TQ3 (+2.7%)**. FP8 per-token (0.999) and KIVI-style int4 (0.997, own implementation) are clearly more accurate than either 3/4-bit scheme; Planar/Iso/Rotor-3 collapse on real KV (cos 0.69-0.79).
+3. **End-to-end Mistral-7B decode (graph-mode GPU step time, vs best fp16):** whole-step speedup is **0.96-1.15x at B=1** (attention is only 4-17% of the step) and **1.07x (8k) -> 1.6x (32k, K=8) at B=8**. Max possible (attention free) at B=8/32k is 2.4x. Where it clearly wins is memory: **KV 3.76x smaller** (B=8/32k: 34.4 GB -> 9.1 GB).
+
+## What was done
+- **A. Head-to-head** (`h2h_summary.md`, `h2h_all.json`, `h2h_cold_all.json`, `h2h_uq_rows*.json`, `h2h_methods_c*.json`, `h2h_fp16_baselines.json`): B in {1,8,32}, ctx 4k-64k, Hq 32/64 (Hkv 8), K in {1,2,4,8}; fp16 SDPA, fp16 bmm / split-KV, amd-experiments fused TQ3 GQA kernel (K=1; K calls and S_q=K variants), our FP4 fused and K-independent. Bytes per K-or-V vector: fp16 256, TQ3 52, FP4+UE8M0 68. Also fp8 and int4 per-tensor (their baseline formats), KIVI-style int4 (own), TQ3-decompress, Planar/Iso/Rotor-3 (decompress+SDPA, the only path they have). UQ rows are in the cross-vendor schema of `mi300x_b8_c32k_tuned.json` plus `pct_of_peak`.
+- **B. Real KV** (`real_kv_summary.md`, `real_kv_attn_{4k,8k}.json`, `real_kv_ppl.json`): per-layer attention-output cosine/rel-L2 with real Q/K/V, 32 layers, 4k and 8k tokens; simulated-quantised-KV perplexity.
+- **C. End-to-end** (`e2e_summary.md`, `e2e_sweep_*.json`, `e2e_real_*.json`): hand-rolled decode loop over the HF modules, backends fp16 SDPA / fp16 bmm / FP4 fused / FP4 K-independent; B in {1,8}, ctx 8k/16k/32k, K 1-8; GPU-kernel time split (attention/GEMM/other) via torch.profiler; projected tokens/s at acceptance 0.5/0.7/0.9; real B=1 3-turn agent-like run (long code context, copy-heavy turns, tool-output ingestion in 16-token chunks, prompt-lookup drafter, real acceptance).
+
+## Findings worth knowing (honest version)
+- **Torch SDPA is a poor fp16 baseline on MI300X** (about 100 GB/s at B=1: no split-KV). Against SDPA our kernel looks 2-18x faster; against bmm it is 1.2-1.75x (cold). Use the "best fp16" columns.
+- **Infinity Cache (256 MB) flatters warm microbenchmarks**, mostly fp16 at B=1 and small B=8; `h2h_summary.md` has warm and cold tables, cold is the realistic one.
+- **amd-experiments' "TQ3 cosine 0.983" is the reconstruction cosine on Gaussian vectors**; on real Mistral K/V the same metric is 0.983 but attention-output cosine is 0.975. Their quality bench reports identical perplexity 1.086 for fp16/int4/TQ3 (1 window, not informative) and NaN for fp8 (their script scales e4m3fnuz to 448; its max is 240). Their TQ3 kernel is K=1 only, ~0.37-0.41 ms flat at small shapes and 235 GB/s at B=32; on a 4.0x byte reduction it is slower than fp16 bmm at B>=8.
+- **Spec-decode acceptance drops with FP4 KV** on copy-heavy decoding (B=1, 8k: 3.8 vs 4.7 drafts accepted/step; teacher-forced top-1 agreement 99.0%), which cancels the per-step gain: projected 440 vs 460 tok/s (fp16 bmm K=8). Fused K=8 and K=1 agree identically with fp16 (72.9% at ctx 16k, 99.0% at 8k), i.e. the K>1 kernel is numerically consistent. At 16k the model (Mistral-v0.1, trained with a 4k sliding window; we disabled SWA) is out of its comfort zone and FP4 top-1 agreement is only 73%: do not read the 16k run as a quality statement for in-distribution contexts.
+- Tokens/s tables "vs fp16 plain" mix spec-decode gain with quantisation gain; use "vs fp16 spec".
+- The UQ K=1 step is ~3% slower than fp16-bmm at B=1; the fused-K advantage appears only for K>1 (verify) or large batch/context.
+
+## What failed / not done
+- `rocprofv3 --kernel-trace` aborts (rocprofiler registration error, core dump) on this stack, like `--pmc`; GPU time split uses torch.profiler instead (`results/rocprof_kerneltrace.log`).
+- HIP-graph capture of the decode loop core-dumped on first try; not investigated, so e2e wall times are eager and launch-bound (~20 ms floor). Tokens/s use summed GPU-kernel time ("graph-mode projection"), labelled as projections. Attention time of the bmm backend is derived (bmm GEMMs look like weight GEMMs by kernel name).
+- Context KV for the sweep is a real prefill replicated across the batch (timing data-independent); real acceptance only at B=1. Prompt-lookup acceptance is workload-specific (copy-heavy code), not a general acceptance rate.
+- SemKV/StarKV: no public code found; not benchmarked. KIVI-style numbers are our own implementation with a dequant-then-SDPA path (quality yes, speed not representative).
+- amd-experiments has no license file: its code was copied only to a scratch dir on the box and run there; nothing vendored into this repo.
+- The box's SSH occasionally refused connections (fail2ban); retries/multiplexing used. Lock etiquette: every GPU job was wrapped in `flock /root/gpu.lock` with jobs split to <10 min.

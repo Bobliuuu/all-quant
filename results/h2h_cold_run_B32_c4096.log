@@ -1,0 +1,16 @@
+== B=32 ctx=4096: build
+[MFMARotate] MFMA rotation kernel ready (tq_mfma_rotate_cov5.hsaco)
+   built in 1s  mem=0.8GB
+{"B": 32, "ctx": 4096, "Hq": 32, "Hkv": 8, "K": 1, "method": "fp16_sdpa_fused", "ms": 0.262, "kv_bytes_per_vec": 256, "GBps_single_pass": 2046.609}
+{"B": 32, "ctx": 4096, "Hq": 32, "Hkv": 8, "K": 1, "method": "fp16_bmm_fused", "ms": 0.279, "kv_bytes_per_vec": 256, "GBps_single_pass": 1924.066}
+{"B": 32, "ctx": 4096, "Hq": 32, "Hkv": 8, "K": 1, "method": "tq3_gqa_K1_incl_outrot", "ms": 0.619, "kv_bytes_per_vec": 52, "GBps_single_pass": 176.279}
+{"B": 32, "ctx": 4096, "Hq": 32, "Hkv": 8, "K": 1, "method": "tq3_gqa_K1_incl_qrot_outrot", "ms": 0.617, "kv_bytes_per_vec": 52, "GBps_single_pass": 176.764}
+{"B": 32, "ctx": 4096, "Hq": 32, "Hkv": 8, "K": 1, "method": "uq_fp4_fused", "ms": 0.193, "kv_bytes_per_vec": 68, "GBps_single_pass": 738.927, "nsplit": 16}
+{"B": 32, "ctx": 4096, "Hq": 32, "Hkv": 8, "K": 8, "method": "fp16_sdpa_fused", "ms": 0.267, "kv_bytes_per_vec": 256, "GBps_single_pass": 2010.192}
+{"B": 32, "ctx": 4096, "Hq": 32, "Hkv": 8, "K": 8, "method": "fp16_bmm_fused", "ms": 0.398, "kv_bytes_per_vec": 256, "GBps_single_pass": 1349.081}
+{"B": 32, "ctx": 4096, "Hq": 32, "Hkv": 8, "K": 8, "method": "fp16_sdpa_Kindep", "ms": 1.947, "kv_bytes_per_vec": 256, "GBps_single_pass": 2205.848}
+{"B": 32, "ctx": 4096, "Hq": 32, "Hkv": 8, "K": 8, "method": "tq3_gqa_Kindep", "ms": 4.684, "kv_bytes_per_vec": 52, "GBps_single_pass": 186.242}
+{"B": 32, "ctx": 4096, "Hq": 32, "Hkv": 8, "K": 8, "method": "tq3_gqa_SqK_noncausal", "ms": 3.617, "kv_bytes_per_vec": 52, "GBps_single_pass": 30.153, "note": "their kernel with S_q=K, no causal mask, q not rotated: timing only"}
+{"B": 32, "ctx": 4096, "Hq": 32, "Hkv": 8, "K": 8, "method": "uq_fp4_fused", "ms": 0.27, "kv_bytes_per_vec": 68, "GBps_single_pass": 527.611, "nsplit": 8}
+{"B": 32, "ctx": 4096, "Hq": 32, "Hkv": 8, "K": 8, "method": "uq_fp4_Kindep", "ms": 1.205, "kv_bytes_per_vec": 68, "GBps_single_pass": 946.645, "nsplit": 8}
+DONE

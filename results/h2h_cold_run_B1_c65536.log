@@ -1,0 +1,16 @@
+== B=1 ctx=65536: build
+[MFMARotate] MFMA rotation kernel ready (tq_mfma_rotate_cov5.hsaco)
+   built in 0s  mem=0.4GB
+{"B": 1, "ctx": 65536, "Hq": 32, "Hkv": 8, "K": 1, "method": "fp16_sdpa_fused", "ms": 2.85, "kv_bytes_per_vec": 256, "GBps_single_pass": 94.196}
+{"B": 1, "ctx": 65536, "Hq": 32, "Hkv": 8, "K": 1, "method": "fp16_bmm_fused", "ms": 0.221, "kv_bytes_per_vec": 256, "GBps_single_pass": 1216.574}
+{"B": 1, "ctx": 65536, "Hq": 32, "Hkv": 8, "K": 1, "method": "tq3_gqa_K1_incl_outrot", "ms": 0.412, "kv_bytes_per_vec": 52, "GBps_single_pass": 132.295}
+{"B": 1, "ctx": 65536, "Hq": 32, "Hkv": 8, "K": 1, "method": "tq3_gqa_K1_incl_qrot_outrot", "ms": 0.437, "kv_bytes_per_vec": 52, "GBps_single_pass": 124.649}
+{"B": 1, "ctx": 65536, "Hq": 32, "Hkv": 8, "K": 1, "method": "uq_fp4_fused", "ms": 0.159, "kv_bytes_per_vec": 68, "GBps_single_pass": 448.699, "nsplit": 64}
+{"B": 1, "ctx": 65536, "Hq": 32, "Hkv": 8, "K": 8, "method": "fp16_sdpa_fused", "ms": 2.857, "kv_bytes_per_vec": 256, "GBps_single_pass": 93.966}
+{"B": 1, "ctx": 65536, "Hq": 32, "Hkv": 8, "K": 8, "method": "fp16_bmm_fused", "ms": 0.298, "kv_bytes_per_vec": 256, "GBps_single_pass": 901.055}
+{"B": 1, "ctx": 65536, "Hq": 32, "Hkv": 8, "K": 8, "method": "fp16_sdpa_Kindep", "ms": 21.013, "kv_bytes_per_vec": 256, "GBps_single_pass": 102.198}
+{"B": 1, "ctx": 65536, "Hq": 32, "Hkv": 8, "K": 8, "method": "tq3_gqa_Kindep", "ms": 3.343, "kv_bytes_per_vec": 52, "GBps_single_pass": 130.49}
+{"B": 1, "ctx": 65536, "Hq": 32, "Hkv": 8, "K": 8, "method": "tq3_gqa_SqK_noncausal", "ms": 1.873, "kv_bytes_per_vec": 52, "GBps_single_pass": 29.114, "note": "their kernel with S_q=K, no causal mask, q not rotated: timing only"}
+{"B": 1, "ctx": 65536, "Hq": 32, "Hkv": 8, "K": 8, "method": "uq_fp4_fused", "ms": 0.195, "kv_bytes_per_vec": 68, "GBps_single_pass": 364.761, "nsplit": 64}
+{"B": 1, "ctx": 65536, "Hq": 32, "Hkv": 8, "K": 8, "method": "uq_fp4_Kindep", "ms": 0.614, "kv_bytes_per_vec": 68, "GBps_single_pass": 928.713, "nsplit": 64}
+DONE
