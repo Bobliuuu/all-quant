@@ -1,0 +1,8 @@
+K=1 max|err| fused=0.0001 baseline=0.0001
+{"K": 1, "fused_ms": 0.361, "base_ms": 0.353, "speedup": 0.977, "fused_GBps": 789.082}
+K=2 max|err| fused=0.0001 baseline=0.0001
+{"K": 2, "fused_ms": 0.373, "base_ms": 0.684, "speedup": 1.831, "fused_GBps": 763.799}
+K=4 max|err| fused=0.0001 baseline=0.0001
+{"K": 4, "fused_ms": 0.453, "base_ms": 1.174, "speedup": 2.592, "fused_GBps": 629.684}
+K=8 max|err| fused=0.0001 baseline=0.0001
+{"K": 8, "fused_ms": 0.542, "base_ms": 2.22, "speedup": 4.099, "fused_GBps": 526.624}
