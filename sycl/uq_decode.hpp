@@ -263,7 +263,7 @@ inline sycl::event decode(sycl::queue& q, const Shape& s, const Cfg& c, const Ar
 #ifndef UQ_NO_XMX
   if (c.path == 4) {   // "best": ESIMD when supported, else the joint_matrix path
     Cfg c2 = c;
-    if (esimd_supported(s, a)) { c2.path = 3; c2.wg = 64; } else { c2.path = 1; c2.wg = 256; c2.tn = 32; }
+    if (esimd_supported(s, a)) { c2.path = 3; c2.wg = 64; } else { c2.path = 1; c2.wg = 256; c2.tn = (s.PAGE % 32) ? 16 : 32; }
     return decode(q, s, c2, a);
   }
   if (c.path == 3) {

@@ -1,0 +1,248 @@
+{
+ "device": "Arc B390",
+ "torch": "2.15.0+xpu",
+ "shape": "Hq32 Hkv8 D128 f16 random data, enable_gqa, 30 iters, KV copies rotated to ~256MB when small",
+ "backend_routed": "aten::_scaled_dot_product_fused_attention_overrideable -> XPU kernel micro_sdpa (oneDNN microkernel SDPA); math path 40 ms; flash/efficient unavailable",
+ "rows": [
+  {
+   "dtype": "float16",
+   "batch": 2,
+   "kv_len": 4096,
+   "n_query": 1,
+   "kv_copies": 7,
+   "ms": 0.332,
+   "kv_MB": 33.6,
+   "eff_GBps": 101.0
+  },
+  {
+   "dtype": "float16",
+   "batch": 2,
+   "kv_len": 4096,
+   "n_query": 2,
+   "kv_copies": 7,
+   "ms": 0.379,
+   "kv_MB": 33.6,
+   "eff_GBps": 88.6
+  },
+  {
+   "dtype": "float16",
+   "batch": 2,
+   "kv_len": 4096,
+   "n_query": 4,
+   "kv_copies": 7,
+   "ms": 0.349,
+   "kv_MB": 33.6,
+   "eff_GBps": 96.2
+  },
+  {
+   "dtype": "float16",
+   "batch": 2,
+   "kv_len": 4096,
+   "n_query": 8,
+   "kv_copies": 7,
+   "ms": 0.346,
+   "kv_MB": 33.6,
+   "eff_GBps": 97.0
+  },
+  {
+   "dtype": "float16",
+   "batch": 2,
+   "kv_len": 16384,
+   "n_query": 1,
+   "kv_copies": 1,
+   "ms": 1.203,
+   "kv_MB": 134.2,
+   "eff_GBps": 111.5
+  },
+  {
+   "dtype": "float16",
+   "batch": 2,
+   "kv_len": 16384,
+   "n_query": 2,
+   "kv_copies": 1,
+   "ms": 1.369,
+   "kv_MB": 134.2,
+   "eff_GBps": 98.0
+  },
+  {
+   "dtype": "float16",
+   "batch": 2,
+   "kv_len": 16384,
+   "n_query": 4,
+   "kv_copies": 1,
+   "ms": 1.368,
+   "kv_MB": 134.2,
+   "eff_GBps": 98.1
+  },
+  {
+   "dtype": "float16",
+   "batch": 2,
+   "kv_len": 16384,
+   "n_query": 8,
+   "kv_copies": 1,
+   "ms": 1.364,
+   "kv_MB": 134.2,
+   "eff_GBps": 98.4
+  },
+  {
+   "dtype": "float16",
+   "batch": 2,
+   "kv_len": 32768,
+   "n_query": 1,
+   "kv_copies": 1,
+   "ms": 2.396,
+   "kv_MB": 268.4,
+   "eff_GBps": 112.0
+  },
+  {
+   "dtype": "float16",
+   "batch": 2,
+   "kv_len": 32768,
+   "n_query": 2,
+   "kv_copies": 1,
+   "ms": 2.778,
+   "kv_MB": 268.4,
+   "eff_GBps": 96.6
+  },
+  {
+   "dtype": "float16",
+   "batch": 2,
+   "kv_len": 32768,
+   "n_query": 4,
+   "kv_copies": 1,
+   "ms": 2.807,
+   "kv_MB": 268.4,
+   "eff_GBps": 95.6
+  },
+  {
+   "dtype": "float16",
+   "batch": 2,
+   "kv_len": 32768,
+   "n_query": 8,
+   "kv_copies": 1,
+   "ms": 2.773,
+   "kv_MB": 268.4,
+   "eff_GBps": 96.8
+  },
+  {
+   "dtype": "float16",
+   "batch": 8,
+   "kv_len": 4096,
+   "n_query": 1,
+   "kv_copies": 1,
+   "ms": 1.198,
+   "kv_MB": 134.2,
+   "eff_GBps": 112.0
+  },
+  {
+   "dtype": "float16",
+   "batch": 8,
+   "kv_len": 4096,
+   "n_query": 2,
+   "kv_copies": 1,
+   "ms": 1.244,
+   "kv_MB": 134.2,
+   "eff_GBps": 107.9
+  },
+  {
+   "dtype": "float16",
+   "batch": 8,
+   "kv_len": 4096,
+   "n_query": 4,
+   "kv_copies": 1,
+   "ms": 1.239,
+   "kv_MB": 134.2,
+   "eff_GBps": 108.3
+  },
+  {
+   "dtype": "float16",
+   "batch": 8,
+   "kv_len": 4096,
+   "n_query": 8,
+   "kv_copies": 1,
+   "ms": 1.24,
+   "kv_MB": 134.2,
+   "eff_GBps": 108.3
+  },
+  {
+   "dtype": "float16",
+   "batch": 8,
+   "kv_len": 16384,
+   "n_query": 1,
+   "kv_copies": 1,
+   "ms": 4.897,
+   "kv_MB": 536.9,
+   "eff_GBps": 109.6
+  },
+  {
+   "dtype": "float16",
+   "batch": 8,
+   "kv_len": 16384,
+   "n_query": 2,
+   "kv_copies": 1,
+   "ms": 5.852,
+   "kv_MB": 536.9,
+   "eff_GBps": 91.7
+  },
+  {
+   "dtype": "float16",
+   "batch": 8,
+   "kv_len": 16384,
+   "n_query": 4,
+   "kv_copies": 1,
+   "ms": 5.869,
+   "kv_MB": 536.9,
+   "eff_GBps": 91.5
+  },
+  {
+   "dtype": "float16",
+   "batch": 8,
+   "kv_len": 16384,
+   "n_query": 8,
+   "kv_copies": 1,
+   "ms": 5.805,
+   "kv_MB": 536.9,
+   "eff_GBps": 92.5
+  },
+  {
+   "dtype": "float16",
+   "batch": 8,
+   "kv_len": 32768,
+   "n_query": 1,
+   "kv_copies": 1,
+   "ms": 9.808,
+   "kv_MB": 1073.7,
+   "eff_GBps": 109.5
+  },
+  {
+   "dtype": "float16",
+   "batch": 8,
+   "kv_len": 32768,
+   "n_query": 2,
+   "kv_copies": 1,
+   "ms": 13.5,
+   "kv_MB": 1073.7,
+   "eff_GBps": 79.5
+  },
+  {
+   "dtype": "float16",
+   "batch": 8,
+   "kv_len": 32768,
+   "n_query": 4,
+   "kv_copies": 1,
+   "ms": 13.244,
+   "kv_MB": 1073.7,
+   "eff_GBps": 81.1
+  },
+  {
+   "dtype": "float16",
+   "batch": 8,
+   "kv_len": 32768,
+   "n_query": 8,
+   "kv_copies": 1,
+   "ms": 13.302,
+   "kv_MB": 1073.7,
+   "eff_GBps": 80.7
+  }
+ ]
+}

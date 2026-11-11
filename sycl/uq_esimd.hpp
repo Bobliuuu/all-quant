@@ -346,7 +346,7 @@ sycl::event launch_split_esimd(sycl::queue& q, const Shape& s, const Args& a, in
   const int pps = (s.max_pages + nsplit - 1) / nsplit;
   const int nwsp = (nsplit + NTH - 1) / NTH;
   return q.submit([&](sycl::handler& h) {
-        if constexpr (MT == 1) {
+        if constexpr (MT == 1 && RC == 4) {
       h.parallel_for(sycl::nd_range<1>((size_t)s.B * s.HKV * nwsp * ((s.M() + 15) / 16) * NTH, NTH), EsimdKernel<RC, MT, NTH>{s, a, nsplit, pps, nwsp});
     } else {   // O accumulators need >128 GRFs
       h.parallel_for(sycl::nd_range<1>((size_t)s.B * s.HKV * nwsp * ((s.M() + 15) / 16) * NTH, NTH),

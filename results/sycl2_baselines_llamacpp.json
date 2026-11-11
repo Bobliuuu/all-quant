@@ -1,0 +1,1087 @@
+{
+ "device": "Arc B390",
+ "llamacpp": "adde94c",
+ "note": "test-backend-ops reuses same buffers every iteration, so small working sets (< ~tens of MB) are cache-resident and give inflated GB/s; use B>=2/kv>=16384 rows",
+ "rows": [
+  {
+   "kv_type": "f16",
+   "batch": 1,
+   "kv_len": 4096,
+   "n_query": 1,
+   "us_per_run": 146.97,
+   "runs": 7455,
+   "kv_MB": 16.8,
+   "eff_GBps": 114.2
+  },
+  {
+   "kv_type": "f16",
+   "batch": 1,
+   "kv_len": 4096,
+   "n_query": 2,
+   "us_per_run": 114.06,
+   "runs": 8952,
+   "kv_MB": 16.8,
+   "eff_GBps": 147.1
+  },
+  {
+   "kv_type": "f16",
+   "batch": 1,
+   "kv_len": 4096,
+   "n_query": 4,
+   "us_per_run": 163.2,
+   "runs": 6341,
+   "kv_MB": 16.8,
+   "eff_GBps": 102.8
+  },
+  {
+   "kv_type": "f16",
+   "batch": 1,
+   "kv_len": 4096,
+   "n_query": 8,
+   "us_per_run": 235.2,
+   "runs": 4301,
+   "kv_MB": 16.8,
+   "eff_GBps": 71.3
+  },
+  {
+   "kv_type": "f16",
+   "batch": 1,
+   "kv_len": 16384,
+   "n_query": 1,
+   "us_per_run": 712.05,
+   "runs": 1492,
+   "kv_MB": 67.1,
+   "eff_GBps": 94.2
+  },
+  {
+   "kv_type": "f16",
+   "batch": 1,
+   "kv_len": 16384,
+   "n_query": 2,
+   "us_per_run": 629.44,
+   "runs": 1683,
+   "kv_MB": 67.1,
+   "eff_GBps": 106.6
+  },
+  {
+   "kv_type": "f16",
+   "batch": 1,
+   "kv_len": 16384,
+   "n_query": 4,
+   "us_per_run": 721.46,
+   "runs": 1410,
+   "kv_MB": 67.1,
+   "eff_GBps": 93.0
+  },
+  {
+   "kv_type": "f16",
+   "batch": 1,
+   "kv_len": 16384,
+   "n_query": 8,
+   "us_per_run": 860.72,
+   "runs": 1175,
+   "kv_MB": 67.1,
+   "eff_GBps": 78.0
+  },
+  {
+   "kv_type": "f16",
+   "batch": 1,
+   "kv_len": 32768,
+   "n_query": 1,
+   "us_per_run": 1426.25,
+   "runs": 748,
+   "kv_MB": 134.2,
+   "eff_GBps": 94.1
+  },
+  {
+   "kv_type": "f16",
+   "batch": 1,
+   "kv_len": 32768,
+   "n_query": 2,
+   "us_per_run": 1231.1,
+   "runs": 846,
+   "kv_MB": 134.2,
+   "eff_GBps": 109.0
+  },
+  {
+   "kv_type": "f16",
+   "batch": 1,
+   "kv_len": 32768,
+   "n_query": 4,
+   "us_per_run": 1435.06,
+   "runs": 705,
+   "kv_MB": 134.2,
+   "eff_GBps": 93.5
+  },
+  {
+   "kv_type": "f16",
+   "batch": 1,
+   "kv_len": 32768,
+   "n_query": 8,
+   "us_per_run": 1669.56,
+   "runs": 600,
+   "kv_MB": 134.2,
+   "eff_GBps": 80.4
+  },
+  {
+   "kv_type": "f16",
+   "batch": 2,
+   "kv_len": 4096,
+   "n_query": 1,
+   "us_per_run": 327.66,
+   "runs": 3730,
+   "kv_MB": 33.6,
+   "eff_GBps": 102.4
+  },
+  {
+   "kv_type": "f16",
+   "batch": 2,
+   "kv_len": 4096,
+   "n_query": 2,
+   "us_per_run": 323.0,
+   "runs": 3357,
+   "kv_MB": 33.6,
+   "eff_GBps": 103.9
+  },
+  {
+   "kv_type": "f16",
+   "batch": 2,
+   "kv_len": 4096,
+   "n_query": 4,
+   "us_per_run": 346.6,
+   "runs": 2992,
+   "kv_MB": 33.6,
+   "eff_GBps": 96.8
+  },
+  {
+   "kv_type": "f16",
+   "batch": 2,
+   "kv_len": 4096,
+   "n_query": 8,
+   "us_per_run": 463.44,
+   "runs": 2162,
+   "kv_MB": 33.6,
+   "eff_GBps": 72.4
+  },
+  {
+   "kv_type": "f16",
+   "batch": 2,
+   "kv_len": 16384,
+   "n_query": 1,
+   "us_per_run": 1440.27,
+   "runs": 748,
+   "kv_MB": 134.2,
+   "eff_GBps": 93.2
+  },
+  {
+   "kv_type": "f16",
+   "batch": 2,
+   "kv_len": 16384,
+   "n_query": 2,
+   "us_per_run": 1287.99,
+   "runs": 846,
+   "kv_MB": 134.2,
+   "eff_GBps": 104.2
+  },
+  {
+   "kv_type": "f16",
+   "batch": 2,
+   "kv_len": 16384,
+   "n_query": 4,
+   "us_per_run": 1353.75,
+   "runs": 752,
+   "kv_MB": 134.2,
+   "eff_GBps": 99.1
+  },
+  {
+   "kv_type": "f16",
+   "batch": 2,
+   "kv_len": 16384,
+   "n_query": 8,
+   "us_per_run": 1722.2,
+   "runs": 600,
+   "kv_MB": 134.2,
+   "eff_GBps": 77.9
+  },
+  {
+   "kv_type": "f16",
+   "batch": 2,
+   "kv_len": 32768,
+   "n_query": 1,
+   "us_per_run": 2696.52,
+   "runs": 376,
+   "kv_MB": 268.4,
+   "eff_GBps": 99.5
+  },
+  {
+   "kv_type": "f16",
+   "batch": 2,
+   "kv_len": 32768,
+   "n_query": 2,
+   "us_per_run": 2538.89,
+   "runs": 423,
+   "kv_MB": 268.4,
+   "eff_GBps": 105.7
+  },
+  {
+   "kv_type": "f16",
+   "batch": 2,
+   "kv_len": 32768,
+   "n_query": 4,
+   "us_per_run": 2655.33,
+   "runs": 384,
+   "kv_MB": 268.4,
+   "eff_GBps": 101.1
+  },
+  {
+   "kv_type": "f16",
+   "batch": 2,
+   "kv_len": 32768,
+   "n_query": 8,
+   "us_per_run": 3389.99,
+   "runs": 300,
+   "kv_MB": 268.4,
+   "eff_GBps": 79.2
+  },
+  {
+   "kv_type": "f16",
+   "batch": 8,
+   "kv_len": 4096,
+   "n_query": 1,
+   "us_per_run": 1247.6,
+   "runs": 935,
+   "kv_MB": 134.2,
+   "eff_GBps": 107.6
+  },
+  {
+   "kv_type": "f16",
+   "batch": 8,
+   "kv_len": 4096,
+   "n_query": 2,
+   "us_per_run": 1257.73,
+   "runs": 846,
+   "kv_MB": 134.2,
+   "eff_GBps": 106.7
+  },
+  {
+   "kv_type": "f16",
+   "batch": 8,
+   "kv_len": 4096,
+   "n_query": 4,
+   "us_per_run": 1358.68,
+   "runs": 752,
+   "kv_MB": 134.2,
+   "eff_GBps": 98.8
+  },
+  {
+   "kv_type": "f16",
+   "batch": 8,
+   "kv_len": 4096,
+   "n_query": 8,
+   "us_per_run": 1840.92,
+   "runs": 552,
+   "kv_MB": 134.2,
+   "eff_GBps": 72.9
+  },
+  {
+   "kv_type": "f16",
+   "batch": 8,
+   "kv_len": 16384,
+   "n_query": 1,
+   "us_per_run": 4857.15,
+   "runs": 235,
+   "kv_MB": 536.9,
+   "eff_GBps": 110.5
+  },
+  {
+   "kv_type": "f16",
+   "batch": 8,
+   "kv_len": 16384,
+   "n_query": 2,
+   "us_per_run": 4870.72,
+   "runs": 216,
+   "kv_MB": 536.9,
+   "eff_GBps": 110.2
+  },
+  {
+   "kv_type": "f16",
+   "batch": 8,
+   "kv_len": 16384,
+   "n_query": 4,
+   "us_per_run": 5268.0,
+   "runs": 192,
+   "kv_MB": 536.9,
+   "eff_GBps": 101.9
+  },
+  {
+   "kv_type": "f16",
+   "batch": 8,
+   "kv_len": 16384,
+   "n_query": 8,
+   "us_per_run": 6904.91,
+   "runs": 150,
+   "kv_MB": 536.9,
+   "eff_GBps": 77.8
+  },
+  {
+   "kv_type": "f16",
+   "batch": 8,
+   "kv_len": 32768,
+   "n_query": 1,
+   "us_per_run": 9623.18,
+   "runs": 120,
+   "kv_MB": 1073.7,
+   "eff_GBps": 111.6
+  },
+  {
+   "kv_type": "f16",
+   "batch": 8,
+   "kv_len": 32768,
+   "n_query": 2,
+   "us_per_run": 9624.17,
+   "runs": 108,
+   "kv_MB": 1073.7,
+   "eff_GBps": 111.6
+  },
+  {
+   "kv_type": "f16",
+   "batch": 8,
+   "kv_len": 32768,
+   "n_query": 4,
+   "us_per_run": 10594.59,
+   "runs": 96,
+   "kv_MB": 1073.7,
+   "eff_GBps": 101.3
+  },
+  {
+   "kv_type": "f16",
+   "batch": 8,
+   "kv_len": 32768,
+   "n_query": 8,
+   "us_per_run": 13683.65,
+   "runs": 75,
+   "kv_MB": 1073.7,
+   "eff_GBps": 78.5
+  },
+  {
+   "kv_type": "q8_0",
+   "batch": 1,
+   "kv_len": 4096,
+   "n_query": 1,
+   "us_per_run": 119.23,
+   "runs": 8946,
+   "kv_MB": 8.9,
+   "eff_GBps": 74.8
+  },
+  {
+   "kv_type": "q8_0",
+   "batch": 1,
+   "kv_len": 4096,
+   "n_query": 2,
+   "us_per_run": 121.17,
+   "runs": 8952,
+   "kv_MB": 8.9,
+   "eff_GBps": 73.6
+  },
+  {
+   "kv_type": "q8_0",
+   "batch": 1,
+   "kv_len": 4096,
+   "n_query": 4,
+   "us_per_run": 141.42,
+   "runs": 7087,
+   "kv_MB": 8.9,
+   "eff_GBps": 63.0
+  },
+  {
+   "kv_type": "q8_0",
+   "batch": 1,
+   "kv_len": 4096,
+   "n_query": 8,
+   "us_per_run": 142.18,
+   "runs": 7106,
+   "kv_MB": 8.9,
+   "eff_GBps": 62.7
+  },
+  {
+   "kv_type": "q8_0",
+   "batch": 1,
+   "kv_len": 16384,
+   "n_query": 1,
+   "us_per_run": 428.34,
+   "runs": 2611,
+   "kv_MB": 35.7,
+   "eff_GBps": 83.2
+  },
+  {
+   "kv_type": "q8_0",
+   "batch": 1,
+   "kv_len": 16384,
+   "n_query": 2,
+   "us_per_run": 458.22,
+   "runs": 2244,
+   "kv_MB": 35.7,
+   "eff_GBps": 77.8
+  },
+  {
+   "kv_type": "q8_0",
+   "batch": 1,
+   "kv_len": 16384,
+   "n_query": 4,
+   "us_per_run": 500.0,
+   "runs": 2068,
+   "kv_MB": 35.7,
+   "eff_GBps": 71.3
+  },
+  {
+   "kv_type": "q8_0",
+   "batch": 1,
+   "kv_len": 16384,
+   "n_query": 8,
+   "us_per_run": 639.32,
+   "runs": 1598,
+   "kv_MB": 35.7,
+   "eff_GBps": 55.8
+  },
+  {
+   "kv_type": "q8_0",
+   "batch": 1,
+   "kv_len": 32768,
+   "n_query": 1,
+   "us_per_run": 813.28,
+   "runs": 1309,
+   "kv_MB": 71.3,
+   "eff_GBps": 87.7
+  },
+  {
+   "kv_type": "q8_0",
+   "batch": 1,
+   "kv_len": 32768,
+   "n_query": 2,
+   "us_per_run": 881.4,
+   "runs": 1222,
+   "kv_MB": 71.3,
+   "eff_GBps": 80.9
+  },
+  {
+   "kv_type": "q8_0",
+   "batch": 1,
+   "kv_len": 32768,
+   "n_query": 4,
+   "us_per_run": 1023.24,
+   "runs": 987,
+   "kv_MB": 71.3,
+   "eff_GBps": 69.7
+  },
+  {
+   "kv_type": "q8_0",
+   "batch": 1,
+   "kv_len": 32768,
+   "n_query": 8,
+   "us_per_run": 1249.85,
+   "runs": 816,
+   "kv_MB": 71.3,
+   "eff_GBps": 57.0
+  },
+  {
+   "kv_type": "q8_0",
+   "batch": 2,
+   "kv_len": 4096,
+   "n_query": 1,
+   "us_per_run": 226.89,
+   "runs": 4476,
+   "kv_MB": 17.8,
+   "eff_GBps": 78.6
+  },
+  {
+   "kv_type": "q8_0",
+   "batch": 2,
+   "kv_len": 4096,
+   "n_query": 2,
+   "us_per_run": 240.22,
+   "runs": 4476,
+   "kv_MB": 17.8,
+   "eff_GBps": 74.2
+  },
+  {
+   "kv_type": "q8_0",
+   "batch": 2,
+   "kv_len": 4096,
+   "n_query": 4,
+   "us_per_run": 271.0,
+   "runs": 3740,
+   "kv_MB": 17.8,
+   "eff_GBps": 65.8
+  },
+  {
+   "kv_type": "q8_0",
+   "batch": 2,
+   "kv_len": 4096,
+   "n_query": 8,
+   "us_per_run": 393.13,
+   "runs": 2632,
+   "kv_MB": 17.8,
+   "eff_GBps": 45.3
+  },
+  {
+   "kv_type": "q8_0",
+   "batch": 2,
+   "kv_len": 16384,
+   "n_query": 1,
+   "us_per_run": 810.49,
+   "runs": 1309,
+   "kv_MB": 71.3,
+   "eff_GBps": 88.0
+  },
+  {
+   "kv_type": "q8_0",
+   "batch": 2,
+   "kv_len": 16384,
+   "n_query": 2,
+   "us_per_run": 877.64,
+   "runs": 1222,
+   "kv_MB": 71.3,
+   "eff_GBps": 81.2
+  },
+  {
+   "kv_type": "q8_0",
+   "batch": 2,
+   "kv_len": 16384,
+   "n_query": 4,
+   "us_per_run": 1040.11,
+   "runs": 987,
+   "kv_MB": 71.3,
+   "eff_GBps": 68.6
+  },
+  {
+   "kv_type": "q8_0",
+   "batch": 2,
+   "kv_len": 16384,
+   "n_query": 8,
+   "us_per_run": 1630.09,
+   "runs": 624,
+   "kv_MB": 71.3,
+   "eff_GBps": 43.7
+  },
+  {
+   "kv_type": "q8_0",
+   "batch": 2,
+   "kv_len": 32768,
+   "n_query": 1,
+   "us_per_run": 1550.4,
+   "runs": 658,
+   "kv_MB": 142.6,
+   "eff_GBps": 92.0
+  },
+  {
+   "kv_type": "q8_0",
+   "batch": 2,
+   "kv_len": 32768,
+   "n_query": 2,
+   "us_per_run": 1678.81,
+   "runs": 611,
+   "kv_MB": 142.6,
+   "eff_GBps": 84.9
+  },
+  {
+   "kv_type": "q8_0",
+   "batch": 2,
+   "kv_len": 32768,
+   "n_query": 4,
+   "us_per_run": 2006.64,
+   "runs": 504,
+   "kv_MB": 142.6,
+   "eff_GBps": 71.1
+  },
+  {
+   "kv_type": "q8_0",
+   "batch": 2,
+   "kv_len": 32768,
+   "n_query": 8,
+   "us_per_run": 3316.38,
+   "runs": 312,
+   "kv_MB": 142.6,
+   "eff_GBps": 43.0
+  },
+  {
+   "kv_type": "q8_0",
+   "batch": 8,
+   "kv_len": 4096,
+   "n_query": 1,
+   "us_per_run": 1010.44,
+   "runs": 1122,
+   "kv_MB": 71.3,
+   "eff_GBps": 70.6
+  },
+  {
+   "kv_type": "q8_0",
+   "batch": 8,
+   "kv_len": 4096,
+   "n_query": 2,
+   "us_per_run": 977.17,
+   "runs": 1034,
+   "kv_MB": 71.3,
+   "eff_GBps": 73.0
+  },
+  {
+   "kv_type": "q8_0",
+   "batch": 8,
+   "kv_len": 4096,
+   "n_query": 4,
+   "us_per_run": 1129.65,
+   "runs": 893,
+   "kv_MB": 71.3,
+   "eff_GBps": 63.1
+  },
+  {
+   "kv_type": "q8_0",
+   "batch": 8,
+   "kv_len": 4096,
+   "n_query": 8,
+   "us_per_run": 1383.7,
+   "runs": 744,
+   "kv_MB": 71.3,
+   "eff_GBps": 51.5
+  },
+  {
+   "kv_type": "q8_0",
+   "batch": 8,
+   "kv_len": 16384,
+   "n_query": 1,
+   "us_per_run": 3724.1,
+   "runs": 282,
+   "kv_MB": 285.2,
+   "eff_GBps": 76.6
+  },
+  {
+   "kv_type": "q8_0",
+   "batch": 8,
+   "kv_len": 16384,
+   "n_query": 2,
+   "us_per_run": 3726.98,
+   "runs": 288,
+   "kv_MB": 285.2,
+   "eff_GBps": 76.5
+  },
+  {
+   "kv_type": "q8_0",
+   "batch": 8,
+   "kv_len": 16384,
+   "n_query": 4,
+   "us_per_run": 4364.44,
+   "runs": 240,
+   "kv_MB": 285.2,
+   "eff_GBps": 65.3
+  },
+  {
+   "kv_type": "q8_0",
+   "batch": 8,
+   "kv_len": 16384,
+   "n_query": 8,
+   "us_per_run": 5430.63,
+   "runs": 186,
+   "kv_MB": 285.2,
+   "eff_GBps": 52.5
+  },
+  {
+   "kv_type": "q8_0",
+   "batch": 8,
+   "kv_len": 32768,
+   "n_query": 1,
+   "us_per_run": 7130.3,
+   "runs": 144,
+   "kv_MB": 570.4,
+   "eff_GBps": 80.0
+  },
+  {
+   "kv_type": "q8_0",
+   "batch": 8,
+   "kv_len": 32768,
+   "n_query": 2,
+   "us_per_run": 7318.25,
+   "runs": 144,
+   "kv_MB": 570.4,
+   "eff_GBps": 77.9
+  },
+  {
+   "kv_type": "q8_0",
+   "batch": 8,
+   "kv_len": 32768,
+   "n_query": 4,
+   "us_per_run": 8576.33,
+   "runs": 120,
+   "kv_MB": 570.4,
+   "eff_GBps": 66.5
+  },
+  {
+   "kv_type": "q8_0",
+   "batch": 8,
+   "kv_len": 32768,
+   "n_query": 8,
+   "us_per_run": 10664.24,
+   "runs": 96,
+   "kv_MB": 570.4,
+   "eff_GBps": 53.5
+  },
+  {
+   "kv_type": "q4_0",
+   "batch": 1,
+   "kv_len": 4096,
+   "n_query": 1,
+   "us_per_run": 51.75,
+   "runs": 19383,
+   "kv_MB": 4.7,
+   "eff_GBps": 91.2
+  },
+  {
+   "kv_type": "q4_0",
+   "batch": 1,
+   "kv_len": 4096,
+   "n_query": 2,
+   "us_per_run": 53.89,
+   "runs": 18650,
+   "kv_MB": 4.7,
+   "eff_GBps": 87.6
+  },
+  {
+   "kv_type": "q4_0",
+   "batch": 1,
+   "kv_len": 4096,
+   "n_query": 4,
+   "us_per_run": 68.03,
+   "runs": 14920,
+   "kv_MB": 4.7,
+   "eff_GBps": 69.4
+  },
+  {
+   "kv_type": "q4_0",
+   "batch": 1,
+   "kv_len": 4096,
+   "n_query": 8,
+   "us_per_run": 109.16,
+   "runs": 9163,
+   "kv_MB": 4.7,
+   "eff_GBps": 43.2
+  },
+  {
+   "kv_type": "q4_0",
+   "batch": 1,
+   "kv_len": 16384,
+   "n_query": 1,
+   "us_per_run": 186.99,
+   "runs": 5595,
+   "kv_MB": 18.9,
+   "eff_GBps": 100.9
+  },
+  {
+   "kv_type": "q4_0",
+   "batch": 1,
+   "kv_len": 16384,
+   "n_query": 2,
+   "us_per_run": 205.84,
+   "runs": 4862,
+   "kv_MB": 18.9,
+   "eff_GBps": 91.7
+  },
+  {
+   "kv_type": "q4_0",
+   "batch": 1,
+   "kv_len": 16384,
+   "n_query": 4,
+   "us_per_run": 261.56,
+   "runs": 3854,
+   "kv_MB": 18.9,
+   "eff_GBps": 72.2
+  },
+  {
+   "kv_type": "q4_0",
+   "batch": 1,
+   "kv_len": 16384,
+   "n_query": 8,
+   "us_per_run": 419.33,
+   "runs": 2397,
+   "kv_MB": 18.9,
+   "eff_GBps": 45.0
+  },
+  {
+   "kv_type": "q4_0",
+   "batch": 1,
+   "kv_len": 32768,
+   "n_query": 1,
+   "us_per_run": 473.99,
+   "runs": 2244,
+   "kv_MB": 37.7,
+   "eff_GBps": 79.6
+  },
+  {
+   "kv_type": "q4_0",
+   "batch": 1,
+   "kv_len": 32768,
+   "n_query": 2,
+   "us_per_run": 501.86,
+   "runs": 2068,
+   "kv_MB": 37.7,
+   "eff_GBps": 75.2
+  },
+  {
+   "kv_type": "q4_0",
+   "batch": 1,
+   "kv_len": 32768,
+   "n_query": 4,
+   "us_per_run": 593.73,
+   "runs": 1692,
+   "kv_MB": 37.7,
+   "eff_GBps": 63.6
+  },
+  {
+   "kv_type": "q4_0",
+   "batch": 1,
+   "kv_len": 32768,
+   "n_query": 8,
+   "us_per_run": 923.25,
+   "runs": 1104,
+   "kv_MB": 37.7,
+   "eff_GBps": 40.9
+  },
+  {
+   "kv_type": "q4_0",
+   "batch": 2,
+   "kv_len": 4096,
+   "n_query": 1,
+   "us_per_run": 98.38,
+   "runs": 10444,
+   "kv_MB": 9.4,
+   "eff_GBps": 95.9
+  },
+  {
+   "kv_type": "q4_0",
+   "batch": 2,
+   "kv_len": 4096,
+   "n_query": 2,
+   "us_per_run": 102.12,
+   "runs": 10071,
+   "kv_MB": 9.4,
+   "eff_GBps": 92.4
+  },
+  {
+   "kv_type": "q4_0",
+   "batch": 2,
+   "kv_len": 4096,
+   "n_query": 4,
+   "us_per_run": 128.02,
+   "runs": 7854,
+   "kv_MB": 9.4,
+   "eff_GBps": 73.7
+  },
+  {
+   "kv_type": "q4_0",
+   "batch": 2,
+   "kv_len": 4096,
+   "n_query": 8,
+   "us_per_run": 295.7,
+   "runs": 3384,
+   "kv_MB": 9.4,
+   "eff_GBps": 31.9
+  },
+  {
+   "kv_type": "q4_0",
+   "batch": 2,
+   "kv_len": 16384,
+   "n_query": 1,
+   "us_per_run": 451.14,
+   "runs": 2244,
+   "kv_MB": 37.7,
+   "eff_GBps": 83.7
+  },
+  {
+   "kv_type": "q4_0",
+   "batch": 2,
+   "kv_len": 16384,
+   "n_query": 2,
+   "us_per_run": 453.87,
+   "runs": 2256,
+   "kv_MB": 37.7,
+   "eff_GBps": 83.2
+  },
+  {
+   "kv_type": "q4_0",
+   "batch": 2,
+   "kv_len": 16384,
+   "n_query": 4,
+   "us_per_run": 530.14,
+   "runs": 1927,
+   "kv_MB": 37.7,
+   "eff_GBps": 71.2
+  },
+  {
+   "kv_type": "q4_0",
+   "batch": 2,
+   "kv_len": 16384,
+   "n_query": 8,
+   "us_per_run": 1200.66,
+   "runs": 840,
+   "kv_MB": 37.7,
+   "eff_GBps": 31.4
+  },
+  {
+   "kv_type": "q4_0",
+   "batch": 2,
+   "kv_len": 32768,
+   "n_query": 1,
+   "us_per_run": 863.82,
+   "runs": 1222,
+   "kv_MB": 75.5,
+   "eff_GBps": 87.4
+  },
+  {
+   "kv_type": "q4_0",
+   "batch": 2,
+   "kv_len": 32768,
+   "n_query": 2,
+   "us_per_run": 862.16,
+   "runs": 1175,
+   "kv_MB": 75.5,
+   "eff_GBps": 87.6
+  },
+  {
+   "kv_type": "q4_0",
+   "batch": 2,
+   "kv_len": 32768,
+   "n_query": 4,
+   "us_per_run": 1002.12,
+   "runs": 1008,
+   "kv_MB": 75.5,
+   "eff_GBps": 75.3
+  },
+  {
+   "kv_type": "q4_0",
+   "batch": 2,
+   "kv_len": 32768,
+   "n_query": 8,
+   "us_per_run": 2395.94,
+   "runs": 420,
+   "kv_MB": 75.5,
+   "eff_GBps": 31.5
+  },
+  {
+   "kv_type": "q4_0",
+   "batch": 8,
+   "kv_len": 4096,
+   "n_query": 1,
+   "us_per_run": 540.14,
+   "runs": 1870,
+   "kv_MB": 37.7,
+   "eff_GBps": 69.9
+  },
+  {
+   "kv_type": "q4_0",
+   "batch": 8,
+   "kv_len": 4096,
+   "n_query": 2,
+   "us_per_run": 512.21,
+   "runs": 1974,
+   "kv_MB": 37.7,
+   "eff_GBps": 73.7
+  },
+  {
+   "kv_type": "q4_0",
+   "batch": 8,
+   "kv_len": 4096,
+   "n_query": 4,
+   "us_per_run": 602.2,
+   "runs": 1692,
+   "kv_MB": 37.7,
+   "eff_GBps": 62.7
+  },
+  {
+   "kv_type": "q4_0",
+   "batch": 8,
+   "kv_len": 4096,
+   "n_query": 8,
+   "us_per_run": 1006.7,
+   "runs": 1008,
+   "kv_MB": 37.7,
+   "eff_GBps": 37.5
+  },
+  {
+   "kv_type": "q4_0",
+   "batch": 8,
+   "kv_len": 16384,
+   "n_query": 1,
+   "us_per_run": 2025.49,
+   "runs": 517,
+   "kv_MB": 151.0,
+   "eff_GBps": 74.5
+  },
+  {
+   "kv_type": "q4_0",
+   "batch": 8,
+   "kv_len": 16384,
+   "n_query": 2,
+   "us_per_run": 1972.82,
+   "runs": 528,
+   "kv_MB": 151.0,
+   "eff_GBps": 76.5
+  },
+  {
+   "kv_type": "q4_0",
+   "batch": 8,
+   "kv_len": 16384,
+   "n_query": 4,
+   "us_per_run": 2286.45,
+   "runs": 444,
+   "kv_MB": 151.0,
+   "eff_GBps": 66.0
+  },
+  {
+   "kv_type": "q4_0",
+   "batch": 8,
+   "kv_len": 16384,
+   "n_query": 8,
+   "us_per_run": 3883.34,
+   "runs": 258,
+   "kv_MB": 151.0,
+   "eff_GBps": 38.9
+  },
+  {
+   "kv_type": "q4_0",
+   "batch": 8,
+   "kv_len": 32768,
+   "n_query": 1,
+   "us_per_run": 4193.27,
+   "runs": 240,
+   "kv_MB": 302.0,
+   "eff_GBps": 72.0
+  },
+  {
+   "kv_type": "q4_0",
+   "batch": 8,
+   "kv_len": 32768,
+   "n_query": 2,
+   "us_per_run": 3983.24,
+   "runs": 252,
+   "kv_MB": 302.0,
+   "eff_GBps": 75.8
+  },
+  {
+   "kv_type": "q4_0",
+   "batch": 8,
+   "kv_len": 32768,
+   "n_query": 4,
+   "us_per_run": 4530.63,
+   "runs": 222,
+   "kv_MB": 302.0,
+   "eff_GBps": 66.7
+  },
+  {
+   "kv_type": "q4_0",
+   "batch": 8,
+   "kv_len": 32768,
+   "n_query": 8,
+   "us_per_run": 7706.43,
+   "runs": 132,
+   "kv_MB": 302.0,
+   "eff_GBps": 39.2
+  }
+ ]
+}

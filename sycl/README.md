@@ -78,3 +78,9 @@ Verifying K=4 tokens costs 1.3x one token (fused) vs 3.5x (K independent).
 
 Second box (Lunar Lake, Arc 140V Xe2) could not run: its GPU is in driver error state (Windows code 39) and needs a driver reinstall by an admin.
 Baselines and other targets: `baselines_notes.md`, `modal/NOTES.md` (when present). Prior art: `PRIOR_ART.md`.
+
+## Update 2026-11-11 (sycl2): ESIMD path, NVFP4, corrected peak
+- `--path esimd|best` (uq_esimd.hpp): register-LUT FP4 decode + DPAS, no barriers in the hot loop; `best` = ESIMD when supported (UE8M0, D128, PAGE%16==0) else XMX. 36/36 vectors.
+- NVFP4 (`Args.nv`, e4m3 scales per 16, k_ts folded into sm_scale, v_ts in the reduce): portable + XMX paths, vectors in `vectors_nvfp4/` (`bench/sycl2/gen_vectors_nvfp4.py`), 10/10.
+- **The 430-455 GB/s "read peak" above was measured on uniform data and is a compression artefact; with random data the ceiling is ~105-113 GB/s.** The % columns in the older tables are therefore ~4x too pessimistic. See `results/sycl2_profile.md`, `results/sycl2_summary.json`, `PORTING_LOG.md` addendum.
+- Build/run: `build.bat bench` / `bench.exe --path best --wg 64 --nsplit 12 ...` (ESIMD wants wg = 16 x threads-per-WG; nsplit ~ 768/(B*Hkv) for K<=2 and ~384/(B*Hkv)*2 for K>=4 fills the machine; sweep with `--nsplit sweep`).

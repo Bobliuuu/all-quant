@@ -1,0 +1,43 @@
+  cpu = _conversion_method_template(device=torch.device("cpu"))
+2.15.0+xpu ['cpu', 'cuda', 'cudnn', 'cusparselt', 'kleidiai', 'm', 'mha', 'miopen', 'mkl', 'mkldnn', 'mps', 'nnpack', 'openmp', 'opt_einsum', 'python_native', 'quantized']
+['CUDNN_ATTENTION', 'EFFICIENT_ATTENTION', 'ERROR', 'FLASH_ATTENTION', 'MATH', 'OVERRIDEABLE']
+nq=1 default: 1.202 ms
+    CPU aten::scaled_dot_product_attention
+    CPU aten::_scaled_dot_product_fused_attention_overrideable
+    XPU micro_sdpa
+nq=1 OVERRIDEABLE: 1.304 ms
+    CPU aten::scaled_dot_product_attention
+    CPU aten::_scaled_dot_product_fused_attention_overrideable
+    XPU micro_sdpa
+nq=1 FLASH: ERR No available kernel. Aborting execution.
+nq=1 EFFICIENT: ERR No available kernel. Aborting execution.
+nq=1 MATH: 40.544 ms
+    CPU aten::scaled_dot_product_attention
+    CPU aten::_scaled_dot_product_attention_math
+    XPU _ZTSN2at6native3xpu25UnrolledElementwiseKernelINS1_14CopyScalarFuncIN3c104HalfEEENS_6detail5ArrayIPcLi2EEE23Tr
+    XPU _ZTSN2at6native3xpu27VectorizedElementwiseKernelILi4ENS1_13AUnaryFunctorIfffNS1_10MulFunctorIfEEEENS_6detail5A
+    XPU _ZTSN2at6native3xpu27VectorizedElementwiseKernelILi4ENS1_14CopyScalarFuncIfEENS_6detail5ArrayIPcLi2EEE16Offset
+    XPU gemm_kernel
+    XPU _ZTSN2at6native3xpu4impl27SoftmaxForwardKernelFunctorILi4EfffjLb0ENS0_6memory14aligned_vectorIfLi4EEELi16ELb1E
+    XPU _ZTSN2at6native3xpu25UnrolledElementwiseKernelINS1_14CopyScalarFuncIfEENS_6detail5ArrayIPcLi2EEE23TrivialOffse
+nq=1 CUDNN: ERR No viable backend for scaled_dot_product_attention was found. This is likely due to turning off both the math kernel and
+nq=4 default: 1.396 ms
+    CPU aten::scaled_dot_product_attention
+    CPU aten::_scaled_dot_product_fused_attention_overrideable
+    XPU micro_sdpa
+nq=4 OVERRIDEABLE: 1.383 ms
+    CPU aten::scaled_dot_product_attention
+    CPU aten::_scaled_dot_product_fused_attention_overrideable
+    XPU micro_sdpa
+nq=4 FLASH: ERR No available kernel. Aborting execution.
+nq=4 EFFICIENT: ERR No available kernel. Aborting execution.
+nq=4 MATH: 41.175 ms
+    CPU aten::scaled_dot_product_attention
+    CPU aten::_scaled_dot_product_attention_math
+    XPU _ZTSN2at6native3xpu25UnrolledElementwiseKernelINS1_14CopyScalarFuncIN3c104HalfEEENS_6detail5ArrayIPcLi2EEE23Tr
+    XPU _ZTSN2at6native3xpu27VectorizedElementwiseKernelILi4ENS1_13AUnaryFunctorIfffNS1_10MulFunctorIfEEEENS_6detail5A
+    XPU _ZTSN2at6native3xpu27VectorizedElementwiseKernelILi4ENS1_14CopyScalarFuncIfEENS_6detail5ArrayIPcLi2EEE16Offset
+    XPU gemm_kernel
+    XPU _ZTSN2at6native3xpu4impl27SoftmaxForwardKernelFunctorILi4EfffjLb0ENS0_6memory14aligned_vectorIfLi4EEELi16ELb1E
+    XPU _ZTSN2at6native3xpu25UnrolledElementwiseKernelINS1_14CopyScalarFuncIfEENS_6detail5ArrayIPcLi2EEE23TrivialOffse
+nq=4 CUDNN: ERR No viable backend for scaled_dot_product_attention was found. This is likely due to turning off both the math kernel and

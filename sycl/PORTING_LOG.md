@@ -44,3 +44,25 @@ Facts from `sycl/AMD_PORT_NOTES.md` (read-only study of the repo; AMD numbers ar
 | portability | separate HIP (wave64, MFMA, ballot) and Triton paths | one SYCL source; portable path + Intel-only XMX path behind a macro |
 | end to end | vLLM parity to +10% (Amdahl: attention 30% of step) | not integrated (kernel level only) |
 Both efforts end up ALU/latency-bound, far from bandwidth peak, for the same reason: dequantising sub-byte KV costs more issue slots than the bytes cost memory time on this size of decode problem.
+
+## Addendum 2026-11-11 (sycl2 pass): ESIMD/DPAS path, NVFP4, corrected bandwidth ceiling
+(earlier text above is kept unchanged; where it quotes "% of read peak" see item 1.)
+
+1. **The read peak was wrong.** The 430-455 GB/s figure came from a read kernel over a uniformly filled buffer; this GPU serves uniform data 2.5-4x faster than random data
+   (compression). With random bytes the same kernel, plain SYCL uint4 loads and ESIMD block loads over the paged layout all give 105-113 GB/s (LPDDR5X); torch SDPA and llama.cpp reach 90-112 GB/s.
+   `bench` now prints both peaks and uses the random one. B8/ctx16k FP4 KV (134 MB) therefore has a memory floor of ~1.2 ms. The old XMX kernel was at ~50% of the true peak at K=1.
+2. **Sub-group-private joint_matrix pipeline (`uq_xmx2.hpp`, `--path xmx2`)**: no work-group barriers, per-sub-group KV stream and online softmax, O in registers. Correct (36/36) but 2.5x SLOWER (6.4 ms vs 2.5 at K=1):
+   per-lane SLM LUT gathers + scalar SLM stores dominate. Negative result, kept.
+3. **ESIMD path (`uq_esimd.hpp`, `--path esimd`)**: one hardware thread per (b, kv-head, split); 256 B block loads; FP4->bf16 through a 256-entry byte LUT held in 16 GRFs (register-indirect `iselect`);
+   UE8M0 scale folded as a 16-bit exponent add on the looked-up words (zero codes decode to +-2^-100, scale byte clamped to [105,250], no mask needed); S^T = K Q^T on DPAS with tokens as M rows and queries as N lanes
+   (so the online softmax is lane-parallel, no cross-lane reductions); V decoded straight into the VNNI B operand (token pairs per word); P goes through a 512 B SLM transpose; M up to 16 per thread (RC 4/8, 1-2 row tiles,
+   GRF 128 for RC4, 256 otherwise), M>16 splits into query-group threads. No barrier in the hot loop. Debugging notes: a 32-bit add on packed bf16 pairs leaks a carry into the high half (+0.6% bias): all scale adds are 16-bit lane adds.
+   Software prefetch gave nothing. 2D transposed block loads and gathers run at 121 GB/s vs 264+ for contiguous blocks, hence the S^T formulation (K tile used in its natural row layout).
+   Passes the 36/36 vectors including rotated K/Q (`rot_h128_b2k4`) and the upstream-rule case (`paper_rule_b2k4`). Dispatch `--path best` = ESIMD when supported (UE8M0, D128, PAGE%16==0), else XMX.
+4. **NVFP4**: `Args.nv`, scales `uint8 [pages,Hkv,PAGE,D/16]` (raw e4m3fn), exact integer e4m3 decode, k_ts folded into sm_scale, v_ts applied in the reduce kernel; portable and XMX paths (bf16 product exact). 10/10 vectors from
+   `bench/sycl2/gen_vectors_nvfp4.py` (frozen copy of the uqmt quantiser; includes rotated, k_ts/v_ts large and small, GQA 1, short rows). ESIMD falls back to XMX for NVFP4.
+5. **Results** (`results/sycl2_summary.json`, sweeps `results/sycl2_bench_{xmx,esimd}.jsonl`): ESIMD vs the barrier XMX kernel, best nsplit each: 1.4-1.6x at K=1/2, 2.0x at K=4, 2.1-2.2x at K=8; B8 ctx16k K=1 2.62 -> 1.72 ms (76% of the random-data peak),
+   K=4 3.49 -> 1.77 ms (74%), K=8 7.24 -> 3.47 ms (38%). The "3x over the old XMX numbers" target was not reached: the memory floor bounds K=1 to ~2.2x and the K=8 path is ALU-bound.
+6. Baselines on the same Arc (random data): torch XPU SDPA routes to oneDNN `micro_sdpa` (90-112 GB/s of dense f16 KV); IPEX 2.8 (needs torch 2.8) paged/dense 82-111 GB/s; llama.cpp `test-backend-ops` built from source (35 min, MKL import lib workaround),
+   q4_0 KV at B8/ctx16k n_q=1 2.0 ms, q4_0 n_q=8 cliff 3.9 ms. Files: `results/sycl2_baselines_*`. Full profile/ablation: `results/sycl2_profile.md`.
+7. csc-arc-2 (Lunar Lake Arc 140V) still has its GPU in Windows error 39 (CM_PROB_DRIVER_FAILED_LOAD, 2024 driver); `sycl-ls` sees no device; not touched further (no bypass attempted).
