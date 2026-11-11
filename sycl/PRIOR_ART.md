@@ -2,6 +2,13 @@
 
 Method: web search plus primary-source reads of `main`/`master` of each repo (raw files, release notes). Nothing was run on hardware. "Not found" means a targeted search/read did not find it; it is not proof of absence. GitHub API rate limit was hit late, so Triton-XPU, Gaudi and SGLang quantized-KV coverage is thinner (flagged below).
 
+## Wording (per user guidance, 2026-11-11)
+Say: "no public SYCL / Intel-GPU port of the UltraQuant format (FP4 E2M1 + UE8M0 per-32 scales, Hadamard-rotated K/Q, unrotated V) with fused
+multi-query verify was found". Do NOT say "does not exist" / "first FP4 KV" / "first 4-bit KV on Intel" / "K-query KV sharing is new" (llama.cpp
+SYCL DPAS already shares one KV read across up to 31 query tokens for q4_0/q8_0). Our contribution: UltraQuant-format FP4 + fused verify + running on Intel.
+Where searched (all by web search and primary-source reads, none run on hardware by the research pass): llama.cpp SYCL, oneDNN SDPA, IPEX, OpenVINO / GenAI,
+vLLM XPU, SGLang XPU, intel/llm-scaler / ipex-llm, intel/sycl-tla (cutlass-sycl), Intel Gaudi, Triton-XPU (thin), FlashInfer, upstream vLLM/SGLang UltraQuant.
+
 ## Headline: two things that make a naive "does not exist" claim FALSE
 
 1. **llama.cpp SYCL has a native 4-bit KV decode kernel on Xe2 XMX (DPAS).** Merged 2026-10-29 ("[SYCL] add DPAS flash attention kernel for quantized KV cache (#31125)", commit f7c01c52). It takes q4_0 / q8_0 K and V, F32 queries with `Q->ne[1]` in 1..31 (so several query tokens share one KV read; GQA group up to 32), head sizes 64/96/128/256/512, on BMG/LNL/PTL/WCL. It is an integer 4-bit format with an f16 scale per 32 values (not FP4/MX), and it is a contiguous ggml KV cache (not paged).

@@ -31,11 +31,18 @@ sub-group reductions, SLM tiling, `sycl::ext::oneapi::bfloat16`). Device selecti
 - **Split/reduce**: grid = B x Hkv x nsplit work-groups, intermediate `(O/l, lse)` per split, reduce kernel merges with exp2 weights.
   Rows with `seq_len-K+j+1 <= 0` return zeros.
 
-## Correctness (Arc B390, 8 cases x nsplit {1,2,3,8}, 32 runs per path; `results/sycl_arcb390_correctness.log`)
-Vectors cover K in {1,2,3,4,8,16}, GQA group 1/4/16, D 64/128, PAGE 16/32/64, ragged seq_lens, shuffled pages, seq_len<K, rotated K/Q.
+## Correctness (Arc B390, 9 cases x nsplit {1,2,3,8}, 36 runs per path; `results/sycl_arcb390_correctness.log`)
+Vectors cover K in {1,2,3,4,8,16}, GQA group 1/4/16, D 64/128, PAGE 16/32/64, ragged seq_lens, shuffled pages, seq_len<K, rotated K/Q, and an upstream-rule case (`paper_rule_b2k4`: vLLM UltraQuant scale rule c=0.156, zero-sentinel scale byte 0, rotated).
 Output is bf16, so errors are dominated by output rounding. Criterion: abs err <= 1e-3 + 2^-7*|ref| (1 bf16 ulp) (+6e-3 absolute for the XMX path whose P is bf16).
-Both paths: 32/32 pass, worst max_abs_err 7.7e-3 (a short-sequence row with |ref|~2, i.e. a bf16 ulp / cancellation case); typical max_abs_err 1.0-2.5e-3
+Both paths: 36/36 pass, worst max_abs_err 7.7e-3 (a short-sequence row with |ref|~2, i.e. a bf16 ulp / cancellation case); typical max_abs_err 1.0-2.5e-3
 (raw max abs err under 1e-3 is not reachable with bf16 output when |out|>0.25). Portable path with fp32 P is within 1 bf16 ulp everywhere.
+
+## Compatibility with upstream vLLM UltraQuant
+Layout/semantics are the `uqmt` layout (SoA pages, low nibble = even, UE8M0, byte 0 = 0.0 happens to decode to exactly zero via the bit
+construction `s<<23`). `cuda/UPSTREAM_COMPAT.md` (cuda-agent) verified upstream's Triton quantiser/store bit-for-bit against
+`uqmt.quant` with `rule="paper", c=0.156` (+ -0 canonicalisation) and that the upstream AoS block layout converts to ours with a byte permute.
+The generator's quantiser is bit-identical to `uqmt/attn.py::quantize_fp4` (checked) and also implements the upstream rule; the SYCL kernels
+pass both. Not done: running upstream vLLM's own Triton fallback on an Intel GPU, and consuming vectors dumped by upstream's AoS layout directly (needs the permute from that doc).
 
 ## Benchmarks
 See `results/sycl_arcb390_xmx_sweep.{log,jsonl}`, `results/sycl_arcb390_portable_sweep.{log,jsonl}`, `results/sycl_tuning_notes.md`.

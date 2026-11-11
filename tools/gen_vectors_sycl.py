@@ -28,6 +28,23 @@ def quantize_fp4(x):
     return packed.contiguous(), (e.squeeze(-1) + 127).to(torch.uint8).contiguous()
 
 
+def quantize_fp4_paper(x, c=0.156):
+    """Upstream vLLM UltraQuant scale rule: exp=floor(log2(c*amax)+0.5) clamped [-126,127], byte=exp+127,
+    all-zero group -> byte 0 (zero sentinel), codes clip at +-6, -0 canonicalised to +0 (see cuda/UPSTREAM_COMPAT.md)."""
+    D = x.shape[-1]
+    xg = x.float().reshape(*x.shape[:-1], D // BLOCK, BLOCK)
+    amax = xg.abs().amax(-1, keepdim=True)
+    zero = amax == 0
+    e = torch.floor(torch.log2(torch.where(zero, torch.ones_like(amax), c * amax)) + 0.5).clamp(-126, 127)
+    y = (xg / torch.exp2(e)).clamp(-6, 6)
+    grid = torch.tensor(FP4_VALUES)
+    code = (y.abs().unsqueeze(-1) - grid).abs().argmin(-1).to(torch.uint8)
+    code = code | (((y < 0) & (code != 0)).to(torch.uint8) << 3)
+    code = code.reshape(*x.shape[:-1], D)
+    byte = torch.where(zero, torch.zeros_like(e), e + 127).squeeze(-1).to(torch.uint8)
+    return (code[..., 0::2] | (code[..., 1::2] << 4)).contiguous(), byte.contiguous()
+
+
 def dequantize_fp4(packed, scales):
     grid = torch.tensor(FP4_VALUES)
     lo, hi = packed & 0xF, packed >> 4
@@ -36,7 +53,8 @@ def dequantize_fp4(packed, scales):
         return torch.where((c & 8) != 0, -v, v)
     D = packed.shape[-1] * 2
     out = torch.stack([dec(lo), dec(hi)], -1).reshape(*packed.shape[:-1], D)
-    return out * torch.exp2(scales.float() - 127).repeat_interleave(BLOCK, -1)
+    sc = torch.where(scales == 0, torch.zeros(()), torch.exp2(scales.float() - 127))  # byte 0 = zero sentinel (upstream); never produced by the ceil rule
+    return out * sc.repeat_interleave(BLOCK, -1)
 
 
 def reference(q, kc, ks, vc, vs, bt, sl, sm_scale):
@@ -68,7 +86,7 @@ def hadamard(n):
     return H / n ** 0.5   # orthonormal: (qH)(kH)^T == q k^T
 
 
-def build_case(name, B, K, HQ, HKV, D, PAGE, seq_lens, seed, kv_scale=1.0, rotate=False):
+def build_case(name, B, K, HQ, HKV, D, PAGE, seq_lens, seed, kv_scale=1.0, rotate=False, paper=False):
     g = torch.Generator().manual_seed(seed)
     T = max(seq_lens)
     npg = (T + PAGE - 1) // PAGE
@@ -84,8 +102,9 @@ def build_case(name, B, K, HQ, HKV, D, PAGE, seq_lens, seed, kv_scale=1.0, rotat
 
     def paged(x):
         return x.reshape(B, HKV, npg, PAGE, D).permute(0, 2, 1, 3, 4).reshape(B * npg, HKV, PAGE, D)
-    kc, ks = quantize_fp4(paged(k))
-    vc, vs = quantize_fp4(paged(v))
+    qf = quantize_fp4_paper if paper else quantize_fp4
+    kc, ks = qf(paged(k))
+    vc, vs = qf(paged(v))
     # shuffle physical pages: logical page i lives at physical perm[i]
     perm = torch.randperm(B * npg, generator=g)
     inv = torch.empty_like(perm); inv[perm] = torch.arange(B * npg)
@@ -107,6 +126,7 @@ CASES = [
     ("b2k16_d128_p32", 2, 16, 8, 2, 128, 32, [64, 150], 5),
     ("edge_short_k4", 2, 4, 8, 2, 128, 64, [2, 65], 6),   # seq_len < K -> zero rows
     ("rot_h128_b2k4", 2, 4, 32, 8, 128, 64, [260, 400], 8, 1.0, True),  # Hadamard-rotated K and Q, V unrotated
+    ("paper_rule_b2k4", 2, 4, 32, 8, 128, 64, [200, 333], 9, 1.0, True, True),  # upstream vLLM scale rule (c=0.156, zero sentinel), rotated
     ("b4k3_d128_p64_g1", 4, 3, 8, 8, 128, 64, [129, 64, 1, 256], 7),  # GQA group 1, odd K
 ]
 
