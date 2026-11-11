@@ -33,10 +33,10 @@ def body(gpu, mode, extra):
         P(sh("cd /work/cuda && ./test_vectors vectors 1e-2 2>&1 | tail -60"))
     elif mode == "ablate":
         # extra = "" ; builds variants of the standalone bench with ablation flags
-        for name, flag in (("full", 0), ("nodeq", 1), ("nommma", 2), ("nodeq_nommma", 3)):
+        for name, flag in (("full", 0), ("loadonly", 4)):
             P(f"## variant {name}")
             P(sh(f"cd /work/cuda && nvcc -O3 -std=c++17 -arch=native -DUQ_ABL={flag} -o bs_{name} bench_standalone.cu uq_decode.cu 2>&1 | grep -i error"))
-            P(sh(f"cd /work/cuda && ./bs_{name} --ks 1 8 {extra}"))
+            P(sh(f"cd /work/cuda && ./bs_{name} --ks 1 8 --variant 2 {extra}"))
         P("## samepage (L2-resident, compute only)")
         P(sh(f"cd /work/cuda && nvcc -O3 -std=c++17 -arch=native -o bs_full bench_standalone.cu uq_decode.cu 2>&1 | grep -i error; ./bs_full --ks 1 8 --samepage"))
     elif mode == "prof":

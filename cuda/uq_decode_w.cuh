@@ -36,7 +36,8 @@ struct CfgW {
   static constexpr int KPW = PS ? PAGE : 64;
   static constexpr int NT = KPW / 8;
   static constexpr int SLICE = 2 * KPW * (DH + NG);
-  static constexpr int VT = 16 * LD * 2;
+  static constexpr int VT = 0;   // V is dequantised straight into B fragments (no smem tile)
+  static constexpr int CPT = D / 8, VWC = CPT / 8 > 0 ? CPT / 8 : 1;   // d-columns / 32-bit words per thread
   static constexpr int WSM = ST * SLICE + VT;
   static constexpr int CS = D + 4;
   static constexpr int COMB = NWK * BM * CS * 4 + 2 * NWK * BM * 4;
@@ -75,7 +76,6 @@ uq_split_w(const UQParams a, int G, int gp_shift) {
     return;
   }
   uint8_t* wsm = smem + (size_t)warp * C::WSM;
-  uint8_t* vt = wsm + ST * C::SLICE;
   const int32_t* bt = a.block_table + (size_t)b * a.max_pages;
   const int gm = (1 << gp_shift) - 1;
   auto load_slice = [&](size_t page, int s) {
@@ -150,6 +150,9 @@ uq_split_w(const UQParams a, int G, int gp_shift) {
     { if (it + ST - 1 < nit) load_slice((size_t)pg_next, (it + ST - 1) % ST); cp_commit();
       if (it + ST < nit) pg_next = bt[page_of(it + ST)]; }
     PROF_T(0);
+#if UQ_ABL & 4
+    if (it + 1 < nit) continue;   // load-only ablation: skip all compute
+#endif
     const uint8_t* st = wsm + (it % ST) * C::SLICE;
     const uint8_t* kr = st; const uint8_t* ksc = st + KPW * DH;
     const uint8_t* vr = ksc + KPW * NG; const uint8_t* vsc = vr + KPW * DH;
@@ -214,39 +217,47 @@ uq_split_w(const UQParams a, int G, int gp_shift) {
       for (int i = 0; i < D / 8; i++) { acc[mb][i][0] *= al0; acc[mb][i][1] *= al0; acc[mb][i][2] *= al1; acc[mb][i][3] *= al1; }
     }
     PROF_T(2);
-    // ---- O += P V, V dequantised per 16-key chunk into the warp-private tile
+    // ---- O += P V.  V is dequantised straight from the raw stage into B fragments: thread g owns the CPT
+    // columns d = CPT*g + i (i = n-tile index); keys of a fragment are (2t,2t+1) / (2t+8,2t+9) of the 16-key chunk.
     #pragma unroll
     for (int kk = 0; kk < KPW / 16; kk++) {
-      __syncwarp();
-      for (int c = lane; c < 16 * NG; c += 32) {
-        int key = c / NG, gi = c % NG;
-        uint4 raw = *(const uint4*)(vr + (kk * 16 + key) * DH + gi * 16);
-        uint32_t sv = vsc[(kk * 16 + key) * NG + gi];
-        uint32_t w[4] = {raw.x, raw.y, raw.z, raw.w};
-        #pragma unroll
-        for (int j = 0; j < 4; j++) {
-          uint32_t o[4]; deq_word(w[j], sv, o);
-          *(uint4*)(vt + (key * LD + gi * 32 + 8 * j) * 2) = make_uint4(o[0], o[1], o[2], o[3]);
-        }
-      }
-      __syncwarp();
       uint32_t pa[MB][4];
       #pragma unroll
       for (int mb = 0; mb < MB; mb++) {
         pa[mb][0] = pack_bf16(s[mb][2 * kk][0], s[mb][2 * kk][1]); pa[mb][1] = pack_bf16(s[mb][2 * kk][2], s[mb][2 * kk][3]);
         pa[mb][2] = pack_bf16(s[mb][2 * kk + 1][0], s[mb][2 * kk + 1][1]); pa[mb][3] = pack_bf16(s[mb][2 * kk + 1][2], s[mb][2 * kk + 1][3]);
       }
+      const int gi = (C::CPT * g) / 32;
+      const int kA = kk * 16 + 2 * t;
+      uint32_t wa[2][C::VWC], wb[2][C::VWC], sa[2], sb[2];   // [0]: keys kA,kA+1  [1]: keys kA+8,kA+9
       #pragma unroll
-      for (int dt = 0; dt < D / 16; dt++) {
-        int key = (lane & 7) + ((lane >> 3) & 1) * 8;
-        int col = dt * 16 + (lane >> 4) * 8;
-        uint32_t b0, b1, b2, b3;
-        ldsm4t(b0, b1, b2, b3, smem_u32(vt + (key * LD + col) * 2));
-        #pragma unroll
-        for (int mb = 0; mb < MB; mb++) { mma16816(acc[mb][2 * dt], pa[mb], b0, b1); mma16816(acc[mb][2 * dt + 1], pa[mb], b2, b3); }
+      for (int hh = 0; hh < 2; hh++) {
+        const uint8_t* ra = vr + (kA + 8 * hh) * DH + g * (C::CPT / 2);
+        const uint8_t* rb = ra + DH;
+        if constexpr (C::VWC == 2) { uint2 x = *(const uint2*)ra, y = *(const uint2*)rb; wa[hh][0] = x.x; wa[hh][1] = x.y; wb[hh][0] = y.x; wb[hh][1] = y.y; }
+        else { wa[hh][0] = *(const uint32_t*)ra; wb[hh][0] = *(const uint32_t*)rb; }
+        sa[hh] = vsc[(kA + 8 * hh) * NG + gi]; sb[hh] = vsc[(kA + 8 * hh + 1) * NG + gi];
       }
+      uint32_t Bv[2][C::CPT];
+      #pragma unroll
+      for (int hh = 0; hh < 2; hh++) {
+        uint32_t fa = (min(sa[hh], 128u) + 126u) << 7; fa |= ((min(sb[hh], 128u) + 126u) << 7) << 16;
+        uint32_t fb = (max(sa[hh], 128u) - 1u) << 7;   fb |= ((max(sb[hh], 128u) - 1u) << 7) << 16;
+        #pragma unroll
+        for (int w = 0; w < C::VWC; w++) {
+          uint32_t clo = __byte_perm(wa[hh][w], wb[hh][w], 0x5410), chi = __byte_perm(wa[hh][w], wb[hh][w], 0x7632);
+          #pragma unroll
+          for (int j = 0; j < 4; j++) {
+            Bv[hh][8 * w + j] = mul_bf16x2(mul_bf16x2(pair_raw(clo, j), fa), fb);
+            Bv[hh][8 * w + 4 + j] = mul_bf16x2(mul_bf16x2(pair_raw(chi, j), fa), fb);
+          }
+        }
+      }
+      #pragma unroll
+      for (int i = 0; i < C::CPT; i++)
+        #pragma unroll
+        for (int mb = 0; mb < MB; mb++) mma16816(acc[mb][i], pa[mb], Bv[0][i], Bv[1][i]);
     }
-    PROF_T(3);
   }
 #ifdef UQ_PROF
   if (lane == 0 && warp == 0) { for (int i = 0; i < 6; i++) atomicAdd(&g_prof[i], (unsigned long long)pacc[i]); atomicAdd(&g_prof[6], (unsigned long long)nit); atomicAdd(&g_prof[7], 1ull); }
@@ -264,10 +275,8 @@ uq_split_w(const UQParams a, int G, int gp_shift) {
     int r0 = (wm * MB + mb) * 16 + g, r1 = r0 + 8;
     #pragma unroll
     for (int i = 0; i < D / 8; i++) {
-      // stored column c -> actual d = 8*(c>>3) + (c&1)*4 + ((c&7)>>1)
-      int c0 = i * 8 + 2 * t, c1 = c0 + 1;
-      int d0 = 8 * (c0 >> 3) + (c0 & 1) * 4 + ((c0 & 7) >> 1);
-      int d1 = 8 * (c1 >> 3) + (c1 & 1) * 4 + ((c1 & 7) >> 1);
+      // tile i, MMA column n (= owning thread g) holds d = CPT*n + i
+      int d0 = C::CPT * (2 * t) + i, d1 = C::CPT * (2 * t + 1) + i;
       float* row0 = cb + ((size_t)wk * BM + r0) * C::CS; float* row1 = cb + ((size_t)wk * BM + r1) * C::CS;
       row0[d0] = acc[mb][i][0]; row0[d1] = acc[mb][i][1]; row1[d0] = acc[mb][i][2]; row1[d1] = acc[mb][i][3];
     }
