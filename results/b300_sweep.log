@@ -1,0 +1,136 @@
+NVIDIA B300 SXM6 AC, 10.3
+
+2.15.0+cu132 3.9.0 (10, 3)
+
+CHECK K=1 max|err| fused=0.0003 baseline=0.0003
+{"K": 1, "fused_ms": 0.068, "base_ms": 0.066, "speedup": 0.972, "fused_GBps": 131.05}
+K=8 max|err| fused=0.0003 baseline=0.0003
+{"K": 8, "fused_ms": 0.075, "base_ms": 0.211, "speedup": 2.82, "fused_GBps": 118.881}
+/usr/local/lib/python3.11/site-packages/triton/knobs.py:504: UserWarning: TRITON_DEFAULT_FP_FUSION is unset: defaulting to FP fusion ENABLED for backward compatibility in Triton 3.9. The default will change to DISABLED in Triton 3.10; set TRITON_DEFAULT_FP_FUSION=1 to keep fusion enabled or =0 to adopt the new default early and silence this warning.
+  warn_once(FP_FUSION_DEFAULT_WARNING)
+
+{"warps": 1, "stages": 1, "nsplit": 8, "K": 1, "fused_ms": 0.8345543500002606, "base_ms": 0.8344412999999662, "speedup": 0.9998645384805742, "fused_GBps": 341.75446092865127}
+{"warps": 1, "stages": 1, "nsplit": 8, "K": 8, "fused_ms": 1.8850265000001087, "base_ms": 3.352243850000036, "speedup": 1.7783536995367666, "fused_GBps": 151.30433020436772}
+{"warps": 1, "stages": 1, "nsplit": 16, "K": 1, "fused_ms": 0.520199099999985, "base_ms": 0.5216888999999725, "speedup": 1.002863903455403, "fused_GBps": 548.2759812541163}
+{"warps": 1, "stages": 1, "nsplit": 16, "K": 8, "fused_ms": 1.4078565500000195, "base_ms": 3.1106811499999054, "speedup": 2.2095156995930174, "fused_GBps": 202.58645811606021}
+{"warps": 1, "stages": 1, "nsplit": 32, "K": 1, "fused_ms": 0.4895613000002186, "base_ms": 0.4901279000002034, "speedup": 1.0011573627245138, "fused_GBps": 582.5882723979054}
+{"warps": 1, "stages": 1, "nsplit": 32, "K": 8, "fused_ms": 1.5623857500003169, "base_ms": 3.1303157000003523, "speedup": 2.00354854746961, "fused_GBps": 182.54945809633895}
+{"warps": 1, "stages": 1, "nsplit": 64, "K": 1, "fused_ms": 0.4736461999996777, "base_ms": 0.47265955000028725, "speedup": 0.9979169050667119, "fused_GBps": 602.1639612018297}
+{"warps": 1, "stages": 1, "nsplit": 64, "K": 8, "fused_ms": 1.8931693499993685, "base_ms": 3.2075945500004366, "speedup": 1.6942987958269589, "fused_GBps": 150.65354401606763}
+{"warps": 1, "stages": 2, "nsplit": 8, "K": 1, "fused_ms": 0.811266450000403, "base_ms": 0.8137849000000585, "speedup": 1.0031043438313691, "fused_GBps": 351.5647319075728}
+{"warps": 1, "stages": 2, "nsplit": 8, "K": 8, "fused_ms": 2.1383350500002507, "base_ms": 3.2307277000001022, "speedup": 1.5108613124027142, "fused_GBps": 133.3807216039257}
+{"warps": 1, "stages": 2, "nsplit": 16, "K": 1, "fused_ms": 0.47050834999993185, "base_ms": 0.4725952500002961, "speedup": 1.004435415440267, "fused_GBps": 606.1798308149926}
+{"warps": 1, "stages": 2, "nsplit": 16, "K": 8, "fused_ms": 2.2803042500001425, "base_ms": 3.177495949999809, "speedup": 1.3934526280866295, "fused_GBps": 125.07658660022327}
+{"warps": 1, "stages": 2, "nsplit": 32, "K": 1, "fused_ms": 0.4692678999994371, "base_ms": 0.4666321499996684, "speedup": 0.994383272327445, "fused_GBps": 607.7821900887365}
+{"warps": 1, "stages": 2, "nsplit": 32, "K": 8, "fused_ms": 1.865820800000506, "base_ms": 3.077949449999551, "speedup": 1.6496490177399221, "fused_GBps": 152.86177107679507}
+{"warps": 1, "stages": 2, "nsplit": 64, "K": 1, "fused_ms": 0.4497957499999927, "base_ms": 0.44646079999992594, "speedup": 0.9925856347018244, "fused_GBps": 634.0937458835584}
+{"warps": 1, "stages": 2, "nsplit": 64, "K": 8, "fused_ms": 1.9317417499998157, "base_ms": 3.063296799999904, "speedup": 1.585769319320347, "fused_GBps": 147.64534234455883}
+{"warps": 1, "stages": 3, "nsplit": 8, "K": 1, "fused_ms": 0.750246999999149, "base_ms": 0.7491675500006068, "speedup": 0.9985612071777115, "fused_GBps": 380.1583638459381}
+{"warps": 1, "stages": 3, "nsplit": 8, "K": 8, "fused_ms": 2.3172950000002857, "base_ms": 3.0845364499995753, "speedup": 1.331093559516244, "fused_GBps": 123.08000146721277}
+{"warps": 1, "stages": 3, "nsplit": 16, "K": 1, "fused_ms": 0.44406690000045046, "base_ms": 0.4547471499989797, "speedup": 1.0240509932141268, "fused_GBps": 642.27410779707}
+{"warps": 1, "stages": 3, "nsplit": 16, "K": 8, "fused_ms": 2.3845445499986795, "base_ms": 3.0157521500001394, "speedup": 1.2647078243943102, "fused_GBps": 119.60886702668564}
+{"warps": 1, "stages": 3, "nsplit": 32, "K": 1, "fused_ms": 0.44148409999991145, "base_ms": 0.44041190000001507, "speedup": 0.9975713734653262, "fused_GBps": 646.031583017502}
+{"warps": 1, "stages": 3, "nsplit": 32, "K": 8, "fused_ms": 1.928866849999622, "base_ms": 2.9500856499993233, "speedup": 1.5294397588925859, "fused_GBps": 147.86540190685318}
+{"warps": 1, "stages": 3, "nsplit": 64, "K": 1, "fused_ms": 0.4235897000000932, "base_ms": 0.4245435999990832, "speedup": 1.002251943328626, "fused_GBps": 673.3229632352658}
+{"warps": 1, "stages": 3, "nsplit": 64, "K": 8, "fused_ms": 2.1234710000001655, "base_ms": 2.939997549999873, "speedup": 1.384524464897163, "fused_GBps": 134.31437114044775}
+{"warps": 2, "stages": 1, "nsplit": 8, "K": 1, "fused_ms": 0.410809349999397, "base_ms": 0.40970179999959555, "speedup": 0.9973039805452258, "fused_GBps": 694.2701571919398}
+{"warps": 2, "stages": 1, "nsplit": 8, "K": 8, "fused_ms": 1.7392293000000336, "base_ms": 2.7595370500009153, "speedup": 1.586643607028045, "fused_GBps": 163.98796409420797}
+{"warps": 2, "stages": 1, "nsplit": 16, "K": 1, "fused_ms": 0.40424314999967237, "base_ms": 0.40256300000010015, "speedup": 0.9958437143596036, "fused_GBps": 705.5473222000945}
+{"warps": 2, "stages": 1, "nsplit": 16, "K": 8, "fused_ms": 1.6311557999998172, "base_ms": 2.7355429000010645, "speedup": 1.6770580100327455, "fused_GBps": 174.85311458294294}
+{"warps": 2, "stages": 1, "nsplit": 32, "K": 1, "fused_ms": 0.40240215000011403, "base_ms": 0.4011725500006946, "speedup": 0.9969443503236275, "fused_GBps": 708.7752190188824}
+{"warps": 2, "stages": 1, "nsplit": 32, "K": 8, "fused_ms": 1.6443789499987815, "base_ms": 2.7225508000000787, "speedup": 1.655671157796137, "fused_GBps": 173.4470463759046}
+{"warps": 2, "stages": 1, "nsplit": 64, "K": 1, "fused_ms": 0.37584094999942863, "base_ms": 0.3740252000000055, "speedup": 0.9951688340522077, "fused_GBps": 758.865344503928}
+{"warps": 2, "stages": 1, "nsplit": 64, "K": 8, "fused_ms": 1.531665849999797, "base_ms": 2.7133468499997093, "speedup": 1.7715005201689837, "fused_GBps": 186.21076653242469}
+{"warps": 2, "stages": 2, "nsplit": 8, "K": 1, "fused_ms": 0.36912074999975175, "base_ms": 0.367464750000579, "speedup": 0.9955136632140731, "fused_GBps": 772.6812215249123}
+{"warps": 2, "stages": 2, "nsplit": 8, "K": 8, "fused_ms": 0.7966467999992233, "base_ms": 2.393617700001016, "speedup": 3.0046159728544066, "fused_GBps": 358.01646601766066}
+{"warps": 2, "stages": 2, "nsplit": 16, "K": 1, "fused_ms": 0.340116099999932, "base_ms": 0.33945625000058044, "speedup": 0.9980599271855944, "fused_GBps": 838.5744514889388}
+{"warps": 2, "stages": 2, "nsplit": 16, "K": 8, "fused_ms": 0.7722702499989964, "base_ms": 2.316107200000772, "speedup": 2.9990889847223587, "fused_GBps": 369.317181388731}
+{"warps": 2, "stages": 2, "nsplit": 32, "K": 1, "fused_ms": 0.3384382500001948, "base_ms": 0.3386857999998938, "speedup": 1.0007314480549963, "fused_GBps": 842.7317893288831}
+{"warps": 2, "stages": 2, "nsplit": 32, "K": 8, "fused_ms": 0.7750946000001591, "base_ms": 2.309964799999875, "speedup": 2.9802359608741966, "fused_GBps": 367.97143471253895}
+{"warps": 2, "stages": 2, "nsplit": 64, "K": 1, "fused_ms": 0.32739435000053163, "base_ms": 0.32704929999880505, "speedup": 0.9989460722161941, "fused_GBps": 871.1594198236373}
+{"warps": 2, "stages": 2, "nsplit": 64, "K": 8, "fused_ms": 0.7726770999994415, "base_ms": 2.3505333499997505, "speedup": 3.042064207676725, "fused_GBps": 369.12271892127535}
+{"warps": 2, "stages": 3, "nsplit": 8, "K": 1, "fused_ms": 0.3736748500003273, "base_ms": 0.37273040000087576, "speedup": 0.997472535281808, "fused_GBps": 763.2642978240312}
+{"warps": 2, "stages": 3, "nsplit": 8, "K": 8, "fused_ms": 0.7589453999997886, "base_ms": 2.4298001999994767, "speedup": 3.201548095554902, "fused_GBps": 375.80130533774815}
+{"warps": 2, "stages": 3, "nsplit": 16, "K": 1, "fused_ms": 0.34627864999947633, "base_ms": 0.3468612500000745, "speedup": 1.0016824600667673, "fused_GBps": 823.6507564079718}
+{"warps": 2, "stages": 3, "nsplit": 16, "K": 8, "fused_ms": 0.7560131999994724, "base_ms": 2.360873400000685, "speedup": 3.1227938877288555, "fused_GBps": 377.2588520943802}
+{"warps": 2, "stages": 3, "nsplit": 32, "K": 1, "fused_ms": 0.34425104999940004, "base_ms": 0.34365765000075044, "speedup": 0.9982762579848321, "fused_GBps": 828.5019668073548}
+{"warps": 2, "stages": 3, "nsplit": 32, "K": 8, "fused_ms": 0.763821700000733, "base_ms": 2.3517928499998675, "speedup": 3.0789814560094464, "fused_GBps": 373.40215916846336}
+{"warps": 2, "stages": 3, "nsplit": 64, "K": 1, "fused_ms": 0.331152300000781, "base_ms": 0.33017760000007, "speedup": 0.9970566413076138, "fused_GBps": 861.2734140736072}
+{"warps": 2, "stages": 3, "nsplit": 64, "K": 8, "fused_ms": 0.7704933500008337, "base_ms": 2.3942568500018524, "speedup": 3.1074335034809337, "fused_GBps": 370.168895032892}
+{"warps": 4, "stages": 1, "nsplit": 8, "K": 1, "fused_ms": 0.4478803499978312, "base_ms": 0.44711724999899616, "speedup": 0.9982961967435303, "fused_GBps": 636.8055039730613}
+{"warps": 4, "stages": 1, "nsplit": 8, "K": 8, "fused_ms": 0.48810629999991306, "base_ms": 2.2347216000014214, "speedup": 4.578350248709798, "fused_GBps": 584.324914470579}
+{"warps": 4, "stages": 1, "nsplit": 16, "K": 1, "fused_ms": 0.354031000000532, "base_ms": 0.35449020000157816, "speedup": 1.0012970615597094, "fused_GBps": 805.6149659198528}
+{"warps": 4, "stages": 1, "nsplit": 16, "K": 8, "fused_ms": 0.4592061500005684, "base_ms": 2.174264350000499, "speedup": 4.734832819634073, "fused_GBps": 621.0994168951069}
+{"warps": 4, "stages": 1, "nsplit": 32, "K": 1, "fused_ms": 0.32194359999948574, "base_ms": 0.32104889999970965, "speedup": 0.9972209418054045, "fused_GBps": 885.9088113584354}
+{"warps": 4, "stages": 1, "nsplit": 32, "K": 8, "fused_ms": 0.48576589999811404, "base_ms": 2.175906900001223, "speedup": 4.479332328616873, "fused_GBps": 587.1401677250448}
+{"warps": 4, "stages": 1, "nsplit": 64, "K": 1, "fused_ms": 0.32401385000184746, "base_ms": 0.3228207000006478, "speedup": 0.9963175956793424, "fused_GBps": 880.2483967841924}
+{"warps": 4, "stages": 1, "nsplit": 64, "K": 8, "fused_ms": 0.5092641499999218, "base_ms": 2.212392550001141, "speedup": 4.3442927408133505, "fused_GBps": 560.0485956061189}
+{"warps": 4, "stages": 2, "nsplit": 8, "K": 1, "fused_ms": 0.44865994999838676, "base_ms": 0.44750689999943916, "speedup": 0.9974300135348569, "fused_GBps": 635.6989787054216}
+{"warps": 4, "stages": 2, "nsplit": 8, "K": 8, "fused_ms": 0.45245955000154936, "base_ms": 2.2752558999997063, "speedup": 5.028639355699123, "fused_GBps": 630.360596873297}
+{"warps": 4, "stages": 2, "nsplit": 16, "K": 1, "fused_ms": 0.35713930000156324, "base_ms": 0.35625925000033476, "speedup": 0.9975358354534922, "fused_GBps": 798.603435686724}
+{"warps": 4, "stages": 2, "nsplit": 16, "K": 8, "fused_ms": 0.4503021000004992, "base_ms": 2.2403835000005756, "speedup": 4.9752899220281055, "fused_GBps": 633.3807281815559}
+{"warps": 4, "stages": 2, "nsplit": 32, "K": 1, "fused_ms": 0.3293351499991104, "base_ms": 0.32923740000114776, "speedup": 0.9997031899025571, "fused_GBps": 866.0256034036161}
+{"warps": 4, "stages": 2, "nsplit": 32, "K": 8, "fused_ms": 0.45344995000107247, "base_ms": 2.237373500000217, "speedup": 4.934113456170687, "fused_GBps": 628.9837985412181}
+{"warps": 4, "stages": 2, "nsplit": 64, "K": 1, "fused_ms": 0.3306103999989318, "base_ms": 0.32940954999958194, "speedup": 0.9963677791159813, "fused_GBps": 862.6851181962863}
+{"warps": 4, "stages": 2, "nsplit": 64, "K": 8, "fused_ms": 0.5192816000004541, "base_ms": 2.289414699998815, "speedup": 4.408811519600951, "fused_GBps": 549.2447103840201}
+{"warps": 4, "stages": 3, "nsplit": 8, "K": 1, "fused_ms": 0.327708250000569, "base_ms": 0.3265325499995697, "speedup": 0.9964123576351913, "fused_GBps": 870.3249674047106}
+{"warps": 4, "stages": 3, "nsplit": 8, "K": 8, "fused_ms": 0.4512557000026618, "base_ms": 2.0470576000008123, "speedup": 4.536358432677387, "fused_GBps": 632.0422589638594}
+{"warps": 4, "stages": 3, "nsplit": 16, "K": 1, "fused_ms": 0.29569714999979624, "base_ms": 0.29450865000058, "speedup": 0.9959806849703589, "fused_GBps": 964.5431888680581}
+{"warps": 4, "stages": 3, "nsplit": 16, "K": 8, "fused_ms": 0.44963345000041954, "base_ms": 2.0251061500005108, "speedup": 4.503904569374501, "fused_GBps": 634.3226287984887}
+{"warps": 4, "stages": 3, "nsplit": 32, "K": 1, "fused_ms": 0.29008565000196995, "base_ms": 0.2891665499987539, "speedup": 0.996831625407152, "fused_GBps": 983.2015889033572}
+{"warps": 4, "stages": 3, "nsplit": 32, "K": 8, "fused_ms": 0.4542028499997741, "base_ms": 2.024456199998781, "speedup": 4.457163137571214, "fused_GBps": 627.9411765032778}
+{"warps": 4, "stages": 3, "nsplit": 64, "K": 1, "fused_ms": 0.28825729999937266, "base_ms": 0.2874012000006587, "speedup": 0.9970300838913159, "fused_GBps": 989.4378112908873}
+{"warps": 4, "stages": 3, "nsplit": 64, "K": 8, "fused_ms": 0.5234349999994947, "base_ms": 2.072481800001924, "speedup": 3.9593871254385453, "fused_GBps": 544.8865131301409}
+{"warps": 8, "stages": 1, "nsplit": 8, "K": 1, "fused_ms": 0.45229195000047184, "base_ms": 0.4519171999987748, "speedup": 0.9991714422472108, "fused_GBps": 630.5941814788047}
+{"warps": 8, "stages": 1, "nsplit": 8, "K": 8, "fused_ms": 0.45670810000046913, "base_ms": 2.9301991000011185, "speedup": 6.415912264306477, "fused_GBps": 624.4966358155395}
+{"warps": 8, "stages": 1, "nsplit": 16, "K": 1, "fused_ms": 0.4503504000012981, "base_ms": 0.4490603999983023, "speedup": 0.9971355637676971, "fused_GBps": 633.312798210411}
+{"warps": 8, "stages": 1, "nsplit": 16, "K": 8, "fused_ms": 0.4490763500001549, "base_ms": 2.8468791499989266, "speedup": 6.339410102531439, "fused_GBps": 635.1095353827955}
+{"warps": 8, "stages": 1, "nsplit": 32, "K": 1, "fused_ms": 0.409072700000479, "base_ms": 0.40629620000061095, "speedup": 0.993212697889972, "fused_GBps": 697.217565483265}
+{"warps": 8, "stages": 1, "nsplit": 32, "K": 8, "fused_ms": 0.4449221499982059, "base_ms": 2.8422132499997588, "speedup": 6.388113628443133, "fused_GBps": 641.0394987103925}
+{"warps": 8, "stages": 1, "nsplit": 64, "K": 1, "fused_ms": 0.41660370000045077, "base_ms": 0.4159349499985865, "speedup": 0.9983947574112675, "fused_GBps": 684.6138716475427}
+{"warps": 8, "stages": 1, "nsplit": 64, "K": 8, "fused_ms": 0.5059517000006508, "base_ms": 2.9069785499984846, "speedup": 5.745565337550492, "fused_GBps": 563.7152162936366}
+{"warps": 8, "stages": 2, "nsplit": 8, "K": 1, "fused_ms": 0.466648100001521, "base_ms": 0.4644654499998069, "speedup": 0.9953227067640327, "fused_GBps": 611.1943282294953}
+{"warps": 8, "stages": 2, "nsplit": 8, "K": 8, "fused_ms": 0.42618295000238504, "base_ms": 3.009166300000743, "speedup": 7.060738351883629, "fused_GBps": 669.2259087286432}
+{"warps": 8, "stages": 2, "nsplit": 16, "K": 1, "fused_ms": 0.44465765000154533, "base_ms": 0.4435068000020692, "speedup": 0.9974118290791307, "fused_GBps": 641.4208144153346}
+{"warps": 8, "stages": 2, "nsplit": 16, "K": 8, "fused_ms": 0.4225338499992404, "base_ms": 2.9479490500023076, "speedup": 6.976835228722166, "fused_GBps": 675.0054983772608}
+{"warps": 8, "stages": 2, "nsplit": 32, "K": 1, "fused_ms": 0.41996455000230526, "base_ms": 0.41791305000060675, "speedup": 0.9951150638745884, "fused_GBps": 679.1351127099524}
+{"warps": 8, "stages": 2, "nsplit": 32, "K": 8, "fused_ms": 0.4294219000001931, "base_ms": 2.943723300001011, "speedup": 6.855084242325991, "fused_GBps": 664.1782172727375}
+{"warps": 8, "stages": 2, "nsplit": 64, "K": 1, "fused_ms": 0.4182077499990555, "base_ms": 0.4177875500005257, "speedup": 0.9989952362228324, "fused_GBps": 681.9880119405825}
+{"warps": 8, "stages": 2, "nsplit": 64, "K": 8, "fused_ms": 0.5005973999999469, "base_ms": 2.9517690500000526, "speedup": 5.896492970199937, "fused_GBps": 569.7446131362852}
+{"warps": 8, "stages": 3, "nsplit": 8, "K": 1, "fused_ms": 0.4428634499987538, "base_ms": 0.4429333000018687, "speedup": 1.0001577235671968, "fused_GBps": 644.0194421120158}
+{"warps": 8, "stages": 3, "nsplit": 8, "K": 8, "fused_ms": 0.42635165000035613, "base_ms": 2.8882473999999547, "speedup": 6.77433147027235, "fused_GBps": 668.9611075734357}
+{"warps": 8, "stages": 3, "nsplit": 16, "K": 1, "fused_ms": 0.4214284499994392, "base_ms": 0.42108420000204205, "speedup": 0.9991831353640278, "fused_GBps": 676.7760268685694}
+{"warps": 8, "stages": 3, "nsplit": 16, "K": 8, "fused_ms": 0.4213003999979037, "base_ms": 2.8535320999992564, "speedup": 6.773153075604616, "fused_GBps": 676.9817261066431}
+{"warps": 8, "stages": 3, "nsplit": 32, "K": 1, "fused_ms": 0.40010705000099733, "base_ms": 0.39946354999926825, "speedup": 0.9983916804222083, "fused_GBps": 712.8409059507676}
+{"warps": 8, "stages": 3, "nsplit": 32, "K": 8, "fused_ms": 0.43126825000001645, "base_ms": 2.847957299999848, "speedup": 6.603679496461285, "fused_GBps": 661.3347307620933}
+{"warps": 8, "stages": 3, "nsplit": 64, "K": 1, "fused_ms": 0.4129414000004772, "base_ms": 0.4123748500006741, "speedup": 0.9986280135636619, "fused_GBps": 690.6855839585724}
+{"warps": 8, "stages": 3, "nsplit": 64, "K": 8, "fused_ms": 0.5050510500012706, "base_ms": 2.94358465000073, "speedup": 5.828291318260451, "fused_GBps": 564.72048122518}
+BEST {"1": {"warps": 4, "stages": 3, "nsplit": 64, "K": 1, "fused_ms": 0.28825729999937266, "base_ms": 0.2874012000006587, "speedup": 0.9970300838913159, "fused_GBps": 989.4378112908873}, "8": {"warps": 8, "stages": 3, "nsplit": 16, "K": 8, "fused_ms": 0.4213003999979037, "base_ms": 2.8535320999992564, "speedup": 6.773153075604616, "fused_GBps": 676.9817261066431}}
+## tuned warps=4 stages=3 nsplit=64 ks=[1]
+K=1 max|err| fused=0.0001 baseline=0.0001
+{"K": 1, "fused_ms": 0.288, "base_ms": 0.287, "speedup": 0.997, "fused_GBps": 989.588}
+/usr/local/lib/python3.11/site-packages/triton/knobs.py:504: UserWarning: TRITON_DEFAULT_FP_FUSION is unset: defaulting to FP fusion ENABLED for backward compatibility in Triton 3.9. The default will change to DISABLED in Triton 3.10; set TRITON_DEFAULT_FP_FUSION=1 to keep fusion enabled or =0 to adopt the new default early and silence this warning.
+  warn_once(FP_FUSION_DEFAULT_WARNING)
+
+## tuned warps=8 stages=3 nsplit=16 ks=[2, 4, 8]
+K=2 max|err| fused=0.0001 baseline=0.0001
+{"K": 2, "fused_ms": 0.421, "base_ms": 0.777, "speedup": 1.844, "fused_GBps": 676.679}
+K=4 max|err| fused=0.0001 baseline=0.0001
+{"K": 4, "fused_ms": 0.532, "base_ms": 1.479, "speedup": 2.779, "fused_GBps": 535.717}
+K=8 max|err| fused=0.0001 baseline=0.0001
+{"K": 8, "fused_ms": 0.421, "base_ms": 2.85, "speedup": 6.77, "fused_GBps": 677.427}
+/usr/local/lib/python3.11/site-packages/triton/knobs.py:504: UserWarning: TRITON_DEFAULT_FP_FUSION is unset: defaulting to FP fusion ENABLED for backward compatibility in Triton 3.9. The default will change to DISABLED in Triton 3.10; set TRITON_DEFAULT_FP_FUSION=1 to keep fusion enabled or =0 to adopt the new default early and silence this warning.
+  warn_once(FP_FUSION_DEFAULT_WARNING)
+
+## orig-default warps=4 stages=2 nsplit=16 ks=[1, 2, 4, 8]
+K=1 max|err| fused=0.0001 baseline=0.0001
+{"K": 1, "fused_ms": 0.357, "base_ms": 0.356, "speedup": 0.997, "fused_GBps": 798.427}
+K=2 max|err| fused=0.0001 baseline=0.0001
+{"K": 2, "fused_ms": 0.357, "base_ms": 0.639, "speedup": 1.791, "fused_GBps": 799.23}
+K=4 max|err| fused=0.0001 baseline=0.0001
+{"K": 4, "fused_ms": 0.422, "base_ms": 1.188, "speedup": 2.817, "fused_GBps": 676.137}
+K=8 max|err| fused=0.0001 baseline=0.0001
+{"K": 8, "fused_ms": 0.45, "base_ms": 2.24, "speedup": 4.976, "fused_GBps": 633.475}
+/usr/local/lib/python3.11/site-packages/triton/knobs.py:504: UserWarning: TRITON_DEFAULT_FP_FUSION is unset: defaulting to FP fusion ENABLED for backward compatibility in Triton 3.9. The default will change to DISABLED in Triton 3.10; set TRITON_DEFAULT_FP_FUSION=1 to keep fusion enabled or =0 to adopt the new default early and silence this warning.
+  warn_once(FP_FUSION_DEFAULT_WARNING)
+
