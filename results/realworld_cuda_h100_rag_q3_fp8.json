@@ -1,0 +1,1238 @@
+{
+ "tag": "cuda_h100_rag_q3_fp8",
+ "model": "Qwen3-8B",
+ "kv": "fp8",
+ "extra": "",
+ "ts": "2026-11-11T08:55:27Z",
+ "server": {
+  "kv_cache_tokens": 758016,
+  "max_concurrency_at_maxlen": 23.13,
+  "kv_cache_gib": 52.05,
+  "weights_gib": 15.27,
+  "attn_backend": "FLASH_ATTN",
+  "startup_s": 66.0
+ },
+ "result": {
+  "workload": "rag_hotpotqa",
+  "n": 300,
+  "ctx_tokens": 16000,
+  "EM": 0.46,
+  "F1": 0.5805426147926148,
+  "wall_s": 168.1837482900005,
+  "ttft_p50": 7.924007241999789,
+  "ttft_p99": 8.754870632000348,
+  "samples": [
+   {
+    "gold": "yes",
+    "pred": "No"
+   },
+   {
+    "gold": "Chief of Protocol",
+    "pred": "Janet Waldo"
+   },
+   {
+    "gold": "Animorphs",
+    "pred": "The Hork-Bajir Chronicles"
+   },
+   {
+    "gold": "no",
+    "pred": "No."
+   },
+   {
+    "gold": "Greenwich Village, New York City",
+    "pred": "Greenwich Village"
+   },
+   {
+    "gold": "YG Entertainment",
+    "pred": "YG Entertainment"
+   },
+   {
+    "gold": "Eenasul Fateh",
+    "pred": "Eenasul Fateh"
+   },
+   {
+    "gold": "3,677 seated",
+    "pred": "4,000"
+   },
+   {
+    "gold": "Terry Richardson",
+    "pred": "Terry Richardson"
+   },
+   {
+    "gold": "yes",
+    "pred": "Yes"
+   },
+   {
+    "gold": "Kansas Song",
+    "pred": "Kansas Song"
+   },
+   {
+    "gold": "David Weissman",
+    "pred": "David Weissman"
+   },
+   {
+    "gold": "1999",
+    "pred": "1999"
+   },
+   {
+    "gold": "no",
+    "pred": "No"
+   },
+   {
+    "gold": "from 1986 to 2013",
+    "pred": "1945\u20131969"
+   },
+   {
+    "gold": "9,984",
+    "pred": "31,000,000"
+   },
+   {
+    "gold": "the North Atlantic Conference",
+    "pred": "North Atlantic Conference"
+   },
+   {
+    "gold": "yes",
+    "pred": "Yes"
+   },
+   {
+    "gold": "1969 until 1974",
+    "pred": "1969\u20131974"
+   },
+   {
+    "gold": "Robert Erskine Childers DSC",
+    "pred": "Henry Roth"
+   },
+   {
+    "gold": "Pedro Rodr\u00edguez",
+    "pred": "Sergio P\u00e9rez"
+   },
+   {
+    "gold": "Sonic",
+    "pred": "Sonic the Hedgehog"
+   },
+   {
+    "gold": "keyboard function keys",
+    "pred": "Front Row"
+   },
+   {
+    "gold": "Badly Drawn Boy",
+    "pred": "Wolf Alice"
+   },
+   {
+    "gold": "World's Best Goalkeeper",
+    "pred": "World's Best Goalkeeper"
+   },
+   {
+    "gold": "Barton Lee Hazlewood",
+    "pred": "Lee Hazlewood, Nancy Sinatra"
+   },
+   {
+    "gold": "1838",
+    "pred": "1838"
+   },
+   {
+    "gold": "yes",
+    "pred": "Yes"
+   },
+   {
+    "gold": "Henry J. Kaiser",
+    "pred": "Henry J. Kaiser"
+   },
+   {
+    "gold": "Arena of Khazan",
+    "pred": "Crusaders of Khazan"
+   },
+   {
+    "gold": "2000",
+    "pred": "2000"
+   },
+   {
+    "gold": "Fujioka, Gunma",
+    "pred": "Japan"
+   },
+   {
+    "gold": "Charles Eug\u00e8ne",
+    "pred": "Charles Nungesser and Fran\u00e7ois Coli"
+   },
+   {
+    "gold": "no",
+    "pred": "No"
+   },
+   {
+    "gold": "Letters to Cleo",
+    "pred": "Screaming Trees"
+   },
+   {
+    "gold": "October 1922",
+    "pred": "1922"
+   },
+   {
+    "gold": "2000",
+    "pred": "2000"
+   },
+   {
+    "gold": "World War II",
+    "pred": "World War II"
+   },
+   {
+    "gold": "no",
+    "pred": "No"
+   },
+   {
+    "gold": "New York City",
+    "pred": "Muncie"
+   },
+   {
+    "gold": "Scotch Collie",
+    "pred": "The Scotch Collie"
+   },
+   {
+    "gold": "Mumbai",
+    "pred": "Kochi"
+   },
+   {
+    "gold": "1962",
+    "pred": "1962"
+   },
+   {
+    "gold": "sovereignty",
+    "pred": "sovereignty"
+   },
+   {
+    "gold": "Nelson Rockefeller",
+    "pred": "Nelson Rockefeller"
+   },
+   {
+    "gold": "Yellowcraig",
+    "pred": "Yellowcraigs"
+   },
+   {
+    "gold": "Phil Spector",
+    "pred": "Phil Spector"
+   },
+   {
+    "gold": "Organizations could come together to address global issues",
+    "pred": "World Summit of Nobel Peace Laureates"
+   },
+   {
+    "gold": "yes",
+    "pred": "Yes"
+   },
+   {
+    "gold": "English Electric Canberra",
+    "pred": "English Electric Canberra"
+   },
+   {
+    "gold": "2009 Big 12 Conference",
+    "pred": "2009, Big 12 Conference"
+   },
+   {
+    "gold": "1,462",
+    "pred": "1,462"
+   },
+   {
+    "gold": "Indianapolis Motor Speedway",
+    "pred": "Darlington Raceway"
+   },
+   {
+    "gold": "Rome",
+    "pred": "Rome"
+   },
+   {
+    "gold": "Max Martin, Savan Kotecha and Ilya Salmanzadeh",
+    "pred": "Max Martin, Savan Kotecha, Ilya Salmanzadeh"
+   },
+   {
+    "gold": "Marion, South Australia",
+    "pred": "Marion"
+   },
+   {
+    "gold": "Drifting",
+    "pred": "Drifting"
+   },
+   {
+    "gold": "Keith Bostic",
+    "pred": "Jerry Glanville"
+   },
+   {
+    "gold": "35,124",
+    "pred": "103,000"
+   },
+   {
+    "gold": "no",
+    "pred": "Yes"
+   },
+   {
+    "gold": "shortest player ever to play in the National Basketball Association",
+    "pred": "shortest player in NBA"
+   },
+   {
+    "gold": "Ronald Shusett",
+    "pred": "The film is \"Alien\" (1979), and the executive producer is Gordon Carroll, David Giler"
+   },
+   {
+    "gold": "Adeline Virginia Woolf",
+    "pred": "Virginia Woolf"
+   },
+   {
+    "gold": "821",
+    "pred": "821"
+   },
+   {
+    "gold": "more than 70 countries",
+    "pred": "70"
+   },
+   {
+    "gold": "Charmed",
+    "pred": "Charmed"
+   },
+   {
+    "gold": "International Boxing Hall of Fame",
+    "pred": "International Boxing Hall of Fame"
+   },
+   {
+    "gold": "Usher",
+    "pred": "Usher"
+   },
+   {
+    "gold": "Bill Murray",
+    "pred": "Brian Doyle-Murray"
+   },
+   {
+    "gold": "Carabao Cup",
+    "pred": "Carabao Cup"
+   },
+   {
+    "gold": "Teen Titans Go!",
+    "pred": "Teen Titans"
+   },
+   {
+    "gold": "276,170 inhabitants",
+    "pred": "Strasbourg"
+   },
+   {
+    "gold": "orange",
+    "pred": "orange"
+   },
+   {
+    "gold": "Tromeo and Juliet",
+    "pred": "Tromeo and Juliet"
+   },
+   {
+    "gold": "William Jefferson Clinton",
+    "pred": "Bill Clinton"
+   },
+   {
+    "gold": "John John Florence",
+    "pred": "John John Florence"
+   },
+   {
+    "gold": "Ann",
+    "pred": "Christopher"
+   },
+   {
+    "gold": "Apalachees",
+    "pred": "Ais"
+   },
+   {
+    "gold": "British",
+    "pred": "British"
+   },
+   {
+    "gold": "1865",
+    "pred": "1865"
+   },
+   {
+    "gold": "Newport",
+    "pred": "Lempster"
+   },
+   {
+    "gold": "Bob Seger",
+    "pred": "Bob Seger"
+   },
+   {
+    "gold": "Conscription",
+    "pred": "requiring only men to register for the draft"
+   },
+   {
+    "gold": "Mondelez International, Inc.",
+    "pred": "Mondelez International"
+   },
+   {
+    "gold": "Monica Lewinsky",
+    "pred": "Monica Lewinsky"
+   },
+   {
+    "gold": "April 1, 1949",
+    "pred": "1949"
+   },
+   {
+    "gold": "1866",
+    "pred": "1866"
+   },
+   {
+    "gold": "Canary Islands, Spain",
+    "pred": "Tenerife, Spain"
+   },
+   {
+    "gold": "250 million",
+    "pred": "250 million"
+   },
+   {
+    "gold": "director",
+    "pred": "film director and cinematographer"
+   },
+   {
+    "gold": "The Conversation",
+    "pred": "The Conversation"
+   },
+   {
+    "gold": "John Waters",
+    "pred": "John Waters"
+   },
+   {
+    "gold": "Las Vegas Strip in Paradise",
+    "pred": "Las Vegas"
+   },
+   {
+    "gold": "no",
+    "pred": "No"
+   },
+   {
+    "gold": "March and April",
+    "pred": "March and April"
+   },
+   {
+    "gold": "Fairfax County",
+    "pred": "Fairfax County"
+   },
+   {
+    "gold": "IT products and services",
+    "pred": "IT products and services"
+   },
+   {
+    "gold": "Levni Yilmaz",
+    "pred": "Lev Yilmaz"
+   },
+   {
+    "gold": "Beijing",
+    "pred": "Rabat"
+   },
+   {
+    "gold": "no",
+    "pred": "No."
+   },
+   {
+    "gold": "Coahuila, Mexico",
+    "pred": "Florida and Oklahoma"
+   },
+   {
+    "gold": "Larnelle Harris",
+    "pred": "Karen Clark-Sheard"
+   },
+   {
+    "gold": "2003",
+    "pred": "1999"
+   },
+   {
+    "gold": "North Avenue at Techwood Drive",
+    "pred": "Grant Field"
+   },
+   {
+    "gold": "Leo Varadkar",
+    "pred": "Leo Varadkar"
+   },
+   {
+    "gold": "George Raft",
+    "pred": "George Raft"
+   },
+   {
+    "gold": "1887",
+    "pred": "1892"
+   },
+   {
+    "gold": "business",
+    "pred": "value investing"
+   },
+   {
+    "gold": "7 October 1978",
+    "pred": "7 October 1978"
+   },
+   {
+    "gold": "B-17 Flying Fortress bomber",
+    "pred": "B-17 Flying Fortress"
+   },
+   {
+    "gold": "Blake Shelton",
+    "pred": "Blake Shelton"
+   },
+   {
+    "gold": "three centuries",
+    "pred": "three"
+   },
+   {
+    "gold": "7 January 1936",
+    "pred": "1936"
+   },
+   {
+    "gold": "George Archainbaud",
+    "pred": "George Archainbaud"
+   },
+   {
+    "gold": "picric acid",
+    "pred": "Picric acid"
+   },
+   {
+    "gold": "230",
+    "pred": "16"
+   },
+   {
+    "gold": "Marvel",
+    "pred": "Marvel"
+   },
+   {
+    "gold": "United States Senator",
+    "pred": "U.S. Representative for Maryland's 8th congressional district"
+   },
+   {
+    "gold": "no",
+    "pred": "No, Skin Yard was from the U.S., Ostava from Bulgaria."
+   },
+   {
+    "gold": "yes",
+    "pred": "Yes"
+   },
+   {
+    "gold": "The A41",
+    "pred": "A5117"
+   },
+   {
+    "gold": "Princess Jessica",
+    "pred": "Princess Jessica"
+   },
+   {
+    "gold": "The Spiderwick Chronicles",
+    "pred": "The Spiderwick Chronicles"
+   },
+   {
+    "gold": "KKR & Co",
+    "pred": "Kohlberg Kravis Roberts"
+   },
+   {
+    "gold": "The Bye Bye Man",
+    "pred": "The Bye Bye Man"
+   },
+   {
+    "gold": "Richmond",
+    "pred": "Richmond River"
+   },
+   {
+    "gold": "Owsley Stanley",
+    "pred": "Owsley Stanley"
+   },
+   {
+    "gold": "the late 12th Century",
+    "pred": "1422"
+   },
+   {
+    "gold": "San Luis Obispo, California",
+    "pred": "San Luis Obispo"
+   },
+   {
+    "gold": "Mercedes-Benz Superdome",
+    "pred": "Cardinal Stadium"
+   },
+   {
+    "gold": "LaLee's Kin: The Legacy of Cotton",
+    "pred": "LaLee's Kin: The Legacy of Cotton"
+   },
+   {
+    "gold": "Pirate's Cove",
+    "pred": "Catan"
+   },
+   {
+    "gold": "Crystal Dynamics",
+    "pred": "Square Enix"
+   },
+   {
+    "gold": "\"The Marshall Mathers LP 2\"",
+    "pred": "Unapologetic"
+   },
+   {
+    "gold": "Suicide Squad",
+    "pred": "Harsh Times"
+   },
+   {
+    "gold": "Jillian Belk",
+    "pred": "Heidi Gardner"
+   },
+   {
+    "gold": "Texas Tech University",
+    "pred": "Texas Tech University"
+   },
+   {
+    "gold": "Lord Combermere",
+    "pred": "Stapleton Cotton"
+   },
+   {
+    "gold": "seasonal television specials, particularly its work in stop motion animation",
+    "pred": "stop motion animation"
+   },
+   {
+    "gold": "2014",
+    "pred": "2008"
+   },
+   {
+    "gold": "Oxford",
+    "pred": "Oxford"
+   },
+   {
+    "gold": "Roberta Vinci",
+    "pred": "Roberta Vinci"
+   },
+   {
+    "gold": "\"Teach the Controversy\" campaign",
+    "pred": "Teach the Controversy"
+   },
+   {
+    "gold": "Lostprophets disbanded in 2013 after Watkins was charged with sexual offences in late 2012.",
+    "pred": "Ian Watkins"
+   },
+   {
+    "gold": "Nebo Zovyot",
+    "pred": "Nebo Zovyot"
+   },
+   {
+    "gold": "Erika Jayne",
+    "pred": "Marco Da Silva"
+   },
+   {
+    "gold": "2009",
+    "pred": "2009"
+   },
+   {
+    "gold": "Kingdom of the Isles",
+    "pred": "The Kingdom of the Isles"
+   },
+   {
+    "gold": "The Beatles",
+    "pred": "The Beatles"
+   },
+   {
+    "gold": "\"We'll Burn That Bridge\"",
+    "pred": "(Who Says) You Can't Have It All"
+   },
+   {
+    "gold": "director",
+    "pred": "film director"
+   },
+   {
+    "gold": "1901",
+    "pred": "1901"
+   },
+   {
+    "gold": "Argand lamp",
+    "pred": "Argand lamp"
+   },
+   {
+    "gold": "seven",
+    "pred": "ten"
+   },
+   {
+    "gold": "yes",
+    "pred": "Yes"
+   },
+   {
+    "gold": "Brazil",
+    "pred": "Brazil"
+   },
+   {
+    "gold": "The Seven Days Battles",
+    "pred": "Seven Days Battles"
+   },
+   {
+    "gold": "Lush Ltd.",
+    "pred": "Lush"
+   },
+   {
+    "gold": "Manchester United",
+    "pred": "Old Trafford"
+   },
+   {
+    "gold": "1989",
+    "pred": "1989"
+   },
+   {
+    "gold": "Kathryn Jean Martin",
+    "pred": "Kathy Sullivan"
+   },
+   {
+    "gold": "Frank Lowy",
+    "pred": "Frank Lowy"
+   },
+   {
+    "gold": "Las Vegas",
+    "pred": "Las Vegas"
+   },
+   {
+    "gold": "Kelly Lee Osbourne",
+    "pred": "Kelly Osbourne"
+   },
+   {
+    "gold": "Sean Yseult.",
+    "pred": "Sean Yseult"
+   },
+   {
+    "gold": "Prescription Drug User Fee Act",
+    "pred": "pharmaceutical companies"
+   },
+   {
+    "gold": "Dinosaur",
+    "pred": "Dinosaur"
+   },
+   {
+    "gold": "Wichita",
+    "pred": "Wichita"
+   },
+   {
+    "gold": "United States presidential election of 2016",
+    "pred": "2016 United States presidential election"
+   },
+   {
+    "gold": "Roman",
+    "pred": "Roman Empire"
+   },
+   {
+    "gold": "C. W. Grafton",
+    "pred": "Sue Grafton"
+   },
+   {
+    "gold": "Brooklyn, New York",
+    "pred": "New York"
+   },
+   {
+    "gold": "48,982",
+    "pred": "26,245"
+   },
+   {
+    "gold": "Pasek & Paul",
+    "pred": "Pasek and Paul"
+   },
+   {
+    "gold": "City of Newcastle",
+    "pred": "Shelly Beach is a coastal suburb of the Central Coast region of New South Wales, Australia, located east of Tug"
+   },
+   {
+    "gold": "yes",
+    "pred": "Yes"
+   },
+   {
+    "gold": "drawings",
+    "pred": "Drawings"
+   },
+   {
+    "gold": "between the 8th and 16th centuries",
+    "pred": "8th to 12th century"
+   },
+   {
+    "gold": "Alistair Grant",
+    "pred": "William Smoot"
+   },
+   {
+    "gold": "Scotland",
+    "pred": "Scotland"
+   },
+   {
+    "gold": "Comedy Film Nerds",
+    "pred": "The Nerdist Podcast"
+   },
+   {
+    "gold": "Summerlin",
+    "pred": "Las Vegas"
+   },
+   {
+    "gold": "George Harrison",
+    "pred": "George Harrison"
+   },
+   {
+    "gold": "Canadian professional ice hockey centre",
+    "pred": "Center"
+   },
+   {
+    "gold": "1952",
+    "pred": "1952"
+   },
+   {
+    "gold": "third",
+    "pred": "Season 3"
+   },
+   {
+    "gold": "Mark Neveldine and Brian Taylor",
+    "pred": "Mark Neveldine and Brian Taylor"
+   },
+   {
+    "gold": "Hidden America with Jonah Ray",
+    "pred": "Hidden America with Jonah Ray"
+   },
+   {
+    "gold": "no",
+    "pred": "Yes"
+   },
+   {
+    "gold": "1943",
+    "pred": "1992"
+   },
+   {
+    "gold": "Oregon Ducks football",
+    "pred": "Philadelphia Eagles"
+   },
+   {
+    "gold": "National Broadcasting Company",
+    "pred": "NBC"
+   },
+   {
+    "gold": "North African Arab",
+    "pred": "Arab"
+   },
+   {
+    "gold": "Murray Hill",
+    "pred": "Murray Hill, New Jersey"
+   },
+   {
+    "gold": "severe acute respiratory syndrome",
+    "pred": "Severe Acute Respiratory Syndrome (SARS)"
+   },
+   {
+    "gold": "Wendell Berry",
+    "pred": "Wendell Berry"
+   },
+   {
+    "gold": "Tinu Suresh Desai",
+    "pred": "Vikram Bhatt"
+   },
+   {
+    "gold": "Golden Valley, Minnesota,",
+    "pred": "Minneapolis"
+   },
+   {
+    "gold": "$10.5 million",
+    "pred": "$10.5 million"
+   },
+   {
+    "gold": "1999 Odisha cyclone",
+    "pred": "Cyclone Kesiny"
+   },
+   {
+    "gold": "Crackle",
+    "pred": "Crackle"
+   },
+   {
+    "gold": "Salford City Football Club",
+    "pred": "Salford City F.C."
+   },
+   {
+    "gold": "architect Michael Graves",
+    "pred": "Michael Graves"
+   },
+   {
+    "gold": "multiple awards",
+    "pred": "Multiple awards"
+   },
+   {
+    "gold": "Kevin Spacey",
+    "pred": "Kevin Spacey"
+   },
+   {
+    "gold": "Ryan Seacrest",
+    "pred": "Nicki Minaj"
+   },
+   {
+    "gold": "yes",
+    "pred": "Yes."
+   },
+   {
+    "gold": "Colonel Charles Hastings Judd",
+    "pred": "King Kal\u0101kaua"
+   },
+   {
+    "gold": "Pavel Sergeyevich Alexandrov",
+    "pred": "Semyon Aranovich Gershgorin"
+   },
+   {
+    "gold": "Gal Gadot",
+    "pred": "Gal Gadot"
+   },
+   {
+    "gold": "Rear Adm. J. Edward Snyder",
+    "pred": "USS New Jersey"
+   },
+   {
+    "gold": "Jackson Storm",
+    "pred": "Lightning McQueen"
+   },
+   {
+    "gold": "712 5th Avenue",
+    "pred": "Manhattan Life Insurance Building"
+   },
+   {
+    "gold": "right-hand",
+    "pred": "Right-hand"
+   },
+   {
+    "gold": "Arthur Ignatius Conan Doyle",
+    "pred": "Arthur Conan Doyle"
+   },
+   {
+    "gold": "Birmingham, Alabama",
+    "pred": "Knoxville"
+   },
+   {
+    "gold": "44",
+    "pred": "5"
+   },
+   {
+    "gold": "the Parthian Empire",
+    "pred": "Sasanian Empire"
+   },
+   {
+    "gold": "Erinsborough",
+    "pred": "Erinsborough"
+   },
+   {
+    "gold": "Samoa",
+    "pred": "Answer:\tAnswer:\tAnswer:\tAnswer:\tAnswer:\tAnswer:\tAnswer:\tAnswer:"
+   },
+   {
+    "gold": "Kimberly Couger \"Kimmy\" Schmidt",
+    "pred": "Kimmy Schmidt"
+   },
+   {
+    "gold": "\"The Comic Strip Presents...\"",
+    "pred": "The Young Ones"
+   },
+   {
+    "gold": "no",
+    "pred": "Yes"
+   },
+   {
+    "gold": "nineteenth",
+    "pred": "18th century"
+   },
+   {
+    "gold": "Awake",
+    "pred": "Blog Wars"
+   },
+   {
+    "gold": "French Canadians",
+    "pred": "French Canadians"
+   },
+   {
+    "gold": "American",
+    "pred": "American"
+   },
+   {
+    "gold": "8 km",
+    "pred": "8 km"
+   },
+   {
+    "gold": "Rawhide",
+    "pred": "Rawhide"
+   },
+   {
+    "gold": "Marsilea",
+    "pred": "Marsilea"
+   },
+   {
+    "gold": "Mark Masons' Hall",
+    "pred": "St James's Palace"
+   },
+   {
+    "gold": "Starlite",
+    "pred": "Starlite"
+   },
+   {
+    "gold": "Hong Kong",
+    "pred": "Bank of China Tower"
+   },
+   {
+    "gold": "Craig v. Boren",
+    "pred": "Craig v. Boren"
+   },
+   {
+    "gold": "\"Queen City\"",
+    "pred": "Bangor"
+   },
+   {
+    "gold": "Arrowhead Stadium",
+    "pred": "Arrowhead Stadium"
+   },
+   {
+    "gold": "acidic",
+    "pred": "cranberries"
+   },
+   {
+    "gold": "Compliance",
+    "pred": "Compliance"
+   },
+   {
+    "gold": "Logan International Airport",
+    "pred": "Logan International Airport"
+   },
+   {
+    "gold": "Ehretia",
+    "pred": "Xanthoceras"
+   },
+   {
+    "gold": "a pinball machine",
+    "pred": "Frank Thomas' Big Hurt"
+   },
+   {
+    "gold": "Donna Paige Helmintoller",
+    "pred": "Paige O'Hara"
+   },
+   {
+    "gold": "Reginald Martinez \"Reggie\" Jackson",
+    "pred": "Reggie Jackson"
+   },
+   {
+    "gold": "Thomas Mawson",
+    "pred": "Peter Perry"
+   },
+   {
+    "gold": "strings",
+    "pred": "Sarod"
+   },
+   {
+    "gold": "Brad Silberling",
+    "pred": "Brad Silberling"
+   },
+   {
+    "gold": "25 laps",
+    "pred": "25"
+   },
+   {
+    "gold": "yes",
+    "pred": "Yes."
+   },
+   {
+    "gold": "Thomas Loren Friedman",
+    "pred": "Thomas Friedman"
+   },
+   {
+    "gold": "Taylor Swift",
+    "pred": "Taylor Swift"
+   },
+   {
+    "gold": "Istanbul, Turkey",
+    "pred": "Istanbul"
+   },
+   {
+    "gold": "super-regional shopping mall",
+    "pred": "A super-regional shopping mall"
+   },
+   {
+    "gold": "Ordos City",
+    "pred": "Ordos City"
+   },
+   {
+    "gold": "Scott Sidney",
+    "pred": "Alain Resnais"
+   },
+   {
+    "gold": "over 600 stores",
+    "pred": "600"
+   },
+   {
+    "gold": "Berea College",
+    "pred": "Berea College"
+   },
+   {
+    "gold": "1945",
+    "pred": "1946"
+   },
+   {
+    "gold": "Mountbatten family",
+    "pred": "House of Windsor"
+   },
+   {
+    "gold": "James Burke",
+    "pred": "James Burke"
+   },
+   {
+    "gold": "Gulangyu",
+    "pred": "Gulangyu"
+   },
+   {
+    "gold": "Slaughterhouse-Five",
+    "pred": "Slaughterhouse-Five"
+   },
+   {
+    "gold": "the east of Ireland",
+    "pred": "East"
+   },
+   {
+    "gold": "Distillery",
+    "pred": "Distillery"
+   },
+   {
+    "gold": "Tybalt",
+    "pred": "Romeo"
+   },
+   {
+    "gold": "SKUM",
+    "pred": "SKUM"
+   },
+   {
+    "gold": "Anabolic steroids",
+    "pred": "Anabolic-androgenic steroids"
+   },
+   {
+    "gold": "Don S. Davis",
+    "pred": "Don S. Davis"
+   },
+   {
+    "gold": "Charles Kelley",
+    "pred": "Lady Antebellum"
+   },
+   {
+    "gold": "3,384,569",
+    "pred": "3,384,569"
+   },
+   {
+    "gold": "Anna Clyne",
+    "pred": "Anna Clyne"
+   },
+   {
+    "gold": "USS Essex",
+    "pred": "USS Essex (CV-9)"
+   },
+   {
+    "gold": "yes",
+    "pred": "Yes"
+   },
+   {
+    "gold": "Catwoman",
+    "pred": "Catwoman"
+   },
+   {
+    "gold": "7 miles",
+    "pred": "20 mi"
+   },
+   {
+    "gold": "Laura Ann Osnes",
+    "pred": "Laura Osnes"
+   },
+   {
+    "gold": "20",
+    "pred": "20"
+   },
+   {
+    "gold": "Eucryphia",
+    "pred": "Eucryphia"
+   },
+   {
+    "gold": "Venice",
+    "pred": "Venice"
+   },
+   {
+    "gold": "Waimea Bay",
+    "pred": "Waimea Bay"
+   },
+   {
+    "gold": "evangelical Christian periodical",
+    "pred": "Christianity Today"
+   },
+   {
+    "gold": "James Franco",
+    "pred": "James Franco"
+   },
+   {
+    "gold": "DI Humphrey Goodman",
+    "pred": "Humphrey Goodman"
+   },
+   {
+    "gold": "February",
+    "pred": "October"
+   },
+   {
+    "gold": "Sacred Planet",
+    "pred": "Sacred Planet"
+   },
+   {
+    "gold": "Hanna",
+    "pred": "Calgary"
+   },
+   {
+    "gold": "Ferdi Taygan",
+    "pred": "Mahesh Bhupathi"
+   },
+   {
+    "gold": "paracyclist",
+    "pred": "Formula One"
+   },
+   {
+    "gold": "The Dragon School in Oxford",
+    "pred": "Peterhouse, Cambridge"
+   },
+   {
+    "gold": "Suicide Kings",
+    "pred": "Suicide Kings"
+   },
+   {
+    "gold": "Hey Pa! There's a Goat on the Roof",
+    "pred": "\"Hey Pa! There's a Goat on the Roof\""
+   },
+   {
+    "gold": "a record of 13\u20133",
+    "pred": "13\u20133"
+   },
+   {
+    "gold": "8,211 at the 2010 census",
+    "pred": "Wytheville"
+   },
+   {
+    "gold": "The Crowned Prince of the Philadelphia Mob",
+    "pred": "The Crowned Prince of the Philadelphia Mob"
+   },
+   {
+    "gold": "supervisor of the royal works",
+    "pred": "Architect"
+   },
+   {
+    "gold": "Janet Damita Jo Jackson",
+    "pred": "Janet Jackson"
+   },
+   {
+    "gold": "Continental Army",
+    "pred": "Continental Army"
+   },
+   {
+    "gold": "Macaronesia",
+    "pred": "Canary Islands"
+   },
+   {
+    "gold": "Treaty of Gandamak",
+    "pred": "Treaty of Gandamak"
+   },
+   {
+    "gold": "Oregon",
+    "pred": "Oregon"
+   },
+   {
+    "gold": "early 1970s",
+    "pred": "early 1970s"
+   }
+  ]
+ },
+ "metrics_tail": {
+  "vllm:prefix_cache_queries_total{engine=\"0\",model_name=\"m\"}": 5233302.0,
+  "vllm:prefix_cache_queries_created{engine=\"0\",model_name=\"m\"}": 1794387391.6241803,
+  "vllm:prefix_cache_hits_total{engine=\"0\",model_name=\"m\"}": 4784.0,
+  "vllm:prefix_cache_hits_created{engine=\"0\",model_name=\"m\"}": 1794387391.6241949,
+  "vllm:external_prefix_cache_queries_total{engine=\"0\",model_name=\"m\"}": 0.0,
+  "vllm:external_prefix_cache_queries_created{engine=\"0\",model_name=\"m\"}": 1794387391.6242223,
+  "vllm:external_prefix_cache_hits_total{engine=\"0\",model_name=\"m\"}": 0.0,
+  "vllm:external_prefix_cache_hits_created{engine=\"0\",model_name=\"m\"}": 1794387391.6242368,
+  "vllm:cache_config_info{_block_size_resolved=\"True\",block_size=\"16\",cache_dtype=\"fp8\",cache_hit_alignment_tokens=\"None\",effective_attention_block_size=\"16\",enable_mamba_shared_prefix_checkpoint=\"False\",enable_prefix_caching=\"True\",engine=\"0\",gpu_memory_utilization=\"0.9\",hash_block_size=\"None\",is_attention_free=\"False\",kv_cache_dtype_skip_layers=\"[]\",kv_cache_layout=\"None\",kv_cache_max_concurrency=\"23.1328125\",kv_cache_memory_bytes=\"None\",kv_cache_size_tokens=\"758016\",kv_offloading_backend=\"native\",kv_offloading_size=\"None\",kv_sharing_fast_prefill=\"False\",mamba_block_size=\"None\",mamba_cache_dtype=\"auto\",mamba_cache_mode=\"none\",mamba_page_size_padded=\"None\",mamba_ssm_cache_dtype=\"auto\",num_cpu_blocks=\"None\",num_gpu_blocks=\"47376\",num_gpu_blocks_override=\"None\",prefix_cache_retention_interval=\"0\",prefix_caching_hash_algo=\"sha256\",prefix_match_unit=\"None\",replayssm_buffer_len=\"16\",simple_cpu_offload_num_blocks=\"None\",skip_page_size_padded=\"None\",sliding_window=\"None\",swa_bounded_replay=\"True\",use_kda_recoverssm=\"False\",use_replayssm=\"False\",user_specified_block_size=\"False\"}": 1.0
+ }
+}

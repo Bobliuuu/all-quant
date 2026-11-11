@@ -102,9 +102,9 @@ def gpu_mem_used_gib():
 async def stream_completion(session, url, prompt, max_tokens, temperature=0.0, extra=None):
     """One streamed /v1/completions request. Returns dict with text, ttft, itls, ntok."""
     body = {"model": "m", "prompt": prompt, "max_tokens": max_tokens, "temperature": temperature,
-            "stream": True, "ignore_eos": False}
+            "stream": True, "ignore_eos": False, "stream_options": {"include_usage": True}}
     if extra: body.update(extra)
-    t0 = time.perf_counter(); ttft = None; last = t0; itls = []; text = []; n = 0
+    t0 = time.perf_counter(); ttft = None; last = t0; itls = []; text = []; n = 0; ntok = None
     async with session.post(url + "/v1/completions", json=body) as r:
         if r.status != 200:
             return {"error": f"{r.status} {(await r.text())[:300]}"}
@@ -113,6 +113,8 @@ async def stream_completion(session, url, prompt, max_tokens, temperature=0.0, e
             if not line.startswith("data:") or line.endswith("[DONE]"):
                 continue
             j = json.loads(line[5:])
+            if j.get("usage"): ntok = j["usage"].get("completion_tokens")
+            if not j.get("choices"): continue
             ch = j["choices"][0]
             if ch.get("text"):
                 now = time.perf_counter()
@@ -120,7 +122,12 @@ async def stream_completion(session, url, prompt, max_tokens, temperature=0.0, e
                 else: itls.append(now - last)
                 last = now; text.append(ch["text"]); n += 1
             if j.get("usage"): pass
-    return {"text": "".join(text), "ttft": ttft, "itls": itls, "chunks": n, "e2e": time.perf_counter() - t0}
+    # With speculative decoding one SSE chunk can carry several tokens: use usage.completion_tokens as the token
+    # count and spread each inter-chunk gap evenly over the tokens it carried (per-token ITL approximation).
+    ntok = ntok or n
+    tpc = max(1.0, (ntok - 1) / max(1, len(itls))) if itls else 1.0
+    itls_tok = [x / tpc for x in itls for _ in range(int(round(tpc)))] if tpc > 1.0 else itls
+    return {"text": "".join(text), "ttft": ttft, "itls": itls_tok, "chunks": n, "ntok": ntok, "tok_per_chunk": tpc, "e2e": time.perf_counter() - t0}
 
 
 def pct(xs, p):

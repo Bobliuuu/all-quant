@@ -15,6 +15,7 @@ _SP = "--n 64 --gen 384 --conc {c} --k {k} --extra '--speculative-config {{\"met
 for kv, nm in (("auto", "bf16"), ("fp8", "fp8")):
     JOBS.append((f"agentdistinct_{nm}", "Mistral-7B-v0.1", kv, "agent", _AG))
     JOBS.append((f"agentshared_{nm}", "Mistral-7B-v0.1", kv, "agent", "--sessions 32 --turns 8 --prefix-tokens 24000 --gen 128"))
+    JOBS.append((f"driftctl_{nm}", "Mistral-7B-v0.1", kv, "drift", "--n 24 --ctx-tokens 12000 --gen 512 --conc 8"))
     JOBS.append((f"rag_{nm}", "Mistral-7B-v0.1", kv, "rag", "--n 300 --ctx-tokens 16000 --conc 16"))
     JOBS.append((f"needle_{nm}", "Mistral-7B-v0.1", kv, "needle", "--n 4 --ctx-tokens 30000 --conc 8"))
     JOBS.append((f"drift_{nm}", "Mistral-7B-v0.1", kv, "drift", "--n 24 --ctx-tokens 12000 --gen 512 --conc 8"))
@@ -27,7 +28,8 @@ for kv, nm in (("auto", "bf16"), ("fp8", "fp8")):
 
 
 @app.function(image=image, gpu="H100", timeout=14400, volumes={"/models": vol})
-def run_all():
+def run_all(select: str = ""):
+    import re
     from huggingface_hub import snapshot_download
     for m, repo in (("Mistral-7B-v0.1", "mistralai/Mistral-7B-v0.1"), ("Qwen3-8B", "Qwen/Qwen3-8B")):
         if not os.path.exists(f"/models/{m}/config.json"):
@@ -36,15 +38,19 @@ def run_all():
     env = dict(os.environ, RW_MODELS="/models", RW_VLLM_BIN=subprocess.check_output(["which", "vllm"], text=True).strip(), RW_LOGS="/tmp/logs")
     out = {}
     for tag, model, kv, wl, extra in JOBS:
+        if select and not re.search(select, tag): continue
         cmd = f"python /rw/run_cfg.py --model {model} --kv {kv} --workload {wl} --tag cuda_h100_{tag} --outdir /tmp/out {extra}"
         r = subprocess.run(cmd, shell=True, env=env, capture_output=True, text=True, cwd="/rw")
         p = f"/tmp/out/realworld_cuda_h100_{tag}.json"
+        os.makedirs("/models/out", exist_ok=True)
+        if os.path.exists(p): subprocess.run(["cp", p, "/models/out/"]); vol.commit()
         out[tag] = json.load(open(p)) if os.path.exists(p) else {"error": (r.stdout + r.stderr)[-2000:]}
     return out
 
 @app.local_entrypoint()
 def main():
-    res = run_all.remote()
+    import sys
+    res = run_all.remote(os.environ.get("RW_SELECT", ""))
     d = os.path.join(HERE, "..", "..", "results"); os.makedirs(d, exist_ok=True)
     for tag, v in res.items():
         json.dump(v, open(os.path.join(d, f"realworld_cuda_h100_{tag}.json"), "w"), indent=1)

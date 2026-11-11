@@ -39,7 +39,7 @@ async def session(sid, srv, prefix, rest, cpt, turns, chunk_tokens, gen, out, di
             r = await stream_completion(s, srv.url, hist, gen)
             if "error" in r: out.append({"sid": sid, "turn": t, "error": r["error"]}); return
             out.append({"sid": sid, "turn": t, "ttft": r["ttft"], "itls": r["itls"], "e2e": r["e2e"],
-                        "n": r["chunks"], "text": r["text"]})
+                        "n": r["ntok"], "text": r["text"]})
             hist += r["text"]
 
 

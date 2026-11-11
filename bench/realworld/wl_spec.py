@@ -36,7 +36,7 @@ def run(srv, a):
         res = await asyncio.gather(*[one(p, sem) for p in ps]); return res, time.perf_counter() - t0, b
     res, wall, b0 = asyncio.run(go()); b1 = scrape(srv)
     ok = [r for r in res if "error" not in r]
-    itl = [x for r in ok for x in r["itls"]]; n = sum(r["chunks"] for r in ok)
+    itl = [x for r in ok for x in r["itls"]]; n = sum(r["ntok"] for r in ok)
     d = {k: b1[k] - b0[k] for k in b1}
     return {"workload": "spec_codeedit", "K": a.k, "conc": a.conc, "n": a.n, "gen": a.gen, "wall_s": wall,
             "out_tok_per_s": n / wall, "itl_p50": pct(itl, 50), "itl_p99": pct(itl, 99),

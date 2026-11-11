@@ -1,0 +1,1238 @@
+{
+ "tag": "cuda_h100_rag_fp8",
+ "model": "Mistral-7B-v0.1",
+ "kv": "fp8",
+ "extra": "",
+ "ts": "2026-11-11T08:30:06Z",
+ "server": {
+  "kv_cache_tokens": 1461360,
+  "max_concurrency_at_maxlen": 44.6,
+  "kv_cache_gib": 55.79,
+  "weights_gib": 13.5,
+  "attn_backend": "FLASH_ATTN",
+  "startup_s": 60.0
+ },
+ "result": {
+  "workload": "rag_hotpotqa",
+  "n": 300,
+  "ctx_tokens": 16000,
+  "EM": 0.13333333333333333,
+  "F1": 0.23423461408445925,
+  "wall_s": 144.89973700200017,
+  "ttft_p50": 5.669359442999848,
+  "ttft_p99": 7.045868291000261,
+  "samples": [
+   {
+    "gold": "yes",
+    "pred": "Yes, they were both American."
+   },
+   {
+    "gold": "Chief of Protocol",
+    "pred": "Lord High Treasurer"
+   },
+   {
+    "gold": "Animorphs",
+    "pred": "The Divide trilogy"
+   },
+   {
+    "gold": "no",
+    "pred": "Yes, the Laleli Mosque and Esma Sultan Mansion are located in the same neighborhood in Istan"
+   },
+   {
+    "gold": "Greenwich Village, New York City",
+    "pred": "The director of the romantic comedy \"Big Stone Gap\" is based in what New York city?"
+   },
+   {
+    "gold": "YG Entertainment",
+    "pred": "YG Entertainment"
+   },
+   {
+    "gold": "Eenasul Fateh",
+    "pred": "Tyus Jones"
+   },
+   {
+    "gold": "3,677 seated",
+    "pred": "9,000"
+   },
+   {
+    "gold": "Terry Richardson",
+    "pred": "Terry Richardson is older than Annie Morton."
+   },
+   {
+    "gold": "yes",
+    "pred": "Yes, both are from the United States."
+   },
+   {
+    "gold": "Kansas Song",
+    "pred": "Rock Chalk Jayhawk"
+   },
+   {
+    "gold": "David Weissman",
+    "pred": "David Weissman"
+   },
+   {
+    "gold": "1999",
+    "pred": "1991"
+   },
+   {
+    "gold": "no",
+    "pred": "Yes, both Random House Tower and 888 7th Avenue are used for real estate."
+   },
+   {
+    "gold": "from 1986 to 2013",
+    "pred": "1945\u20131969"
+   },
+   {
+    "gold": "9,984",
+    "pred": "Brown State Fishing Lake is in a country that has a population of 320,000,0"
+   },
+   {
+    "gold": "the North Atlantic Conference",
+    "pred": "The America East Conference"
+   },
+   {
+    "gold": "yes",
+    "pred": "Yes, they are both Opera composers."
+   },
+   {
+    "gold": "1969 until 1974",
+    "pred": "1993-1997"
+   },
+   {
+    "gold": "Robert Erskine Childers DSC",
+    "pred": "Henry Roth"
+   },
+   {
+    "gold": "Pedro Rodr\u00edguez",
+    "pred": "Sergio P\u00e9rez"
+   },
+   {
+    "gold": "Sonic",
+    "pred": ""
+   },
+   {
+    "gold": "keyboard function keys",
+    "pred": "Front Row"
+   },
+   {
+    "gold": "Badly Drawn Boy",
+    "pred": "Badly Drawn Boy"
+   },
+   {
+    "gold": "World's Best Goalkeeper",
+    "pred": "Jesper Schmeichel"
+   },
+   {
+    "gold": "Barton Lee Hazlewood",
+    "pred": "Nancy Sinatra and Lee Hazlewood."
+   },
+   {
+    "gold": "1838",
+    "pred": "1968"
+   },
+   {
+    "gold": "yes",
+    "pred": "Yes, both Dictyosperma, and Huernia are described as a genus."
+   },
+   {
+    "gold": "Henry J. Kaiser",
+    "pred": "Edgar Kaiser Sr."
+   },
+   {
+    "gold": "Arena of Khazan",
+    "pred": "The adventure is called \"Arena of Khazan\"."
+   },
+   {
+    "gold": "2000",
+    "pred": "Poison's album \"Shut Up, Make Love\" was released on 2016-01"
+   },
+   {
+    "gold": "Fujioka, Gunma",
+    "pred": "Japan"
+   },
+   {
+    "gold": "Charles Eug\u00e8ne",
+    "pred": "Charles Nungesser"
+   },
+   {
+    "gold": "no",
+    "pred": "Yes, they are."
+   },
+   {
+    "gold": "Letters to Cleo",
+    "pred": "Screaming Trees had more members."
+   },
+   {
+    "gold": "October 1922",
+    "pred": "The Bolsheviks were defeated by the White Army in the course of a civil war that ended when the Bolshe"
+   },
+   {
+    "gold": "2000",
+    "pred": "1995"
+   },
+   {
+    "gold": "World War II",
+    "pred": "World War II"
+   },
+   {
+    "gold": "no",
+    "pred": "No, Elko Regional Airport is located in Elko, Nevada, and Gerald R. Ford International Airport is located"
+   },
+   {
+    "gold": "New York City",
+    "pred": ""
+   },
+   {
+    "gold": "Scotch Collie",
+    "pred": "The Manchester Terrier."
+   },
+   {
+    "gold": "Mumbai",
+    "pred": "The company that Sachin Warrier worked for as a software engineer was headquartered in the United States."
+   },
+   {
+    "gold": "1962",
+    "pred": "1984"
+   },
+   {
+    "gold": "sovereignty",
+    "pred": "The Second Battle of Agordat"
+   },
+   {
+    "gold": "Nelson Rockefeller",
+    "pred": "Lyndon B. Johnson"
+   },
+   {
+    "gold": "Yellowcraig",
+    "pred": "North Berwick"
+   },
+   {
+    "gold": "Phil Spector",
+    "pred": "Phil Spector"
+   },
+   {
+    "gold": "Organizations could come together to address global issues",
+    "pred": "A former Soviet statesman initiated a forum for party democracy and the power separation within the Communist Party."
+   },
+   {
+    "gold": "yes",
+    "pred": "Yes, they are both types of plant."
+   },
+   {
+    "gold": "English Electric Canberra",
+    "pred": "The English Electric Canberra was a British first-generation jet-powered medium bomber that was manufactured during the"
+   },
+   {
+    "gold": "2009 Big 12 Conference",
+    "pred": "2015 Colorado Buffaloes football team"
+   },
+   {
+    "gold": "1,462",
+    "pred": "Carrefour"
+   },
+   {
+    "gold": "Indianapolis Motor Speedway",
+    "pred": "Indianapolis Motor Speedway"
+   },
+   {
+    "gold": "Rome",
+    "pred": "In the 1953 film \"The Great Caruso\", Mario Lanza starred as the \"Prince"
+   },
+   {
+    "gold": "Max Martin, Savan Kotecha and Ilya Salmanzadeh",
+    "pred": "Ellie Goulding worked with Starsmith, Jonny Lattimer, Fraser T Smith, Richard St"
+   },
+   {
+    "gold": "Marion, South Australia",
+    "pred": "Adelaide"
+   },
+   {
+    "gold": "Drifting",
+    "pred": "D1NZ is a series based on the oversteering technique."
+   },
+   {
+    "gold": "Keith Bostic",
+    "pred": "Jerry Glanville is younger than Keith Bostic."
+   },
+   {
+    "gold": "35,124",
+    "pred": "11,000"
+   },
+   {
+    "gold": "no",
+    "pred": "Yes, both Cypress and Ajuga are genera."
+   },
+   {
+    "gold": "shortest player ever to play in the National Basketball Association",
+    "pred": "The former NBA player who was a member of the Charlotte Hornets during their 1992-93 season"
+   },
+   {
+    "gold": "Ronald Shusett",
+    "pred": "Joe Dante"
+   },
+   {
+    "gold": "Adeline Virginia Woolf",
+    "pred": "Emma Bull was born 10 years earlier than Virginia Woolf."
+   },
+   {
+    "gold": "821",
+    "pred": "821"
+   },
+   {
+    "gold": "more than 70 countries",
+    "pred": "10"
+   },
+   {
+    "gold": "Charmed",
+    "pred": "Spill.com"
+   },
+   {
+    "gold": "International Boxing Hall of Fame",
+    "pred": "International Boxing Hall of Fame"
+   },
+   {
+    "gold": "Usher",
+    "pred": "Usher"
+   },
+   {
+    "gold": "Bill Murray",
+    "pred": "Homero C\u00e1rdenas Guill\u00e9n"
+   },
+   {
+    "gold": "Carabao Cup",
+    "pred": "The Carabao Cup"
+   },
+   {
+    "gold": "Teen Titans Go!",
+    "pred": "Teen Titans"
+   },
+   {
+    "gold": "276,170 inhabitants",
+    "pred": "The city of 122nd SS-Standarte was formed in2014 is ."
+   },
+   {
+    "gold": "orange",
+    "pred": "Orange"
+   },
+   {
+    "gold": "Tromeo and Juliet",
+    "pred": "\"Son of the Beach\""
+   },
+   {
+    "gold": "William Jefferson Clinton",
+    "pred": "Bill Clinton"
+   },
+   {
+    "gold": "John John Florence",
+    "pred": ""
+   },
+   {
+    "gold": "Ann",
+    "pred": "The actress who plays Bobbi Bacha in Suburban Madness is named Katie Cassidy. Her middle name"
+   },
+   {
+    "gold": "Apalachees",
+    "pred": "Alvaro Mexia had a diplomatic mission with which tribe of indigenous people?"
+   },
+   {
+    "gold": "British",
+    "pred": "British"
+   },
+   {
+    "gold": "1865",
+    "pred": "1895"
+   },
+   {
+    "gold": "Newport",
+    "pred": "The county seat of the county where East Lempster, New Hampshire is located is Concord, New Hampshire."
+   },
+   {
+    "gold": "Bob Seger",
+    "pred": "Robert C Seger born may 6 1945. What was the Rock singers stage name ?"
+   },
+   {
+    "gold": "Conscription",
+    "pred": "The practice of requiring only men to register for the draft was constitutional."
+   },
+   {
+    "gold": "Mondelez International, Inc.",
+    "pred": "Handi-Snacks are a snack food product line sold by the American multinational confectionery, food"
+   },
+   {
+    "gold": "Monica Lewinsky",
+    "pred": "Monica Lewinsky"
+   },
+   {
+    "gold": "April 1, 1949",
+    "pred": "1966"
+   },
+   {
+    "gold": "1866",
+    "pred": "1968"
+   },
+   {
+    "gold": "Canary Islands, Spain",
+    "pred": "Teide National Park and Garajonay National Park are located in the Canary Islands."
+   },
+   {
+    "gold": "250 million",
+    "pred": "1000000"
+   },
+   {
+    "gold": "director",
+    "pred": "They are both film directors."
+   },
+   {
+    "gold": "The Conversation",
+    "pred": "Lstudio.com"
+   },
+   {
+    "gold": "John Waters",
+    "pred": "John Waters"
+   },
+   {
+    "gold": "Las Vegas Strip in Paradise",
+    "pred": "The Flamingo Hotel in Las Vegas, Nevada."
+   },
+   {
+    "gold": "no",
+    "pred": "Yes, they both contain gin."
+   },
+   {
+    "gold": "March and April",
+    "pred": "In June."
+   },
+   {
+    "gold": "Fairfax County",
+    "pred": "Fairfax County"
+   },
+   {
+    "gold": "IT products and services",
+    "pred": "Kingstone Companies, Inc., which has its headquarters in Kingston, New York, provides property and casualty insurance products"
+   },
+   {
+    "gold": "Levni Yilmaz",
+    "pred": "Pamela B. Green"
+   },
+   {
+    "gold": "Beijing",
+    "pred": "Rabat"
+   },
+   {
+    "gold": "no",
+    "pred": "No, Yingkou is a prefecture-level city, while Fuding is a county-level city"
+   },
+   {
+    "gold": "Coahuila, Mexico",
+    "pred": "The Black Seminoles settled in distinct bands near the Native American Seminole."
+   },
+   {
+    "gold": "Larnelle Harris",
+    "pred": "Yolanda Adams"
+   },
+   {
+    "gold": "2003",
+    "pred": "1968"
+   },
+   {
+    "gold": "North Avenue at Techwood Drive",
+    "pred": "Bobby Dodd Stadium at Historic Grant Field"
+   },
+   {
+    "gold": "Leo Varadkar",
+    "pred": "Leo Varadkar"
+   },
+   {
+    "gold": "George Raft",
+    "pred": "George Raft"
+   },
+   {
+    "gold": "1887",
+    "pred": "1969"
+   },
+   {
+    "gold": "business",
+    "pred": "Both are involved in the business of investing."
+   },
+   {
+    "gold": "7 October 1978",
+    "pred": "Zaheer Khan was born on 7 October 1978."
+   },
+   {
+    "gold": "B-17 Flying Fortress bomber",
+    "pred": "B-17 Flying Fortress"
+   },
+   {
+    "gold": "Blake Shelton",
+    "pred": "Randy Travis"
+   },
+   {
+    "gold": "three centuries",
+    "pred": "The \"dwelling place of the dead\" was built over nine centuries."
+   },
+   {
+    "gold": "7 January 1936",
+    "pred": "1982"
+   },
+   {
+    "gold": "George Archainbaud",
+    "pred": "George Archainbaud died first."
+   },
+   {
+    "gold": "picric acid",
+    "pred": "Picric acid"
+   },
+   {
+    "gold": "230",
+    "pred": "The Argentine PGA Championship record holder has won how many tournaments worldwide?"
+   },
+   {
+    "gold": "Marvel",
+    "pred": "Suicide's 1977 released album features a song based on what brand's comic character?"
+   },
+   {
+    "gold": "United States Senator",
+    "pred": "The DISCLOSE Act was introduced by Senator Sheldon Whitehouse, a Democrat from Rhode Island."
+   },
+   {
+    "gold": "no",
+    "pred": "Yes, they were."
+   },
+   {
+    "gold": "yes",
+    "pred": "Yes, they are both musicians."
+   },
+   {
+    "gold": "The A41",
+    "pred": "U.S. Route 287"
+   },
+   {
+    "gold": "Princess Jessica",
+    "pred": "In the 1999 Hallmark Entertainment made-for-TV fantasy movie \"The 13th Floor"
+   },
+   {
+    "gold": "The Spiderwick Chronicles",
+    "pred": "In America"
+   },
+   {
+    "gold": "KKR & Co",
+    "pred": "Leeds Equity Partners"
+   },
+   {
+    "gold": "The Bye Bye Man",
+    "pred": "The film is \"The Last Witch Hunter\""
+   },
+   {
+    "gold": "Richmond",
+    "pred": "Richmond"
+   },
+   {
+    "gold": "Owsley Stanley",
+    "pred": "Jory Prum"
+   },
+   {
+    "gold": "the late 12th Century",
+    "pred": "The palace was founded at which Columba de Dunbar died in 1435."
+   },
+   {
+    "gold": "San Luis Obispo, California",
+    "pred": "San Luis Obispo"
+   },
+   {
+    "gold": "Mercedes-Benz Superdome",
+    "pred": "The KFC Yum! Center"
+   },
+   {
+    "gold": "LaLee's Kin: The Legacy of Cotton",
+    "pred": "LaLee's Kin: The Legacy of Cotton"
+   },
+   {
+    "gold": "Pirate's Cove",
+    "pred": "Catan"
+   },
+   {
+    "gold": "Crystal Dynamics",
+    "pred": "Core Design"
+   },
+   {
+    "gold": "\"The Marshall Mathers LP 2\"",
+    "pred": "The Marshall Mathers LP 2"
+   },
+   {
+    "gold": "Suicide Squad",
+    "pred": "Suicide Squad"
+   },
+   {
+    "gold": "Jillian Belk",
+    "pred": "Hilarie Burton"
+   },
+   {
+    "gold": "Texas Tech University",
+    "pred": "Texas Tech University"
+   },
+   {
+    "gold": "Lord Combermere",
+    "pred": "Lord Lake"
+   },
+   {
+    "gold": "seasonal television specials, particularly its work in stop motion animation",
+    "pred": "The production company for The Year Without a Santa Claus is best known for producing the documentary \"Grizzly Man"
+   },
+   {
+    "gold": "2014",
+    "pred": "2005"
+   },
+   {
+    "gold": "Oxford",
+    "pred": "The author of Sexual Politics attended which British University?"
+   },
+   {
+    "gold": "Roberta Vinci",
+    "pred": "Jorge Lozano had the best singles ranking."
+   },
+   {
+    "gold": "\"Teach the Controversy\" campaign",
+    "pred": "Teen Titans Go!"
+   },
+   {
+    "gold": "Lostprophets disbanded in 2013 after Watkins was charged with sexual offences in late 2012.",
+    "pred": "Ian Watkins"
+   },
+   {
+    "gold": "Nebo Zovyot",
+    "pred": "The movie Battle Beyond the Sun was a 1959 Soviet science fiction film directed by Mikhail Kalato"
+   },
+   {
+    "gold": "Erika Jayne",
+    "pred": "Erika Jayne was born first."
+   },
+   {
+    "gold": "2009",
+    "pred": "The English local newspaper, featuring the sculpture and war memorial in the Forbury gardens, changed names in 18"
+   },
+   {
+    "gold": "Kingdom of the Isles",
+    "pred": "The Isles of the Hebrides"
+   },
+   {
+    "gold": "The Beatles",
+    "pred": "The Beatles"
+   },
+   {
+    "gold": "\"We'll Burn That Bridge\"",
+    "pred": "\"Tonight I Climbed the Wall\""
+   },
+   {
+    "gold": "director",
+    "pred": "They were both film directors."
+   },
+   {
+    "gold": "1901",
+    "pred": "1901"
+   },
+   {
+    "gold": "Argand lamp",
+    "pred": "Yes"
+   },
+   {
+    "gold": "seven",
+    "pred": "10"
+   },
+   {
+    "gold": "yes",
+    "pred": "Yes, they are both orchids."
+   },
+   {
+    "gold": "Brazil",
+    "pred": "1982 FIFA World Cup"
+   },
+   {
+    "gold": "The Seven Days Battles",
+    "pred": "The Seven Days Battles were fought earlier in our nation's history."
+   },
+   {
+    "gold": "Lush Ltd.",
+    "pred": "Central Market"
+   },
+   {
+    "gold": "Manchester United",
+    "pred": "Manchester United"
+   },
+   {
+    "gold": "1989",
+    "pred": "1993"
+   },
+   {
+    "gold": "Kathryn Jean Martin",
+    "pred": ""
+   },
+   {
+    "gold": "Frank Lowy",
+    "pred": "John Jeremy Lloyd"
+   },
+   {
+    "gold": "Las Vegas",
+    "pred": "Crystal Lake, Illinois"
+   },
+   {
+    "gold": "Kelly Lee Osbourne",
+    "pred": ""
+   },
+   {
+    "gold": "Sean Yseult.",
+    "pred": "The Star and Dagger bass player married the bass player from the band \"The Dagger\"."
+   },
+   {
+    "gold": "Prescription Drug User Fee Act",
+    "pred": "The organization that also has a Center for Veterinary Medicine as well as part of the U.S. Department of Health"
+   },
+   {
+    "gold": "Dinosaur",
+    "pred": "Dinosaur"
+   },
+   {
+    "gold": "Wichita",
+    "pred": "Wichita"
+   },
+   {
+    "gold": "United States presidential election of 2016",
+    "pred": "The 2016 United States presidential election was the 58th quadrennial American presidential election."
+   },
+   {
+    "gold": "Roman",
+    "pred": "This Celtic ruler who was born in AD 43 ruled southeastern Britain prior to conquest by which"
+   },
+   {
+    "gold": "C. W. Grafton",
+    "pred": "John Dickson Carr"
+   },
+   {
+    "gold": "Brooklyn, New York",
+    "pred": "Los Angeles County"
+   },
+   {
+    "gold": "48,982",
+    "pred": "48,982"
+   },
+   {
+    "gold": "Pasek & Paul",
+    "pred": "Benj Pasek and Justin Paul"
+   },
+   {
+    "gold": "City of Newcastle",
+    "pred": "Cessnock"
+   },
+   {
+    "gold": "yes",
+    "pred": "Yes, both Bamboo Ma\u00f1alac and Danny Jones are musicians."
+   },
+   {
+    "gold": "drawings",
+    "pred": "Works by Hanna Leena Kristiina Varis are part of a collection in a museum that houses approximately 6"
+   },
+   {
+    "gold": "between the 8th and 16th centuries",
+    "pred": "The Western Germanic language was spoken from which the small settlement situated on the river Leda opposite Leer derives its"
+   },
+   {
+    "gold": "Alistair Grant",
+    "pred": ""
+   },
+   {
+    "gold": "Scotland",
+    "pred": "Scotland"
+   },
+   {
+    "gold": "Comedy Film Nerds",
+    "pred": "Chris Hardwick"
+   },
+   {
+    "gold": "Summerlin",
+    "pred": "Reno"
+   },
+   {
+    "gold": "George Harrison",
+    "pred": "Amitabh Bachchan"
+   },
+   {
+    "gold": "Canadian professional ice hockey centre",
+    "pred": "The Captain of the National Hockey League All-Star Game \"Away Team\" plays the position of Center."
+   },
+   {
+    "gold": "1952",
+    "pred": "1958"
+   },
+   {
+    "gold": "third",
+    "pred": "The character was introduced in season one and season two and, due to Mako's death, was voiced by"
+   },
+   {
+    "gold": "Mark Neveldine and Brian Taylor",
+    "pred": "The directors of the 2009 American science fiction film \"District 9\" were Neill Blom"
+   },
+   {
+    "gold": "Hidden America with Jonah Ray",
+    "pred": "Free Radio"
+   },
+   {
+    "gold": "no",
+    "pred": "Yes, they belong to different film genres."
+   },
+   {
+    "gold": "1943",
+    "pred": "1992"
+   },
+   {
+    "gold": "Oregon Ducks football",
+    "pred": "Oregon State Beavers"
+   },
+   {
+    "gold": "National Broadcasting Company",
+    "pred": "The episode \"Marry Me a Little, Marry Me a Little More\" was broadcast on NBC."
+   },
+   {
+    "gold": "North African Arab",
+    "pred": "French"
+   },
+   {
+    "gold": "Murray Hill",
+    "pred": "The headquarters of the American research and scientific development company where Ravi Sethi worked as computer scientist are located in Taipe"
+   },
+   {
+    "gold": "severe acute respiratory syndrome",
+    "pred": "SARS"
+   },
+   {
+    "gold": "Wendell Berry",
+    "pred": ""
+   },
+   {
+    "gold": "Tinu Suresh Desai",
+    "pred": "Vikram Bhatt"
+   },
+   {
+    "gold": "Golden Valley, Minnesota,",
+    "pred": ""
+   },
+   {
+    "gold": "$10.5 million",
+    "pred": "The settlement was for $100,000."
+   },
+   {
+    "gold": "1999 Odisha cyclone",
+    "pred": "Cyclone Gonu"
+   },
+   {
+    "gold": "Crackle",
+    "pred": "The 2000 British film Snatch was later adapted into a television series for what streaming service?"
+   },
+   {
+    "gold": "Salford City Football Club",
+    "pred": "Chris Williams last played for Boston United from the National League North."
+   },
+   {
+    "gold": "architect Michael Graves",
+    "pred": "The hotel was designed by architects."
+   },
+   {
+    "gold": "multiple awards",
+    "pred": "The 71st Golden Globe Awards for television in 2013, Breaking Bad, police sit"
+   },
+   {
+    "gold": "Kevin Spacey",
+    "pred": "Kevin Spacey"
+   },
+   {
+    "gold": "Ryan Seacrest",
+    "pred": "Nicki Minaj"
+   },
+   {
+    "gold": "yes",
+    "pred": "Yes, they are both magazines."
+   },
+   {
+    "gold": "Colonel Charles Hastings Judd",
+    "pred": "George W. Macfarlane"
+   },
+   {
+    "gold": "Pavel Sergeyevich Alexandrov",
+    "pred": "Semyon Aranovich Gershgorin has written more than 300 papers."
+   },
+   {
+    "gold": "Gal Gadot",
+    "pred": "Gal Gadot"
+   },
+   {
+    "gold": "Rear Adm. J. Edward Snyder",
+    "pred": "Captain John H. Holloway, Jr."
+   },
+   {
+    "gold": "Jackson Storm",
+    "pred": "Jackson Storm"
+   },
+   {
+    "gold": "712 5th Avenue",
+    "pred": "Manhattan Life Insurance Building is taller."
+   },
+   {
+    "gold": "right-hand",
+    "pred": "He is a right-hand batsman."
+   },
+   {
+    "gold": "Arthur Ignatius Conan Doyle",
+    "pred": "Penelope Lively was born first."
+   },
+   {
+    "gold": "Birmingham, Alabama",
+    "pred": "The Tennessee Volunteers football team plays as a member for a conference in Knoxville."
+   },
+   {
+    "gold": "44",
+    "pred": "65"
+   },
+   {
+    "gold": "the Parthian Empire",
+    "pred": "Sasanian Empire"
+   },
+   {
+    "gold": "Erinsborough",
+    "pred": "Beverly Hills"
+   },
+   {
+    "gold": "Samoa",
+    "pred": "The Falkland Islands beat India in the 2010 Commonwealth games that has eleven administrative divisions."
+   },
+   {
+    "gold": "Kimberly Couger \"Kimmy\" Schmidt",
+    "pred": "Kimmy Schmidt"
+   },
+   {
+    "gold": "\"The Comic Strip Presents...\"",
+    "pred": "\"The Young Ones\""
+   },
+   {
+    "gold": "no",
+    "pred": "Yes, both Dafeng District and Dazhou are located in the same province, Jiangsu."
+   },
+   {
+    "gold": "nineteenth",
+    "pred": "19th century"
+   },
+   {
+    "gold": "Awake",
+    "pred": "\"House of Saddam\""
+   },
+   {
+    "gold": "French Canadians",
+    "pred": "The ethnic group who settled in Canada in the 17th century that participated in a conflict with Irish Catholic immigrants in"
+   },
+   {
+    "gold": "American",
+    "pred": "American"
+   },
+   {
+    "gold": "8 km",
+    "pred": "The bridge is 16 km long."
+   },
+   {
+    "gold": "Rawhide",
+    "pred": "Bonanza"
+   },
+   {
+    "gold": "Marsilea",
+    "pred": "The Marsilea is the genus of more individual species of plants."
+   },
+   {
+    "gold": "Mark Masons' Hall",
+    "pred": "St James's Palace"
+   },
+   {
+    "gold": "Starlite",
+    "pred": "The hairdresser was John Walker, and the material was gunpowder."
+   },
+   {
+    "gold": "Hong Kong",
+    "pred": "One Raffles Place is one of the tallest skyscrapers in the city of Singapore and tallest in"
+   },
+   {
+    "gold": "Craig v. Boren",
+    "pred": "Craig v. Boren came first."
+   },
+   {
+    "gold": "\"Queen City\"",
+    "pred": "Hobart"
+   },
+   {
+    "gold": "Arrowhead Stadium",
+    "pred": "Arrowhead Stadium"
+   },
+   {
+    "gold": "acidic",
+    "pred": "Cranberries"
+   },
+   {
+    "gold": "Compliance",
+    "pred": "The movie was called \"The Stripper\" and was released in 2005."
+   },
+   {
+    "gold": "Logan International Airport",
+    "pred": "Boston Logan International Airport"
+   },
+   {
+    "gold": "Ehretia",
+    "pred": "Xanthoceras has more species than Ehretia."
+   },
+   {
+    "gold": "a pinball machine",
+    "pred": ""
+   },
+   {
+    "gold": "Donna Paige Helmintoller",
+    "pred": "Paige O'Hara"
+   },
+   {
+    "gold": "Reginald Martinez \"Reggie\" Jackson",
+    "pred": ""
+   },
+   {
+    "gold": "Thomas Mawson",
+    "pred": "The late Sir Peter Scott"
+   },
+   {
+    "gold": "strings",
+    "pred": "Apatim Majumdar is a Bengali musician and singer. He is a member of the band \"Bho"
+   },
+   {
+    "gold": "Brad Silberling",
+    "pred": "Neil Patrick Harris"
+   },
+   {
+    "gold": "25 laps",
+    "pred": "25"
+   },
+   {
+    "gold": "yes",
+    "pred": "Yes, they are both women's magazines."
+   },
+   {
+    "gold": "Thomas Loren Friedman",
+    "pred": "Henri Bergson has won more Pulitzer Prizes than Thomas Friedman."
+   },
+   {
+    "gold": "Taylor Swift",
+    "pred": "\"Born to Die\" by Lana Del Rey"
+   },
+   {
+    "gold": "Istanbul, Turkey",
+    "pred": "Istanbul"
+   },
+   {
+    "gold": "super-regional shopping mall",
+    "pred": "Opry Mills is a shopping mall in Nashville, Tennessee, United States. It is located in the Op"
+   },
+   {
+    "gold": "Ordos City",
+    "pred": "Spaceware Sky Division II is manufactured by Inner Mongolia Autonomous Region, which is one of twelve subdiv"
+   },
+   {
+    "gold": "Scott Sidney",
+    "pred": "Alain Resnais had the longest career."
+   },
+   {
+    "gold": "over 600 stores",
+    "pred": "1,200"
+   },
+   {
+    "gold": "Berea College",
+    "pred": "Berea College"
+   },
+   {
+    "gold": "1945",
+    "pred": "1942"
+   },
+   {
+    "gold": "Mountbatten family",
+    "pred": "The House of Windsor"
+   },
+   {
+    "gold": "James Burke",
+    "pred": "Neil deGrasse Tyson"
+   },
+   {
+    "gold": "Gulangyu",
+    "pred": "Gulangyu is larger than Asante Traditional Buildings."
+   },
+   {
+    "gold": "Slaughterhouse-Five",
+    "pred": "Catch-22"
+   },
+   {
+    "gold": "the east of Ireland",
+    "pred": "Munster"
+   },
+   {
+    "gold": "Distillery",
+    "pred": "Tandragee Rovers"
+   },
+   {
+    "gold": "Tybalt",
+    "pred": "Romeo"
+   },
+   {
+    "gold": "SKUM",
+    "pred": "\"The Flowers of Romance\" was a fanzine published by the Sex Pistols bassist Glen Mat"
+   },
+   {
+    "gold": "Anabolic steroids",
+    "pred": "Methandienone"
+   },
+   {
+    "gold": "Don S. Davis",
+    "pred": "Michael Shanks"
+   },
+   {
+    "gold": "Charles Kelley",
+    "pred": "The Oak Ridge Boys"
+   },
+   {
+    "gold": "3,384,569",
+    "pred": "The population of the city in which the National Archives and Library of Ethiopia is located according to the 20"
+   },
+   {
+    "gold": "Anna Clyne",
+    "pred": "John Williams"
+   },
+   {
+    "gold": "USS Essex",
+    "pred": "USS Essex (CV-9)"
+   },
+   {
+    "gold": "yes",
+    "pred": "Yes, both Stenocereus and Pachypodium can include tree like plants."
+   },
+   {
+    "gold": "Catwoman",
+    "pred": "Catwoman"
+   },
+   {
+    "gold": "7 miles",
+    "pred": "16 January 1995 \"First Knight\" was being filmed at a studio located 10"
+   },
+   {
+    "gold": "Laura Ann Osnes",
+    "pred": "Laura Osnes"
+   },
+   {
+    "gold": "20",
+    "pred": "3"
+   },
+   {
+    "gold": "Eucryphia",
+    "pred": "Lepidozamia has more species than Eucryphia."
+   },
+   {
+    "gold": "Venice",
+    "pred": "Naples"
+   },
+   {
+    "gold": "Waimea Bay",
+    "pred": "Pipeline"
+   },
+   {
+    "gold": "evangelical Christian periodical",
+    "pred": "Eugene Habecker is the chairman of the American Society of Magazine Editors."
+   },
+   {
+    "gold": "James Franco",
+    "pred": "James Franco"
+   },
+   {
+    "gold": "DI Humphrey Goodman",
+    "pred": "Humphrey Goodman"
+   },
+   {
+    "gold": "February",
+    "pred": "In what month was the relief first officer of the flight that crashed on its way to Cairo with a stop in New"
+   },
+   {
+    "gold": "Sacred Planet",
+    "pred": "Oz the Great and Powerful was released first."
+   },
+   {
+    "gold": "Hanna",
+    "pred": "Edmonton"
+   },
+   {
+    "gold": "Ferdi Taygan",
+    "pred": "Ferdi Taygan is older than Mahesh Bhupathi."
+   },
+   {
+    "gold": "paracyclist",
+    "pred": "Golf"
+   },
+   {
+    "gold": "The Dragon School in Oxford",
+    "pred": "Ian Harland studied at the University of Oxford prior to studying at the oldest college at the University of Cambridge."
+   },
+   {
+    "gold": "Suicide Kings",
+    "pred": "In 1997 American mystery crime film \"Grease\" Johnny Galecki started in."
+   },
+   {
+    "gold": "Hey Pa! There's a Goat on the Roof",
+    "pred": "\"Hey Pa! There's a Goat on the Roof\" came to market first."
+   },
+   {
+    "gold": "a record of 13\u20133",
+    "pred": "The St. Louis Rams finished the regular-season with a 13-3 record."
+   },
+   {
+    "gold": "8,211 at the 2010 census",
+    "pred": "The population of the town at the intersection of Interstate Highways 77 and  the longest Interstate highway within"
+   },
+   {
+    "gold": "The Crowned Prince of the Philadelphia Mob",
+    "pred": "The nickname of the hitman hired by an Italian American Criminal Organization was \"Baby Shanks\"."
+   },
+   {
+    "gold": "supervisor of the royal works",
+    "pred": "He was appointed \"architecte du roi\"."
+   },
+   {
+    "gold": "Janet Damita Jo Jackson",
+    "pred": "Janet Jackson"
+   },
+   {
+    "gold": "Continental Army",
+    "pred": "The Continental Army"
+   },
+   {
+    "gold": "Macaronesia",
+    "pred": "The Canary Islands"
+   },
+   {
+    "gold": "Treaty of Gandamak",
+    "pred": "The Treaty of Gandamak"
+   },
+   {
+    "gold": "Oregon",
+    "pred": "California"
+   },
+   {
+    "gold": "early 1970s",
+    "pred": "1970s"
+   }
+  ]
+ },
+ "metrics_tail": {
+  "vllm:prefix_cache_queries_total{engine=\"0\",model_name=\"m\"}": 5232242.0,
+  "vllm:prefix_cache_queries_created{engine=\"0\",model_name=\"m\"}": 1794385864.8307953,
+  "vllm:prefix_cache_hits_total{engine=\"0\",model_name=\"m\"}": 0.0,
+  "vllm:prefix_cache_hits_created{engine=\"0\",model_name=\"m\"}": 1794385864.830808,
+  "vllm:external_prefix_cache_queries_total{engine=\"0\",model_name=\"m\"}": 0.0,
+  "vllm:external_prefix_cache_queries_created{engine=\"0\",model_name=\"m\"}": 1794385864.8308249,
+  "vllm:external_prefix_cache_hits_total{engine=\"0\",model_name=\"m\"}": 0.0,
+  "vllm:external_prefix_cache_hits_created{engine=\"0\",model_name=\"m\"}": 1794385864.8308427,
+  "vllm:cache_config_info{_block_size_resolved=\"True\",block_size=\"16\",cache_dtype=\"fp8\",cache_hit_alignment_tokens=\"None\",effective_attention_block_size=\"None\",enable_mamba_shared_prefix_checkpoint=\"False\",enable_prefix_caching=\"True\",engine=\"0\",gpu_memory_utilization=\"0.9\",hash_block_size=\"None\",is_attention_free=\"False\",kv_cache_dtype_skip_layers=\"[]\",kv_cache_layout=\"None\",kv_cache_max_concurrency=\"44.59718969555035\",kv_cache_memory_bytes=\"None\",kv_cache_size_tokens=\"1461360\",kv_offloading_backend=\"native\",kv_offloading_size=\"None\",kv_sharing_fast_prefill=\"False\",mamba_block_size=\"None\",mamba_cache_dtype=\"auto\",mamba_cache_mode=\"none\",mamba_page_size_padded=\"None\",mamba_ssm_cache_dtype=\"auto\",num_cpu_blocks=\"None\",num_gpu_blocks=\"57129\",num_gpu_blocks_override=\"None\",prefix_cache_retention_interval=\"0\",prefix_caching_hash_algo=\"sha256\",prefix_match_unit=\"None\",replayssm_buffer_len=\"16\",simple_cpu_offload_num_blocks=\"None\",skip_page_size_padded=\"None\",sliding_window=\"4096\",swa_bounded_replay=\"True\",use_kda_recoverssm=\"False\",use_replayssm=\"False\",user_specified_block_size=\"False\"}": 1.0
+ }
+}
