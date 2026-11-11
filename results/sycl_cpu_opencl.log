@@ -1,0 +1,73 @@
+$ clang++ --version | head -2; sycl-ls; nvidia-smi -L; ls /opt/dpcpp/lib | grep -i -E 'pi_|ur_adapter|cuda' ; cat /etc/OpenCL/vendors/* 2>/dev/null; ls /opt/intel/oneapi/lib 2>/dev/null | head
+DPC++ compiler 7.2.0 (pre-release) (Nightly 2026-11-04) build based on:
+clang version 24.0.0git (https://github.com/intel/llvm 921d6889dc664de9690e5307dc73c3bb59b05124)
+[opencl:cpu][opencl:0] Intel(R) OpenCL, AMD EPYC 7V73X 64-Core Processor                OpenCL 3.1 (Build 0) [2026.22.10.0.01_160000]
+libcuda_trace_collector.so
+libur_adapter_cuda.so
+libur_adapter_cuda.so.0
+libur_adapter_cuda.so.0.12.0
+libur_adapter_level_zero.a
+libur_adapter_level_zero_v2.a
+libur_adapter_opencl.a
+/opt/intel/oneapi/redist/lib/libintelocl.so
+bash: line 1: nvidia-smi: command not found
+
+$ cd /work/b && clang++ -fsycl -O3 -std=c++17 -DUQ_NO_XMX -fsycl-targets=spir64_x86_64 -I/work/sycl /work/sycl/test_vectors.cpp -o test_vectors
+
+$ cd /work/b && clang++ -fsycl -O3 -std=c++17 -DUQ_NO_XMX -fsycl-targets=spir64_x86_64 -I/work/sycl /work/sycl/bench.cpp -o bench
+
+$ cd /work/b && ONEAPI_DEVICE_SELECTOR=opencl:cpu  ./test_vectors /work/sycl/vectors --sg 16 --sweep
+device: AMD EPYC 7V73X 64-Core Processor               
+b2k1_d128_p64          nsplit=1 path=portable wg=128 tn=32 sg=16  max_abs_err=9.694e-04  PASS
+b2k1_d128_p64          nsplit=2 path=portable wg=128 tn=32 sg=16  max_abs_err=9.694e-04  PASS
+b2k1_d128_p64          nsplit=3 path=portable wg=128 tn=32 sg=16  max_abs_err=9.694e-04  PASS
+b2k1_d128_p64          nsplit=8 path=portable wg=128 tn=32 sg=16  max_abs_err=9.694e-04  PASS
+b2k4_d128_p64          nsplit=1 path=portable wg=128 tn=32 sg=16  max_abs_err=1.051e-03  PASS
+b2k4_d128_p64          nsplit=2 path=portable wg=128 tn=32 sg=16  max_abs_err=1.051e-03  PASS
+b2k4_d128_p64          nsplit=3 path=portable wg=128 tn=32 sg=16  max_abs_err=1.051e-03  PASS
+b2k4_d128_p64          nsplit=8 path=portable wg=128 tn=32 sg=16  max_abs_err=1.051e-03  PASS
+b1k8_d128_p64          nsplit=1 path=portable wg=128 tn=32 sg=16  max_abs_err=9.325e-04  PASS
+b1k8_d128_p64          nsplit=2 path=portable wg=128 tn=32 sg=16  max_abs_err=9.325e-04  PASS
+b1k8_d128_p64          nsplit=3 path=portable wg=128 tn=32 sg=16  max_abs_err=9.325e-04  PASS
+b1k8_d128_p64          nsplit=8 path=portable wg=128 tn=32 sg=16  max_abs_err=9.325e-04  PASS
+b3k2_d64_p16           nsplit=1 path=portable wg=128 tn=16 sg=16  max_abs_err=1.903e-03  PASS
+b3k2_d64_p16           nsplit=2 path=portable wg=128 tn=16 sg=16  max_abs_err=1.903e-03  PASS
+b3k2_d64_p16           nsplit=3 path=portable wg=128 tn=16 sg=16  max_abs_err=1.903e-03  PASS
+b3k2_d64_p16           nsplit=8 path=portable wg=128 tn=16 sg=16  max_abs_err=1.903e-03  PASS
+b2k16_d128_p32         nsplit=1 path=portable wg=128 tn=32 sg=16  max_abs_err=1.933e-03  PASS
+b2k16_d128_p32         nsplit=2 path=portable wg=128 tn=32 sg=16  max_abs_err=1.933e-03  PASS
+b2k16_d128_p32         nsplit=3 path=portable wg=128 tn=32 sg=16  max_abs_err=1.933e-03  PASS
+b2k16_d128_p32         nsplit=8 path=portable wg=128 tn=32 sg=16  max_abs_err=1.933e-03  PASS
+edge_short_k4          nsplit=1 path=portable wg=128 tn=32 sg=16  max_abs_err=7.715e-03  PASS
+edge_short_k4          nsplit=2 path=portable wg=128 tn=32 sg=16  max_abs_err=7.715e-03  PASS
+edge_short_k4          nsplit=3 path=portable wg=128 tn=32 sg=16  max_abs_err=7.715e-03  PASS
+edge_short_k4          nsplit=8 path=portable wg=128 tn=32 sg=16  max_abs_err=7.715e-03  PASS
+rot_h128_b2k4          nsplit=1 path=portable wg=128 tn=32 sg=16  max_abs_err=7.274e-03  PASS
+rot_h128_b2k4          nsplit=2 path=portable wg=128 tn=32 sg=16  max_abs_err=7.274e-03  PASS
+rot_h128_b2k4          nsplit=3 path=portable wg=128 tn=32 sg=16  max_abs_err=7.274e-03  PASS
+rot_h128_b2k4          nsplit=8 path=portable wg=128 tn=32 sg=16  max_abs_err=7.274e-03  PASS
+paper_rule_b2k4        nsplit=1 path=portable wg=128 tn=32 sg=16  max_abs_err=7.687e-03  PASS
+paper_rule_b2k4        nsplit=2 path=portable wg=128 tn=32 sg=16  max_abs_err=7.687e-03  PASS
+paper_rule_b2k4        nsplit=3 path=portable wg=128 tn=32 sg=16  max_abs_err=7.687e-03  PASS
+paper_rule_b2k4        nsplit=8 path=portable wg=128 tn=32 sg=16  max_abs_err=7.687e-03  PASS
+b4k3_d128_p64_g1       nsplit=1 path=portable wg=128 tn=32 sg=16  max_abs_err=1.951e-03  PASS
+b4k3_d128_p64_g1       nsplit=2 path=portable wg=128 tn=32 sg=16  max_abs_err=1.951e-03  PASS
+b4k3_d128_p64_g1       nsplit=3 path=portable wg=128 tn=32 sg=16  max_abs_err=1.951e-03  PASS
+b4k3_d128_p64_g1       nsplit=8 path=portable wg=128 tn=32 sg=16  max_abs_err=1.951e-03  PASS
+SUMMARY runs=36 fails=0 worst_max_abs_err=7.715e-03
+
+$ cd /work/b && ONEAPI_DEVICE_SELECTOR=opencl:cpu  ./bench --B 2,8 --ctx 4096,16384 --K 1,4,8 --sg 16 --path portable --json /work/b/bench.jsonl --iters 3
+device: AMD EPYC 7V73X 64-Core Processor                 compute_units=17  local_mem=256 KB
+peak copy (r+w) 41.7 GB/s   peak read 23.4 GB/s
+B=2 ctx=4096 K=1 nsplit=4 wg=128 tn=32 sg=16 path=0 | fused 8.728 ms  1.0 GB/s (4% of read peak)
+B=2 ctx=4096 K=4 nsplit=4 wg=128 tn=32 sg=16 path=0 | fused 20.167 ms  0.4 GB/s (2% of read peak) | K-indep 32.593 ms (x1.62)
+B=2 ctx=4096 K=8 nsplit=4 wg=128 tn=32 sg=16 path=0 | fused 35.980 ms  0.2 GB/s (1% of read peak) | K-indep 64.826 ms (x1.80)
+B=2 ctx=16384 K=1 nsplit=4 wg=128 tn=32 sg=16 path=0 | fused 32.925 ms  1.1 GB/s (5% of read peak)
+B=2 ctx=16384 K=4 nsplit=4 wg=128 tn=32 sg=16 path=0 | fused 80.275 ms  0.4 GB/s (2% of read peak) | K-indep 127.041 ms (x1.58)
+B=2 ctx=16384 K=8 nsplit=4 wg=128 tn=32 sg=16 path=0 | fused 149.641 ms  0.2 GB/s (1% of read peak) | K-indep 268.155 ms (x1.79)
+B=8 ctx=4096 K=1 nsplit=1 wg=128 tn=32 sg=16 path=0 | fused 36.547 ms  1.0 GB/s (4% of read peak)
+B=8 ctx=4096 K=4 nsplit=1 wg=128 tn=32 sg=16 path=0 | fused 92.574 ms  0.4 GB/s (2% of read peak) | K-indep 136.374 ms (x1.47)
+B=8 ctx=4096 K=8 nsplit=1 wg=128 tn=32 sg=16 path=0 | fused 141.713 ms  0.3 GB/s (1% of read peak) | K-indep 250.734 ms (x1.77)
+B=8 ctx=16384 K=1 nsplit=1 wg=128 tn=32 sg=16 path=0 | fused 128.954 ms  1.1 GB/s (5% of read peak)
+B=8 ctx=16384 K=4 nsplit=1 wg=128 tn=32 sg=16 path=0 | fused 319.825 ms  0.4 GB/s (2% of read peak) | K-indep 506.274 ms (x1.58)
+B=8 ctx=16384 K=8 nsplit=1 wg=128 tn=32 sg=16 path=0 | fused 562.914 ms  0.3 GB/s (1% of read peak) | K-indep 998.727 ms (x1.77)

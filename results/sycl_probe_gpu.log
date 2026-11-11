@@ -1,0 +1,14 @@
+$ clang++ --version | head -2; sycl-ls; nvidia-smi -L; ls /opt/dpcpp/lib | grep -i -E 'pi_|ur_adapter|cuda' ; cat /etc/OpenCL/vendors/* 2>/dev/null; ls /opt/intel/oneapi/lib 2>/dev/null | head
+DPC++ compiler 7.2.0 (pre-release) (Nightly 2026-11-04) build based on:
+clang version 24.0.0git (https://github.com/intel/llvm 921d6889dc664de9690e5307dc73c3bb59b05124)
+[opencl:cpu][opencl:0] Intel(R) OpenCL, Intel(R) Xeon(R) Platinum 8275CL CPU @ 3.00GHz OpenCL 3.1 (Build 0) [2026.22.10.0.01_160000]
+[cuda:gpu][cuda:0] NVIDIA CUDA BACKEND, NVIDIA A100-SXM4-40GB 8.0 [CUDA 13.3]
+GPU 0: NVIDIA A100-SXM4-40GB (UUID: GPU-e4ec7b04-54bc-4ddf-6d75-86737bfb8bb8)
+libcuda_trace_collector.so
+libur_adapter_cuda.so
+libur_adapter_cuda.so.0
+libur_adapter_cuda.so.0.12.0
+libur_adapter_level_zero.a
+libur_adapter_level_zero_v2.a
+libur_adapter_opencl.a
+/opt/intel/oneapi/redist/lib/libintelocl.so
