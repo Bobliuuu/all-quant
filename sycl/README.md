@@ -59,6 +59,19 @@ Hq32 Hkv8 D128 PAGE64, ms (best nsplit), Arc B390 (read peak ~430-455 GB/s, copy
 | 8 | 16384 | 8 | 6.30 | 16.8 | 79.9 | 23 | 5.3 |
 | 8 | 32768 | 4 | 6.26 | 18.8 | - | 46 | 10.6 |
 
+### Where we stand (same Arc B390, Hq32 Hkv8 D128; ms per attention layer call; baselines from `baselines_notes.md`)
+| B | ctx | K | ours FP4 fused (XMX) | torch-XPU dense f16 SDPA (`enable_gqa`) | KV bytes read |
+|---|---|---|---|---|---|
+| 8 | 16384 | 1 | 2.48 | 5.01 | FP4 142 MB vs f16 536 MB |
+| 8 | 16384 | 4 | 3.19 | 6.11 | same |
+| 8 | 4096 | 4 | 0.85 | 1.28 | |
+| 2 | 16384 | 4 | 0.87 | 1.48 | |
+Ours is ~1.5-2.2x faster than dense f16 SDPA while reading 3.8x fewer bytes; dense SDPA reaches only ~90-110 GB/s on this part.
+llama.cpp SYCL (b12283, DPAS FA decode, q4_0 KV, whole-model Qwen3-0.6B, GQA 2, batch 1): 50.7 tok/s decode at depth 16384 vs 30.4 f16 (attention part ~2.1x faster
+than f16, effective ~44 GB/s of KV, i.e. similarly ALU-bound); verify of 8 tokens in one step costs 22.9 ms vs 21.0 ms for 2 (K-query sharing: yes).
+Not comparable in absolute ms (whole model, different head counts); neither is paged FP4/UltraQuant. Supports K-query verify: ours yes, llama.cpp yes (q4_0/q8_0, non-paged, integer 4-bit),
+torch SDPA yes (dense). FP4/MX KV: ours only.
+
 Honest summary: correct and 8x faster than the portable path with XMX, fused verify is 2.7-3x faster than re-reading KV per query, but at
 ~10% of memory-bandwidth peak the kernel is still ALU/barrier bound (not memory bound). See tuning notes for the ablation and next steps.
 Verifying K=4 tokens costs 1.3x one token (fused) vs 3.5x (K independent).
