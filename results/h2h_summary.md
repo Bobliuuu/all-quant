@@ -192,7 +192,7 @@ Torch's SDPA (flash path, no split-KV) reaches only ~100 GB/s at B=1. The `bmm+s
 | 32 | 65536 | 1 | 3.722 | 3.073 | 3.528 | 3.073 | 2795 | 2.301 | 1.34x | 1.62x | 7.136 |
 | 32 | 65536 | 8 | 3.864 | 5.940 | 10.302 | 3.864 | 2223 | 3.028 | 1.28x | 1.28x | - |
 
-NOTE: this table is warm-cache (same layer repeated), which favours fp16 at small shapes because KV fits in the 256 MB Infinity Cache; the cold-cache table below is the realistic one (UQ 1.2-1.75x faster than best fp16 there). UQ moves 3.76x fewer KV bytes than fp16 but reaches only 0.3-1.0 TB/s of the 3.9 TB/s measured HBM peak (dequant ALU + tile structure bound, see results/mi300x_tuning_notes.md), so against a bandwidth-efficient fp16 kernel the per-call gain is ~1.0-1.6x, not 3.76x.
+NOTE: this table is warm-cache (same layer repeated), which favours fp16 at small shapes because KV fits in the 256 MB Infinity Cache; the cold-cache table below is the realistic one (UQ 1.0-1.75x faster than best fp16 there). UQ moves 3.76x fewer KV bytes than fp16 but reaches only 0.3-1.0 TB/s of the 3.9 TB/s measured HBM peak (dequant ALU + tile structure bound, see results/mi300x_tuning_notes.md), so against a bandwidth-efficient fp16 kernel the per-call gain is ~1.0-1.6x, not 3.76x.
 
 ## Cold-cache timings (Infinity Cache flushed before every call), Hq/Hkv=32/8
 
