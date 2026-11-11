@@ -88,7 +88,7 @@ How far from the roofline: at K=1 the MI300X kernel moves 797 GB/s of FP4 bytes,
 
 ### Other backends
 
-CUDA (`mma.sync`) and SYCL ports of the same algorithm live in [`cuda/`](cuda/) and [`sycl/`](sycl/), each with its own README/log and validation vectors generated from the Python reference.
+CUDA (`mma.sync`) and SYCL (validated on an Intel Arc B390) ports of the same algorithm live in [`cuda/`](cuda/) and [`sycl/`](sycl/), checked against validation vectors generated from the Python reference. A serving-level evaluation harness is in [`bench/realworld/`](bench/realworld/); its results will be added below when available.
 
 ## Head-to-head vs amd-experiments and end-to-end
 
