@@ -1,0 +1,30 @@
+{
+ "bf16_vs_bf16_rerun": {
+  "identical": 19,
+  "n": 24,
+  "median": 513,
+  "min": 43,
+  "mean": 426
+ },
+ "fp8_vs_bf16": {
+  "identical": 1,
+  "n": 24,
+  "median": 30,
+  "min": 1,
+  "mean": 62
+ },
+ "fp8_vs_fp8_rerun": {
+  "identical": 2,
+  "n": 24,
+  "median": 30,
+  "min": 1,
+  "mean": 80
+ },
+ "fp8rerun_vs_bf16rerun": {
+  "identical": 1,
+  "n": 24,
+  "median": 39,
+  "min": 1,
+  "mean": 64
+ }
+}
