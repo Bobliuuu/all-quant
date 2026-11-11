@@ -1,0 +1,4 @@
+Container image Copyright (c) 2016-2023, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+This container image and its contents are governed by the NVIDIA Deep Learning Container License.
+NVIDIA RTX PRO 6000 Blackwell Server Edition, 12.0, 610.57.04
+RESULT runs=1260 fails=0 worst_max_abs_err=9.720e-03 worst_err_beyond_bf16_rounding=2.073e-03 tol=1.0e-02

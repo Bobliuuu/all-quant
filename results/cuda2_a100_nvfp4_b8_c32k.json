@@ -1,0 +1,82 @@
+[
+ {
+  "K": 1,
+  "device": "NVIDIA A100 80GB PCIe",
+  "kv_bytes": 301989888,
+  "cuda_nvfp4_ms": 0.4582741419474284,
+  "cuda_cfg": {
+   "variant": 1,
+   "nwarps": 4,
+   "stages": 2,
+   "nsplit": 24
+  },
+  "cuda_err_vs_fp32_ref": 0.0001417100429534912,
+  "triton_nvfp4_ms": 0.5847040176391601,
+  "triton_cfg": {
+   "w": 4,
+   "n": 32
+  },
+  "cuda_vs_triton": 1.27588263032793,
+  "cuda_GBps": 658.9721312153877
+ },
+ {
+  "K": 2,
+  "device": "NVIDIA A100 80GB PCIe",
+  "kv_bytes": 301989888,
+  "cuda_nvfp4_ms": 0.4700160026550293,
+  "cuda_cfg": {
+   "variant": 1,
+   "nwarps": 4,
+   "stages": 2,
+   "nsplit": 24
+  },
+  "cuda_err_vs_fp32_ref": 0.00013064220547676086,
+  "triton_nvfp4_ms": 0.5938175837198894,
+  "triton_cfg": {
+   "w": 4,
+   "n": 32
+  },
+  "cuda_vs_triton": 1.2633986510364092,
+  "cuda_GBps": 642.5098002921553
+ },
+ {
+  "K": 4,
+  "device": "NVIDIA A100 80GB PCIe",
+  "kv_bytes": 301989888,
+  "cuda_nvfp4_ms": 0.5189290682474772,
+  "cuda_cfg": {
+   "variant": 1,
+   "nwarps": 4,
+   "stages": 2,
+   "nsplit": 24
+  },
+  "cuda_err_vs_fp32_ref": 0.00013646483421325684,
+  "triton_nvfp4_ms": 0.8026453018188476,
+  "triton_cfg": {
+   "w": 4,
+   "n": 32
+  },
+  "cuda_vs_triton": 1.546734131756262,
+  "cuda_GBps": 581.9482979049095
+ },
+ {
+  "K": 8,
+  "device": "NVIDIA A100 80GB PCIe",
+  "kv_bytes": 301989888,
+  "cuda_nvfp4_ms": 0.8161962509155274,
+  "cuda_cfg": {
+   "variant": 1,
+   "nwarps": 4,
+   "stages": 2,
+   "nsplit": 24
+  },
+  "cuda_err_vs_fp32_ref": 0.00016400963068008423,
+  "triton_nvfp4_ms": 1.1592703501383463,
+  "triton_cfg": {
+   "w": 4,
+   "n": 16
+  },
+  "cuda_vs_triton": 1.420332853572891,
+  "cuda_GBps": 369.99666153974357
+ }
+]

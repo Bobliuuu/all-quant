@@ -1,0 +1,119 @@
+[
+ {
+  "K": 1,
+  "device": "NVIDIA B300 SXM6 AC",
+  "hbm_copy_GBps": 6577.785101088391,
+  "kv_bytes": 285212672,
+  "cuda_fused_ms": 0.13881600697835286,
+  "cuda_base_ms": 0.152404260635376,
+  "cuda_cfg": {
+   "nwarps": 2,
+   "stages": 2,
+   "nsplit": 9,
+   "variant": 2,
+   "mb": 1
+  },
+  "cuda_fused_GBps": 2054.6093941779814,
+  "cuda_pct_peak": 31.23558101401057,
+  "cuda_speedup_vs_base": 1.0978867924009807,
+  "cuda_err": 0.00012451037764549255,
+  "triton_fused_ms": 0.30759894053141273,
+  "triton_base_ms": 0.30739412307739256,
+  "triton_cfg": {
+   "w": 4,
+   "s": 3,
+   "n": 32
+  },
+  "triton_fused_GBps": 927.222543443297,
+  "cuda_vs_triton": 2.2158751517710784,
+  "prev_cuda_fused_ms": 0.1394997278849284,
+  "speedup_vs_prev": 1.004925375116734
+ },
+ {
+  "K": 2,
+  "device": "NVIDIA B300 SXM6 AC",
+  "hbm_copy_GBps": 6577.785101088391,
+  "kv_bytes": 285212672,
+  "cuda_fused_ms": 0.14158612887064617,
+  "cuda_base_ms": 0.2909184137980143,
+  "cuda_cfg": {
+   "nwarps": 2,
+   "stages": 2,
+   "nsplit": 9,
+   "variant": 2,
+   "mb": 1
+  },
+  "cuda_fused_GBps": 2014.4111169292,
+  "cuda_pct_peak": 30.624459236223544,
+  "cuda_speedup_vs_base": 2.0547098513004682,
+  "cuda_err": 0.00014074891805648804,
+  "triton_fused_ms": 0.3095775922139486,
+  "triton_base_ms": 0.5950410842895508,
+  "triton_cfg": {
+   "w": 4,
+   "s": 3,
+   "n": 32
+  },
+  "triton_fused_GBps": 921.2962409853294,
+  "cuda_vs_triton": 2.1864966199957365,
+  "prev_cuda_fused_ms": 0.1418623924255371,
+  "speedup_vs_prev": 1.0019512049456718
+ },
+ {
+  "K": 4,
+  "device": "NVIDIA B300 SXM6 AC",
+  "hbm_copy_GBps": 6577.785101088391,
+  "kv_bytes": 285212672,
+  "cuda_fused_ms": 0.2548778692881266,
+  "cuda_base_ms": 0.5356639862060547,
+  "cuda_cfg": {
+   "nwarps": 4,
+   "stages": 2,
+   "nsplit": 16,
+   "variant": 1
+  },
+  "cuda_fused_GBps": 1119.017013115334,
+  "cuda_pct_peak": 17.01206402942803,
+  "cuda_speedup_vs_base": 2.1016496555866664,
+  "cuda_err": 0.00015055760741233826,
+  "triton_fused_ms": 0.42495787938435875,
+  "triton_base_ms": 1.1397781372070312,
+  "triton_cfg": {
+   "w": 4,
+   "s": 2,
+   "n": 32
+  },
+  "triton_fused_GBps": 671.155156396184,
+  "cuda_vs_triton": 1.6673000310747468,
+  "prev_cuda_fused_ms": 0.2526517391204834,
+  "speedup_vs_prev": 0.9912658946268627
+ },
+ {
+  "K": 8,
+  "device": "NVIDIA B300 SXM6 AC",
+  "hbm_copy_GBps": 6577.785101088391,
+  "kv_bytes": 285212672,
+  "cuda_fused_ms": 0.3074314753214518,
+  "cuda_base_ms": 1.0060895919799804,
+  "cuda_cfg": {
+   "variant": 4,
+   "stages": 4,
+   "nsplit": 9
+  },
+  "cuda_fused_GBps": 927.7276235355547,
+  "cuda_pct_peak": 14.103951547186432,
+  "cuda_speedup_vs_base": 3.2725653446121883,
+  "cuda_err": 0.00014723092317581177,
+  "triton_fused_ms": 0.49453865687052406,
+  "triton_base_ms": 2.2151593526204425,
+  "triton_cfg": {
+   "w": 4,
+   "s": 2,
+   "n": 16
+  },
+  "triton_fused_GBps": 576.7247272535703,
+  "cuda_vs_triton": 1.6086142655153708,
+  "prev_cuda_fused_ms": 0.3503946622212728,
+  "speedup_vs_prev": 1.1397488232293016
+ }
+]

@@ -13,9 +13,10 @@ seq_lens int32 [B] including the K spec tokens; query j sees seq_len-K+j+1 keys
 
 Supported: D in {64, 128}, PAGE in {16, 32, 64, 128} (D=128, PAGE=64 is the tuned shape), K*pow2(G) <= 128
 (K in 1..16 for G=8), ragged `seq_lens`, shuffled page tables, seq_len < K (zero rows), sm_80 and newer
-(tested: A100, H100, L40S, B300 sm_103, RTX PRO 6000 sm_120).  Output is bf16 [B,K,Hq,D].  Not supported
-yet: D=256, a CUDA-graph workspace API (the extension allocates scratch per call unless `mo/ml` are passed),
-the native block-scaled FP4 MMA path (see below).
+(tested: A100, H100, L40S, B300 sm_103, RTX PRO 6000 sm_120).  Output is bf16 [B,K,Hq,D].  Added 2026-11-11 (cuda2, see the
+section at the end): an sm_90a wgmma variant (H100), a tcgen05 variant (B300, explicit request), NVFP4 (E4M3 scale per 16 +
+per-tensor fp32, `fmt=1`) and a CUDA-graph friendly workspace API.  Not supported yet: D=256, the native block-scaled FP4 MMA
+path (see below).
 
 ## Files
 | file | what |
@@ -127,3 +128,37 @@ kernel everywhere.  We do not claim to beat FlashInfer/BitDecoding NVFP4 on B300
   1.2-1.6x for the whole kernel, not built fused.  On RTX PRO 6000 (sm_120a) `mma.sync.kind::mxf8f6f4.block_scale` QK^T is
   validated (1.4-2x faster than software dequant for QK).  PV cannot use block scales (V's scale is along the output
   axis, not the reduction axis).
+
+## cuda2 update (2026-11-11): H100 wgmma path, B300 tcgen05 variant, NVFP4, graph-friendly API
+Full account (design, ablations, what failed): `PORTING_LOG.md` addendum.  Data: `../results/cuda2_summary.json` (same schema as `cuda_summary_b8_c32k.json`, plus `prev_cuda_fused_ms`).
+
+New kernels / features
+* **variant 3 (H100, sm_90a)**: warp-specialised wgmma kernel (`uq_decode_sm90.cuh`): bulk-copy (1D TMA) producer warpgroup, 2 dequant warpgroups (LUT dequant to 128B-swizzled bf16 tiles),
+  2 MMA warpgroups (`wgmma.m64n64k16` with Q in registers, `m64n128k16` with P in registers and V MN-major, lazy softmax rescale, `setmaxnreg`).  D = 128, PAGE = 64, K*pow2(G) <= 64.  Auto-selected on sm_90
+  (build with `-gencode arch=compute_90a,code=sm_90a -DUQ_ENABLE_SM90`; `uq_cuda.py` / `setup.py` do this on H100) for >= 32 query rows; `variant=3, nwarps=#MMA WGs, stages, mb=#dequant WGs` to force.
+* **variant 4 (B200/B300, sm_100a/103a)**: raw-PTX tcgen05 bf16 UMMA kernel with TMEM accumulators (`uq_decode_sm100.cuh`, built with `-DUQ_ENABLE_SM100`, request with `variant=4`).  Correct; only faster than the
+  mma.sync kernels at K = 8 (1.14x); see the log.
+* **NVFP4** (`fmt=1`, `k_ts`, `v_ts`): E4M3 scale per 16, per-tensor fp32; layout of `uqmt/nvfp4.py`; variants 1 (all GPUs) and 3 (H100).  Vectors: `vectors_nvfp4/` (`tools/cuda2_gen_vectors_nvfp4.py`).
+* **Graph-friendly API**: `uq_decode_cuda(..., workspace=ws, out=out)`, `workspace_floats(...)`, C: `uq_workspace_bytes`, `uq_decode_launch_ws`; captured/replayed bit-exact (`bench/cuda2/test_graph.py`).
+
+B8, ctx 32768, Hq 64 / Hkv 8, D 128, PAGE 64 (285 MB of FP4 KV per step), tuned, same-job Triton snapshot (UE8M0/32, bf16 q):
+
+| GPU | K | previous CUDA ms | **cuda2 ms** | speedup | cuda2 % of copy peak | Triton ms | cuda2 vs Triton | best variant |
+|---|---|---|---|---|---|---|---|---|
+| H100 | 1 | 0.1614 | 0.1633 | 1.0x | 58% | 0.3739 | 2.29x | 2 |
+| | 2 | 0.1632 | 0.1635 | 1.0x | 58% | 0.3777 | 2.31x | 2 |
+| | 4 | 0.2906 | **0.2145** | 1.35x | 44% | 0.4938 | 2.30x | 3 (wgmma) |
+| | 8 | 0.4310 | **0.2152** | **2.00x** | 44% | 0.4562 | 2.12x | 3 (wgmma) |
+| B300 | 1 | 0.1395 | 0.1388 | 1.0x | 31% | 0.3076 | 2.2x | 2 |
+| | 2 | 0.1419 | 0.1416 | 1.0x | 31% | 0.3096 | 2.2x | 2 |
+| | 4 | 0.2527 | 0.2549 | 1.0x | 17% | 0.4250 | 1.67x | 1 |
+| | 8 | 0.3504 | **0.3074** | 1.14x | 14% | 0.4945 | 1.61x | 4 (tcgen05) |
+| A100 / L40S / RTX PRO 6000 | 1-8 | | unchanged within noise (0.95-1.06x) | | | | | 1 / 2 |
+
+NVFP4 (E4M3/16 + per-tensor, same shape; Triton = `uqmt/nvfp4.py`): H100 K=1/2/4/8 = 0.275 / 0.275 / **0.214** / **0.216** ms (1.4x / 1.4x / 2.3x / 2.4x over Triton NVFP4), B300 0.235 / 0.236 / 0.280 / 0.373 ms
+(1.3-1.5x), A100 0.458 / 0.470 / 0.519 / 0.816 ms (1.3-1.55x); max abs error vs the fp32 reference 1.1e-4 .. 1.6e-4 (`results/cuda2_*_nvfp4_b8_c32k.json`).
+Correctness: vector harness 0 failures on A100 (1756 launches), H100 (2096, incl. variant 3), L40S (1260), B300 (1856), RTX PRO 6000 (1260) and 2016 NVFP4 launches on H100 (`results/cuda2_*_vectors*.log`).  The H100
+variant 3 rounds P up to 2^8 in bf16 (lazy rescale) so its worst error beyond bf16 rounding on the tiny test vectors is 2.8e-3 (was 2.1e-3), the benchmark-shape error stays 1.4e-4.
+
+Honest status vs the vendor kernels: B300 K=8 0.307 ms vs FlashInfer trtllm-gen NVFP4 0.094 ms (3.3x slower; was 3.7x) and K=1 0.139 vs 0.066 (2.1x, unchanged).  The tcgen05 kernel exists and is correct, but a software-dequant
+design is bound by the per-page S -> softmax -> PV chain and dequant issue, not by the MMA: even the skeleton without dequant and softmax is 0.20 ms.  Native block-scaled QK (mxf8f6f4) is still not built.

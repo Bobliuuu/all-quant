@@ -1,0 +1,7 @@
+{"fmt": "ue8m0", "K": 1, "replay_equals_eager": true, "alloc_during_capture_bytes": 1024, "empty_capture_baseline_bytes": 1024, "variant_auto": "sm90"}
+{"fmt": "ue8m0", "K": 4, "replay_equals_eager": true, "alloc_during_capture_bytes": 1024, "empty_capture_baseline_bytes": 1024, "variant_auto": "sm90"}
+{"fmt": "ue8m0", "K": 8, "replay_equals_eager": true, "alloc_during_capture_bytes": 1024, "empty_capture_baseline_bytes": 1024, "variant_auto": "sm90"}
+{"fmt": "nvfp4", "K": 1, "replay_equals_eager": true, "alloc_during_capture_bytes": 1024, "empty_capture_baseline_bytes": 1024, "variant_auto": "sm90"}
+{"fmt": "nvfp4", "K": 4, "replay_equals_eager": true, "alloc_during_capture_bytes": 1024, "empty_capture_baseline_bytes": 1024, "variant_auto": "sm90"}
+{"fmt": "nvfp4", "K": 8, "replay_equals_eager": true, "alloc_during_capture_bytes": 1024, "empty_capture_baseline_bytes": 1024, "variant_auto": "sm90"}
+ALL_OK

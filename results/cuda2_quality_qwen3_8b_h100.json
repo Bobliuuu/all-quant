@@ -1,0 +1,87 @@
+{
+ "model": "qwen3_8b",
+ "device": "NVIDIA H100 80GB HBM3",
+ "rows": [
+  {
+   "ppl": 8.522767303190381,
+   "ppl_decode_part": 7.447254666401446,
+   "tokens": 16376,
+   "K": 1,
+   "fmt": "fp16",
+   "backend": "sdpa",
+   "sec": 79.6
+  },
+  {
+   "ppl": 9.103068378543453,
+   "ppl_decode_part": 8.002337479020545,
+   "tokens": 16376,
+   "K": 1,
+   "fmt": "ue8m0",
+   "backend": "triton",
+   "sec": 67.9
+  },
+  {
+   "ppl": 9.118532573468713,
+   "ppl_decode_part": 8.029562465536568,
+   "tokens": 16376,
+   "K": 1,
+   "fmt": "ue8m0",
+   "backend": "cuda",
+   "sec": 223.0
+  },
+  {
+   "ppl": 9.078755245509406,
+   "ppl_decode_part": 7.952416115607567,
+   "tokens": 16320,
+   "K": 8,
+   "fmt": "ue8m0",
+   "backend": "triton",
+   "sec": 10.6
+  },
+  {
+   "ppl": 9.086562541101056,
+   "ppl_decode_part": 7.966153309777298,
+   "tokens": 16320,
+   "K": 8,
+   "fmt": "ue8m0",
+   "backend": "cuda",
+   "sec": 8.9
+  },
+  {
+   "ppl": 8.60885719810757,
+   "ppl_decode_part": 7.540951397666205,
+   "tokens": 16376,
+   "K": 1,
+   "fmt": "nvfp4",
+   "backend": "triton",
+   "sec": 67.4
+  },
+  {
+   "ppl": 8.625016519934249,
+   "ppl_decode_part": 7.569301444600494,
+   "tokens": 16376,
+   "K": 1,
+   "fmt": "nvfp4",
+   "backend": "cuda",
+   "sec": 63.3
+  },
+  {
+   "ppl": 8.597717250194679,
+   "ppl_decode_part": 7.514511065000757,
+   "tokens": 16320,
+   "K": 8,
+   "fmt": "nvfp4",
+   "backend": "triton",
+   "sec": 10.7
+  },
+  {
+   "ppl": 8.592599372387735,
+   "ppl_decode_part": 7.505532361184169,
+   "tokens": 16320,
+   "K": 8,
+   "fmt": "nvfp4",
+   "backend": "cuda",
+   "sec": 8.7
+  }
+ ]
+}

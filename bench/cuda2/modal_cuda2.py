@@ -27,7 +27,8 @@ def body(gpu, mode, extra, defs=""):
         s = " ".join(str(x) for x in a); print(s, flush=True); log.write(s + "\n"); log.flush()
     P(sh("nvidia-smi --query-gpu=name,compute_cap,driver_version --format=csv,noheader"))
     arch = "-gencode arch=compute_90a,code=sm_90a" if "H100" in gpu else "-arch=native"
-    F = f"-O3 -std=c++17 {arch} -DUQ_ENABLE_SM90 -I /work/cuda {defs}"
+    if "H100" not in gpu: defs = defs.replace("-DUQ_ENABLE_SM90", "")
+    F = f"-O3 -std=c++17 {arch} " + ("-DUQ_ENABLE_SM90 " if "H100" in gpu else "") + f"-I /work/cuda {defs}"
     fast = mode.endswith("f") and mode not in ("sh",)
     if fast: F += " -DUQ_SM90_ONLY"; mode = mode[:-1]
     if mode == "sm90":
@@ -41,6 +42,8 @@ def body(gpu, mode, extra, defs=""):
         P(sh("cd /work/cuda && ./tvnv vectors_nvfp4 1e-2 2>&1 | grep -E 'first fail|RESULT|FAIL' | head -12"))
     elif mode == "bench":   # torch bench vs Triton snapshot (JIT-builds uq_cuda_ext); extra = args of cuda/bench_cuda.py
         P(sh(f"cd /work/cuda && python bench_cuda.py {extra} --out /out/{gpu}_bench/result.json 2>&1 | grep -vE 'Remark|warning|instantiation|detected during|^\\s*$' | tail -60"))
+    elif mode == "nvbench":
+        P(sh(f"cd /work && python bench/cuda2/bench_nvfp4_cuda.py --out /out/{gpu}_nvbench/result.json {extra} 2>&1 | grep -vE 'Remark|warning|instantiation|detected during|^\\s*$' | tail -30"))
     elif mode == "ptxas":
         P(sh(f"cd /work/cuda && nvcc {F} -Xptxas -v -c -o /tmp/x.o uq_decode.cu 2>&1 | grep -A2 -E 'uq_sm90' | grep -E 'registers|spill|Compiling' | head -40"))
     elif mode == "sh":
@@ -52,7 +55,13 @@ def _fn(gpu): return dict(gpu=gpu, image=img, timeout=3600, volumes={"/out": vol
 def run_h100(mode: str, extra: str = "", defs: str = ""): body("H100", mode, extra, defs)
 @app.function(**_fn("B300"))
 def run_b300(mode: str, extra: str = "", defs: str = ""): body("B300", mode, extra, defs)
-FUNCS = {"H100": run_h100, "B300": run_b300}
+@app.function(**_fn("A100-80GB"))
+def run_a100(mode: str, extra: str = "", defs: str = ""): body("A100", mode, extra, defs)
+@app.function(**_fn("L40S"))
+def run_l40s(mode: str, extra: str = "", defs: str = ""): body("L40S", mode, extra, defs)
+@app.function(**_fn("RTX-PRO-6000"))
+def run_rtx(mode: str, extra: str = "", defs: str = ""): body("RTXPRO6000", mode, extra, defs)
+FUNCS = {"H100": run_h100, "B300": run_b300, "A100": run_a100, "L40S": run_l40s, "RTXPRO6000": run_rtx}
 
 @app.local_entrypoint()
 def main(gpu: str = "H100", mode: str = "sm90", extra: str = "", defs: str = ""):

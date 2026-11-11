@@ -1,0 +1,122 @@
+[
+ {
+  "K": 1,
+  "device": "NVIDIA H100 80GB HBM3",
+  "hbm_copy_GBps": 3014.096656946833,
+  "kv_bytes": 285212672,
+  "cuda_fused_ms": 0.1633301258087158,
+  "cuda_base_ms": 0.16613225936889647,
+  "cuda_cfg": {
+   "nwarps": 4,
+   "stages": 2,
+   "nsplit": 4,
+   "variant": 2,
+   "mb": 1
+  },
+  "cuda_fused_GBps": 1746.2343250382787,
+  "cuda_pct_peak": 57.93557817774659,
+  "cuda_speedup_vs_base": 1.0171562566691608,
+  "cuda_err": 0.00015358999371528625,
+  "triton_fused_ms": 0.3739466667175293,
+  "triton_base_ms": 0.37420053482055665,
+  "triton_cfg": {
+   "w": 4,
+   "s": 2,
+   "n": 32
+  },
+  "triton_fused_GBps": 762.7094914458565,
+  "cuda_vs_triton": 2.2895143493336754,
+  "prev_cuda_fused_ms": 0.1614400068918864,
+  "speedup_vs_prev": 0.9884276161089656
+ },
+ {
+  "K": 2,
+  "device": "NVIDIA H100 80GB HBM3",
+  "hbm_copy_GBps": 3014.096656946833,
+  "kv_bytes": 285212672,
+  "cuda_fused_ms": 0.16345067024230958,
+  "cuda_base_ms": 0.33188158671061196,
+  "cuda_cfg": {
+   "nwarps": 4,
+   "stages": 2,
+   "nsplit": 4,
+   "variant": 2,
+   "mb": 1
+  },
+  "cuda_fused_GBps": 1744.9464818784943,
+  "cuda_pct_peak": 57.89285084327919,
+  "cuda_speedup_vs_base": 2.030469414524944,
+  "cuda_err": 0.00011962652206420898,
+  "triton_fused_ms": 0.37770986557006836,
+  "triton_base_ms": 0.7328117370605469,
+  "triton_cfg": {
+   "w": 4,
+   "s": 2,
+   "n": 32
+  },
+  "triton_fused_GBps": 755.1104644024466,
+  "cuda_vs_triton": 2.3108492917779255,
+  "prev_cuda_fused_ms": 0.1631733258565267,
+  "speedup_vs_prev": 0.9983031921167913
+ },
+ {
+  "K": 4,
+  "device": "NVIDIA H100 80GB HBM3",
+  "hbm_copy_GBps": 3014.096656946833,
+  "kv_bytes": 285212672,
+  "cuda_fused_ms": 0.21448853810628254,
+  "cuda_base_ms": 0.6245450973510742,
+  "cuda_cfg": {
+   "variant": 3,
+   "nwarps": 2,
+   "stages": 3,
+   "mb": 2,
+   "nsplit": 2
+  },
+  "cuda_fused_GBps": 1329.7338613901713,
+  "cuda_pct_peak": 44.117160553740895,
+  "cuda_speedup_vs_base": 2.9117877480315615,
+  "cuda_err": 0.00014204531908035278,
+  "triton_fused_ms": 0.49376853307088214,
+  "triton_base_ms": 1.3998026529947916,
+  "triton_cfg": {
+   "w": 4,
+   "s": 2,
+   "n": 16
+  },
+  "triton_fused_GBps": 577.6242366563622,
+  "cuda_vs_triton": 2.302074215388665,
+  "prev_cuda_fused_ms": 0.29062185287475584,
+  "speedup_vs_prev": 1.354952835431924
+ },
+ {
+  "K": 8,
+  "device": "NVIDIA H100 80GB HBM3",
+  "hbm_copy_GBps": 3014.096656946833,
+  "kv_bytes": 285212672,
+  "cuda_fused_ms": 0.21522026062011718,
+  "cuda_base_ms": 1.1991563161214194,
+  "cuda_cfg": {
+   "variant": 3,
+   "nwarps": 2,
+   "stages": 3,
+   "mb": 2,
+   "nsplit": 2
+  },
+  "cuda_fused_GBps": 1325.2129292019845,
+  "cuda_pct_peak": 43.967167613807575,
+  "cuda_speedup_vs_base": 5.571763144725656,
+  "cuda_err": 0.0001417025923728943,
+  "triton_fused_ms": 0.45624532699584963,
+  "triton_base_ms": 2.697210693359375,
+  "triton_cfg": {
+   "w": 4,
+   "s": 2,
+   "n": 16
+  },
+  "triton_fused_GBps": 625.1300673652588,
+  "cuda_vs_triton": 2.1198995191310686,
+  "prev_cuda_fused_ms": 0.43103040059407555,
+  "speedup_vs_prev": 2.0027408170222523
+ }
+]

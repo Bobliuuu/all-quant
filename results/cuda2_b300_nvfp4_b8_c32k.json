@@ -1,0 +1,82 @@
+[
+ {
+  "K": 1,
+  "device": "NVIDIA B300 SXM6 AC",
+  "kv_bytes": 301989888,
+  "cuda_nvfp4_ms": 0.2349386692047119,
+  "cuda_cfg": {
+   "variant": 1,
+   "nwarps": 4,
+   "stages": 2,
+   "nsplit": 16
+  },
+  "cuda_err_vs_fp32_ref": 0.00012475252151489258,
+  "triton_nvfp4_ms": 0.3060522715250651,
+  "triton_cfg": {
+   "w": 4,
+   "n": 32
+  },
+  "cuda_vs_triton": 1.3026900703961548,
+  "cuda_GBps": 1285.3988192844643
+ },
+ {
+  "K": 2,
+  "device": "NVIDIA B300 SXM6 AC",
+  "kv_bytes": 301989888,
+  "cuda_nvfp4_ms": 0.2363445281982422,
+  "cuda_cfg": {
+   "variant": 1,
+   "nwarps": 4,
+   "stages": 2,
+   "nsplit": 16
+  },
+  "cuda_err_vs_fp32_ref": 0.00011163204908370972,
+  "triton_nvfp4_ms": 0.3076661427815755,
+  "triton_cfg": {
+   "w": 4,
+   "n": 32
+  },
+  "cuda_vs_triton": 1.3017696882049659,
+  "cuda_GBps": 1277.7528225518954
+ },
+ {
+  "K": 4,
+  "device": "NVIDIA B300 SXM6 AC",
+  "kv_bytes": 301989888,
+  "cuda_nvfp4_ms": 0.27947092056274414,
+  "cuda_cfg": {
+   "variant": 1,
+   "nwarps": 4,
+   "stages": 3,
+   "nsplit": 16
+  },
+  "cuda_err_vs_fp32_ref": 0.0001300610601902008,
+  "triton_nvfp4_ms": 0.42272319793701174,
+  "triton_cfg": {
+   "w": 4,
+   "n": 32
+  },
+  "cuda_vs_triton": 1.5125838390835584,
+  "cuda_GBps": 1080.5771398037102
+ },
+ {
+  "K": 8,
+  "device": "NVIDIA B300 SXM6 AC",
+  "kv_bytes": 301989888,
+  "cuda_nvfp4_ms": 0.37280213038126625,
+  "cuda_cfg": {
+   "variant": 1,
+   "nwarps": 4,
+   "stages": 3,
+   "nsplit": 24
+  },
+  "cuda_err_vs_fp32_ref": 0.00013887137174606323,
+  "triton_nvfp4_ms": 0.5226325352986654,
+  "triton_cfg": {
+   "w": 4,
+   "n": 32
+  },
+  "cuda_vs_triton": 1.4019032958963162,
+  "cuda_GBps": 810.0540833582515
+ }
+]

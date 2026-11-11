@@ -1,0 +1,118 @@
+[
+ {
+  "K": 1,
+  "device": "NVIDIA L40S",
+  "hbm_copy_GBps": 655.7698472133734,
+  "kv_bytes": 285212672,
+  "cuda_fused_ms": 0.39113388061523435,
+  "cuda_base_ms": 0.4007253328959147,
+  "cuda_cfg": {
+   "nwarps": 4,
+   "stages": 4,
+   "nsplit": 4,
+   "variant": 1
+  },
+  "cuda_fused_GBps": 729.1944935871433,
+  "cuda_pct_peak": 111.19670974287403,
+  "cuda_speedup_vs_base": 1.0245221719621769,
+  "cuda_err": 0.0001256316900253296,
+  "triton_fused_ms": 0.43827412923177084,
+  "triton_base_ms": 0.43813546498616535,
+  "triton_cfg": {
+   "w": 4,
+   "s": 3,
+   "n": 32
+  },
+  "triton_fused_GBps": 650.7631935746133,
+  "cuda_vs_triton": 1.1205220282691624,
+  "prev_cuda_fused_ms": 0.3902463912963867,
+  "speedup_vs_prev": 0.9977309832698419
+ },
+ {
+  "K": 2,
+  "device": "NVIDIA L40S",
+  "hbm_copy_GBps": 655.7698472133734,
+  "kv_bytes": 285212672,
+  "cuda_fused_ms": 0.39512427647908527,
+  "cuda_base_ms": 0.43625812530517577,
+  "cuda_cfg": {
+   "nwarps": 4,
+   "stages": 4,
+   "nsplit": 4,
+   "variant": 1
+  },
+  "cuda_fused_GBps": 721.83029233613,
+  "cuda_pct_peak": 110.07372409748234,
+  "cuda_speedup_vs_base": 1.1041035726597979,
+  "cuda_err": 0.0001404881477355957,
+  "triton_fused_ms": 0.4436992009480794,
+  "triton_base_ms": 0.621567980448405,
+  "triton_cfg": {
+   "w": 4,
+   "s": 3,
+   "n": 32
+  },
+  "triton_fused_GBps": 642.8063683472237,
+  "cuda_vs_triton": 1.1229358137693808,
+  "prev_cuda_fused_ms": 0.3941354751586914,
+  "speedup_vs_prev": 0.9974974928667887
+ },
+ {
+  "K": 4,
+  "device": "NVIDIA L40S",
+  "hbm_copy_GBps": 655.7698472133734,
+  "kv_bytes": 285212672,
+  "cuda_fused_ms": 0.43052374521891273,
+  "cuda_base_ms": 0.6673749287923177,
+  "cuda_cfg": {
+   "nwarps": 4,
+   "stages": 2,
+   "nsplit": 4,
+   "variant": 1
+  },
+  "cuda_fused_GBps": 662.4783770172189,
+  "cuda_pct_peak": 101.02300065066316,
+  "cuda_speedup_vs_base": 1.5501466207234886,
+  "cuda_err": 0.00011989101767539978,
+  "triton_fused_ms": 0.5122048060099283,
+  "triton_base_ms": 1.170297622680664,
+  "triton_cfg": {
+   "w": 4,
+   "s": 2,
+   "n": 16
+  },
+  "triton_fused_GBps": 556.8332601597485,
+  "cuda_vs_triton": 1.1897248681358619,
+  "prev_cuda_fused_ms": 0.43141120274861655,
+  "speedup_vs_prev": 1.0020613439782573
+ },
+ {
+  "K": 8,
+  "device": "NVIDIA L40S",
+  "hbm_copy_GBps": 655.7698472133734,
+  "kv_bytes": 285212672,
+  "cuda_fused_ms": 0.4939754803975423,
+  "cuda_base_ms": 1.2211551666259766,
+  "cuda_cfg": {
+   "nwarps": 8,
+   "stages": 3,
+   "nsplit": 11,
+   "variant": 1
+  },
+  "cuda_fused_GBps": 577.3822453099618,
+  "cuda_pct_peak": 88.0464766355892,
+  "cuda_speedup_vs_base": 2.4720967235928666,
+  "cuda_err": 0.0001380816102027893,
+  "triton_fused_ms": 0.6197247823079427,
+  "triton_base_ms": 2.206378682454427,
+  "triton_cfg": {
+   "w": 4,
+   "s": 3,
+   "n": 16
+  },
+  "triton_fused_GBps": 460.2247322397334,
+  "cuda_vs_triton": 1.25456587806585,
+  "prev_cuda_fused_ms": 0.5229567845662435,
+  "speedup_vs_prev": 1.0586695196801623
+ }
+]

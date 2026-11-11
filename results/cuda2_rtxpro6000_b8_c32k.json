@@ -1,0 +1,121 @@
+[
+ {
+  "K": 1,
+  "device": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+  "hbm_copy_GBps": 1461.948887284788,
+  "kv_bytes": 285212672,
+  "cuda_fused_ms": 0.20754987398783367,
+  "cuda_base_ms": 0.20949333508809406,
+  "cuda_cfg": {
+   "nwarps": 2,
+   "stages": 2,
+   "nsplit": 4,
+   "variant": 2,
+   "mb": 1
+  },
+  "cuda_fused_GBps": 1374.1886059478834,
+  "cuda_pct_peak": 93.99703491003041,
+  "cuda_speedup_vs_base": 1.0093638269343121,
+  "cuda_err": 0.00012301653623580933,
+  "triton_fused_ms": 0.27078933715820314,
+  "triton_base_ms": 0.27103252410888673,
+  "triton_cfg": {
+   "w": 4,
+   "s": 3,
+   "n": 32
+  },
+  "triton_fused_GBps": 1053.264042791206,
+  "cuda_vs_triton": 1.3046952616992507,
+  "prev_cuda_fused_ms": 0.2055082639058431,
+  "speedup_vs_prev": 0.9901632795878726
+ },
+ {
+  "K": 2,
+  "device": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+  "hbm_copy_GBps": 1461.948887284788,
+  "kv_bytes": 285212672,
+  "cuda_fused_ms": 0.2100053310394287,
+  "cuda_base_ms": 0.30459092458089193,
+  "cuda_cfg": {
+   "nwarps": 4,
+   "stages": 2,
+   "nsplit": 5,
+   "variant": 2,
+   "mb": 1
+  },
+  "cuda_fused_GBps": 1358.1211038230788,
+  "cuda_pct_peak": 92.89798813318681,
+  "cuda_speedup_vs_base": 1.4503961545800221,
+  "cuda_err": 0.00013184547424316406,
+  "triton_fused_ms": 0.2723957379659017,
+  "triton_base_ms": 0.4760661443074544,
+  "triton_cfg": {
+   "w": 4,
+   "s": 3,
+   "n": 32
+  },
+  "triton_fused_GBps": 1047.0526232525074,
+  "cuda_vs_triton": 1.2970896339520026,
+  "prev_cuda_fused_ms": 0.20816213289896648,
+  "speedup_vs_prev": 0.9912230888076067
+ },
+ {
+  "K": 4,
+  "device": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+  "hbm_copy_GBps": 1461.948887284788,
+  "kv_bytes": 285212672,
+  "cuda_fused_ms": 0.28795413970947265,
+  "cuda_base_ms": 0.5434517542521159,
+  "cuda_cfg": {
+   "nwarps": 4,
+   "stages": 2,
+   "nsplit": 8,
+   "variant": 2,
+   "mb": 1
+  },
+  "cuda_fused_GBps": 990.4794988804863,
+  "cuda_pct_peak": 67.7506243545942,
+  "cuda_speedup_vs_base": 1.8872857837724577,
+  "cuda_err": 0.00012376531958580017,
+  "triton_fused_ms": 0.38599894841512045,
+  "triton_base_ms": 0.8714944203694661,
+  "triton_cfg": {
+   "w": 4,
+   "s": 2,
+   "n": 16
+  },
+  "triton_fused_GBps": 738.8949456237109,
+  "cuda_vs_triton": 1.3404875818231639,
+  "prev_cuda_fused_ms": 0.2767423947652181,
+  "speedup_vs_prev": 0.9610641300188757
+ },
+ {
+  "K": 8,
+  "device": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+  "hbm_copy_GBps": 1461.948887284788,
+  "kv_bytes": 285212672,
+  "cuda_fused_ms": 0.38118505477905273,
+  "cuda_base_ms": 1.0239445368448894,
+  "cuda_cfg": {
+   "nwarps": 8,
+   "stages": 2,
+   "nsplit": 8,
+   "variant": 1
+  },
+  "cuda_fused_GBps": 748.2262707422213,
+  "cuda_pct_peak": 51.180056789253996,
+  "cuda_speedup_vs_base": 2.686213753680351,
+  "cuda_err": 0.00013599544763565063,
+  "triton_fused_ms": 0.4625237464904785,
+  "triton_base_ms": 1.6399434407552083,
+  "triton_cfg": {
+   "w": 4,
+   "s": 3,
+   "n": 16
+  },
+  "triton_fused_GBps": 616.644386724199,
+  "cuda_vs_triton": 1.2133837376141945,
+  "prev_cuda_fused_ms": 0.361521053314209,
+  "speedup_vs_prev": 0.9484135035770443
+ }
+]

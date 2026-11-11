@@ -52,3 +52,61 @@ Facts from `git log`, `kernels/hip/*`, `tq_triton.py`, `tq_hsaco_loader.py`, `cu
 * **Common to both**: the high-level kernel (fused dequant + attention) is easy to get correct and 1.3-2x better than a generic baseline; the last 2-3x to the roofline is instruction-level work; benchmarks need explicit
   caveats (what peak, which clocks, which config) to avoid overstating.  Differences in outcome: AMD stayed a standalone/prototype (library + Triton), this one has a vector-validated CUDA kernel, build files and a five-GPU table, but
   neither was integrated into a serving stack by the porting agent.
+
+## Addendum 2026-11-11 (cuda2-agent): H100 wgmma path, B300 tcgen05 variant, NVFP4, workspace API
+
+Everything below ran on Modal (CUDA 12.9.1, torch cu129; H100 = `gpu="H100!"`, i.e. a real H100 80GB HBM3, not an H200).  Raw logs/JSON:
+`results/cuda2_*`; summary in the previous schema: `results/cuda2_summary.json`.  Dev harnesses: `bench/cuda2/` (`modal_cuda2.py`, `bench_sm90.cu`,
+`modal_cuda2_b300.py`, `bench_sm100.cu`, `test_vectors_nv.cu`, `test_graph.py`, `quality_cuda2.py`, `modal_cuda2_model.py`).
+
+### Goal 1: H100 variant 3 (`uq_decode_sm90.cuh`, sm_90a)
+Design: 1 producer warpgroup (one lane) issues `cp.async.bulk` (1D TMA, no tensor map) copies of the four contiguous per-(page,head) FP4 slices into a raw
+ring (mbarrier `complete_tx`); 2 dequant warpgroups expand FP4/UE8M0 to bf16 into 128B-swizzled K/V tiles (fence.proxy.async, mbarrier handshake);
+2 MMA warpgroups (alternate pages, own online-softmax state, merged through smem at the end) run `wgmma.m64n64k16` for S = Q K^T (A = Q held in registers,
+B = K tile K-major) and `wgmma.m64n128k16` for O += P V (A = P in registers, B = V tile MN-major via the transpose bit, LBO 8192 / SBO 1024); `setmaxnreg`
+rebalances registers (DQ 56, producer 24, MMA the rest).  M = 64 rows (K*pow2(G) <= 64, i.e. K <= 8 for G = 8), D = 128, PAGE = 64.
+Correct on the first bring-up (vectors 420/420).  Then a perf hunt; what each step bought (H100, K=8, B8 ctx32768, ms; K=1 is the same because the kernel is K-independent):
+
+| step | change | K=8 ms | finding |
+|---|---|---|---|
+| v0 | first wgmma kernel (ALU dequant, Q in smem, producer = dequant thread 0, `named_bar` per page) | 0.375 | K-independent => not MMA bound; 2500 cycles/page |
+| ablate | no dequant 0.18 / no MMA+softmax 0.26 / neither 0.117 (80% of HBM peak) | | dequant side dominates, but also additive => poor overlap |
+| v1 | cheaper pair order (`deq_word`), Q stored permuted, per-chunk scale factors | 0.333 | |
+| v2 | 2-4 dequant WGs, `ex2.approx`, fma-based softmax, skip masks on interior pages, skip softmax for all-padding warps, `setmaxnreg` | 0.252 | K=1/4/8 identical => structural |
+| v3 | 32-replica byte->bf16x2 LUT in smem (`prmt`+`imad`+`lds`+`hfma2` per 2 elements instead of ~8 int ops) | 0.242 | int-ALU was not the (only) limiter |
+| v4 | Q fragments in registers (`wgmma` RS for S) | 0.238 | smem bandwidth not the limiter either |
+| prof | `clock64` split per role (UQ90_PROF): DQ 805 cyc/page of work + 591 cyc waiting at the per-page barrier; MMA 900 cyc softmax per page | | the per-page `named_bar` serialises the two DQ warpgroups |
+| v5 | dedicated producer warpgroup + per-stage `rfree` mbarrier (raw stage released right after the LDS, no CTA barrier), lazy O rescale (FA4-style, only when the max grows by > 2^8) | **0.2115** | 2.0x vs the previous H100 K=8 (0.431) |
+
+Tried and dropped: two independent S accumulation chains (S wait 902 -> 418 cycles but +32 registers spill the MMA warpgroups under the 96-register launch
+cap of a 640-thread CTA; net slower); deeper raw rings (4 -> 8/12 stages: no gain); ND = 3 dequant WGs (no gain).  Pitfall: the register file is split per SM
+sub-partition (16K regs, ceil(warps/4) warps each), so a 17-warp CTA gets 96 regs/thread, not 120; a `setmaxnreg.inc` that asks for more than the launch
+allocation minus what the `dec` released hangs (the first producer-warp attempt deadlocked on exactly this; mbarrier waits therefore spin with a bounded
+`__trap()` instead of hanging).  `ptxas` C7510 "wgmma serialized due to function call" appeared when a `printf` was left in the wait loop.
+Final H100 B8 ctx32768 (tuned, same job as Triton): K=1 0.1633, K=2 0.1635 (variant 2, unchanged, 58% of the 3.0 TB/s copy peak), **K=4 0.2145 (was 0.2906, 1.35x), K=8 0.2152 (was 0.4310, 2.00x)**.
+Variant 3 needs ~0.21 ms at every K (it is K-independent, 44% of peak), so it only pays for K >= 4 (auto-selected on sm_90 for >= 32 query rows); K=1/2 stay on variant 2.
+Where it stops: per page per MMA warpgroup S+wait 900, softmax 1100, PV 520 cycles and ~1500 cycles per page per CTA in total; the remaining gap to the 0.117 ms
+load-only floor is instruction issue + the dependent S -> softmax -> PV chain at 1 CTA/SM, not memory.
+
+### Goal 2: B300 variant 4 (`uq_decode_sm100.cuh`, tcgen05; written by a forked sub-agent, see its commits 586b380 / 21d0376)
+Raw-PTX tcgen05 (kind::f16, bf16) variant of the same architecture: M = 128 rows, Q and P in TMEM (TS MMA), S and P double-buffered in TMEM, 4 softmax warps
+(one thread per TMEM lane, no shuffles), bulk-copy producer, 256 dequant threads, conditional O rescale in TMEM.  Correct (vectors 60/60, plus a fp32 GPU
+reference cross-check at ctx 8192).  Performance on B300 B8 ctx32768: 0.350/0.354/0.351/0.362 ms at K=1/2/4/8 in its own bench (K-independent again; skeleton alone,
+no dequant and no softmax math, is already 0.20 ms) => only K=8 beats the legacy kernel (0.3074 ms tuned in the final run vs 0.3504 before, 1.14x); K=1/2/4 stay on
+variant 2 / 1.  The native block-scaled FP4 QK step (kind::mxf8f6f4) was NOT built.  FlashInfer trtllm-gen NVFP4 (0.066 / 0.094 ms at K=1/8) is still 2.1x / 3.3x faster:
+the gap is the per-page serial chain (and dequant) of a software-dequant design, not a missing instruction.  Variant 4 is hooked as `variant=4` (explicit request, fmt 0 only).
+
+### Goal 3: NVFP4 (fmt=1)
+`UQParams.fmt/k_ts/v_ts`; scales uint8 [pages,Hkv,PAGE,D/16] (raw e4m3fn), `k_ts` folded into sm_scale at launch, `v_ts` applied in the reduce kernel.  The E4M3 scale
+is decoded exactly (`fp16(b<<7) * 256`, same trick as `uqmt/nvfp4.py`, then exact to bf16; fp4 x e4m3 has <= 5 significant bits so the bf16 product is exact).
+Implemented in variant 1 (all GPUs, `GS=16` template) and variant 3 (H100: 256-entry E4M3 -> bf16x2 table in smem, two scales per 32-element chunk).  Variant 2 has no NVFP4
+form (fmt=1 requests fall back to variant 1).  Vectors: `tools/cuda2_gen_vectors_nvfp4.py` (snapshot of `quantize_nvfp4`, fp32 reference) -> `cuda/vectors_nvfp4/`,
+harness `bench/cuda2/test_vectors_nv.cu`: **H100 2016 launches (variants 1 and 3) 0 failures**, worst error beyond bf16 rounding 1.7e-3 (`results/cuda2_h100_vectors_nvfp4.log`).
+
+### Goal 4: workspace / CUDA graphs
+`uq_workspace_bytes`, `uq_decode_launch_ws` (C), `uq_decode_cuda(..., workspace=, out=)` and `workspace_floats` (Python): scratch and output are caller owned, no allocation and no
+sync in the launch path (the one-time `cudaFuncSetAttribute` happens on the first call: warm up before capture).  `bench/cuda2/test_graph.py`: capture + replay is bit-equal to
+eager for UE8M0 and NVFP4 at K = 1, 4, 8 with changed `seq_lens`/q (the capture allocates nothing beyond the empty-capture baseline).  D = 256 not done.
+
+### Goal 5: real model
+See the tables in the "cuda2" section of `README.md` (perplexity Triton vs CUDA through Qwen3-8B on H100/B300; whole decode step vs fp16 SDPA on Mistral-7B, B8 ctx32768).
