@@ -2,38 +2,38 @@
  {
   "K": 1,
   "device": "NVIDIA H100 80GB HBM3",
-  "hbm_copy_GBps": 3011.4999019841466,
+  "hbm_copy_GBps": 3033.141653283578,
   "kv_bytes": 285212672,
-  "cuda_fused_ms": 0.18669652938842773,
-  "cuda_base_ms": 0.1863957405090332,
+  "cuda_fused_ms": 0.1614400068918864,
+  "cuda_base_ms": 0.16545173327128093,
   "cuda_cfg": {
    "nwarps": 4,
-   "stages": 2,
+   "stages": 3,
    "nsplit": 4,
    "variant": 2,
    "mb": 1
   },
-  "cuda_fused_GBps": 1527.6806319554364,
-  "cuda_pct_peak": 50.72823116975411,
-  "cuda_speedup_vs_base": 0.9983888887469958,
+  "cuda_fused_GBps": 1766.6790127864776,
+  "cuda_pct_peak": 58.24584588306089,
+  "cuda_speedup_vs_base": 1.0248496420226314,
   "cuda_err": 0.00015358999371528625,
-  "triton_fused_ms": 0.37476587295532227,
-  "triton_base_ms": 0.37485014597574867,
+  "triton_fused_ms": 0.371448548634847,
+  "triton_base_ms": 0.3713823954264323,
   "triton_cfg": {
    "w": 4,
    "s": 2,
    "n": 32
   },
-  "triton_fused_GBps": 761.0422735423448,
-  "cuda_vs_triton": 2.0073531853161053
+  "triton_fused_GBps": 767.8389727143037,
+  "cuda_vs_triton": 2.300845718394944
  },
  {
   "K": 2,
   "device": "NVIDIA H100 80GB HBM3",
-  "hbm_copy_GBps": 3011.4999019841466,
+  "hbm_copy_GBps": 3033.141653283578,
   "kv_bytes": 285212672,
-  "cuda_fused_ms": 0.18881600697835285,
-  "cuda_base_ms": 0.3853280067443848,
+  "cuda_fused_ms": 0.1631733258565267,
+  "cuda_base_ms": 0.3309173266092936,
   "cuda_cfg": {
    "nwarps": 4,
    "stages": 2,
@@ -41,72 +41,72 @@
    "variant": 2,
    "mb": 1
   },
-  "cuda_fused_GBps": 1510.5322719418525,
-  "cuda_pct_peak": 50.15880196265749,
-  "cuda_speedup_vs_base": 2.0407592179860123,
+  "cuda_fused_GBps": 1747.9123533387974,
+  "cuda_pct_peak": 57.627125704682,
+  "cuda_speedup_vs_base": 2.028011164645005,
   "cuda_err": 0.00011962652206420898,
-  "triton_fused_ms": 0.3786112149556478,
-  "triton_base_ms": 0.7413642883300782,
+  "triton_fused_ms": 0.37251946131388347,
+  "triton_base_ms": 0.7287680308024088,
   "triton_cfg": {
    "w": 4,
    "s": 2,
    "n": 32
   },
-  "triton_fused_GBps": 753.3127935299303,
-  "cuda_vs_triton": 2.0051860062852316
+  "triton_fused_GBps": 765.6316021558962,
+  "cuda_vs_triton": 2.2829678770011004
  },
  {
   "K": 4,
   "device": "NVIDIA H100 80GB HBM3",
-  "hbm_copy_GBps": 3011.4999019841466,
+  "hbm_copy_GBps": 3033.141653283578,
   "kv_bytes": 285212672,
-  "cuda_fused_ms": 0.2916618665059408,
-  "cuda_base_ms": 0.9629429499308269,
+  "cuda_fused_ms": 0.29062185287475584,
+  "cuda_base_ms": 0.6188575744628906,
   "cuda_cfg": {
    "nwarps": 4,
-   "stages": 3,
-   "nsplit": 16,
+   "stages": 2,
+   "nsplit": 6,
    "variant": 1
   },
-  "cuda_fused_GBps": 977.8881120689482,
-  "cuda_pct_peak": 32.471796244278806,
-  "cuda_speedup_vs_base": 3.3015730217553583,
-  "cuda_err": 0.0001416616141796112,
-  "triton_fused_ms": 0.5019626617431641,
-  "triton_base_ms": 1.4255947113037108,
+  "cuda_fused_GBps": 981.3875631813313,
+  "cuda_pct_peak": 32.35548073130425,
+  "cuda_speedup_vs_base": 2.1294254659149416,
+  "cuda_err": 0.0001279301941394806,
+  "triton_fused_ms": 0.4969440142313639,
+  "triton_base_ms": 1.4113311767578125,
   "triton_cfg": {
    "w": 4,
    "s": 2,
    "n": 16
   },
-  "triton_fused_GBps": 568.1949948419328,
-  "cuda_vs_triton": 1.7210431646638993
+  "triton_fused_GBps": 573.9332074280958,
+  "cuda_vs_triton": 1.7099334042355139
  },
  {
   "K": 8,
   "device": "NVIDIA H100 80GB HBM3",
-  "hbm_copy_GBps": 3011.4999019841466,
+  "hbm_copy_GBps": 3033.141653283578,
   "kv_bytes": 285212672,
-  "cuda_fused_ms": 0.4201258659362793,
-  "cuda_base_ms": 1.8488928476969402,
+  "cuda_fused_ms": 0.43103040059407555,
+  "cuda_base_ms": 1.1759787241617838,
   "cuda_cfg": {
    "nwarps": 4,
-   "stages": 3,
-   "nsplit": 8,
+   "stages": 2,
+   "nsplit": 4,
    "variant": 1
   },
-  "cuda_fused_GBps": 678.8743448689692,
-  "cuda_pct_peak": 22.54273176039914,
-  "cuda_speedup_vs_base": 4.400806990487376,
-  "cuda_err": 0.00015133991837501526,
-  "triton_fused_ms": 0.45357545216878253,
-  "triton_base_ms": 2.6850934346516926,
+  "cuda_fused_GBps": 661.6996657472429,
+  "cuda_pct_peak": 21.815653252821505,
+  "cuda_speedup_vs_base": 2.728296478719296,
+  "cuda_err": 0.00013517588376998901,
+  "triton_fused_ms": 0.4534015973409017,
+  "triton_base_ms": 2.688738250732422,
   "triton_cfg": {
    "w": 4,
    "s": 2,
    "n": 16
   },
-  "triton_fused_GBps": 628.8097617193531,
-  "cuda_vs_triton": 1.0796180119925691
+  "triton_fused_GBps": 629.050876028466,
+  "cuda_vs_triton": 1.051901667993702
  }
 ]

@@ -51,25 +51,28 @@ int main(int argc, char** argv) {
     void* q; size_t qn = (size_t)B * K * HQ * D; CK(cudaMalloc(&q, qn * 2)); fill_rand<<<256, 256>>>((uint8_t*)q, qn * 2, 5, 0x30, 0x3f);
     p.q = q; CK(cudaMalloc(&p.out, qn * 2));
     int bm = uq_block_m(K, HQ, HKV);
-    std::vector<int> nws = variant == 2 ? std::vector<int>{2, 4, 8, 16} : bm == 16 ? std::vector<int>{1, 2, 4, 8} : bm == 32 ? std::vector<int>{2, 4, 8} : bm == 64 ? std::vector<int>{4, 8} : std::vector<int>{8};
-    std::vector<int> sts = {2, 3, 4}, nss = {4, 8, 12, 16, 24, 32, 48, 64, 96};
-    if (!tune) { nws = {0}; sts = {3}; nss = {16}; }
-    double best = 1e9; int bw = 0, bs = 0, bn = 0, bmb = 0;
-    std::vector<int> mbs = variant == 2 ? std::vector<int>{1, 2} : std::vector<int>{0};
-    p.variant = variant;
-    for (int mbv : mbs) for (int nw : nws) for (int st : sts) for (int ns : nss) {
+    struct Cfg3 { int var, mb, nw; };
+    std::vector<Cfg3> cfgs;
+    std::vector<int> nws1 = bm == 16 ? std::vector<int>{1, 2, 4, 8} : bm == 32 ? std::vector<int>{2, 4, 8} : bm == 64 ? std::vector<int>{4, 8} : std::vector<int>{8};
+    if (variant != 2) for (int nw : nws1) cfgs.push_back({1, 0, nw});
+    if (variant != 1) for (int mbv : {1, 2}) for (int nw : {2, 4, 8, 16}) cfgs.push_back({2, mbv, nw});
+    std::vector<int> sts = {2, 3, 4}, nss = {3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 18, 20, 24, 32, 48, 64};
+    if (!tune) { cfgs = {{variant ? variant : 2, 1, 0}}; sts = {3}; nss = {16}; }
+    double best = 1e9; int bw = 0, bs = 0, bn = 0, bmb = 0, bvar = 0;
+    for (auto c : cfgs) for (int st : sts) for (int ns : nss) {
+      int nw = c.nw, mbv = c.mb; p.variant = c.var;
       p.nsplit = ns; p.mb = mbv; float *mo, *ml; CK(cudaMalloc(&mo, uq_mo_elems(p) * 4)); CK(cudaMalloc(&ml, uq_ml_elems(p) * 4)); p.mo = mo; p.ml = ml;
       cudaError_t e = uq_decode_launch(p, nw, st, 0);
       if (e != cudaSuccess) { cudaGetLastError(); cudaFree(mo); cudaFree(ml); continue; }
       for (int i = 0; i < 3; i++) uq_decode_launch(p, nw, st, 0);
       cudaEventRecord(e0); for (int i = 0; i < iters; i++) uq_decode_launch(p, nw, st, 0); cudaEventRecord(e1); cudaEventSynchronize(e1);
       float t; cudaEventElapsedTime(&t, e0, e1); t /= iters; CK(cudaGetLastError());
-      if (t < best) { best = t; bw = nw; bs = st; bn = ns; bmb = mbv; }
+      if (t < best) { best = t; bw = nw; bs = st; bn = ns; bmb = mbv; bvar = c.var; }
       cudaFree(mo); cudaFree(ml);
     }
-    printf("K=%d best %.4f ms  (mb=%d nw=%d st=%d ns=%d)  %.0f GB/s  %.1f%% of copy peak\n", K, best, bmb, bw, bs, bn, kvbytes / best / 1e6, 100 * kvbytes / best / 1e6 / peak);
+    printf("K=%d best %.4f ms  (var=%d mb=%d nw=%d st=%d ns=%d)  %.0f GB/s  %.1f%% of copy peak\n", K, best, bvar, bmb, bw, bs, bn, kvbytes / best / 1e6, 100 * kvbytes / best / 1e6 / peak);
 #ifdef UQ_PROF
-    { p.variant = 2; p.mb = bmb; p.nsplit = bn; float *mo, *ml; cudaMalloc(&mo, uq_mo_elems(p) * 4); cudaMalloc(&ml, uq_ml_elems(p) * 4); p.mo = mo; p.ml = ml;
+    { p.variant = bvar; p.mb = bmb; p.nsplit = bn; float *mo, *ml; cudaMalloc(&mo, uq_mo_elems(p) * 4); cudaMalloc(&ml, uq_ml_elems(p) * 4); p.mo = mo; p.ml = ml;
       uq_prof_reset(); uq_decode_launch(p, bw, bs, 0); cudaDeviceSynchronize(); unsigned long long pr[8]; uq_prof_read(pr);
       double it = (double)pr[6] / 1.0; printf("  PROF K=%d cycles/iter (warp0 lane0): wait=%.0f kdeq+S=%.0f softmax=%.0f pv=%.0f loopovh=%.0f  iters/warp=%.1f\n", K,
              pr[0] / it, pr[1] / it, pr[2] / it, pr[3] / it, pr[5] / it, it / pr[7]); }
