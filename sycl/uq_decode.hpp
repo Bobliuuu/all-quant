@@ -238,8 +238,16 @@ sycl::event run_D(sycl::queue& q, const Shape& s, const Cfg& c, const Args& a) {
   throw std::runtime_error("unsupported (wg,tn,sg) config");
 }
 
+}  // namespace uq
+#include "uq_xmx.hpp"
+namespace uq {
+
 // Fused: all K queries x G heads share each KV page read.
 inline sycl::event decode(sycl::queue& q, const Shape& s, const Cfg& c, const Args& a) {
+  if (c.path == 1) {
+    if (s.D == 128) return run_xmx<128>(q, s, c, a);
+    if (s.D == 64) return run_xmx<64>(q, s, c, a);
+  }
   if (s.D == 128) return run_D<128>(q, s, c, a);
   if (s.D == 64) return run_D<64>(q, s, c, a);
   throw std::runtime_error("head_dim must be 64 or 128");

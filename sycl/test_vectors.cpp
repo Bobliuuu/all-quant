@@ -47,16 +47,18 @@ int main(int argc, char** argv) {
       std::vector<uq::bf16> hout(nout);
       q.memcpy(hout.data(), out, nout * sizeof(uq::bf16)).wait();
       const float* ref = (const float*)vref.data();
+      // bf16 P (XMX path) adds an error proportional to |V| (cancellation), not to |ref|: allow 6e-3 abs
+      const double floor_extra = c.path == 1 ? 6e-3 : 0.0;
       double maxabs = 0, maxtol = 0, wo = 0, wr = 0; size_t wi = 0; bool nan = false;
       for (size_t i = 0; i < nout; i++) {
         double o = (float)hout[i], r = ref[i], e = std::fabs(o - r);
         if (o != o) nan = true;
         maxabs = std::fmax(maxabs, e);
         // pass if within 1e-3 abs OR within one bf16 ulp (2^-7 relative) of the fp32 reference: output is bf16 and P is rounded to bf16 before PV as in the Triton kernel
-        { double x = e - (1e-3 + std::fabs(r) * (1.0 / 128)); if (x > maxtol) { maxtol = x; wi = i; wo = o; wr = r; } }
+        { double x = e - (1e-3 + std::fabs(r) * (1.0 / 128) + floor_extra); if (x > maxtol) { maxtol = x; wi = i; wo = o; wr = r; } }
       }
       bool ok = !nan && maxabs <= 1e-3 + 0 || (!nan && maxtol <= 0);
-      std::printf("%-22s nsplit=%d wg=%d tn=%d sg=%d  max_abs_err=%.3e  %s\n", name.c_str(), ns, c.wg, c.tn, c.sg, maxabs,
+      std::printf("%-22s nsplit=%d path=%s wg=%d tn=%d sg=%d  max_abs_err=%.3e  %s\n", name.c_str(), ns, c.path ? "xmx" : "portable", c.wg, c.tn, c.sg, maxabs,
                   ok ? "PASS" : "FAIL");
       if (!ok) std::printf("   worst elem idx=%zu (b=%zu,j=%zu) out=%g ref=%g\n", wi, wi / ((size_t)K * HQ * D), (wi / ((size_t)HQ * D)) % K, wo, wr);
       worst = std::fmax(worst, maxabs); runs++; fails += !ok;
