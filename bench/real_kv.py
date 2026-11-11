@@ -55,9 +55,12 @@ def fq_block(x, m):
     for i in range(0, xf.shape[0], 1 << 20):
         c = xf[i:i + (1 << 20)].float(); out[i:i + (1 << 20)] = _bq[m].decompress(_bq[m].compress(c), c.shape).to(x.dtype)
     return out.reshape(sh)
-def fq_fp8_pt(x):  # amd-experiments baseline: per-tensor absmax e4m3fnuz
-    amax = x.float().abs().amax().clamp(min=1e-12); sc = 448.0 / amax
-    return ((x.float() * sc).clamp(-448, 448).to(torch.float8_e4m3fnuz).float() / sc).to(x.dtype)
+def fq_fp8_pt(x, mx=240.0):  # amd-experiments fp8 baseline format (per-tensor absmax, e4m3fnuz). NOTE their script scales to 448, but e4m3fnuz max is 240 -> NaN; fixed here.
+    amax = x.float().abs().amax().clamp(min=1e-12); sc = mx / amax
+    return ((x.float() * sc).clamp(-mx, mx).to(torch.float8_e4m3fnuz).float() / sc).to(x.dtype)
+def fq_fp8_tok(x):  # fp8 e4m3fnuz with a per-vector (token,head) absmax scale: the fair fp8 KV baseline
+    amax = x.float().abs().amax(-1, keepdim=True).clamp(min=1e-12); sc = 240.0 / amax
+    return ((x.float() * sc).to(torch.float8_e4m3fnuz).float() / sc).to(x.dtype)
 def fq_int4_pt(x):  # amd-experiments baseline: per-tensor symmetric int4
     amax = x.float().abs().amax().clamp(min=1e-12); sc = 7.0 / amax
     return ((x.float() * sc).round().clamp(-7, 7) / sc).to(x.dtype)
@@ -68,10 +71,13 @@ def fq_kivi4(x, is_key):  # KIVI-style: K per-channel over groups of 32 tokens, 
     xf = x.float(); B_, H_, S_, D_ = xf.shape
     if is_key: return _asym4(xf.reshape(B_, H_, S_ // 32, 32, D_), 3).reshape(B_, H_, S_, D_).to(x.dtype)
     return _asym4(xf.reshape(B_, H_, S_, D_ // 32, 32), 4).reshape(B_, H_, S_, D_).to(x.dtype)
-OTHERS = {"fp4_ue8m0_sim": lambda x, k: fq_fp4(x), "tq3_sim": lambda x, k: fq_tq3(x), "fp8_pertensor": lambda x, k: fq_fp8_pt(x),
+OTHERS = {"fp4_ue8m0_sim": lambda x, k: fq_fp4(x), "tq3_sim": lambda x, k: fq_tq3(x), "fp8_pertensor_fixed240": lambda x, k: fq_fp8_pt(x), "fp8_pertoken": lambda x, k: fq_fp8_tok(x),
           "int4_pertensor": lambda x, k: fq_int4_pt(x), "kivi4_own": fq_kivi4,
           **{m + "3": (lambda x, k, m=m: fq_block(x, m)) for m in ("planar", "iso", "rotor")}}
 
+_g = torch.randn(1, 1, 4096, D, device=dev, dtype=torch.float16)
+print("sanity: reconstruction cosine on iid Gaussian vectors (their reported 0.983 regime):",
+      {nm: round(F.cosine_similarity(fn(_g, True).float().reshape(-1, D), _g.float().reshape(-1, D), dim=-1).mean().item(), 4) for nm, fn in OTHERS.items()}, flush=True)
 
 if a.mode == "attn":
     ids = ids_all[: a.ntok][None].to(dev); S = ids.shape[1]
@@ -134,6 +140,8 @@ if a.mode == "attn":
                     sc3 = torch.einsum("hgkd,hsd->hgks", qq, kk[0].float()) * SM
                     r3 = torch.einsum("hgks,hsd->hgkd", sc3.softmax(-1), vv[0].float()).reshape(Hq, K, D).permute(1, 0, 2)
                     res["others_K1"][nm] = dict(zip(("cos", "rel_l2"), cos_rel(r3, r)))
+                    res.setdefault("recon_cos", {})[nm] = dict(K=F.cosine_similarity(kk.float().reshape(-1, D), k.float().reshape(-1, D), dim=-1).mean().item(),
+                                                                V=F.cosine_similarity(vv.float().reshape(-1, D), v.float().reshape(-1, D), dim=-1).mean().item())
         layers.append(res); print(json.dumps({k_: (round(v_, 4) if isinstance(v_, float) else v_) for k_, v_ in res.items() if k_ in ("layer", "uq_K1", "uq_K8", "tq3_K1")}), flush=True)
     json.dump(dict(model=a.model, ntok=Sp, device=torch.cuda.get_device_name(0), layers=layers), open(a.out, "w"), indent=1)
 

@@ -31,7 +31,7 @@ for ctx in a.ctxs:
     add("fp16_sdpa", lambda: F.scaled_dot_product_attention(q, k, v, scale=SM), 256)
     # fp8 per-tensor (amd-experiments baseline format)
     def mk8(x):
-        sc = 448.0 / x.float().abs().amax(); return (x.float() * sc).clamp(-448, 448).to(torch.float8_e4m3fnuz), sc
+        sc = 240.0 / x.float().abs().amax(); return (x.float() * sc).clamp(-240, 240).to(torch.float8_e4m3fnuz), sc
     k8, ks8 = mk8(k); v8, vs8 = mk8(v)
     add("fp8_pertensor_dequant_sdpa", lambda: F.scaled_dot_product_attention(q, (k8.to(torch.float16) / ks8.half()), (v8.to(torch.float16) / vs8.half()), scale=SM), 128)
     # int4 per-tensor (their baseline format), lean unpack
