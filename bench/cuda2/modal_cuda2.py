@@ -21,13 +21,13 @@ def sh(c, timeout=3300):
     p.wait()
     return ""
 
-def body(gpu, mode, extra):
+def body(gpu, mode, extra, defs=""):
     d = f"/out/{gpu}_{mode}"; os.makedirs(d, exist_ok=True); log = open(f"{d}/log.txt", "w")
     def P(*a):
         s = " ".join(str(x) for x in a); print(s, flush=True); log.write(s + "\n"); log.flush()
     P(sh("nvidia-smi --query-gpu=name,compute_cap,driver_version --format=csv,noheader"))
     arch = "-gencode arch=compute_90a,code=sm_90a" if "H100" in gpu else "-arch=native"
-    F = f"-O3 -std=c++17 {arch} -DUQ_ENABLE_SM90 -I /work/cuda" 
+    F = f"-O3 -std=c++17 {arch} -DUQ_ENABLE_SM90 -I /work/cuda {defs}"
     fast = mode.endswith("f")
     if fast: F += " -DUQ_SM90_ONLY"; mode = mode[:-1]
     if mode == "sm90":
@@ -44,11 +44,11 @@ def body(gpu, mode, extra):
 
 def _fn(gpu): return dict(gpu=gpu, image=img, timeout=3600, volumes={"/out": vol})
 @app.function(**_fn("H100!"))
-def run_h100(mode: str, extra: str = ""): body("H100", mode, extra)
+def run_h100(mode: str, extra: str = "", defs: str = ""): body("H100", mode, extra, defs)
 @app.function(**_fn("B300"))
-def run_b300(mode: str, extra: str = ""): body("B300", mode, extra)
+def run_b300(mode: str, extra: str = "", defs: str = ""): body("B300", mode, extra, defs)
 FUNCS = {"H100": run_h100, "B300": run_b300}
 
 @app.local_entrypoint()
-def main(gpu: str = "H100", mode: str = "sm90", extra: str = ""):
-    FUNCS[gpu].remote(mode, extra)
+def main(gpu: str = "H100", mode: str = "sm90", extra: str = "", defs: str = ""):
+    FUNCS[gpu].remote(mode, extra, defs)

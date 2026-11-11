@@ -545,8 +545,8 @@ cudaError_t uq_decode_launch(const UQParams& p, int nw, int stages, cudaStream_t
   if (p.variant == 3) return dispatch_sm90(p, nw, stages, s);   // nw = # MMA warpgroups, stages = dequant stages
 #endif
 #ifdef UQ_SM90_ONLY
-  return cudaErrorInvalidValue;   // dev build: only variant 3
-#endif
+  return cudaErrorInvalidValue;   // dev build (fast compile): only variant 3
+#else
   if (p.D == 128) {
     switch (p.PAGE) {
       case 16: return dispatch_dp<128, 16>(p, nw, stages, s);
@@ -562,6 +562,7 @@ cudaError_t uq_decode_launch(const UQParams& p, int nw, int stages, cudaStream_t
     }
   }
   return cudaErrorInvalidValue;
+#endif
 }
 
 #ifdef UQ_PROF

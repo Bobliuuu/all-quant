@@ -18,6 +18,9 @@ __global__ void fill_rand(uint8_t* p, size_t n, uint32_t seed, int lo, int hi) {
   }
 }
 static float bf2f(uint16_t b) { uint32_t u = (uint32_t)b << 16; float f; memcpy(&f, &u, 4); return f; }
+#ifdef UQ90_PROF
+void uq_sm90_prof_read(unsigned long long*); void uq_sm90_prof_reset();
+#endif
 int main(int argc, char** argv) {
   int B = 8, ctx = 32768, HQ = 64, HKV = 8, D = 128, PAGE = 64; std::vector<int> Ks = {1, 2, 4, 8}; int iters = 50; bool only3 = false, ragged = true, smoke = false;
   for (int i = 1; i < argc; i++) {
@@ -85,19 +88,27 @@ int main(int argc, char** argv) {
     }
     R b3{3, 0, 0, 0, 0, 1e9};
     int nmis = 0;
-    for (int mw : {1, 2}) for (int st : {2, 3, 4}) for (int ns : {2, 3, 4, 5, 6, 8, 9, 12, 16, 20, 24, 32}) {
-      double ms; if (!timeit(3, 0, mw, st, ns, ms)) continue;
+    for (int mw : {1, 2}) for (int st : {2, 3, 32, 33}) for (int nd : {2, 3}) for (int ns : {2, 3, 4, 6, 8, 16}) {
+      double ms; if (!timeit(3, nd, mw, st, ns, ms)) continue;
       if (!only3) {
-        p.variant = 3; p.nsplit = ns; float *mo, *ml; CK(cudaMalloc(&mo, uq_mo_elems(p) * 4)); CK(cudaMalloc(&ml, uq_ml_elems(p) * 4)); p.mo = mo; p.ml = ml;
+        p.variant = 3; p.mb = nd; p.nsplit = ns; float *mo, *ml; CK(cudaMalloc(&mo, uq_mo_elems(p) * 4)); CK(cudaMalloc(&ml, uq_ml_elems(p) * 4)); p.mo = mo; p.ml = ml;
         CK(cudaMemset(p.out, 0xFF, qn * 2)); uq_decode_launch(p, mw, st, 0); CK(cudaDeviceSynchronize());
         std::vector<uint16_t> h(qn), r(qn); CK(cudaMemcpy(h.data(), p.out, qn * 2, cudaMemcpyDeviceToHost)); CK(cudaMemcpy(r.data(), ref, qn * 2, cudaMemcpyDeviceToHost));
         double mx = 0; for (size_t i = 0; i < qn; i++) { double d = fabs((double)bf2f(h[i]) - bf2f(r[i])); if (std::isnan(d)) d = 1e9; if (d > mx) mx = d; }
         cudaFree(mo); cudaFree(ml);
-        if (mx > 2e-3) { if (nmis++ < 4) printf("  MISMATCH var3 mw=%d st=%d ns=%d maxdiff=%.3e\n", mw, st, ns, mx); continue; }
+        if (mx > 2e-3) { if (nmis++ < 4) printf("  MISMATCH var3 mw=%d nd=%d st=%d ns=%d maxdiff=%.3e\n", mw, nd, st, ns, mx); continue; }
       }
-      if (ms < b3.ms) b3 = {3, 0, mw, st, ns, ms};
+      if (ms < b3.ms) b3 = {3, nd, mw, st, ns, ms};
     }
-    printf("K=%d sm90 best %.4f ms (mw=%d st=%d ns=%d) %.0f GB/s %.1f%% peak\n", K, b3.ms, b3.nw, b3.st, b3.ns, kvbytes / b3.ms / 1e6, 100 * kvbytes / b3.ms / 1e6 / peak);
+    printf("K=%d sm90 best %.4f ms (nd=%d mw=%d st=%d ns=%d) %.0f GB/s %.1f%% peak\n", K, b3.ms, b3.mb, b3.nw, b3.st, b3.ns, kvbytes / b3.ms / 1e6, 100 * kvbytes / b3.ms / 1e6 / peak);
+#ifdef UQ90_PROF
+    { p.variant = 3; p.mb = b3.mb; p.nsplit = b3.ns; float *mo, *ml; CK(cudaMalloc(&mo, uq_mo_elems(p) * 4)); CK(cudaMalloc(&ml, uq_ml_elems(p) * 4)); p.mo = mo; p.ml = ml;
+      uq_sm90_prof_reset(); uq_decode_launch(p, b3.nw, b3.st, 0); CK(cudaDeviceSynchronize()); unsigned long long pr[16]; uq_sm90_prof_read(pr);
+      double dn = (double)pr[15] / 1.0;  // pages summed over CTAs (DQ thread0 of each CTA)
+      printf("  PROF DQ cycles/page: wait_full=%.0f wait_free=%.0f dequant=%.0f fence+arr=%.0f bar+issue=%.0f\n", pr[0] / dn, pr[1] / dn, pr[2] / dn, pr[3] / dn, pr[4] / dn);
+      double mn = (double)pr[12];
+      printf("  PROF MMA cycles/page(per WG): wait_dfull=%.0f S+wait=%.0f softmax=%.0f PV+wait=%.0f (other %.0f)\n", pr[8] / mn, pr[9] / mn, pr[10] / mn, pr[11] / mn, pr[13] / mn); }
+#endif
     if (!only3 && b3.ms < 1e8) printf("K=%d speedup sm90/legacy %.2fx\n", K, b12.ms / b3.ms);
     fflush(stdout); cudaFree(q); cudaFree(p.out); cudaFree(ref);
   }
