@@ -128,6 +128,27 @@
    }
   },
   {
+   "name": "rot_h128_b2k4",
+   "B": 2,
+   "K": 4,
+   "HQ": 32,
+   "HKV": 8,
+   "D": 128,
+   "PAGE": 64,
+   "max_pages": 7,
+   "sm_scale": 0.08838834764831845,
+   "files": {
+    "q": "rot_h128_b2k4.q.bin",
+    "kc": "rot_h128_b2k4.kc.bin",
+    "ks": "rot_h128_b2k4.ks.bin",
+    "vc": "rot_h128_b2k4.vc.bin",
+    "vs": "rot_h128_b2k4.vs.bin",
+    "bt": "rot_h128_b2k4.bt.bin",
+    "sl": "rot_h128_b2k4.sl.bin",
+    "ref": "rot_h128_b2k4.ref.bin"
+   }
+  },
+  {
    "name": "b4k3_d128_p64_g1",
    "B": 4,
    "K": 3,

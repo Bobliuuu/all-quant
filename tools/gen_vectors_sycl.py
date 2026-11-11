@@ -61,7 +61,14 @@ def reference(q, kc, ks, vc, vs, bt, sl, sm_scale):
     return out
 
 
-def build_case(name, B, K, HQ, HKV, D, PAGE, seq_lens, seed, kv_scale=1.0):
+def hadamard(n):
+    H = torch.ones(1, 1)
+    while H.shape[0] < n:
+        H = torch.cat([torch.cat([H, H], 1), torch.cat([H, -H], 1)], 0)
+    return H / n ** 0.5   # orthonormal: (qH)(kH)^T == q k^T
+
+
+def build_case(name, B, K, HQ, HKV, D, PAGE, seq_lens, seed, kv_scale=1.0, rotate=False):
     g = torch.Generator().manual_seed(seed)
     T = max(seq_lens)
     npg = (T + PAGE - 1) // PAGE
@@ -69,6 +76,11 @@ def build_case(name, B, K, HQ, HKV, D, PAGE, seq_lens, seed, kv_scale=1.0):
     k = torch.randn(B, HKV, T_pad, D, generator=g) * kv_scale
     v = torch.randn(B, HKV, T_pad, D, generator=g) * kv_scale
     q = (torch.randn(B, K, HQ, D, generator=g)).to(torch.bfloat16)
+    if rotate:  # UltraQuant convention: rotation applied OUTSIDE the kernel to K (before quantisation) and Q; V unrotated.
+        k = k * (1 + 8 * (torch.rand(D, generator=g) < 0.05).float())   # outlier channels (what the rotation is for)
+        H = hadamard(D)
+        k = k @ H
+        q = (q.float() @ H).to(torch.bfloat16)
 
     def paged(x):
         return x.reshape(B, HKV, npg, PAGE, D).permute(0, 2, 1, 3, 4).reshape(B * npg, HKV, PAGE, D)
@@ -94,6 +106,7 @@ CASES = [
     ("b3k2_d64_p16", 3, 2, 16, 4, 64, 16, [50, 97, 130], 4),
     ("b2k16_d128_p32", 2, 16, 8, 2, 128, 32, [64, 150], 5),
     ("edge_short_k4", 2, 4, 8, 2, 128, 64, [2, 65], 6),   # seq_len < K -> zero rows
+    ("rot_h128_b2k4", 2, 4, 32, 8, 128, 64, [260, 400], 8, 1.0, True),  # Hadamard-rotated K and Q, V unrotated
     ("b4k3_d128_p64_g1", 4, 3, 8, 8, 128, 64, [129, 64, 1, 256], 7),  # GQA group 1, odd K
 ]
 
