@@ -22,7 +22,7 @@ import triton
 import triton.language as tl
 
 FP4_VALUES = [0.0, 0.5, 1.0, 1.5, 2.0, 3.0, 4.0, 6.0]
-GROUP = 32
+GROUP = tl.constexpr(32)
 
 
 # ----------------------------------------------------------------- quantize
@@ -125,8 +125,9 @@ def _split_kernel(
         m_i = m_new
 
     o_base = MO + (((b * HKV + hk) * NSPLIT + sp) * BLOCK_M + rows[:, None]) * D
-    tl.store(o_base + 2 * offs_h[None, :], acc_e)
-    tl.store(o_base + 2 * offs_h[None, :] + 1, acc_o)
+    inv_l = 1.0 / tl.maximum(l_i, 1e-30)
+    tl.store(o_base + 2 * offs_h[None, :], acc_e * inv_l[:, None])
+    tl.store(o_base + 2 * offs_h[None, :] + 1, acc_o * inv_l[:, None])
     lse = tl.where(l_i > 0, m_i + tl.log2(tl.maximum(l_i, 1e-30)), float("-inf"))
     tl.store(ML + ((b * HKV + hk) * NSPLIT + sp) * BLOCK_M + rows, lse)
 
