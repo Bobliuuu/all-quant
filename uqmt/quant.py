@@ -145,3 +145,62 @@ def dequantize_nvfp4(packed, scales, ts):
     D = packed.shape[-1] * 2
     out = torch.stack([dec(lo), dec(hi)], -1).reshape(*packed.shape[:-1], D)
     return out * (scales.float() * ts).repeat_interleave(16, -1)
+
+
+# ------------------------------------------------------- quantise-on-write kernel
+try:
+    from .attn import triton, tl, HAVE_TRITON
+except ImportError:  # pragma: no cover
+    HAVE_TRITON = False
+
+
+@triton.jit
+def _qow_kernel(X, CODE, SC, SLOT, N_TOK, HKV: tl.constexpr, D: tl.constexpr, PAGE: tl.constexpr,
+                RULE: tl.constexpr, C: tl.constexpr):
+    """One program per (token, kv head, 32-group).  X [N, Hkv, D]; SLOT [N] int32 =
+    page*PAGE + offset in the paged cache; CODE [pages,Hkv,PAGE,D/2]; SC [pages,Hkv,PAGE,D/32]."""
+    n = tl.program_id(0)
+    h = tl.program_id(1)
+    g = tl.program_id(2)
+    NG: tl.constexpr = D // 32
+    o = tl.arange(0, 32)
+    x = tl.load(X + (n * HKV + h) * D + g * 32 + o).to(tl.float32)
+    amax = tl.maximum(tl.max(tl.abs(x), 0), 1e-30)
+    if RULE == 0:
+        e = tl.ceil(tl.log2(amax / 6.0))
+    else:
+        # round-half-away like torch.round only differs at exact .5 ties of log2; torch.round is
+        # half-to-even, reproduced below
+        t = tl.log2(C * amax)
+        f = tl.floor(t)
+        d = t - f
+        e = tl.where(d > 0.5, f + 1.0, tl.where(d < 0.5, f, tl.where((f % 2.0) == 0.0, f, f + 1.0)))
+    e = tl.minimum(tl.maximum(e, -127.0), 127.0)
+    y = x / tl.exp2(e)
+    y = tl.minimum(tl.maximum(y, -6.0), 6.0)
+    a = tl.abs(y)
+    # nearest grid {0,.5,1,1.5,2,3,4,6}; argmin takes the first (lower) index on ties
+    c = (a > 0.25).to(tl.int32) + (a > 0.75).to(tl.int32) + (a > 1.25).to(tl.int32) + (a > 1.75).to(tl.int32) \
+        + (a > 2.5).to(tl.int32) + (a > 3.5).to(tl.int32) + (a > 5.0).to(tl.int32)
+    c = c | ((y < 0).to(tl.int32) << 3)
+    c2 = tl.reshape(c, [16, 2])
+    lo, hi = tl.split(c2)
+    byte = (lo | (hi << 4)).to(tl.uint8)
+    slot = tl.load(SLOT + n).to(tl.int64)
+    page = slot // PAGE
+    off = slot % PAGE
+    row = (page * HKV + h) * PAGE + off
+    tl.store(CODE + row * (D // 2) + g * 16 + tl.arange(0, 16), byte)
+    tl.store(SC + row * NG + g, (e + 127.0).to(tl.uint8))
+
+
+def quantize_on_write(x, code, scale, slots, rule="ceil", c=PAPER_C):
+    """Quantise x [N, Hkv, D] (N new tokens) and scatter into the paged FP4 cache tensors
+    `code` [pages,Hkv,PAGE,D/2] and `scale` [pages,Hkv,PAGE,D/32] at flat slots [N]
+    (slot = page*PAGE + in-page offset).  Bit-exact with quant.quantize (rule 'ceil'/'paper')."""
+    N, HKV, D = x.shape
+    PAGE = code.shape[2]
+    x = x.contiguous()
+    slots = slots.to(torch.int32)
+    _qow_kernel[(N, HKV, D // 32)](x, code, scale, slots, N, HKV=HKV, D=D, PAGE=PAGE,
+                                   RULE=0 if rule == "ceil" else 1, C=float(c), num_warps=1)

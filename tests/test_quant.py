@@ -82,3 +82,20 @@ def test_uq_decode_on_quant_output(monkeypatch, rule, c):
     out = cache.decode(q)
     ref = A.reference(q, cache.kc, cache.ks, cache.vc, cache.vs, cache.block_table, cache.seq_lens)
     assert (out.float() - ref).abs().max() < 2e-2
+
+
+@pytest.mark.skipif(not HAS_GPU, reason="needs GPU+triton")
+@pytest.mark.parametrize("rule,c", [("ceil", 0.0), ("paper", 0.156), ("paper", 0.195)])
+@pytest.mark.parametrize("D", [64, 128])
+def test_quantize_on_write_bit_exact(rule, c, D):
+    torch.manual_seed(0)
+    N, H, PAGE, P = 37, 3, 64, 5
+    x = (torch.randn(N, H, D, device="cuda") * torch.rand(N, H, 1, device="cuda") * 5).bfloat16()
+    x[3, 1, 7] = 0; x[4] = 0  # zeros / all-zero group
+    code = torch.zeros(P, H, PAGE, D // 2, dtype=torch.uint8, device="cuda")
+    sc = torch.zeros(P, H, PAGE, D // 32, dtype=torch.uint8, device="cuda")
+    slots = torch.randperm(P * PAGE, device="cuda")[:N].int()
+    Q.quantize_on_write(x, code, sc, slots, rule, c)
+    p, s = Q.quantize(x, rule, c)  # [N,H,D/2]
+    pg, off = (slots // PAGE).long(), (slots % PAGE).long()
+    assert torch.equal(code[pg, :, off], p) and torch.equal(sc[pg, :, off], s)
