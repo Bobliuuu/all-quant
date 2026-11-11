@@ -1,0 +1,313 @@
+{
+ "generated": "2026-11-11",
+ "note": "Commit hashes are default-branch HEAD from git ls-remote on 2026-11-11, not audited; install commands marked [unverified] were not read this session; pin before use.",
+ "methods": [
+  {
+   "name": "UltraQuant (AMD, paper)",
+   "bits": "4 (FP4 e2m1 + UE8M0/32ch; 4.25 eff.)",
+   "repo_url": null,
+   "repo_head_commit_2026_11_11": null,
+   "install_command": null,
+   "runs_on_rocm": "yes: gfx950 (MI355X) only per paper/PR",
+   "runs_on_cuda": "no",
+   "entry_points_kv_quant_dequant": null,
+   "code_status": "kernel not released (paper); SGLang PR #41949 open (https://github.com/sgl-project/sglang/pull/41949); vLLM fork inside docker rocm/vllm-dev:quark-ultraquant-lmcache-mi355 (LMCache blog) [unverified that UltraQuant kernels are in that image]",
+   "notes": "arXiv 2606.20474; blog https://rocm.blogs.amd.com/software-tools-optimization/ultraquant-kv4/README.html. SGLang flags: --kv-cache-dtype ultraquant_4bit --attention-backend ultraquant. Rejects spec-decode, MLA, non-gfx950.",
+   "models": [
+    "Qwen3.5-397B-A17B",
+    "Qwen3.6-27B",
+    "Qwen3.8",
+    "MiniMax-M2.5"
+   ]
+  },
+  {
+   "name": "uqmt (this repo)",
+   "bits": "4.25 (FP4+UE8M0/32)",
+   "repo_url": "https://github.com/Bobliuuu/ultraquant-more",
+   "repo_head_commit_2026_11_11": null,
+   "install_command": "pip install -e ~/ultraquant-more (pyproject.toml, untracked at time of writing)",
+   "runs_on_rocm": "yes: MI300X gfx942 (Triton, in-register dequant)",
+   "runs_on_cuda": "yes: B300 (Triton)",
+   "entry_points_kv_quant_dequant": "uqmt.attn.quantize_fp4 / dequantize_fp4 / fused K-query decode (see attn.py)",
+   "code_status": "public",
+   "notes": "kernel-level only; no model integration",
+   "models": null
+  },
+  {
+   "name": "kvpress (NVIDIA)",
+   "bits": "n/a (eviction) + optional QuantizedCache nbits=4 (quanto)",
+   "repo_url": "https://github.com/NVIDIA/kvpress",
+   "repo_head_commit_2026_11_11": "0cb673acf9e0bcb5e7f42e38997a7f2e736bbf3a",
+   "install_command": "pip install kvpress ; for 4-bit: pip install optimum-quanto",
+   "runs_on_rocm": "untested (PyTorch/transformers; likely if torch-rocm works) [unverified]",
+   "runs_on_cuda": "yes",
+   "entry_points_kv_quant_dequant": "pipeline('kv-press-text-generation'); press(model) context manager; transformers QuantizedCache(backend='quanto', nbits=4)",
+   "code_status": "public, Apache-2.0",
+   "notes": "Best harness for H2O/SnapKV/PyramidKV/StreamingLLM/ExpectedAttention etc on HF models; evaluation CLI in evaluation/ dir. Tested: Llama, Mistral, Phi3, Qwen2, Qwen3, Gemma3.",
+   "models": [
+    "Qwen3-8B",
+    "Llama-3.1-8B-Instruct"
+   ]
+  },
+  {
+   "name": "BitDecoding-FP4 (2026)",
+   "bits": "4 (NVFP4 and MXFP4)",
+   "repo_url": "https://github.com/OpenBitSys/BitDecoding-FP4",
+   "repo_head_commit_2026_11_11": "4e2907d74d8b1cdb3bce2b4795fc86bf76385e7f",
+   "install_command": "git clone --recurse-submodules https://github.com/OpenBitSys/BitDecoding-FP4.git && cd BitDecoding-FP4 && bash tools/bootstrap_env.sh (needs CUDA>=13.0, driver>=580, Python 3.12, uv)",
+   "runs_on_rocm": "no",
+   "runs_on_cuda": "yes: B200/B300 (SM100/SM103) only per README",
+   "entry_points_kv_quant_dequant": "not documented on README page; vLLM out-of-tree CUSTOM attention backend",
+   "code_status": "public, MIT",
+   "notes": "arXiv 2611.09825: native FP4 KV decode; abstract claims within 0.5 pt of BF16 (NVFP4), ~1 pt (MXFP4). Strong comparator for B300 results.",
+   "models": [
+    "Qwen3-4B-Thinking-2507",
+    "Qwen3-30B-A3B-Thinking-2507",
+    "GLM-4.7",
+    "Hy4-preview(MLA)"
+   ]
+  },
+  {
+   "name": "STAR-KV (the 'StarKV' found; ICML 2026)",
+   "bits": "low-rank + optional 3.2-bit (first 20% channels 4b, rest 3b, Hadamard)",
+   "repo_url": "https://github.com/PriyanshBhatnagar/STAR-KV",
+   "repo_head_commit_2026_11_11": "7ac7611534ff611d303d1fc790027aecb2205177",
+   "install_command": "git clone https://github.com/PriyanshBhatnagar/STAR-KV.git; conda create -n StarKV python=3.12.7; pip install -r requirements.txt",
+   "runs_on_rocm": "untested [unverified]",
+   "runs_on_cuda": "yes (benchmarked on RTX 4090)",
+   "entry_points_kv_quant_dequant": "eval.py --kv-quant [--triton]; train.py (soft-threshold rank selection w/ distillation); kv_quant.py; latency.py",
+   "code_status": "public, no license file visible",
+   "notes": "arXiv 2606.08382 (low-rank KV, NOT Star Attention). Triton 3.2-bit decode kernels MHA-only; GQA models only via fake-quant. Companion vLLM repo PriyanshBhatnagar/STAR-KV-Serve (HEAD a59aff9db42ff3adcc30c6002065511b45b9e862). Other 'STaR-KV' kawhiiiileo/STaR-KV (HEAD 35910334636b23ce2f7d4d3f79dc51dc334180b0) is GUI-VLM compression, arXiv 2606.01790, unrelated.",
+   "models": [
+    "longchat-7b-v1.5-32k",
+    "Llama-3 family (gated)"
+   ]
+  },
+  {
+   "name": "SemKV (2026)",
+   "bits": "~2.3-8 mixed (two adjacent precisions above a 'quality cliff' ~2.322 bits)",
+   "repo_url": null,
+   "repo_head_commit_2026_11_11": null,
+   "install_command": null,
+   "runs_on_rocm": "unknown",
+   "runs_on_cuda": "unknown",
+   "entry_points_kv_quant_dequant": null,
+   "code_status": "NO public code found (arXiv abs/PDF/HTML/TeX only, searched twice)",
+   "notes": "arXiv 2608.28911 'SemKV: Semantic Mixed-Precision KV Cache Quantization Guided by the Quality Cliff'. Keeps all tokens, ranks by model-internal score, mixed precision; 6.0x storage, Llama-3.1-8B-Instruct, Mistral-7B. Not to be confused with SemanticKV arXiv 2611.11452 (video generation, eviction) or SeKV (arXiv 2606.31145; repo AmirAbaskohi/SeKV HEAD 6569d111d3ace5c7c1ad596bf36962a99cd7e94b, semantic-span offloading). Quality agent must reimplement from paper.",
+   "models": [
+    "Llama-3.1-8B-Instruct",
+    "Mistral-7B"
+   ]
+  },
+  {
+   "name": "TurboQuant+ (community port)",
+   "bits": "3-4 (codebook)",
+   "repo_url": "https://github.com/TheTom/turboquant_plus",
+   "repo_head_commit_2026_11_11": "ba52ad107d1fdd02bc9be8fd85308226b75c905b",
+   "install_command": "see repo README (llama.cpp port) [unverified]",
+   "runs_on_rocm": "unknown",
+   "runs_on_cuda": "yes (llama.cpp backends)",
+   "entry_points_kv_quant_dequant": "see repo",
+   "code_status": "public",
+   "notes": "TurboQuant paper: openreview tO3ASKZlok. AMD vLLM TQ: flag --kv-cache-dtype turboquant_4bit_nc (AMD fork; no public repo link in blog).",
+   "models": null
+  },
+  {
+   "name": "amd-experiments (user's TurboQuant/Iso/Planar/Rotor study)",
+   "bits": "3 (TQ3 52B block), TQ4 kernels",
+   "repo_url": "https://github.com/Bobliuuu/amd-experiments",
+   "repo_head_commit_2026_11_11": "27a7c17d9dde9c9b9fd24127f7112eec4775b990",
+   "install_command": "see repo README",
+   "runs_on_rocm": "yes: MI300X gfx942, ROCm 7.2.0, Triton",
+   "runs_on_cuda": "unknown",
+   "entry_points_kv_quant_dequant": "see repo (Triton kernels)",
+   "code_status": "public (user's)",
+   "notes": "Mistral-7B-v0.1; all 3-bit methods cosine 0.983 at 4.923x.",
+   "models": [
+    "Mistral-7B-v0.1"
+   ]
+  },
+  {
+   "name": "KIVI",
+   "bits": "2 (asym., per-channel K / per-token V)",
+   "repo_url": "https://github.com/jy-yuan/KIVI",
+   "repo_head_commit_2026_11_11": "876b4d2d08e3b1d5f70d0969c299d8c7c42ddfb6",
+   "install_command": "see repo README (CUDA/Triton ext build) [unverified]",
+   "runs_on_rocm": "unverified",
+   "runs_on_cuda": "yes",
+   "entry_points_kv_quant_dequant": "see repo",
+   "code_status": "public",
+   "notes": "arXiv 2402.02750 (id from memory). UltraQuant paper reports KIVI OOM at 131K.",
+   "models": null
+  },
+  {
+   "name": "KVQuant",
+   "bits": "2-4 (non-uniform, outliers)",
+   "repo_url": "https://github.com/SqueezeAILab/KVQuant",
+   "repo_head_commit_2026_11_11": "57a238357f0ffe50084670fcd5781c9848f80ea2",
+   "install_command": "see repo README [unverified]",
+   "runs_on_rocm": "unverified",
+   "runs_on_cuda": "yes",
+   "entry_points_kv_quant_dequant": "see repo",
+   "code_status": "public",
+   "notes": "arXiv 2401.18079 (id from memory).",
+   "models": null
+  },
+  {
+   "name": "QServe / OmniServe (QoQ W4A8KV4)",
+   "bits": "KV4 int4",
+   "repo_url": "https://github.com/mit-han-lab/omniserve",
+   "repo_head_commit_2026_11_11": "02b2925aa6fa3b92b06316a1524b7f38922cd9c8",
+   "install_command": "see repo README [unverified]",
+   "runs_on_rocm": "no (CUDA kernels)",
+   "runs_on_cuda": "yes (A100/L40S)",
+   "entry_points_kv_quant_dequant": "see repo",
+   "code_status": "public",
+   "notes": "arXiv 2405.04532.",
+   "models": null
+  },
+  {
+   "name": "Atom (W4A4KV4)",
+   "bits": "4",
+   "repo_url": "https://github.com/efeslab/Atom",
+   "repo_head_commit_2026_11_11": "7e3618b1a7a7c86e1c93cc909b1510c046d76ac6",
+   "install_command": "see repo README [unverified]",
+   "runs_on_rocm": "no",
+   "runs_on_cuda": "yes",
+   "entry_points_kv_quant_dequant": "see repo",
+   "code_status": "public",
+   "notes": "arXiv 2310.19102 (from memory).",
+   "models": null
+  },
+  {
+   "name": "QuaRot",
+   "bits": "4 (W/A/KV, Hadamard)",
+   "repo_url": "https://github.com/spcl/QuaRot",
+   "repo_head_commit_2026_11_11": "5008669b08c1f11f9b64d52d16fddd47ca754c5a",
+   "install_command": "see repo README [unverified]",
+   "runs_on_rocm": "unverified",
+   "runs_on_cuda": "yes",
+   "entry_points_kv_quant_dequant": "fake-quant eval scripts + hadamard utilities",
+   "code_status": "public",
+   "notes": "arXiv 2404.00456 (from memory). Useful for K/Q rotation code.",
+   "models": null
+  },
+  {
+   "name": "SpinQuant",
+   "bits": "4 (learned rotations)",
+   "repo_url": "https://github.com/facebookresearch/SpinQuant",
+   "repo_head_commit_2026_11_11": "8f47aa3f00e8662caf1a484153920a07e5281c3a",
+   "install_command": "see repo README [unverified]",
+   "runs_on_rocm": "unverified",
+   "runs_on_cuda": "yes",
+   "entry_points_kv_quant_dequant": "see repo",
+   "code_status": "public",
+   "notes": "arXiv 2405.16406 (from memory).",
+   "models": null
+  },
+  {
+   "name": "SageAttention 1/2/3",
+   "bits": "INT8 / FP4 attention compute",
+   "repo_url": "https://github.com/thu-ml/SageAttention",
+   "repo_head_commit_2026_11_11": "d1a57a546c3d395b1ffcbeecc66d81db76f3b4b5",
+   "install_command": "see repo README [unverified]",
+   "runs_on_rocm": "no",
+   "runs_on_cuda": "yes (SA3: Blackwell)",
+   "entry_points_kv_quant_dequant": "sageattn* functions",
+   "code_status": "public",
+   "notes": "SA3 arXiv 2505.11594 [verified abstract-level].",
+   "models": null
+  },
+  {
+   "name": "H2O",
+   "bits": "eviction",
+   "repo_url": "https://github.com/FMInference/H2O",
+   "repo_head_commit_2026_11_11": "ac75c2a8a9e76832b2a4139b9363373b56336bfb",
+   "install_command": "see repo",
+   "runs_on_rocm": "n/a",
+   "runs_on_cuda": "yes",
+   "entry_points_kv_quant_dequant": "see repo",
+   "code_status": "public",
+   "notes": "arXiv 2306.14048 (from memory). Also in kvpress family.",
+   "models": null
+  },
+  {
+   "name": "SnapKV",
+   "bits": "eviction",
+   "repo_url": "https://github.com/FasterDecoding/SnapKV",
+   "repo_head_commit_2026_11_11": "e216ddc84c5bd210378cbdbbba12ba02102aa640",
+   "install_command": "see repo",
+   "runs_on_rocm": "n/a",
+   "runs_on_cuda": "yes",
+   "entry_points_kv_quant_dequant": "see repo; also SnapKVPress in kvpress",
+   "code_status": "public",
+   "notes": "arXiv 2404.14469 (from memory).",
+   "models": null
+  },
+  {
+   "name": "Quest",
+   "bits": "sparse page selection",
+   "repo_url": "https://github.com/mit-han-lab/Quest",
+   "repo_head_commit_2026_11_11": "01c1623bf9395009520874e989e29f683203b357",
+   "install_command": "see repo",
+   "runs_on_rocm": "no",
+   "runs_on_cuda": "yes",
+   "entry_points_kv_quant_dequant": "see repo",
+   "code_status": "public",
+   "notes": "arXiv 2406.10774 (from memory).",
+   "models": null
+  },
+  {
+   "name": "Medusa",
+   "bits": "spec decoding trees",
+   "repo_url": "https://github.com/FasterDecoding/Medusa",
+   "repo_head_commit_2026_11_11": "e2a5d20c048a9b0a4092e6933c34313687422518",
+   "install_command": "see repo",
+   "runs_on_rocm": "unverified",
+   "runs_on_cuda": "yes",
+   "entry_points_kv_quant_dequant": "tree attention verification",
+   "code_status": "public",
+   "notes": "arXiv 2401.10774 (from memory).",
+   "models": null
+  },
+  {
+   "name": "EAGLE / EAGLE-3",
+   "bits": "spec decoding trees",
+   "repo_url": "https://github.com/SafeAILab/EAGLE",
+   "repo_head_commit_2026_11_11": "cb7e0841fe0c206c6ed74a197ad5e2a1f13f5a2b",
+   "install_command": "see repo",
+   "runs_on_rocm": "unverified",
+   "runs_on_cuda": "yes",
+   "entry_points_kv_quant_dequant": "tree verification",
+   "code_status": "public",
+   "notes": "EAGLE-3 arXiv 2503.01840 (from memory).",
+   "models": null
+  },
+  {
+   "name": "FlashInfer (multi-query/custom mask/FP8)",
+   "bits": "fp8 KV",
+   "repo_url": "https://github.com/flashinfer-ai/flashinfer",
+   "repo_head_commit_2026_11_11": "d2981ed4a64e926530ebd236168f9c39363c88e1",
+   "install_command": "pip install flashinfer-python [unverified]",
+   "runs_on_rocm": "no",
+   "runs_on_cuda": "yes",
+   "entry_points_kv_quant_dequant": "BatchPrefillWithPagedKVCacheWrapper custom_mask; PR #2105 XQA mask+q_seq_len",
+   "code_status": "public",
+   "notes": "arXiv 2501.01005.",
+   "models": null
+  },
+  {
+   "name": "LMCache (+AMD fork)",
+   "bits": "4 (TQ via fork)",
+   "repo_url": "https://github.com/LMCache/LMCache",
+   "repo_head_commit_2026_11_11": "0b95bd82b6322b516b4c6a27fbc36a27b1345647",
+   "install_command": "fork: aditi-amd/LMCache (HEAD 7dacabafd5a5e002e8526a297a379a31ac3f7559; blog pins commit efd5389) ; docker rocm/vllm-dev:quark-ultraquant-lmcache-mi355",
+   "runs_on_rocm": "yes (MI355X)",
+   "runs_on_cuda": "yes",
+   "entry_points_kv_quant_dequant": "LMCacheConnectorV1 via vLLM --kv-transfer-config; needs PYTHONHASHSEED=0, LMCACHE_PRE_CACHING_HASH_ALGORITHM=sha256",
+   "code_status": "public",
+   "notes": "blog https://rocm.blogs.amd.com/software-tools-optimization/4bit-KV-LMcache/README.html",
+   "models": null
+  }
+ ]
+}
