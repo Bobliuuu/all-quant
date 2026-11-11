@@ -1,0 +1,50 @@
+== B=32 ctx=4096: build
+[MFMARotate] MFMA rotation kernel ready (tq_mfma_rotate_cov5.hsaco)
+   built in 1s  mem=0.8GB
+/root/uq-venv/lib/python3.12/site-packages/triton/knobs.py:504: UserWarning: TRITON_DEFAULT_FP_FUSION is unset: defaulting to FP fusion ENABLED for backward compatibility in Triton 3.9. The default will change to DISABLED in Triton 3.10; set TRITON_DEFAULT_FP_FUSION=1 to keep fusion enabled or =0 to adopt the new default early and silence this warning.
+  warn_once(FP_FUSION_DEFAULT_WARNING)
+{"B": 32, "ctx": 4096, "Hq": 32, "Hkv": 8, "K": 1, "method": "fp16_sdpa_fused", "ms": 0.245, "kv_bytes_per_vec": 256, "GBps_single_pass": 2187.324}
+{"B": 32, "ctx": 4096, "Hq": 32, "Hkv": 8, "K": 1, "method": "tq3_gqa_K1_incl_outrot", "ms": 0.569, "kv_bytes_per_vec": 52, "GBps_single_pass": 191.527}
+{"B": 32, "ctx": 4096, "Hq": 32, "Hkv": 8, "K": 1, "method": "tq3_gqa_K1_incl_qrot_outrot", "ms": 0.586, "kv_bytes_per_vec": 52, "GBps_single_pass": 186.071}
+{"B": 32, "ctx": 4096, "Hq": 32, "Hkv": 8, "K": 1, "method": "uq_fp4_fused", "ms": 0.177, "kv_bytes_per_vec": 68, "GBps_single_pass": 804.811, "nsplit": 8}
+{"B": 32, "ctx": 4096, "Hq": 32, "Hkv": 8, "K": 2, "method": "fp16_sdpa_fused", "ms": 0.243, "kv_bytes_per_vec": 256, "GBps_single_pass": 2209.18}
+{"B": 32, "ctx": 4096, "Hq": 32, "Hkv": 8, "K": 2, "method": "fp16_sdpa_Kindep", "ms": 0.481, "kv_bytes_per_vec": 256, "GBps_single_pass": 2234.555}
+{"B": 32, "ctx": 4096, "Hq": 32, "Hkv": 8, "K": 2, "method": "tq3_gqa_Kindep", "ms": 1.168, "kv_bytes_per_vec": 52, "GBps_single_pass": 186.751}
+{"B": 32, "ctx": 4096, "Hq": 32, "Hkv": 8, "K": 2, "method": "tq3_gqa_SqK_noncausal", "ms": 1.052, "kv_bytes_per_vec": 52, "GBps_single_pass": 103.666, "note": "their kernel with S_q=K, no causal mask, q not rotated: timing only"}
+{"B": 32, "ctx": 4096, "Hq": 32, "Hkv": 8, "K": 2, "method": "uq_fp4_fused", "ms": 0.181, "kv_bytes_per_vec": 68, "GBps_single_pass": 788.172, "nsplit": 16}
+{"B": 32, "ctx": 4096, "Hq": 32, "Hkv": 8, "K": 2, "method": "uq_fp4_Kindep", "ms": 0.329, "kv_bytes_per_vec": 68, "GBps_single_pass": 865.989, "nsplit": 16}
+{"B": 32, "ctx": 4096, "Hq": 32, "Hkv": 8, "K": 4, "method": "fp16_sdpa_fused", "ms": 0.247, "kv_bytes_per_vec": 256, "GBps_single_pass": 2176.47}
+{"B": 32, "ctx": 4096, "Hq": 32, "Hkv": 8, "K": 4, "method": "fp16_sdpa_Kindep", "ms": 0.978, "kv_bytes_per_vec": 256, "GBps_single_pass": 2196.78}
+{"B": 32, "ctx": 4096, "Hq": 32, "Hkv": 8, "K": 4, "method": "tq3_gqa_Kindep", "ms": 2.332, "kv_bytes_per_vec": 52, "GBps_single_pass": 187.093}
+{"B": 32, "ctx": 4096, "Hq": 32, "Hkv": 8, "K": 4, "method": "tq3_gqa_SqK_noncausal", "ms": 1.839, "kv_bytes_per_vec": 52, "GBps_single_pass": 59.289, "note": "their kernel with S_q=K, no causal mask, q not rotated: timing only"}
+{"B": 32, "ctx": 4096, "Hq": 32, "Hkv": 8, "K": 4, "method": "uq_fp4_fused", "ms": 0.19, "kv_bytes_per_vec": 68, "GBps_single_pass": 749.462, "nsplit": 8}
+{"B": 32, "ctx": 4096, "Hq": 32, "Hkv": 8, "K": 4, "method": "uq_fp4_Kindep", "ms": 0.608, "kv_bytes_per_vec": 68, "GBps_single_pass": 938.56, "nsplit": 8}
+{"B": 32, "ctx": 4096, "Hq": 32, "Hkv": 8, "K": 8, "method": "fp16_sdpa_fused", "ms": 0.25, "kv_bytes_per_vec": 256, "GBps_single_pass": 2144.852}
+{"B": 32, "ctx": 4096, "Hq": 32, "Hkv": 8, "K": 8, "method": "fp16_sdpa_Kindep", "ms": 1.967, "kv_bytes_per_vec": 256, "GBps_single_pass": 2184.065}
+{"B": 32, "ctx": 4096, "Hq": 32, "Hkv": 8, "K": 8, "method": "tq3_gqa_Kindep", "ms": 4.66, "kv_bytes_per_vec": 52, "GBps_single_pass": 187.212}
+{"B": 32, "ctx": 4096, "Hq": 32, "Hkv": 8, "K": 8, "method": "tq3_gqa_SqK_noncausal", "ms": 3.609, "kv_bytes_per_vec": 52, "GBps_single_pass": 30.219, "note": "their kernel with S_q=K, no causal mask, q not rotated: timing only"}
+{"B": 32, "ctx": 4096, "Hq": 32, "Hkv": 8, "K": 8, "method": "uq_fp4_fused", "ms": 0.245, "kv_bytes_per_vec": 68, "GBps_single_pass": 582.038, "nsplit": 8}
+{"B": 32, "ctx": 4096, "Hq": 32, "Hkv": 8, "K": 8, "method": "uq_fp4_Kindep", "ms": 1.172, "kv_bytes_per_vec": 68, "GBps_single_pass": 973.744, "nsplit": 8}
+{"B": 32, "ctx": 4096, "Hq": 64, "Hkv": 8, "K": 1, "method": "fp16_sdpa_fused", "ms": 0.236, "kv_bytes_per_vec": 256, "GBps_single_pass": 2272.051}
+{"B": 32, "ctx": 4096, "Hq": 64, "Hkv": 8, "K": 1, "method": "tq3_gqa_K1_incl_outrot", "ms": 0.577, "kv_bytes_per_vec": 52, "GBps_single_pass": 188.881}
+{"B": 32, "ctx": 4096, "Hq": 64, "Hkv": 8, "K": 1, "method": "tq3_gqa_K1_incl_qrot_outrot", "ms": 0.592, "kv_bytes_per_vec": 52, "GBps_single_pass": 184.145}
+{"B": 32, "ctx": 4096, "Hq": 64, "Hkv": 8, "K": 1, "method": "uq_fp4_fused", "ms": 0.18, "kv_bytes_per_vec": 68, "GBps_single_pass": 791.628, "nsplit": 16}
+{"B": 32, "ctx": 4096, "Hq": 64, "Hkv": 8, "K": 2, "method": "fp16_sdpa_fused", "ms": 0.248, "kv_bytes_per_vec": 256, "GBps_single_pass": 2163.239}
+{"B": 32, "ctx": 4096, "Hq": 64, "Hkv": 8, "K": 2, "method": "fp16_sdpa_Kindep", "ms": 0.498, "kv_bytes_per_vec": 256, "GBps_single_pass": 2154.653}
+{"B": 32, "ctx": 4096, "Hq": 64, "Hkv": 8, "K": 2, "method": "tq3_gqa_Kindep", "ms": 1.182, "kv_bytes_per_vec": 52, "GBps_single_pass": 184.528}
+{"B": 32, "ctx": 4096, "Hq": 64, "Hkv": 8, "K": 2, "method": "tq3_gqa_SqK_noncausal", "ms": 1.065, "kv_bytes_per_vec": 52, "GBps_single_pass": 102.382, "note": "their kernel with S_q=K, no causal mask, q not rotated: timing only"}
+{"B": 32, "ctx": 4096, "Hq": 64, "Hkv": 8, "K": 2, "method": "uq_fp4_fused", "ms": 0.189, "kv_bytes_per_vec": 68, "GBps_single_pass": 754.833, "nsplit": 8}
+{"B": 32, "ctx": 4096, "Hq": 64, "Hkv": 8, "K": 2, "method": "uq_fp4_Kindep", "ms": 0.328, "kv_bytes_per_vec": 68, "GBps_single_pass": 869.301, "nsplit": 8}
+{"B": 32, "ctx": 4096, "Hq": 64, "Hkv": 8, "K": 4, "method": "fp16_sdpa_fused", "ms": 0.25, "kv_bytes_per_vec": 256, "GBps_single_pass": 2148.81}
+{"B": 32, "ctx": 4096, "Hq": 64, "Hkv": 8, "K": 4, "method": "fp16_sdpa_Kindep", "ms": 0.997, "kv_bytes_per_vec": 256, "GBps_single_pass": 2153.642}
+{"B": 32, "ctx": 4096, "Hq": 64, "Hkv": 8, "K": 4, "method": "tq3_gqa_Kindep", "ms": 2.359, "kv_bytes_per_vec": 52, "GBps_single_pass": 184.876}
+{"B": 32, "ctx": 4096, "Hq": 64, "Hkv": 8, "K": 4, "method": "tq3_gqa_SqK_noncausal", "ms": 1.867, "kv_bytes_per_vec": 52, "GBps_single_pass": 58.414, "note": "their kernel with S_q=K, no causal mask, q not rotated: timing only"}
+{"B": 32, "ctx": 4096, "Hq": 64, "Hkv": 8, "K": 4, "method": "uq_fp4_fused", "ms": 0.244, "kv_bytes_per_vec": 68, "GBps_single_pass": 583.892, "nsplit": 8}
+{"B": 32, "ctx": 4096, "Hq": 64, "Hkv": 8, "K": 4, "method": "uq_fp4_Kindep", "ms": 0.615, "kv_bytes_per_vec": 68, "GBps_single_pass": 928.109, "nsplit": 8}
+{"B": 32, "ctx": 4096, "Hq": 64, "Hkv": 8, "K": 8, "method": "fp16_sdpa_fused", "ms": 0.283, "kv_bytes_per_vec": 256, "GBps_single_pass": 1900.347}
+{"B": 32, "ctx": 4096, "Hq": 64, "Hkv": 8, "K": 8, "method": "fp16_sdpa_Kindep", "ms": 1.988, "kv_bytes_per_vec": 256, "GBps_single_pass": 2160.513}
+{"B": 32, "ctx": 4096, "Hq": 64, "Hkv": 8, "K": 8, "method": "tq3_gqa_Kindep", "ms": 4.722, "kv_bytes_per_vec": 52, "GBps_single_pass": 184.755}
+{"B": 32, "ctx": 4096, "Hq": 64, "Hkv": 8, "K": 8, "method": "tq3_gqa_SqK_noncausal", "ms": 3.663, "kv_bytes_per_vec": 52, "GBps_single_pass": 29.771, "note": "their kernel with S_q=K, no causal mask, q not rotated: timing only"}
+{"B": 32, "ctx": 4096, "Hq": 64, "Hkv": 8, "K": 8, "method": "uq_fp4_fused", "ms": 0.369, "kv_bytes_per_vec": 68, "GBps_single_pass": 385.945, "nsplit": 8}
+{"B": 32, "ctx": 4096, "Hq": 64, "Hkv": 8, "K": 8, "method": "uq_fp4_Kindep", "ms": 1.194, "kv_bytes_per_vec": 68, "GBps_single_pass": 955.787, "nsplit": 8}
+DONE
