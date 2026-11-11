@@ -1,0 +1,152 @@
+{
+ "version": 1,
+ "cases": [
+  {
+   "name": "b2k1_d128_p64",
+   "B": 2,
+   "K": 1,
+   "HQ": 32,
+   "HKV": 8,
+   "D": 128,
+   "PAGE": 64,
+   "max_pages": 6,
+   "sm_scale": 0.08838834764831845,
+   "files": {
+    "q": "b2k1_d128_p64.q.bin",
+    "kc": "b2k1_d128_p64.kc.bin",
+    "ks": "b2k1_d128_p64.ks.bin",
+    "vc": "b2k1_d128_p64.vc.bin",
+    "vs": "b2k1_d128_p64.vs.bin",
+    "bt": "b2k1_d128_p64.bt.bin",
+    "sl": "b2k1_d128_p64.sl.bin",
+    "ref": "b2k1_d128_p64.ref.bin"
+   }
+  },
+  {
+   "name": "b2k4_d128_p64",
+   "B": 2,
+   "K": 4,
+   "HQ": 32,
+   "HKV": 8,
+   "D": 128,
+   "PAGE": 64,
+   "max_pages": 9,
+   "sm_scale": 0.08838834764831845,
+   "files": {
+    "q": "b2k4_d128_p64.q.bin",
+    "kc": "b2k4_d128_p64.kc.bin",
+    "ks": "b2k4_d128_p64.ks.bin",
+    "vc": "b2k4_d128_p64.vc.bin",
+    "vs": "b2k4_d128_p64.vs.bin",
+    "bt": "b2k4_d128_p64.bt.bin",
+    "sl": "b2k4_d128_p64.sl.bin",
+    "ref": "b2k4_d128_p64.ref.bin"
+   }
+  },
+  {
+   "name": "b1k8_d128_p64",
+   "B": 1,
+   "K": 8,
+   "HQ": 32,
+   "HKV": 8,
+   "D": 128,
+   "PAGE": 64,
+   "max_pages": 11,
+   "sm_scale": 0.08838834764831845,
+   "files": {
+    "q": "b1k8_d128_p64.q.bin",
+    "kc": "b1k8_d128_p64.kc.bin",
+    "ks": "b1k8_d128_p64.ks.bin",
+    "vc": "b1k8_d128_p64.vc.bin",
+    "vs": "b1k8_d128_p64.vs.bin",
+    "bt": "b1k8_d128_p64.bt.bin",
+    "sl": "b1k8_d128_p64.sl.bin",
+    "ref": "b1k8_d128_p64.ref.bin"
+   }
+  },
+  {
+   "name": "b3k2_d64_p16",
+   "B": 3,
+   "K": 2,
+   "HQ": 16,
+   "HKV": 4,
+   "D": 64,
+   "PAGE": 16,
+   "max_pages": 9,
+   "sm_scale": 0.125,
+   "files": {
+    "q": "b3k2_d64_p16.q.bin",
+    "kc": "b3k2_d64_p16.kc.bin",
+    "ks": "b3k2_d64_p16.ks.bin",
+    "vc": "b3k2_d64_p16.vc.bin",
+    "vs": "b3k2_d64_p16.vs.bin",
+    "bt": "b3k2_d64_p16.bt.bin",
+    "sl": "b3k2_d64_p16.sl.bin",
+    "ref": "b3k2_d64_p16.ref.bin"
+   }
+  },
+  {
+   "name": "b2k16_d128_p32",
+   "B": 2,
+   "K": 16,
+   "HQ": 8,
+   "HKV": 2,
+   "D": 128,
+   "PAGE": 32,
+   "max_pages": 5,
+   "sm_scale": 0.08838834764831845,
+   "files": {
+    "q": "b2k16_d128_p32.q.bin",
+    "kc": "b2k16_d128_p32.kc.bin",
+    "ks": "b2k16_d128_p32.ks.bin",
+    "vc": "b2k16_d128_p32.vc.bin",
+    "vs": "b2k16_d128_p32.vs.bin",
+    "bt": "b2k16_d128_p32.bt.bin",
+    "sl": "b2k16_d128_p32.sl.bin",
+    "ref": "b2k16_d128_p32.ref.bin"
+   }
+  },
+  {
+   "name": "edge_short_k4",
+   "B": 2,
+   "K": 4,
+   "HQ": 8,
+   "HKV": 2,
+   "D": 128,
+   "PAGE": 64,
+   "max_pages": 2,
+   "sm_scale": 0.08838834764831845,
+   "files": {
+    "q": "edge_short_k4.q.bin",
+    "kc": "edge_short_k4.kc.bin",
+    "ks": "edge_short_k4.ks.bin",
+    "vc": "edge_short_k4.vc.bin",
+    "vs": "edge_short_k4.vs.bin",
+    "bt": "edge_short_k4.bt.bin",
+    "sl": "edge_short_k4.sl.bin",
+    "ref": "edge_short_k4.ref.bin"
+   }
+  },
+  {
+   "name": "b4k3_d128_p64_g1",
+   "B": 4,
+   "K": 3,
+   "HQ": 8,
+   "HKV": 8,
+   "D": 128,
+   "PAGE": 64,
+   "max_pages": 4,
+   "sm_scale": 0.08838834764831845,
+   "files": {
+    "q": "b4k3_d128_p64_g1.q.bin",
+    "kc": "b4k3_d128_p64_g1.kc.bin",
+    "ks": "b4k3_d128_p64_g1.ks.bin",
+    "vc": "b4k3_d128_p64_g1.vc.bin",
+    "vs": "b4k3_d128_p64_g1.vs.bin",
+    "bt": "b4k3_d128_p64_g1.bt.bin",
+    "sl": "b4k3_d128_p64_g1.sl.bin",
+    "ref": "b4k3_d128_p64_g1.ref.bin"
+   }
+  }
+ ]
+}
