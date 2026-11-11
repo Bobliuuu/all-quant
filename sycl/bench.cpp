@@ -45,10 +45,15 @@ static double peak_gbs(sycl::queue& q) {
   sycl::free(a, q); sycl::free(b, q);
   return 2.0 * n / (ms * 1e-3) / 1e9;  // read + write bytes
 }
-static double peak_read_gbs(sycl::queue& q) {
-  const size_t n = (size_t)512 << 20;
+// random=true: incompressible data. Uniform-fill buffers are served 2.5-4x faster on Arc (memory compression), so the
+// "uniform" peak is NOT the bandwidth a KV stream of random FP4 codes can see; random data is the honest ceiling.
+static double peak_read_gbs(sycl::queue& q, bool random = false) {
+  const size_t n = (size_t)(random ? 256 : 512) << 20;
   auto* a = sycl::malloc_device<uint32_t>(n / 4, q); auto* o = sycl::malloc_device<uint32_t>(1 << 16, q);
-  q.fill(a, 1u, n / 4).wait();
+  if (random) {
+    std::vector<uint32_t> h(n / 4); std::mt19937 r(7); for (auto& x : h) x = r();
+    q.memcpy(a, h.data(), n).wait();
+  } else q.fill(a, 1u, n / 4).wait();
   auto run = [&]() {
     q.parallel_for(sycl::range<1>(n / 16), [=](sycl::id<1> i) {
       sycl::uint4 v = reinterpret_cast<const sycl::uint4*>(a)[i];
@@ -71,7 +76,7 @@ int main(int argc, char** argv) {
     else if (a == "--hq") HQ = std::atoi(nx()); else if (a == "--hkv") HKV = std::atoi(nx()); else if (a == "--d") D = std::atoi(nx());
     else if (a == "--page") PAGE = std::atoi(nx()); else if (a == "--iters") iters = std::atoi(nx());
     else if (a == "--wg") c0.wg = std::atoi(nx()); else if (a == "--tn") c0.tn = std::atoi(nx()); else if (a == "--sg") c0.sg = std::atoi(nx());
-    else if (a == "--path") c0.path = std::string(nx()) == "xmx";
+    else if (a == "--path") { std::string pv = nx(); c0.path = pv == "best" ? 4 : pv == "esimd" ? 3 : pv == "xmx2" ? 2 : pv == "xmx"; }
     else if (a == "--nsplit") { std::string v = nx(); if (v == "sweep") sweep = true; else if (v != "auto") nsplit = std::atoi(v.c_str()); }
     else if (a == "--nobase") nobase = true; else if (a == "--peakonly") peakonly = true; else if (a == "--json") json = nx();
   }
@@ -80,10 +85,10 @@ int main(int argc, char** argv) {
   std::string dname = dev.get_info<sycl::info::device::name>();
   int eus = (int)dev.get_info<sycl::info::device::max_compute_units>();
   std::printf("device: %s  compute_units=%d  local_mem=%zu KB\n", dname.c_str(), eus, dev.get_info<sycl::info::device::local_mem_size>() / 1024);
-  double pcopy = peak_gbs(q), pread = peak_read_gbs(q);
-  std::printf("peak copy (r+w) %.1f GB/s   peak read %.1f GB/s\n", pcopy, pread);
+  double pcopy = peak_gbs(q), pread_u = peak_read_gbs(q), pread = peak_read_gbs(q, true);
+  std::printf("peak copy (r+w, uniform data) %.1f GB/s   peak read uniform-data %.1f GB/s   peak read RANDOM data %.1f GB/s (used for %% of peak)\n", pcopy, pread_u, pread);
   FILE* jf = json.empty() ? nullptr : std::fopen(json.c_str(), "w");
-  if (jf) std::fprintf(jf, "{\"kind\":\"peak\",\"device\":\"%s\",\"copy_gbs\":%.2f,\"read_gbs\":%.2f}\n", dname.c_str(), pcopy, pread);
+  if (jf) std::fprintf(jf, "{\"kind\":\"peak\",\"device\":\"%s\",\"copy_gbs\":%.2f,\"read_uniform_gbs\":%.2f,\"read_gbs\":%.2f}\n", dname.c_str(), pcopy, pread_u, pread);
   if (peakonly) return 0;
 
   std::mt19937 rng(1);

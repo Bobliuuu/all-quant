@@ -4,6 +4,7 @@
 #include "uq_decode.hpp"
 #include "uq_common.hpp"
 #include <cstdio>
+#include <cstdlib>
 #include <cstring>
 #include <string>
 #include <vector>
@@ -12,13 +13,13 @@
 int main(int argc, char** argv) {
   if (argc < 2) { std::fprintf(stderr, "usage: %s <vecdir> [opts]\n", argv[0]); return 2; }
   std::string dir = argv[1];
-  uq::Cfg cfg0; int path = 0; bool sweep = false;
+  uq::Cfg cfg0; int path = 0; bool sweep = false, verbose = false;
   for (int i = 2; i < argc; i++) {
     std::string a = argv[i];
     auto nxt = [&]() { return std::atoi(argv[++i]); };
     if (a == "--nsplit") cfg0.nsplit = nxt(); else if (a == "--wg") cfg0.wg = nxt();
     else if (a == "--tn") cfg0.tn = nxt(); else if (a == "--sg") cfg0.sg = nxt();
-    else if (a == "--path") path = std::string(argv[++i]) == "xmx"; else if (a == "--sweep") sweep = true;
+    else if (a == "--path") { std::string pv = argv[++i]; path = pv == "best" ? 4 : pv == "esimd" ? 3 : pv == "xmx2" ? 2 : pv == "xmx"; } else if (a == "--sweep") sweep = true; else if (a == "--verbose") verbose = true;
   }
   cfg0.path = path;
   sycl::queue q{sycl::default_selector_v, sycl::property::queue::enable_profiling{}};
@@ -48,18 +49,20 @@ int main(int argc, char** argv) {
       q.memcpy(hout.data(), out, nout * sizeof(uq::bf16)).wait();
       const float* ref = (const float*)vref.data();
       // bf16 P (XMX path) adds an error proportional to |V| (cancellation), not to |ref|: allow 6e-3 abs
-      const double floor_extra = c.path == 1 ? 6e-3 : 0.0;
-      double maxabs = 0, maxtol = 0, wo = 0, wr = 0; size_t wi = 0; bool nan = false;
+      const double floor_extra = c.path >= 1 ? 6e-3 : 0.0;
+      size_t wi2 = 0; double wo2 = 0, wr2 = 0; double maxabs = 0, maxtol = 0, wo = 0, wr = 0; size_t wi = 0; bool nan = false;
       for (size_t i = 0; i < nout; i++) {
         double o = (float)hout[i], r = ref[i], e = std::fabs(o - r);
         if (o != o) nan = true;
-        maxabs = std::fmax(maxabs, e);
+        if (e > maxabs) { maxabs = e; wi2 = i; wo2 = o; wr2 = r; }
         // pass if within 1e-3 abs OR within one bf16 ulp (2^-7 relative) of the fp32 reference: output is bf16 and P is rounded to bf16 before PV as in the Triton kernel
         { double x = e - (1e-3 + std::fabs(r) * (1.0 / 128) + floor_extra); if (x > maxtol) { maxtol = x; wi = i; wo = o; wr = r; } }
       }
+      if (verbose && std::getenv("UQ_DUMP")) { FILE* f = std::fopen((std::string(std::getenv("UQ_DUMP")) + "_" + name + ".bin").c_str(), "wb"); std::vector<float> o(nout); for (size_t i = 0; i < nout; i++) o[i] = (float)hout[i]; std::fwrite(o.data(), 4, nout, f); std::vector<float> m1(uq::mo_elems(s, ns)), m2(uq::ml_elems(s, ns)); q.memcpy(m1.data(), mo, m1.size() * 4).wait(); q.memcpy(m2.data(), ml, m2.size() * 4).wait(); std::fwrite(m1.data(), 4, m1.size(), f); std::fwrite(m2.data(), 4, m2.size(), f); std::fclose(f); }
       bool ok = !nan && maxabs <= 1e-3 + 0 || (!nan && maxtol <= 0);
-      std::printf("%-22s nsplit=%d path=%s wg=%d tn=%d sg=%d  max_abs_err=%.3e  %s\n", name.c_str(), ns, c.path ? "xmx" : "portable", c.wg, c.tn, c.sg, maxabs,
+      std::printf("%-22s nsplit=%d path=%s wg=%d tn=%d sg=%d  max_abs_err=%.3e  %s\n", name.c_str(), ns, c.path == 4 ? "best" : c.path == 3 ? "esimd" : c.path == 2 ? "xmx2" : c.path ? "xmx" : "portable", c.wg, c.tn, c.sg, maxabs,
                   ok ? "PASS" : "FAIL");
+      if (verbose) std::printf("   max-abs elem idx=%zu (b=%zu,j=%zu,h=%zu,d=%zu) out=%g ref=%g\n", wi2, wi2 / ((size_t)K * HQ * D), (wi2 / ((size_t)HQ * D)) % K, (wi2 / D) % HQ, wi2 % D, wo2, wr2);
       if (!ok) std::printf("   worst elem idx=%zu (b=%zu,j=%zu) out=%g ref=%g\n", wi, wi / ((size_t)K * HQ * D), (wi / ((size_t)HQ * D)) % K, wo, wr);
       worst = std::fmax(worst, maxabs); runs++; fails += !ok;
       for (void* p : {(void*)dq, (void*)dkc, (void*)dks, (void*)dvc, (void*)dvs, (void*)dbt, (void*)dsl, (void*)mo, (void*)ml, (void*)out}) sycl::free(p, q);

@@ -241,18 +241,34 @@ sycl::event run_D(sycl::queue& q, const Shape& s, const Cfg& c, const Args& a) {
 }  // namespace uq
 #ifndef UQ_NO_XMX  // joint_matrix path is Intel-XMX specific; -DUQ_NO_XMX for CPU / NVIDIA / AMD targets
 #include "uq_xmx.hpp"
+#include "uq_xmx2.hpp"
+#include "uq_esimd.hpp"
 #endif
 namespace uq {
 
 // Fused: all K queries x G heads share each KV page read.
+inline sycl::event decode(sycl::queue& q, const Shape& s, const Cfg& c, const Args& a);
 inline sycl::event decode(sycl::queue& q, const Shape& s, const Cfg& c, const Args& a) {
 #ifndef UQ_NO_XMX
+  if (c.path == 4) {   // "best": ESIMD when supported, else the joint_matrix path
+    Cfg c2 = c;
+    if (esimd_supported(s)) { c2.path = 3; c2.wg = 64; } else { c2.path = 1; c2.wg = 256; c2.tn = 32; }
+    return decode(q, s, c2, a);
+  }
+  if (c.path == 3) {
+    if (esimd_supported(s)) return run_esimd(q, s, c, a);
+    Cfg c2 = c; c2.path = 2; return decode(q, s, c2, a);
+  }
+  if (c.path == 2) {
+    if (s.D == 128) return run_xmx2<128>(q, s, c, a);
+    if (s.D == 64) return run_xmx2<64>(q, s, c, a);
+  }
   if (c.path == 1) {
     if (s.D == 128) return run_xmx<128>(q, s, c, a);
     if (s.D == 64) return run_xmx<64>(q, s, c, a);
   }
 #else
-  if (c.path == 1) throw std::runtime_error("built with UQ_NO_XMX");
+  if (c.path >= 1) throw std::runtime_error("built with UQ_NO_XMX");
 #endif
   if (s.D == 128) return run_D<128>(q, s, c, a);
   if (s.D == 64) return run_D<64>(q, s, c, a);
