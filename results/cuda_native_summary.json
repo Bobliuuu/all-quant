@@ -1,0 +1,59 @@
+{
+ "rtx_pro_6000_sm120a": {
+  "validated": true,
+  "max_abs_err": 3.8e-06,
+  "M64_keys524288": {
+   "bf16_keys_per_us": [
+    17140,
+    16065,
+    14926
+   ],
+   "native_keys_per_us": [
+    23645,
+    27978,
+    27548
+   ],
+   "speedup": [
+    1.38,
+    1.74,
+    1.85
+   ]
+  },
+  "M32": {
+   "speedup": [
+    2.01,
+    1.76,
+    2.03
+   ]
+  }
+ },
+ "b300_sm103a": {
+  "bf16_mma_sync_M64_keys_per_us": [
+   10947,
+   9219,
+   11443
+  ],
+  "bf16_M32_keys_per_us": [
+   13724,
+   18162,
+   18174
+  ],
+  "cutlass_tcgen05_mxf8f6f4_M128": {
+   "128x128_K128_N1M": {
+    "TFLOPs": 416.4,
+    "keys_per_us": 12708
+   },
+   "128x256_K128_N1M": {
+    "TFLOPs": 561.4,
+    "keys_per_us": 17132
+   },
+   "128x128_K4096_N16k": {
+    "TFLOPs": 1586.5
+   },
+   "128x256_K1024_N262k": {
+    "TFLOPs": 1218.7
+   }
+  },
+  "mma_sync_block_scale": "rejected by ptxas on sm_103a"
+ }
+}

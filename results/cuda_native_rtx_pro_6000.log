@@ -1,0 +1,46 @@
+$ nvidia-smi --query-gpu=name,compute_cap,driver_version --format=csv,noheader
+NVIDIA RTX PRO 6000 Blackwell Server Edition, 12.0, 610.57.04
+$ nvcc --version | tail -2
+Cuda compilation tools, release 12.9, V12.9.86
+Build cuda_12.9.r12.9/compiler.36037853_0
+cutlass commit b2f249a (local checkout)
+$ python -c 'import torch;print(torch.__version__,torch.cuda.get_device_capability())'
+2.13.0+cu129 (12, 0)
+$ cd /work && PYTHONPATH=/work python -I /work/native_fp4/gen_data.py /work/data64 8192 64 128 && PYTHONPATH=/work python -I /work/native_fp4/gen_data.py /work/data32 8192 32 128
+Traceback (most recent call last):
+  File "/work/native_fp4/gen_data.py", line 9, in <module>
+    from uqmt.attn import quantize_fp4, dequantize_fp4
+ModuleNotFoundError: No module named 'uqmt'
+$ cd /work/native_fp4 && nvcc -O3 -std=c++17 -gencode arch=compute_120a,code=sm_120a -DUQ_NATIVE -Xptxas -v -o /work/qk_mmasync qk_mmasync.cu 2>&1 | grep -E 'error|registers|spill' | head -40
+0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 69 registers, used 0 barriers
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 96 registers, used 0 barriers
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 84 registers, used 0 barriers
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 96 registers, used 0 barriers
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 120 registers, used 0 barriers
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 172 registers, used 0 barriers
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 160 registers, used 0 barriers
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 196 registers, used 0 barriers
+$ /work/qk_mmasync /work/data64 64 30
+cannot open /work/data64/meta.json
+$ /work/qk_mmasync /work/data32 64 30
+cannot open /work/data32/meta.json
+$ cd /work && python -I - <<'PY'
+import numpy as np, torch, json
+for dd in ('data64','data32'):
+    m=json.load(open(f'/work/{dd}/meta.json')); M,N=m['M'],m['N']
+    ref=np.fromfile(f'/work/{dd}/S_ref.bin',dtype=np.float32).reshape(M,N)
+    for nm in ('native','bf16'):
+        s=np.fromfile(f'/work/{dd}/S_{nm}.bin',dtype=np.float32).reshape(M,N)
+        err=np.abs(s-ref); print(dd,nm,'maxabs',err.max(),'maxrel/absmax',err.max()/np.abs(ref).max(),'exact_frac',(err==0).mean())
+PY
+Traceback (most recent call last):
+  File "<stdin>", line 3, in <module>
+FileNotFoundError: [Errno 2] No such file or directory: '/work/data64/meta.json'

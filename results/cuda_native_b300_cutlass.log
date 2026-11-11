@@ -1,0 +1,186 @@
+Note that running a local entrypoint in detached mode only keeps the last triggered Modal function alive after the parent process has been killed or disconnected.
+✓ Initialized. View run at 
+https://modal.com/apps/jerry-zhu/main/ap-jZkLZvmGg2r25aUp2rSJ3v
+✓ Created objects.
+├── ✓ Uploaded /Users/jhome/ultraquant-more/cuda/modal/modal_native.py
+├── ✓ Uploaded /Users/jhome/cutlass-ref/cutlass/examples/common
+├── ✓ Uploaded /Users/jhome/ultraquant-more/cuda/native_fp4
+├── ✓ Uploaded /Users/jhome/ultraquant-more/uqmt
+├── ✓ Uploaded /Users/jhome/cutlass-ref/cutlass/tools/util/include
+├── ✓ Uploaded /Users/jhome/cutlass-ref/cutlass/include
+├── ✓ Created Function run_b300.
+└── ✓ Created Function run_rtx.
+==========
+== CUDA ==
+==========
+CUDA Version 12.9.1
+Container image Copyright (c) 2016-2023, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+This container image and its contents are governed by the NVIDIA Deep Learning Container License.
+By pulling and using the container, you accept the terms and conditions of this license:
+https://developer.nvidia.com/ngc/nvidia-deep-learning-container-license
+A copy of this license is made available in this container at /NGC-DL-CONTAINER-LICENSE for your convenience.
+$ nvidia-smi --query-gpu=name,compute_cap,driver_version --format=csv,noheader
+NVIDIA B300 SXM6 AC, 10.3, 610.57.04
+$ nvcc --version | tail -2
+Cuda compilation tools, release 12.9, V12.9.86
+Build cuda_12.9.r12.9/compiler.36037853_0
+cutlass commit b2f249a (local checkout)
+$ python -c 'import torch;print(torch.__version__,torch.cuda.get_device_capability())'
+2.13.0+cu129 (10, 3)
+$ cd /work && python -I /work/native_fp4/gen_data.py /work/data64 8192 64 128 && python -I /work/native_fp4/gen_data.py /work/data32 8192 32 128
+Traceback (most recent call last):
+  File "/work/native_fp4/gen_data.py", line 9, in <module>
+    from uqmt.attn import quantize_fp4, dequantize_fp4
+ModuleNotFoundError: No module named 'uqmt'
+$ cd /work/native_fp4 && nvcc -O3 -std=c++17 -arch=sm_103a  -Xptxas -v -o /work/qk_mmasync qk_mmasync.cu 2>&1 | grep -E 'error|registers|spill' | head -40
+0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 14 registers, used 0 barriers
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 95 registers, used 0 barriers
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 12 registers, used 0 barriers
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 96 registers, used 0 barriers
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 14 registers, used 0 barriers
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 168 registers, used 0 barriers
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 6 registers, used 0 barriers
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 189 registers, used 0 barriers
+$ cd /work/native_fp4 && nvcc -O3 -std=c++17 -arch=sm_103a -DUQ_NATIVE -o /work/qk_mmasync_nat qk_mmasync.cu 2>&1 | head -12
+ptxas /tmp/tmpxft_00000052_00000000-7_qk_mmasync.compute_103.ptx, line 890; error   : Instruction 'mma with block scale' not supported on .target 'sm_103'
+ptxas /tmp/tmpxft_00000052_00000000-7_qk_mmasync.compute_103.ptx, line 890; error   : Feature '.kind::mxf8f6f4' not supported on .target 'sm_103'
+ptxas /tmp/tmpxft_00000052_00000000-7_qk_mmasync.compute_103.ptx, line 890; error   : Feature '.block_scale' not supported on .target 'sm_103'
+ptxas /tmp/tmpxft_00000052_00000000-7_qk_mmasync.compute_103.ptx, line 890; error   : Feature '.scale_vec::1X' not supported on .target 'sm_103'
+ptxas /tmp/tmpxft_00000052_00000000-7_qk_mmasync.compute_103.ptx, line 896; error   : Instruction 'mma with block scale' not supported on .target 'sm_103'
+ptxas /tmp/tmpxft_00000052_00000000-7_qk_mmasync.compute_103.ptx, line 896; error   : Feature '.kind::mxf8f6f4' not supported on .target 'sm_103'
+ptxas /tmp/tmpxft_00000052_00000000-7_qk_mmasync.compute_103.ptx, line 896; error   : Feature '.block_scale' not supported on .target 'sm_103'
+ptxas /tmp/tmpxft_00000052_00000000-7_qk_mmasync.compute_103.ptx, line 896; error   : Feature '.scale_vec::1X' not supported on .target 'sm_103'
+ptxas /tmp/tmpxft_00000052_00000000-7_qk_mmasync.compute_103.ptx, line 902; error   : Instruction 'mma with block scale' not supported on .target 'sm_103'
+ptxas /tmp/tmpxft_00000052_00000000-7_qk_mmasync.compute_103.ptx, line 902; error   : Feature '.kind::mxf8f6f4' not supported on .target 'sm_103'
+ptxas /tmp/tmpxft_00000052_00000000-7_qk_mmasync.compute_103.ptx, line 902; error   : Feature '.block_scale' not supported on .target 'sm_103'
+ptxas /tmp/tmpxft_00000052_00000000-7_qk_mmasync.compute_103.ptx, line 902; error   : Feature '.scale_vec::1X' not supported on .target 'sm_103'
+$ /work/qk_mmasync /work/data64 64 30
+cannot open /work/data64/meta.json
+$ /work/qk_mmasync /work/data32 64 30
+cannot open /work/data32/meta.json
+$ cd /work/native_fp4 && nvcc -O3 -std=c++17 -arch=sm_103a --expt-relaxed-constexpr -DTILE_M=128 -DTILE_N=128 -DCL_M=1 -DCL_N=1 -I/work/cutlass/include -I/work/cutlass/tools/util/include -I/work/cutlass/examples/common -o /work/qkc_128x128_c11 qk_cutlass_sm100.cu 2>&1 | grep -E 'error' | head -10
+compile 128x128 c1x1: 69s exists=True
+$ /work/qkc_128x128_c11 --m=128 --n=2048 --k=128 --iterations=5 --verify=1
+tile 128x128x128 cluster 1x1
+  Disposition: Passed
+  Problem Size: 128x2048x128
+  Avg runtime: 0.0078592 ms
+  GFLOPS: 8538.89
+  RESULT m=128 n=2048 k=128 ms=0.0078592 TFLOPs=8.53889 keys_per_us=260.586
+$ /work/qkc_128x128_c11 --m=128 --n=16384 --k=128 --iterations=30 --verify=0 | grep -E 'RESULT|Disposition'
+Disposition: Passed
+  RESULT m=128 n=16384 k=128 ms=0.00515627 TFLOPs=104.12 keys_per_us=3177.49
+$ /work/qkc_128x128_c11 --m=128 --n=262144 --k=128 --iterations=30 --verify=0 | grep -E 'RESULT|Disposition'
+Disposition: Passed
+  RESULT m=128 n=262144 k=128 ms=0.0225152 TFLOPs=381.517 keys_per_us=11643
+$ /work/qkc_128x128_c11 --m=128 --n=1048576 --k=128 --iterations=30 --verify=0 | grep -E 'RESULT|Disposition'
+Disposition: Passed
+  RESULT m=128 n=1048576 k=128 ms=0.0825099 TFLOPs=416.432 keys_per_us=12708.5
+$ /work/qkc_128x128_c11 --m=128 --n=16384 --k=4096 --iterations=30 --verify=0 | grep -E 'RESULT|Disposition'
+Disposition: Passed
+  RESULT m=128 n=16384 k=4096 ms=0.0108288 TFLOPs=1586.5 keys_per_us=1513
+$ /work/qkc_128x128_c11 --m=128 --n=262144 --k=1024 --iterations=30 --verify=0 | grep -E 'RESULT|Disposition'
+Disposition: Passed
+  RESULT m=128 n=262144 k=1024 ms=0.0438389 TFLOPs=1567.54 keys_per_us=5979.71
+$ cd /work/native_fp4 && nvcc -O3 -std=c++17 -arch=sm_103a --expt-relaxed-constexpr -DTILE_M=128 -DTILE_N=256 -DCL_M=1 -DCL_N=1 -I/work/cutlass/include -I/work/cutlass/tools/util/include -I/work/cutlass/examples/common -o /work/qkc_128x256_c11 qk_cutlass_sm100.cu 2>&1 | grep -E 'error' | head -10
+compile 128x256 c1x1: 93s exists=True
+$ /work/qkc_128x256_c11 --m=128 --n=2048 --k=128 --iterations=5 --verify=1
+tile 128x256x128 cluster 1x1
+  Disposition: Passed
+  Problem Size: 128x2048x128
+  Avg runtime: 0.0086848 ms
+  GFLOPS: 7727.16
+  RESULT m=128 n=2048 k=128 ms=0.0086848 TFLOPs=7.72716 keys_per_us=235.814
+$ /work/qkc_128x256_c11 --m=128 --n=16384 --k=128 --iterations=30 --verify=0 | grep -E 'RESULT|Disposition'
+Disposition: Passed
+  RESULT m=128 n=16384 k=128 ms=0.0063552 TFLOPs=84.4774 keys_per_us=2578.05
+$ /work/qkc_128x256_c11 --m=128 --n=262144 --k=128 --iterations=30 --verify=0 | grep -E 'RESULT|Disposition'
+Disposition: Passed
+  RESULT m=128 n=262144 k=128 ms=0.0195275 TFLOPs=439.89 keys_per_us=13424.4
+$ /work/qkc_128x256_c11 --m=128 --n=1048576 --k=128 --iterations=30 --verify=0 | grep -E 'RESULT|Disposition'
+Disposition: Passed
+  RESULT m=128 n=1048576 k=128 ms=0.0612043 TFLOPs=561.394 keys_per_us=17132.4
+$ /work/qkc_128x256_c11 --m=128 --n=16384 --k=4096 --iterations=30 --verify=0 | grep -E 'RESULT|Disposition'
+Disposition: Passed
+  RESULT m=128 n=16384 k=4096 ms=0.0194176 TFLOPs=884.758 keys_per_us=843.771
+$ /work/qkc_128x256_c11 --m=128 --n=262144 --k=1024 --iterations=30 --verify=0 | grep -E 'RESULT|Disposition'
+Disposition: Passed
+  RESULT m=128 n=262144 k=1024 ms=0.0563893 TFLOPs=1218.66 keys_per_us=4648.82
+$ cd /work/native_fp4 && nvcc -O3 -std=c++17 -arch=sm_103a --expt-relaxed-constexpr -DTILE_M=256 -DTILE_N=128 -DCL_M=2 -DCL_N=1 -I/work/cutlass/include -I/work/cutlass/tools/util/include -I/work/cutlass/examples/common -o /work/qkc_256x128_c21 qk_cutlass_sm100.cu 2>&1 | grep -E 'error' | head -10
+compile 256x128 c2x1: 80s exists=True
+$ /work/qkc_256x128_c21 --m=128 --n=2048 --k=128 --iterations=5 --verify=1
+tile 256x128x128 cluster 2x1
+  Disposition: Passed
+  Problem Size: 128x2048x128
+  Avg runtime: 0.0099904 ms
+  GFLOPS: 6717.33
+  RESULT m=128 n=2048 k=128 ms=0.0099904 TFLOPs=6.71733 keys_per_us=204.997
+$ /work/qkc_256x128_c21 --m=128 --n=16384 --k=128 --iterations=30 --verify=0 | grep -E 'RESULT|Disposition'
+Disposition: Passed
+  RESULT m=128 n=16384 k=128 ms=0.00680853 TFLOPs=78.8527 keys_per_us=2406.39
+$ /work/qkc_256x128_c21 --m=128 --n=262144 --k=128 --iterations=30 --verify=0 | grep -E 'RESULT|Disposition'
+Disposition: Passed
+  RESULT m=128 n=262144 k=128 ms=0.0414368 TFLOPs=207.302 keys_per_us=6326.36
+$ /work/qkc_256x128_c21 --m=128 --n=1048576 --k=128 --iterations=30 --verify=0 | grep -E 'RESULT|Disposition'
+Disposition: Passed
+  RESULT m=128 n=1048576 k=128 ms=0.152469 TFLOPs=225.355 keys_per_us=6877.29
+$ /work/qkc_256x128_c21 --m=128 --n=16384 --k=4096 --iterations=30 --verify=0 | grep -E 'RESULT|Disposition'
+Disposition: Passed
+  RESULT m=128 n=16384 k=4096 ms=0.0147307 TFLOPs=1166.27 keys_per_us=1112.24
+$ /work/qkc_256x128_c21 --m=128 --n=262144 --k=1024 --iterations=30 --verify=0 | grep -E 'RESULT|Disposition'
+Stopping app - user stopped from CLI.
+Disposition: Passed
+  RESULT m=128 n=262144 k=1024 ms=0.0594613 TFLOPs=1155.7 keys_per_us=4408.65
+$ cd /work/native_fp4 && nvcc -O3 -std=c++17 -arch=sm_103a --expt-relaxed-constexpr -DTILE_M=256 -DTILE_N=256 -DCL_M=2 -DCL_N=1 -I/work/cutlass/include -I/work/cutlass/tools/util/include -I/work/cutlass/examples/common -o /work/qkc_256x256_c21 qk_cutlass_sm100.cu 2>&1 | grep -E 'error' | head -10
+Runner terminated.
+╭───────────────────── Traceback (most recent call last) ──────────────────────╮
+│ /Users/jhome/ultraquant-more/cuda/modal/modal_native.py:89 in main           │
+│                                                                              │
+│   88 @app.local_entrypoint()                                                 │
+│ ❱ 89 def main(gpu: str = "RTX-PRO-6000", cutlass: bool = True):              │
+│   90 │   if gpu == "B300": run_b300.remote(cutlass)                          │
+│                                                                              │
+│ /Users/jhome/.pyenv/versions/3.12.10/lib/python3.12/site-packages/modal/_obj │
+│ ect.py:49 in wrapped                                                         │
+│                                                                              │
+│    48 │   │   await self.hydrate()                                           │
+│ ❱  49 │   │   return await method(self, *args, **kwargs)                     │
+│    50                                                                        │
+│                                                                              │
+│ /Users/jhome/.pyenv/versions/3.12.10/lib/python3.12/site-packages/modal/_fun │
+│ ctions.py:2081 in remote                                                     │
+│                                                                              │
+│   2080 │   │                                                                 │
+│ ❱ 2081 │   │   return await self._call_function(args, kwargs)                │
+│   2082                                                                       │
+│                                                                              │
+│ /Users/jhome/.pyenv/versions/3.12.10/lib/python3.12/site-packages/modal/_fun │
+│ ctions.py:2018 in _call_function                                             │
+│                                                                              │
+│   2017 │   │                                                                 │
+│ ❱ 2018 │   │   return await invocation.run_function()                        │
+│   2019                                                                       │
+│                                                                              │
+│ /Users/jhome/.pyenv/versions/3.12.10/lib/python3.12/site-packages/modal/_fun │
+│ ctions.py:498 in run_function                                                │
+│                                                                              │
+│    497 │   │   │   if await_response.output.result.status in TERMINAL_STATUS │
+│ ❱  498 │   │   │   │   return await _process_result(                         │
+│    499 │   │   │   │   │   await_response.output.result, await_response.outp │
+│                                                                              │
+│ /Users/jhome/.pyenv/versions/3.12.10/lib/python3.12/site-packages/modal/_uti │
+│ ls/function_utils.py:574 in _process_result                                  │
+│                                                                              │
+│   573 │   │                                                                  │
+│ ❱ 574 │   │   raise RemoteError(result.exception)                            │
+│   575                                                                        │
+╰──────────────────────────────────────────────────────────────────────────────╯
+RemoteError
