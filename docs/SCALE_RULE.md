@@ -1,0 +1,7 @@
+# Scale rule: `ceil(log2(amax/6))` vs the paper's `round(log2(c * amax))`
+
+`uqmt.quantize_fp4` picks the UE8M0 exponent per 32-element group as `e = ceil(log2(amax / 6))`. The UltraQuant paper uses `e = round(log2(c * amax))` with a global constant `c = 0.156`.
+
+Since `round(x) = ceil(x - 1/2)`, we have `round(log2(c * amax)) = ceil(log2(c * amax / sqrt(2)))`. This equals our rule exactly when `c / sqrt(2) = 1/6`, i.e. **`c = sqrt(2)/6 = 0.236`**. Our default is therefore the paper's rule at c = 0.236, which never clips the group maximum; smaller c clips the top of the group on purpose.
+
+On the two models we measured (whole-sequence FP4 KV simulation, wikitext-2, `results/gaps_scale_rule.md`; Mistral-7B-v0.1 / Qwen3-8B, no rotation), **c = 0.156 did not transfer**: perplexity increase +0.327 / +0.924 at c = 0.156 versus +0.152 / +0.654 with our rule, and c = 0.195 was about equal to it (+0.157 / +0.516). The best c differs per model, and the paper's constant was tuned on its own (rotated-key) setup. With Hadamard-rotated keys the ordering is unchanged: c = 0.156 + rotation gives +0.093 (Mistral) / +1.322 (Qwen3) against +0.041 / +0.626 for our rule + rotation. `quantize_fp4` keeps the ceil rule as default; `uqmt.quant` exposes the paper rule (`rule="paper", c=...`), Hadamard rotation and NVFP4 for experiments. Single seed, 16 windows of 2048 tokens; treat differences below ~0.05 ppl as noise.
