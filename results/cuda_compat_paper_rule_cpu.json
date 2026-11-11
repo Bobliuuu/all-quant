@@ -1,0 +1,74 @@
+{
+ "gauss_D128": {
+  "paper_packed_equal": 0.9254992008209229,
+  "paper_scale_equal": 1.0,
+  "paper_packed_equal_after_negzero_canon": 1.0,
+  "paper_packed_bit_identical_after_negzero_canon": true,
+  "paper_packed_bit_identical": false,
+  "paper_scale_bit_identical": true,
+  "ceil_scale_equal": 0.45991250872612
+ },
+ "gauss_D256": {
+  "paper_packed_equal": 0.9259660243988037,
+  "paper_scale_equal": 1.0,
+  "paper_packed_equal_after_negzero_canon": 1.0,
+  "paper_packed_bit_identical_after_negzero_canon": true,
+  "paper_packed_bit_identical": false,
+  "paper_scale_bit_identical": true,
+  "ceil_scale_equal": 0.457931250333786
+ },
+ "lognormal_groups_D128": {
+  "paper_packed_equal": 0.9276406168937683,
+  "paper_scale_equal": 1.0,
+  "paper_packed_equal_after_negzero_canon": 1.0,
+  "paper_packed_bit_identical_after_negzero_canon": true,
+  "paper_packed_bit_identical": false,
+  "paper_scale_bit_identical": true,
+  "ceil_scale_equal": 0.40431249141693115
+ },
+ "lognormal_groups_D256": {
+  "paper_packed_equal": 0.9274695515632629,
+  "paper_scale_equal": 1.0,
+  "paper_packed_equal_after_negzero_canon": 1.0,
+  "paper_packed_bit_identical_after_negzero_canon": true,
+  "paper_packed_bit_identical": false,
+  "paper_scale_bit_identical": true,
+  "ceil_scale_equal": 0.40447500348091125
+ },
+ "bf16_gauss_x4_D128": {
+  "paper_packed_equal": 0.9155476689338684,
+  "paper_scale_equal": 1.0,
+  "paper_packed_equal_after_negzero_canon": 0.9883601665496826,
+  "paper_packed_bit_identical_after_negzero_canon": false,
+  "paper_packed_bit_identical": false,
+  "paper_scale_bit_identical": true,
+  "ceil_scale_equal": 0.4518750011920929
+ },
+ "bf16_gauss_x4_D256": {
+  "paper_packed_equal": 0.915137529373169,
+  "paper_scale_equal": 1.0,
+  "paper_packed_equal_after_negzero_canon": 0.9883062243461609,
+  "paper_packed_bit_identical_after_negzero_canon": false,
+  "paper_packed_bit_identical": false,
+  "paper_scale_bit_identical": true,
+  "ceil_scale_equal": 0.4540812373161316
+ },
+ "with_zero_groups_D128": {
+  "paper_packed_equal": 0.941114068031311,
+  "paper_scale_equal": 0.7982375025749207,
+  "paper_packed_equal_after_negzero_canon": 1.0,
+  "paper_packed_bit_identical_after_negzero_canon": true,
+  "paper_packed_bit_identical": false,
+  "paper_scale_bit_identical": false,
+  "ceil_scale_equal": 0.3683750033378601
+ },
+ "with_zero_groups_D256": {
+  "paper_packed_equal": 0.940605878829956,
+  "paper_scale_equal": 0.8014812469482422,
+  "paper_packed_equal_after_negzero_canon": 1.0,
+  "paper_packed_bit_identical_after_negzero_canon": true,
+  "paper_packed_bit_identical": false,
+  "paper_scale_bit_identical": false,
+  "ceil_scale_equal": 0.36934998631477356
+ }
+}

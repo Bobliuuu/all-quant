@@ -113,9 +113,9 @@ def cmp(a, b):
     return dict(max_abs=(a - b).abs().max().item(), rel_l2=relerr(a, b), bit_identical=bool(torch.equal(a, b)))
 
 Dec = {}
-for (D, Hq, Hkv, K, BS, lens) in [(128, 8, 2, 1, 16, [100, 37, 256]), (128, 8, 2, 4, 16, [100, 37, 256]),
-                                   (256, 16, 2, 1, 16, [130, 64]), (128, 8, 2, 1, 16, [1500, 2100])]:
-    key = f"D{D}_Hq{Hq}_Hkv{Hkv}_K{K}_maxlen{max(lens)}"
+for (D, Hq, Hkv, K, BS, lens) in [(128, 8, 2, 1, 64, [100, 37, 256]), (128, 8, 2, 4, 64, [100, 37, 256]), (128, 8, 2, 1, 16, [100, 37, 256]),
+                                   (256, 16, 2, 1, 16, [130, 64]), (128, 8, 2, 1, 64, [1500, 2100])]:
+    key = f"D{D}_Hq{Hq}_Hkv{Hkv}_K{K}_page{BS}_maxlen{max(lens)}"
     try:
         B = len(lens); maxp = max((l + BS - 1) // BS for l in lens)
         nblocks = B * maxp

@@ -1,0 +1,192 @@
+{
+ "device": "NVIDIA H100 80GB HBM3",
+ "cc": [
+  9,
+  0
+ ],
+ "quantiser_V_path(no_rotation)": {
+  "D128": {
+   "packed_bytes_equal": 0.36711952090263367,
+   "scale_bytes_equal": 0.4012250006198883,
+   "scale_diff_ours_minus_upstream_hist": {
+    "0": 32098,
+    "1": 47902
+   },
+   "packed_equal_when_using_upstream_scales": 0.9162585735321045,
+   "n_differing_bytes_same_scale": 107189,
+   "rel_mse_upstream": 0.016973348334431648,
+   "rel_mse_ours": 0.013703636825084686,
+   "clip_frac_upstream": 0.04599648341536522,
+   "clip_frac_ours": 0.0
+  },
+  "D256": {
+   "packed_bytes_equal": 0.3706374764442444,
+   "scale_bytes_equal": 0.40533748269081116,
+   "scale_diff_ours_minus_upstream_hist": {
+    "0": 64854,
+    "1": 95146
+   },
+   "packed_equal_when_using_upstream_scales": 0.9161003828048706,
+   "n_differing_bytes_same_scale": 214783,
+   "rel_mse_upstream": 0.016970818862318993,
+   "rel_mse_ours": 0.01364070177078247,
+   "clip_frac_upstream": 0.04574843496084213,
+   "clip_frac_ours": 0.0
+  }
+ },
+ "upstream_store_kernel": {
+  "D128": {
+   "V_codes_equal_ref": true,
+   "V_scales_equal_ref": true,
+   "K_codes_equal_ref_frac": 1.0,
+   "K_scales_equal_ref_frac": 1.0,
+   "ours_vs_upstream_store_K_scale_equal_frac": 0.453125,
+   "ours_vs_upstream_store_V_scale_equal_frac": 0.28125
+  },
+  "D256": {
+   "V_codes_equal_ref": true,
+   "V_scales_equal_ref": true,
+   "K_codes_equal_ref_frac": 1.0,
+   "K_scales_equal_ref_frac": 1.0,
+   "ours_vs_upstream_store_K_scale_equal_frac": 0.4443359375,
+   "ours_vs_upstream_store_V_scale_equal_frac": 0.283203125
+  }
+ },
+ "decode": {
+  "D128_Hq8_Hkv2_K1_page64_maxlen256": {
+   "upstream_vs_fp32ref": {
+    "max_abs": 0.0028827786445617676,
+    "rel_l2": 0.002194794127717614,
+    "bit_identical": false
+   },
+   "layout_roundtrip_identical": true,
+   "ours_triton_vs_upstream": {
+    "max_abs": 0.00390625,
+    "rel_l2": 0.0016393205150961876,
+    "bit_identical": false
+   },
+   "ours_triton_vs_fp32ref": {
+    "max_abs": 0.0028827786445617676,
+    "rel_l2": 0.002208743244409561,
+    "bit_identical": false
+   },
+   "ours_cuda_vs_upstream": {
+    "max_abs": 0.00390625,
+    "rel_l2": 0.002365650376304984,
+    "bit_identical": false
+   },
+   "ours_cuda_vs_fp32ref": {
+    "max_abs": 0.0029102563858032227,
+    "rel_l2": 0.0020192323718219995,
+    "bit_identical": false
+   },
+   "oursquant_cache: upstream_kernel_vs_ours_triton": {
+    "max_abs": 0.001953125,
+    "rel_l2": 0.0015387539751827717,
+    "bit_identical": false
+   },
+   "err_vs_unquantised_truth": {
+    "upstream_quantiser": 0.1865525096654892,
+    "ours_quantiser": 0.16258636116981506
+   }
+  },
+  "D128_Hq8_Hkv2_K4_page64_maxlen256": {
+   "upstream_vs_fp32ref": {
+    "max_abs": 0.003221273422241211,
+    "rel_l2": 0.002114746952429414,
+    "bit_identical": false
+   },
+   "layout_roundtrip_identical": true,
+   "ours_triton_vs_upstream": {
+    "max_abs": 0.00390625,
+    "rel_l2": 0.001305423560552299,
+    "bit_identical": false
+   },
+   "ours_triton_vs_fp32ref": {
+    "max_abs": 0.003221273422241211,
+    "rel_l2": 0.0021080493461340666,
+    "bit_identical": false
+   },
+   "ours_cuda_vs_upstream": {
+    "max_abs": 0.00390625,
+    "rel_l2": 0.0023057113867253065,
+    "bit_identical": false
+   },
+   "ours_cuda_vs_fp32ref": {
+    "max_abs": 0.0025296807289123535,
+    "rel_l2": 0.001971703954041004,
+    "bit_identical": false
+   },
+   "oursquant_cache: upstream_kernel_vs_ours_triton": {
+    "max_abs": 0.00390625,
+    "rel_l2": 0.0011442628456279635,
+    "bit_identical": false
+   },
+   "err_vs_unquantised_truth": {
+    "upstream_quantiser": 0.1818051040172577,
+    "ours_quantiser": 0.15957339107990265
+   }
+  },
+  "D128_Hq8_Hkv2_K1_page16_maxlen256": {
+   "upstream_vs_fp32ref": {
+    "max_abs": 0.0021047592163085938,
+    "rel_l2": 0.00204665120691061,
+    "bit_identical": false
+   },
+   "layout_roundtrip_identical": true,
+   "ours_triton_vs_upstream": {
+    "max_abs": 0.00390625,
+    "rel_l2": 0.0018672345904633403,
+    "bit_identical": false
+   },
+   "ours_triton_vs_fp32ref": {
+    "max_abs": 0.002030611038208008,
+    "rel_l2": 0.0019660370890051126,
+    "bit_identical": false
+   },
+   "ours_cuda_error": "RuntimeError('uq_decode_launch failed: invalid argument')",
+   "oursquant_cache: upstream_kernel_vs_ours_triton": {
+    "max_abs": 0.00390625,
+    "rel_l2": 0.0018364492570981383,
+    "bit_identical": false
+   },
+   "err_vs_unquantised_truth": {
+    "upstream_quantiser": 0.2099778950214386,
+    "ours_quantiser": 0.15637415647506714
+   }
+  },
+  "D256_Hq16_Hkv2_K1_page16_maxlen130": {
+   "upstream_vs_fp32ref": {
+    "max_abs": 0.002198517322540283,
+    "rel_l2": 0.002075284020975232,
+    "bit_identical": false
+   },
+   "layout_roundtrip_identical": true,
+   "ours_triton_error": "AssertionError('head_dim must be 64 or 128')",
+   "ours_cuda_error": "RuntimeError('uq_decode_launch failed: invalid argument')",
+   "oursquant_cache_error": "AssertionError('head_dim must be 64 or 128')",
+   "err_vs_unquantised_truth": {
+    "upstream_quantiser": 0.18653051555156708,
+    "ours_quantiser": 0.15660452842712402
+   }
+  },
+  "D128_Hq8_Hkv2_K1_page64_maxlen2100": {
+   "layout_roundtrip_identical": true,
+   "ours_triton_vs_upstream": {
+    "max_abs": 0.00048828125,
+    "rel_l2": 0.0021528713405132294,
+    "bit_identical": false
+   },
+   "ours_cuda_vs_upstream": {
+    "max_abs": 0.00048828125,
+    "rel_l2": 0.0021366612054407597,
+    "bit_identical": false
+   },
+   "oursquant_cache: upstream_kernel_vs_ours_triton": {
+    "max_abs": 0.00048828125,
+    "rel_l2": 0.00212113163433969,
+    "bit_identical": false
+   }
+  }
+ }
+}
