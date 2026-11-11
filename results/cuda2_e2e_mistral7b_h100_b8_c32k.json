@@ -1,0 +1,106 @@
+{
+ "device": "NVIDIA H100 80GB HBM3",
+ "model": "mistralai/Mistral-7B-v0.1",
+ "rows": [
+  {
+   "B": 8,
+   "ctx": 32768,
+   "K": 1,
+   "backend": "fp16",
+   "wall_ms": 23.073535919189453,
+   "graph_ms": 21.998695373535156,
+   "gpu_ms": 21.657304999999948,
+   "cat_ms": {
+    "other": 7.942506333333276,
+    "attention": 13.71479866666667
+   },
+   "kv_bytes": 34359738368
+  },
+  {
+   "B": 8,
+   "ctx": 32768,
+   "K": 8,
+   "backend": "fp16",
+   "wall_ms": 36.573577880859375,
+   "graph_ms": 34.75541305541992,
+   "gpu_ms": 34.43109366666664,
+   "cat_ms": {
+    "other": 9.575148666666639,
+    "attention": 24.855945000000002
+   },
+   "kv_bytes": 34359738368
+  },
+  {
+   "B": 8,
+   "ctx": 32768,
+   "K": 1,
+   "backend": "fp16_bmm",
+   "wall_ms": 46.3345832824707,
+   "graph_ms": 44.677005767822266,
+   "gpu_ms": 44.268088666666635,
+   "cat_ms": {
+    "other": 8.637680666666693,
+    "gemm": 34.64349566666664,
+    "attention": 0.9869123333332986
+   },
+   "kv_bytes": 34359738368
+  },
+  {
+   "B": 8,
+   "ctx": 32768,
+   "K": 8,
+   "backend": "fp16_bmm",
+   "wall_ms": 49.39899444580078,
+   "graph_ms": 47.038230895996094,
+   "gpu_ms": 46.68090199999993,
+   "cat_ms": {
+    "other": 40.11471899999996,
+    "attention": 6.566182999999974
+   },
+   "kv_bytes": 34359738368
+  },
+  {
+   "B": 8,
+   "ctx": 32768,
+   "K": 1,
+   "backend": "uq_fused",
+   "wall_ms": 26.631872177124023,
+   "graph_ms": 14.43148422241211,
+   "gpu_ms": 14.124444333333436,
+   "cat_ms": {
+    "other": 13.82326100000009,
+    "attention": 0.30118333333334707
+   },
+   "kv_bytes": 9126805504
+  },
+  {
+   "B": 8,
+   "ctx": 32768,
+   "K": 8,
+   "backend": "uq_fused",
+   "wall_ms": 25.381328582763672,
+   "graph_ms": 16.188268661499023,
+   "gpu_ms": 15.980606666666558,
+   "cat_ms": {
+    "other": 15.884903999999903,
+    "attention": 0.0957026666666561
+   },
+   "kv_bytes": 9126805504
+  },
+  {
+   "B": 8,
+   "ctx": 32768,
+   "K": 8,
+   "backend": "uq_kindep",
+   "wall_ms": 53.3032341003418,
+   "graph_ms": 50.43988037109375,
+   "gpu_ms": 50.60643933333344,
+   "cat_ms": {
+    "other": 50.20878533333345,
+    "attention": 0.39765399999998885
+   },
+   "kv_bytes": 9126805504
+  }
+ ],
+ "note": "eager HF-module layer loop; context KV = real Mistral prefill of python source, replicated over batch"
+}

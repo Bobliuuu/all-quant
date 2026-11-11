@@ -560,7 +560,8 @@ static cudaError_t dispatch_w(const UQParams& p, int nw, int stages, cudaStream_
 template <int D, int PAGE, int GS>
 static cudaError_t dispatch_dp(const UQParams& p, int nw, int stages, cudaStream_t s) {
   if constexpr (GS == 32) {
-    if (p.variant != 1) {
+    // auto (variant 0): the warp-independent design W only for 16-row tiles; with >= 32 rows it spills (MB=2) and variant 1 is the tuned winner
+    if (p.variant == 2 || (p.variant == 0 && uq_block_m(p.K, p.HQ, p.HKV) == 16)) {
       cudaError_t e = dispatch_w<D, PAGE>(p, nw, stages, s);
       if (e != cudaErrorInvalidValue || p.variant == 2) return e;
       cudaGetLastError();

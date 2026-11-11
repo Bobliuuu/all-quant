@@ -162,3 +162,19 @@ variant 3 rounds P up to 2^8 in bf16 (lazy rescale) so its worst error beyond bf
 
 Honest status vs the vendor kernels: B300 K=8 0.307 ms vs FlashInfer trtllm-gen NVFP4 0.094 ms (3.3x slower; was 3.7x) and K=1 0.139 vs 0.066 (2.1x, unchanged).  The tcgen05 kernel exists and is correct, but a software-dequant
 design is bound by the per-page S -> softmax -> PV chain and dequant issue, not by the MMA: even the skeleton without dequant and softmax is 0.20 ms.  Native block-scaled QK (mxf8f6f4) is still not built.
+
+Real-model checks (Qwen3-8B / Mistral-7B-v0.1, `bench/cuda2/quality_cuda2.py`, `bench/cuda2/modal_cuda2_model.py`; raw: `results/cuda2_quality_*`, `results/cuda2_e2e_*`)
+* **Perplexity through the kernels** (wikitext-2, 8 windows x 2048, 1024-token chunked prefill then teacher-forced decode of the remaining tokens in steps of K query tokens, every layer's decode attention on the paged quantised cache;
+  Triton uqmt kernels vs this CUDA port, H100): fp16 8.5228 | UE8M0 K=1 Triton 9.1031 vs CUDA 9.1185 (+0.17%), K=8 9.0788 vs 9.0866 (+0.09%, variant 3) | NVFP4 K=1 8.6089 vs 8.6250 (+0.19%), K=8 8.5977 vs 8.5926 (-0.06%).
+  So perplexity is unchanged to within ~0.2%, which is the same size as the spread between the *Triton* K=1 and K=8 runs (0.27% / 0.12%: different GEMM shapes in the rest of the fp16 model); it is not bit-identical.
+  B300 shows the same picture (UE8M0 K=1 7.0844 vs 7.0658, K=8 7.0584 vs 7.0428; NVFP4 6.7511 vs 6.7521, 6.7366 vs 6.7328) but its absolute ppl (fp16 6.61 vs 8.52 on H100) is NOT comparable to H100: the chunked-prefill SDPA path of
+  the B300 torch build gives a different baseline, independent of the decode kernels; only the within-GPU backend comparison is meaningful.
+* **Whole decode step, Mistral-7B, B=8, ctx 32768** (eager HF-module layer loop, CUDA-graph replay time, ms; `bench/e2e_decode.py --mode sweep` with the CUDA port behind the `bench/cuda2/shim`; KV 34.4 GB fp16 vs 9.1 GB FP4):
+  | GPU | K | fp16 SDPA | fp16 bmm | UltraQuant CUDA (fused) | vs fp16 SDPA |
+  |---|---|---|---|---|---|
+  | H100 | 1 | 22.0 | 44.7 | **14.4** | 1.52x |
+  | H100 | 8 | 34.8 | 47.0 | **16.2** | 2.15x |
+  | B300 | 1 | 32.8 | 33.3 | **11.1** | 2.95x |
+  | B300 | 8 | 40.7 | 26.7 | **14.8** | 2.75x |
+  K=8 "kernel-independent" (the same kernel run K times) is 50.4 ms on H100 / 42.5 ms on B300, i.e. K-query sharing is worth 3.1x / 2.9x at the step level.  B300 fp16 SDPA is slow in this torch build (the bmm formulation is faster at K=8), so the B300 ratios
+  flatter us.  A first B300 K=8 run took 103 ms because the *default* configuration (variant 0) picked the spilling warp-independent design for >= 32 query rows; fixed (variant 0 now uses variant 1 there; the tuned configs are unchanged).

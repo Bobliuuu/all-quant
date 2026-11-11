@@ -1,0 +1,84 @@
+{
+ "device": "NVIDIA B300 SXM6 AC",
+ "model": "mistralai/Mistral-7B-v0.1",
+ "rows": [
+  {
+   "B": 8,
+   "ctx": 32768,
+   "K": 1,
+   "backend": "fp16",
+   "wall_ms": 33.67348861694336,
+   "graph_ms": 32.82204818725586,
+   "gpu_ms": 0,
+   "cat_ms": {},
+   "kv_bytes": 34359738368
+  },
+  {
+   "B": 8,
+   "ctx": 32768,
+   "K": 8,
+   "backend": "fp16",
+   "wall_ms": 41.749446868896484,
+   "graph_ms": 40.66569519042969,
+   "gpu_ms": 0,
+   "cat_ms": {},
+   "kv_bytes": 34359738368
+  },
+  {
+   "B": 8,
+   "ctx": 32768,
+   "K": 1,
+   "backend": "fp16_bmm",
+   "wall_ms": 34.23129653930664,
+   "graph_ms": 33.288631439208984,
+   "gpu_ms": 0,
+   "cat_ms": {},
+   "kv_bytes": 34359738368
+  },
+  {
+   "B": 8,
+   "ctx": 32768,
+   "K": 8,
+   "backend": "fp16_bmm",
+   "wall_ms": 27.913047790527344,
+   "graph_ms": 26.719575881958008,
+   "gpu_ms": 0,
+   "cat_ms": {},
+   "kv_bytes": 34359738368
+  },
+  {
+   "B": 8,
+   "ctx": 32768,
+   "K": 1,
+   "backend": "uq_fused",
+   "wall_ms": 12.041764259338379,
+   "graph_ms": 11.10616397857666,
+   "gpu_ms": 0,
+   "cat_ms": {},
+   "kv_bytes": 9126805504
+  },
+  {
+   "B": 8,
+   "ctx": 32768,
+   "K": 8,
+   "backend": "uq_fused",
+   "wall_ms": 15.760151863098145,
+   "graph_ms": 14.808956146240234,
+   "gpu_ms": 0,
+   "cat_ms": {},
+   "kv_bytes": 9126805504
+  },
+  {
+   "B": 8,
+   "ctx": 32768,
+   "K": 8,
+   "backend": "uq_kindep",
+   "wall_ms": 43.58026885986328,
+   "graph_ms": 42.47984313964844,
+   "gpu_ms": 0,
+   "cat_ms": {},
+   "kv_bytes": 9126805504
+  }
+ ],
+ "note": "eager HF-module layer loop; context KV = real Mistral prefill of python source, replicated over batch"
+}

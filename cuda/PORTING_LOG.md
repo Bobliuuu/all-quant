@@ -110,3 +110,8 @@ eager for UE8M0 and NVFP4 at K = 1, 4, 8 with changed `seq_lens`/q (the capture 
 
 ### Goal 5: real model
 See the tables in the "cuda2" section of `README.md` (perplexity Triton vs CUDA through Qwen3-8B on H100/B300; whole decode step vs fp16 SDPA on Mistral-7B, B8 ctx32768).
+
+### Goal 5 results and a default-config bug
+Perplexity (Qwen3-8B, H100) and whole-step times (Mistral-7B, B8 ctx32768, K=1/8, H100 and B300) are tabulated in `README.md` ("Real-model checks"); raw data `results/cuda2_quality_qwen3_8b_*.json`, `results/cuda2_e2e_mistral7b_*.json`.
+Summary: ppl within ~0.2% of the Triton kernels (same size as the Triton K=1 vs K=8 spread); H100 step 14.4 / 16.2 ms vs fp16 SDPA 22.0 / 34.8 ms (1.5x / 2.15x), B300 11.1 / 14.8 vs 32.8 / 40.7 ms.
+The first B300 K=8 whole-step run (103 ms) exposed that `variant=0` with >= 32 rows dispatched design W with MB=2 (700 B of stack, ~2.7 ms per call); the default now uses variant 1 for BM >= 32 (`dispatch_dp`).
