@@ -21,6 +21,7 @@ struct SplitKernelXMX {
   Shape s; Args a; int nsplit, pps;
   sycl::local_accessor<bf16, 1> qb, kvb, pb;   // Q [Mpad][D]; K/V tile [D*TN] VNNI; P [Mpad][TN]
   sycl::local_accessor<float, 1> sb, ob, st;   // S [Mpad][TN]; O [Mpad][D]; stats m,l,alpha
+  sycl::local_accessor<sycl::uint2, 1> lut;    // 256-entry byte -> (bf16 pair bits, nonzero mask), exponent pre-biased by -32
 
   [[sycl::reqd_sub_group_size(16)]] void operator()(sycl::nd_item<1> it) const {
     constexpr int DH = D / 2, NG = D / 32, SGS = 16, NSG = T / SGS, NT = TN / 16, DT = D / 16;
@@ -41,6 +42,12 @@ struct SplitKernelXMX {
     auto lp = [](bf16* p) { return sycl::address_space_cast<sycl::access::address_space::local_space, sycl::access::decorated::no>(p); };
     auto lpf = [](float* p) { return sycl::address_space_cast<sycl::access::address_space::local_space, sycl::access::decorated::no>(p); };
 
+    for (int i = t; i < 256; i += T) {
+      const unsigned lo = (unsigned)i & 0xF, hi = (unsigned)i >> 4;
+      const int bias = -(32 << 7);
+      lut[i] = sycl::uint2(fp4_bf16bits(lo, bias) | (fp4_bf16bits(hi, bias) << 16),
+                           ((lo & 7) ? 0xFFFFu : 0u) | ((hi & 7) ? 0xFFFF0000u : 0u));
+    }
     for (int i = t; i < Mpad * D; i += T) {
       const int r = i / D, d = i % D, j = r / G, g = r % G;
       Qb[i] = r < M ? a.q[((size_t)(b * K + j) * s.HQ + hk * G + g) * D + d] : bf16(0.f);
@@ -63,9 +70,10 @@ struct SplitKernelXMX {
             const int e4 = i / TN, n = i % TN;
             const size_t row = cbase + tile * TN + n;
             const uint32_t w = *reinterpret_cast<const uint32_t*>(a.kc + row * DH + e4 * 4);
-            const int off = ((int)a.ks[row * NG + (e4 * 8) / 32] - 127) << 7;
+            const uint32_t off = (uint32_t)((sycl::max((int)a.ks[row * NG + (e4 * 8) / 32], 95) - 95) << 7);
+            const uint32_t offp = off | (off << 16);
 #pragma unroll
-            for (int q = 0; q < 4; q++) KV32[(e4 * 4 + q) * TN + n] = fp4_pair((w >> (8 * q)) & 0xFFu, off);
+            for (int q = 0; q < 4; q++) { const sycl::uint2 l = lut[(w >> (8 * q)) & 0xFFu]; KV32[(e4 * 4 + q) * TN + n] = (l.x() + offp) & l.y(); }
           }
         }
         sycl::group_barrier(it.get_group());
@@ -113,14 +121,16 @@ struct SplitKernelXMX {
             const size_t r0 = cbase + tile * TN + 2 * tp, r1 = r0 + 1;
             const uint32_t w0 = *reinterpret_cast<const uint32_t*>(a.vc + r0 * DH + e4 * 4);
             const uint32_t w1 = *reinterpret_cast<const uint32_t*>(a.vc + r1 * DH + e4 * 4);
-            const int o0 = ((int)a.vs[r0 * NG + (e4 * 8) / 32] - 127) << 7, o1 = ((int)a.vs[r1 * NG + (e4 * 8) / 32] - 127) << 7;
-            sycl::uint4 v0, v1;
+            const uint32_t f0 = (uint32_t)((sycl::max((int)a.vs[r0 * NG + (e4 * 8) / 32], 95) - 95) << 7);
+            const uint32_t f1 = (uint32_t)((sycl::max((int)a.vs[r1 * NG + (e4 * 8) / 32], 95) - 95) << 7);
+            const uint32_t p0 = f0 | (f0 << 16), p1 = f1 | (f1 << 16);
             uint32_t o[8];
 #pragma unroll
             for (int q = 0; q < 4; q++) {
-              const unsigned b0 = (w0 >> (8 * q)) & 0xFFu, b1 = (w1 >> (8 * q)) & 0xFFu;
-              o[2 * q] = fp4_bf16bits(b0 & 0xFu, o0) | (fp4_bf16bits(b1 & 0xFu, o1) << 16);
-              o[2 * q + 1] = fp4_bf16bits(b0 >> 4, o0) | (fp4_bf16bits(b1 >> 4, o1) << 16);
+              const sycl::uint2 l0 = lut[(w0 >> (8 * q)) & 0xFFu], l1 = lut[(w1 >> (8 * q)) & 0xFFu];
+              const uint32_t x0 = (l0.x() + p0) & l0.y(), x1 = (l1.x() + p1) & l1.y();
+              o[2 * q] = (x0 & 0xFFFFu) | (x1 << 16);
+              o[2 * q + 1] = (x0 >> 16) | (x1 & 0xFFFF0000u);
             }
             sycl::uint4* dst = reinterpret_cast<sycl::uint4*>(KV32 + tp * D + e4 * 8);
             dst[0] = sycl::uint4(o[0], o[1], o[2], o[3]);
@@ -162,8 +172,9 @@ sycl::event launch_split_xmx(sycl::queue& q, const Shape& s, const Args& a, int 
   return q.submit([&](sycl::handler& h) {
     sycl::local_accessor<bf16, 1> qb(Mpad * D, h), kvb(D * TN, h), pb(Mpad * TN, h);
     sycl::local_accessor<float, 1> sb(Mpad * TN, h), ob(Mpad * D, h), st(3 * M, h);
+    sycl::local_accessor<sycl::uint2, 1> lut(256, h);
     h.parallel_for(sycl::nd_range<1>((size_t)s.B * s.HKV * nsplit * T, T),
-                   SplitKernelXMX<D, TN, T>{s, a, nsplit, pps, qb, kvb, pb, sb, ob, st});
+                   SplitKernelXMX<D, TN, T>{s, a, nsplit, pps, qb, kvb, pb, sb, ob, st, lut});
   });
 }
 
