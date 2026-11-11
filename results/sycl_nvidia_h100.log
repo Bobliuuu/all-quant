@@ -1,0 +1,755 @@
+$ clang++ --version | head -2; sycl-ls; nvidia-smi -L; ls /opt/dpcpp/lib | grep -i -E 'pi_|ur_adapter|cuda' ; cat /etc/OpenCL/vendors/* 2>/dev/null; ls /opt/intel/oneapi/lib 2>/dev/null | head
+DPC++ compiler 7.2.0 (pre-release) (Nightly 2026-11-04) build based on:
+clang version 24.0.0git (https://github.com/intel/llvm 921d6889dc664de9690e5307dc73c3bb59b05124)
+[opencl:cpu][opencl:0] Intel(R) OpenCL, INTEL(R) XEON(R) PLATINUM 8592V OpenCL 3.1 (Build 0) [2026.22.10.0.01_160000]
+[cuda:gpu][cuda:0] NVIDIA CUDA BACKEND, NVIDIA H100 80GB HBM3 9.0 [CUDA 13.3]
+GPU 0: NVIDIA H100 80GB HBM3 (UUID: GPU-d8da1091-7b15-7bea-d0b4-23402dfe8d6c)
+libcuda_trace_collector.so
+libur_adapter_cuda.so
+libur_adapter_cuda.so.0
+libur_adapter_cuda.so.0.12.0
+libur_adapter_level_zero.a
+libur_adapter_level_zero_v2.a
+libur_adapter_opencl.a
+/opt/intel/oneapi/redist/lib/libintelocl.so
+
+$ cd /work/b && clang++ -fsycl -O3 -std=c++17 -DUQ_NO_XMX -fsycl-targets=nvptx64-nvidia-cuda -I/work/sycl /work/sycl/test_vectors.cpp -o test_vectors
+In file included from /work/sycl/test_vectors.cpp:4:
+/work/sycl/uq_decode.hpp:72:31: warning: attribute argument 16 is invalid and will be ignored; nvptx64 requires sub_group size 32 [-Wincorrect-sub-group-size]
+   72 |   [[sycl::reqd_sub_group_size(SGS)]] void operator()(sycl::nd_item<1> it) const {
+      |                               ^
+/work/sycl/uq_decode.hpp:212:20: note: in instantiation of template class 'uq::SplitKernel<128, 32, 128, 16>' requested here
+  212 |                    SplitKernel<D, TN, T, SGS>{s, a, nsplit, pps, qs, kv, ps, st});
+      |                    ^
+/work/sycl/uq_decode.hpp:209:41: note: while substituting into a lambda expression here
+  209 |   return q.submit([&](sycl::handler& h) {
+      |                                         ^
+/work/sycl/uq_decode.hpp:226:44: note: in instantiation of function template specialization 'uq::launch_split<128, 32, 128, 16>' requested here
+  226 |   return launch_reduce<D>(q, s, a, nsplit, launch_split<D, TN, T, SGS>(q, s, a, nsplit));
+      |                                            ^
+/work/sycl/uq_decode.hpp:233:3: note: in instantiation of function template specialization 'uq::run_cfg<128, 32, 128, 16>' requested here
+  233 |   UQ_CASE(128, 32, 16) UQ_CASE(128, 32, 32) UQ_CASE(128, 16, 16) UQ_CASE(128, 16, 32)
+      |   ^
+/work/sycl/uq_decode.hpp:232:86: note: expanded from macro 'UQ_CASE'
+  232 | #define UQ_CASE(T_, TN_, SG_) if (key == (T_) * 100000 + (TN_) * 100 + (SG_)) return run_cfg<D, TN_, T_, SG_>(q, s, a, c.nsplit);
+      |                                                                                      ^
+/work/sycl/uq_decode.hpp:257:26: note: in instantiation of function template specialization 'uq::run_D<128>' requested here
+  257 |   if (s.D == 128) return run_D<128>(q, s, c, a);
+      |                          ^
+/work/sycl/uq_decode.hpp:72:31: warning: attribute argument 16 is invalid and will be ignored; nvptx64 requires sub_group size 32 [-Wincorrect-sub-group-size]
+   72 |   [[sycl::reqd_sub_group_size(SGS)]] void operator()(sycl::nd_item<1> it) const {
+      |                               ^
+/work/sycl/uq_decode.hpp:212:20: note: in instantiation of template class 'uq::SplitKernel<128, 16, 128, 16>' requested here
+  212 |                    SplitKernel<D, TN, T, SGS>{s, a, nsplit, pps, qs, kv, ps, st});
+      |                    ^
+/work/sycl/uq_decode.hpp:209:41: note: while substituting into a lambda expression here
+  209 |   return q.submit([&](sycl::handler& h) {
+      |                                         ^
+/work/sycl/uq_decode.hpp:226:44: note: in instantiation of function template specialization 'uq::launch_split<128, 16, 128, 16>' requested here
+  226 |   return launch_reduce<D>(q, s, a, nsplit, launch_split<D, TN, T, SGS>(q, s, a, nsplit));
+      |                                            ^
+/work/sycl/uq_decode.hpp:233:45: note: in instantiation of function template specialization 'uq::run_cfg<128, 16, 128, 16>' requested here
+  233 |   UQ_CASE(128, 32, 16) UQ_CASE(128, 32, 32) UQ_CASE(128, 16, 16) UQ_CASE(128, 16, 32)
+      |                                             ^
+/work/sycl/uq_decode.hpp:232:86: note: expanded from macro 'UQ_CASE'
+  232 | #define UQ_CASE(T_, TN_, SG_) if (key == (T_) * 100000 + (TN_) * 100 + (SG_)) return run_cfg<D, TN_, T_, SG_>(q, s, a, c.nsplit);
+      |                                                                                      ^
+/work/sycl/uq_decode.hpp:257:26: note: in instantiation of function template specialization 'uq::run_D<128>' requested here
+  257 |   if (s.D == 128) return run_D<128>(q, s, c, a);
+      |                          ^
+/work/sycl/uq_decode.hpp:72:31: warning: attribute argument 16 is invalid and will be ignored; nvptx64 requires sub_group size 32 [-Wincorrect-sub-group-size]
+   72 |   [[sycl::reqd_sub_group_size(SGS)]] void operator()(sycl::nd_item<1> it) const {
+      |                               ^
+/work/sycl/uq_decode.hpp:212:20: note: in instantiation of template class 'uq::SplitKernel<128, 32, 64, 16>' requested here
+  212 |                    SplitKernel<D, TN, T, SGS>{s, a, nsplit, pps, qs, kv, ps, st});
+      |                    ^
+/work/sycl/uq_decode.hpp:209:41: note: while substituting into a lambda expression here
+  209 |   return q.submit([&](sycl::handler& h) {
+      |                                         ^
+/work/sycl/uq_decode.hpp:226:44: note: in instantiation of function template specialization 'uq::launch_split<128, 32, 64, 16>' requested here
+  226 |   return launch_reduce<D>(q, s, a, nsplit, launch_split<D, TN, T, SGS>(q, s, a, nsplit));
+      |                                            ^
+/work/sycl/uq_decode.hpp:234:3: note: in instantiation of function template specialization 'uq::run_cfg<128, 32, 64, 16>' requested here
+  234 |   UQ_CASE(64, 32, 16) UQ_CASE(64, 32, 32) UQ_CASE(64, 16, 16)
+      |   ^
+/work/sycl/uq_decode.hpp:232:86: note: expanded from macro 'UQ_CASE'
+  232 | #define UQ_CASE(T_, TN_, SG_) if (key == (T_) * 100000 + (TN_) * 100 + (SG_)) return run_cfg<D, TN_, T_, SG_>(q, s, a, c.nsplit);
+      |                                                                                      ^
+/work/sycl/uq_decode.hpp:257:26: note: in instantiation of function template specialization 'uq::run_D<128>' requested here
+  257 |   if (s.D == 128) return run_D<128>(q, s, c, a);
+      |                          ^
+/work/sycl/uq_decode.hpp:72:31: warning: attribute argument 16 is invalid and will be ignored; nvptx64 requires sub_group size 32 [-Wincorrect-sub-group-size]
+   72 |   [[sycl::reqd_sub_group_size(SGS)]] void operator()(sycl::nd_item<1> it) const {
+      |                               ^
+/work/sycl/uq_decode.hpp:212:20: note: in instantiation of template class 'uq::SplitKernel<128, 16, 64, 16>' requested here
+  212 |                    SplitKernel<D, TN, T, SGS>{s, a, nsplit, pps, qs, kv, ps, st});
+      |                    ^
+/work/sycl/uq_decode.hpp:209:41: note: while substituting into a lambda expression here
+  209 |   return q.submit([&](sycl::handler& h) {
+      |                                         ^
+/work/sycl/uq_decode.hpp:226:44: note: in instantiation of function template specialization 'uq::launch_split<128, 16, 64, 16>' requested here
+  226 |   return launch_reduce<D>(q, s, a, nsplit, launch_split<D, TN, T, SGS>(q, s, a, nsplit));
+      |                                            ^
+/work/sycl/uq_decode.hpp:234:43: note: in instantiation of function template specialization 'uq::run_cfg<128, 16, 64, 16>' requested here
+  234 |   UQ_CASE(64, 32, 16) UQ_CASE(64, 32, 32) UQ_CASE(64, 16, 16)
+      |                                           ^
+/work/sycl/uq_decode.hpp:232:86: note: expanded from macro 'UQ_CASE'
+  232 | #define UQ_CASE(T_, TN_, SG_) if (key == (T_) * 100000 + (TN_) * 100 + (SG_)) return run_cfg<D, TN_, T_, SG_>(q, s, a, c.nsplit);
+      |                                                                                      ^
+/work/sycl/uq_decode.hpp:257:26: note: in instantiation of function template specialization 'uq::run_D<128>' requested here
+  257 |   if (s.D == 128) return run_D<128>(q, s, c, a);
+      |                          ^
+/work/sycl/uq_decode.hpp:72:31: warning: attribute argument 16 is invalid and will be ignored; nvptx64 requires sub_group size 32 [-Wincorrect-sub-group-size]
+   72 |   [[sycl::reqd_sub_group_size(SGS)]] void operator()(sycl::nd_item<1> it) const {
+      |                               ^
+/work/sycl/uq_decode.hpp:212:20: note: in instantiation of template class 'uq::SplitKernel<128, 32, 256, 16>' requested here
+  212 |                    SplitKernel<D, TN, T, SGS>{s, a, nsplit, pps, qs, kv, ps, st});
+      |                    ^
+/work/sycl/uq_decode.hpp:209:41: note: while substituting into a lambda expression here
+  209 |   return q.submit([&](sycl::handler& h) {
+      |                                         ^
+/work/sycl/uq_decode.hpp:226:44: note: in instantiation of function template specialization 'uq::launch_split<128, 32, 256, 16>' requested here
+  226 |   return launch_reduce<D>(q, s, a, nsplit, launch_split<D, TN, T, SGS>(q, s, a, nsplit));
+      |                                            ^
+/work/sycl/uq_decode.hpp:235:3: note: in instantiation of function template specialization 'uq::run_cfg<128, 32, 256, 16>' requested here
+  235 |   UQ_CASE(256, 32, 16) UQ_CASE(256, 32, 32) UQ_CASE(256, 16, 16) UQ_CASE(256, 16, 32)
+      |   ^
+/work/sycl/uq_decode.hpp:232:86: note: expanded from macro 'UQ_CASE'
+  232 | #define UQ_CASE(T_, TN_, SG_) if (key == (T_) * 100000 + (TN_) * 100 + (SG_)) return run_cfg<D, TN_, T_, SG_>(q, s, a, c.nsplit);
+      |                                                                                      ^
+/work/sycl/uq_decode.hpp:257:26: note: in instantiation of function template specialization 'uq::run_D<128>' requested here
+  257 |   if (s.D == 128) return run_D<128>(q, s, c, a);
+      |                          ^
+/work/sycl/uq_decode.hpp:72:31: warning: attribute argument 16 is invalid and will be ignored; nvptx64 requires sub_group size 32 [-Wincorrect-sub-group-size]
+   72 |   [[sycl::reqd_sub_group_size(SGS)]] void operator()(sycl::nd_item<1> it) const {
+      |                               ^
+/work/sycl/uq_decode.hpp:212:20: note: in instantiation of template class 'uq::SplitKernel<128, 16, 256, 16>' requested here
+  212 |                    SplitKernel<D, TN, T, SGS>{s, a, nsplit, pps, qs, kv, ps, st});
+      |                    ^
+/work/sycl/uq_decode.hpp:209:41: note: while substituting into a lambda expression here
+  209 |   return q.submit([&](sycl::handler& h) {
+      |                                         ^
+/work/sycl/uq_decode.hpp:226:44: note: in instantiation of function template specialization 'uq::launch_split<128, 16, 256, 16>' requested here
+  226 |   return launch_reduce<D>(q, s, a, nsplit, launch_split<D, TN, T, SGS>(q, s, a, nsplit));
+      |                                            ^
+/work/sycl/uq_decode.hpp:235:45: note: in instantiation of function template specialization 'uq::run_cfg<128, 16, 256, 16>' requested here
+  235 |   UQ_CASE(256, 32, 16) UQ_CASE(256, 32, 32) UQ_CASE(256, 16, 16) UQ_CASE(256, 16, 32)
+      |                                             ^
+/work/sycl/uq_decode.hpp:232:86: note: expanded from macro 'UQ_CASE'
+  232 | #define UQ_CASE(T_, TN_, SG_) if (key == (T_) * 100000 + (TN_) * 100 + (SG_)) return run_cfg<D, TN_, T_, SG_>(q, s, a, c.nsplit);
+      |                                                                                      ^
+/work/sycl/uq_decode.hpp:257:26: note: in instantiation of function template specialization 'uq::run_D<128>' requested here
+  257 |   if (s.D == 128) return run_D<128>(q, s, c, a);
+      |                          ^
+/work/sycl/uq_decode.hpp:72:31: warning: attribute argument 16 is invalid and will be ignored; nvptx64 requires sub_group size 32 [-Wincorrect-sub-group-size]
+   72 |   [[sycl::reqd_sub_group_size(SGS)]] void operator()(sycl::nd_item<1> it) const {
+      |                               ^
+/work/sycl/uq_decode.hpp:212:20: note: in instantiation of template class 'uq::SplitKernel<128, 64, 128, 16>' requested here
+  212 |                    SplitKernel<D, TN, T, SGS>{s, a, nsplit, pps, qs, kv, ps, st});
+      |                    ^
+/work/sycl/uq_decode.hpp:209:41: note: while substituting into a lambda expression here
+  209 |   return q.submit([&](sycl::handler& h) {
+      |                                         ^
+/work/sycl/uq_decode.hpp:226:44: note: in instantiation of function template specialization 'uq::launch_split<128, 64, 128, 16>' requested here
+  226 |   return launch_reduce<D>(q, s, a, nsplit, launch_split<D, TN, T, SGS>(q, s, a, nsplit));
+      |                                            ^
+/work/sycl/uq_decode.hpp:236:3: note: in instantiation of function template specialization 'uq::run_cfg<128, 64, 128, 16>' requested here
+  236 |   UQ_CASE(128, 64, 16) UQ_CASE(128, 64, 32) UQ_CASE(256, 64, 16) UQ_CASE(256, 64, 32)
+      |   ^
+/work/sycl/uq_decode.hpp:232:86: note: expanded from macro 'UQ_CASE'
+  232 | #define UQ_CASE(T_, TN_, SG_) if (key == (T_) * 100000 + (TN_) * 100 + (SG_)) return run_cfg<D, TN_, T_, SG_>(q, s, a, c.nsplit);
+      |                                                                                      ^
+/work/sycl/uq_decode.hpp:257:26: note: in instantiation of function template specialization 'uq::run_D<128>' requested here
+  257 |   if (s.D == 128) return run_D<128>(q, s, c, a);
+      |                          ^
+/work/sycl/uq_decode.hpp:72:31: warning: attribute argument 16 is invalid and will be ignored; nvptx64 requires sub_group size 32 [-Wincorrect-sub-group-size]
+   72 |   [[sycl::reqd_sub_group_size(SGS)]] void operator()(sycl::nd_item<1> it) const {
+      |                               ^
+/work/sycl/uq_decode.hpp:212:20: note: in instantiation of template class 'uq::SplitKernel<128, 64, 256, 16>' requested here
+  212 |                    SplitKernel<D, TN, T, SGS>{s, a, nsplit, pps, qs, kv, ps, st});
+      |                    ^
+/work/sycl/uq_decode.hpp:209:41: note: while substituting into a lambda expression here
+  209 |   return q.submit([&](sycl::handler& h) {
+      |                                         ^
+/work/sycl/uq_decode.hpp:226:44: note: in instantiation of function template specialization 'uq::launch_split<128, 64, 256, 16>' requested here
+  226 |   return launch_reduce<D>(q, s, a, nsplit, launch_split<D, TN, T, SGS>(q, s, a, nsplit));
+      |                                            ^
+/work/sycl/uq_decode.hpp:236:45: note: in instantiation of function template specialization 'uq::run_cfg<128, 64, 256, 16>' requested here
+  236 |   UQ_CASE(128, 64, 16) UQ_CASE(128, 64, 32) UQ_CASE(256, 64, 16) UQ_CASE(256, 64, 32)
+      |                                             ^
+/work/sycl/uq_decode.hpp:232:86: note: expanded from macro 'UQ_CASE'
+  232 | #define UQ_CASE(T_, TN_, SG_) if (key == (T_) * 100000 + (TN_) * 100 + (SG_)) return run_cfg<D, TN_, T_, SG_>(q, s, a, c.nsplit);
+      |                                                                                      ^
+/work/sycl/uq_decode.hpp:257:26: note: in instantiation of function template specialization 'uq::run_D<128>' requested here
+  257 |   if (s.D == 128) return run_D<128>(q, s, c, a);
+      |                          ^
+/work/sycl/uq_decode.hpp:72:31: warning: attribute argument 16 is invalid and will be ignored; nvptx64 requires sub_group size 32 [-Wincorrect-sub-group-size]
+   72 |   [[sycl::reqd_sub_group_size(SGS)]] void operator()(sycl::nd_item<1> it) const {
+      |                               ^
+/work/sycl/uq_decode.hpp:212:20: note: in instantiation of template class 'uq::SplitKernel<64, 32, 128, 16>' requested here
+  212 |                    SplitKernel<D, TN, T, SGS>{s, a, nsplit, pps, qs, kv, ps, st});
+      |                    ^
+/work/sycl/uq_decode.hpp:209:41: note: while substituting into a lambda expression here
+  209 |   return q.submit([&](sycl::handler& h) {
+      |                                         ^
+/work/sycl/uq_decode.hpp:226:44: note: in instantiation of function template specialization 'uq::launch_split<64, 32, 128, 16>' requested here
+  226 |   return launch_reduce<D>(q, s, a, nsplit, launch_split<D, TN, T, SGS>(q, s, a, nsplit));
+      |                                            ^
+/work/sycl/uq_decode.hpp:233:3: note: in instantiation of function template specialization 'uq::run_cfg<64, 32, 128, 16>' requested here
+  233 |   UQ_CASE(128, 32, 16) UQ_CASE(128, 32, 32) UQ_CASE(128, 16, 16) UQ_CASE(128, 16, 32)
+      |   ^
+/work/sycl/uq_decode.hpp:232:86: note: expanded from macro 'UQ_CASE'
+  232 | #define UQ_CASE(T_, TN_, SG_) if (key == (T_) * 100000 + (TN_) * 100 + (SG_)) return run_cfg<D, TN_, T_, SG_>(q, s, a, c.nsplit);
+      |                                                                                      ^
+/work/sycl/uq_decode.hpp:258:25: note: in instantiation of function template specialization 'uq::run_D<64>' requested here
+  258 |   if (s.D == 64) return run_D<64>(q, s, c, a);
+      |                         ^
+/work/sycl/uq_decode.hpp:72:31: warning: attribute argument 16 is invalid and will be ignored; nvptx64 requires sub_group size 32 [-Wincorrect-sub-group-size]
+   72 |   [[sycl::reqd_sub_group_size(SGS)]] void operator()(sycl::nd_item<1> it) const {
+      |                               ^
+/work/sycl/uq_decode.hpp:212:20: note: in instantiation of template class 'uq::SplitKernel<64, 16, 128, 16>' requested here
+  212 |                    SplitKernel<D, TN, T, SGS>{s, a, nsplit, pps, qs, kv, ps, st});
+      |                    ^
+/work/sycl/uq_decode.hpp:209:41: note: while substituting into a lambda expression here
+  209 |   return q.submit([&](sycl::handler& h) {
+      |                                         ^
+/work/sycl/uq_decode.hpp:226:44: note: in instantiation of function template specialization 'uq::launch_split<64, 16, 128, 16>' requested here
+  226 |   return launch_reduce<D>(q, s, a, nsplit, launch_split<D, TN, T, SGS>(q, s, a, nsplit));
+      |                                            ^
+/work/sycl/uq_decode.hpp:233:45: note: in instantiation of function template specialization 'uq::run_cfg<64, 16, 128, 16>' requested here
+  233 |   UQ_CASE(128, 32, 16) UQ_CASE(128, 32, 32) UQ_CASE(128, 16, 16) UQ_CASE(128, 16, 32)
+      |                                             ^
+/work/sycl/uq_decode.hpp:232:86: note: expanded from macro 'UQ_CASE'
+  232 | #define UQ_CASE(T_, TN_, SG_) if (key == (T_) * 100000 + (TN_) * 100 + (SG_)) return run_cfg<D, TN_, T_, SG_>(q, s, a, c.nsplit);
+      |                                                                                      ^
+/work/sycl/uq_decode.hpp:258:25: note: in instantiation of function template specialization 'uq::run_D<64>' requested here
+  258 |   if (s.D == 64) return run_D<64>(q, s, c, a);
+      |                         ^
+/work/sycl/uq_decode.hpp:72:31: warning: attribute argument 16 is invalid and will be ignored; nvptx64 requires sub_group size 32 [-Wincorrect-sub-group-size]
+   72 |   [[sycl::reqd_sub_group_size(SGS)]] void operator()(sycl::nd_item<1> it) const {
+      |                               ^
+/work/sycl/uq_decode.hpp:212:20: note: in instantiation of template class 'uq::SplitKernel<64, 32, 64, 16>' requested here
+  212 |                    SplitKernel<D, TN, T, SGS>{s, a, nsplit, pps, qs, kv, ps, st});
+      |                    ^
+/work/sycl/uq_decode.hpp:209:41: note: while substituting into a lambda expression here
+  209 |   return q.submit([&](sycl::handler& h) {
+      |                                         ^
+/work/sycl/uq_decode.hpp:226:44: note: in instantiation of function template specialization 'uq::launch_split<64, 32, 64, 16>' requested here
+  226 |   return launch_reduce<D>(q, s, a, nsplit, launch_split<D, TN, T, SGS>(q, s, a, nsplit));
+      |                                            ^
+/work/sycl/uq_decode.hpp:234:3: note: in instantiation of function template specialization 'uq::run_cfg<64, 32, 64, 16>' requested here
+  234 |   UQ_CASE(64, 32, 16) UQ_CASE(64, 32, 32) UQ_CASE(64, 16, 16)
+      |   ^
+/work/sycl/uq_decode.hpp:232:86: note: expanded from macro 'UQ_CASE'
+  232 | #define UQ_CASE(T_, TN_, SG_) if (key == (T_) * 100000 + (TN_) * 100 + (SG_)) return run_cfg<D, TN_, T_, SG_>(q, s, a, c.nsplit);
+      |                                                                                      ^
+/work/sycl/uq_decode.hpp:258:25: note: in instantiation of function template specialization 'uq::run_D<64>' requested here
+  258 |   if (s.D == 64) return run_D<64>(q, s, c, a);
+      |                         ^
+/work/sycl/uq_decode.hpp:72:31: warning: attribute argument 16 is invalid and will be ignored; nvptx64 requires sub_group size 32 [-Wincorrect-sub-group-size]
+   72 |   [[sycl::reqd_sub_group_size(SGS)]] void operator()(sycl::nd_item<1> it) const {
+      |                               ^
+/work/sycl/uq_decode.hpp:212:20: note: in instantiation of template class 'uq::SplitKernel<64, 16, 64, 16>' requested here
+  212 |                    SplitKernel<D, TN, T, SGS>{s, a, nsplit, pps, qs, kv, ps, st});
+      |                    ^
+/work/sycl/uq_decode.hpp:209:41: note: while substituting into a lambda expression here
+  209 |   return q.submit([&](sycl::handler& h) {
+      |                                         ^
+/work/sycl/uq_decode.hpp:226:44: note: in instantiation of function template specialization 'uq::launch_split<64, 16, 64, 16>' requested here
+  226 |   return launch_reduce<D>(q, s, a, nsplit, launch_split<D, TN, T, SGS>(q, s, a, nsplit));
+      |                                            ^
+/work/sycl/uq_decode.hpp:234:43: note: in instantiation of function template specialization 'uq::run_cfg<64, 16, 64, 16>' requested here
+  234 |   UQ_CASE(64, 32, 16) UQ_CASE(64, 32, 32) UQ_CASE(64, 16, 16)
+      |                                           ^
+/work/sycl/uq_decode.hpp:232:86: note: expanded from macro 'UQ_CASE'
+  232 | #define UQ_CASE(T_, TN_, SG_) if (key == (T_) * 100000 + (TN_) * 100 + (SG_)) return run_cfg<D, TN_, T_, SG_>(q, s, a, c.nsplit);
+      |                                                                                      ^
+/work/sycl/uq_decode.hpp:258:25: note: in instantiation of function template specialization 'uq::run_D<64>' requested here
+  258 |   if (s.D == 64) return run_D<64>(q, s, c, a);
+      |                         ^
+/work/sycl/uq_decode.hpp:72:31: warning: attribute argument 16 is invalid and will be ignored; nvptx64 requires sub_group size 32 [-Wincorrect-sub-group-size]
+   72 |   [[sycl::reqd_sub_group_size(SGS)]] void operator()(sycl::nd_item<1> it) const {
+      |                               ^
+/work/sycl/uq_decode.hpp:212:20: note: in instantiation of template class 'uq::SplitKernel<64, 32, 256, 16>' requested here
+  212 |                    SplitKernel<D, TN, T, SGS>{s, a, nsplit, pps, qs, kv, ps, st});
+      |                    ^
+/work/sycl/uq_decode.hpp:209:41: note: while substituting into a lambda expression here
+  209 |   return q.submit([&](sycl::handler& h) {
+      |                                         ^
+/work/sycl/uq_decode.hpp:226:44: note: in instantiation of function template specialization 'uq::launch_split<64, 32, 256, 16>' requested here
+  226 |   return launch_reduce<D>(q, s, a, nsplit, launch_split<D, TN, T, SGS>(q, s, a, nsplit));
+      |                                            ^
+/work/sycl/uq_decode.hpp:235:3: note: in instantiation of function template specialization 'uq::run_cfg<64, 32, 256, 16>' requested here
+  235 |   UQ_CASE(256, 32, 16) UQ_CASE(256, 32, 32) UQ_CASE(256, 16, 16) UQ_CASE(256, 16, 32)
+      |   ^
+/work/sycl/uq_decode.hpp:232:86: note: expanded from macro 'UQ_CASE'
+  232 | #define UQ_CASE(T_, TN_, SG_) if (key == (T_) * 100000 + (TN_) * 100 + (SG_)) return run_cfg<D, TN_, T_, SG_>(q, s, a, c.nsplit);
+      |                                                                                      ^
+/work/sycl/uq_decode.hpp:258:25: note: in instantiation of function template specialization 'uq::run_D<64>' requested here
+  258 |   if (s.D == 64) return run_D<64>(q, s, c, a);
+      |                         ^
+/work/sycl/uq_decode.hpp:72:31: warning: attribute argument 16 is invalid and will be ignored; nvptx64 requires sub_group size 32 [-Wincorrect-sub-group-size]
+   72 |   [[sycl::reqd_sub_group_size(SGS)]] void operator()(sycl::nd_item<1> it) const {
+      |                               ^
+/work/sycl/uq_decode.hpp:212:20: note: in instantiation of template class 'uq::SplitKernel<64, 16, 256, 16>' requested here
+  212 |                    SplitKernel<D, TN, T, SGS>{s, a, nsplit, pps, qs, kv, ps, st});
+      |                    ^
+/work/sycl/uq_decode.hpp:209:41: note: while substituting into a lambda expression here
+  209 |   return q.submit([&](sycl::handler& h) {
+      |                                         ^
+/work/sycl/uq_decode.hpp:226:44: note: in instantiation of function template specialization 'uq::launch_split<64, 16, 256, 16>' requested here
+  226 |   return launch_reduce<D>(q, s, a, nsplit, launch_split<D, TN, T, SGS>(q, s, a, nsplit));
+      |                                            ^
+/work/sycl/uq_decode.hpp:235:45: note: in instantiation of function template specialization 'uq::run_cfg<64, 16, 256, 16>' requested here
+  235 |   UQ_CASE(256, 32, 16) UQ_CASE(256, 32, 32) UQ_CASE(256, 16, 16) UQ_CASE(256, 16, 32)
+      |                                             ^
+/work/sycl/uq_decode.hpp:232:86: note: expanded from macro 'UQ_CASE'
+  232 | #define UQ_CASE(T_, TN_, SG_) if (key == (T_) * 100000 + (TN_) * 100 + (SG_)) return run_cfg<D, TN_, T_, SG_>(q, s, a, c.nsplit);
+      |                                                                                      ^
+/work/sycl/uq_decode.hpp:258:25: note: in instantiation of function template specialization 'uq::run_D<64>' requested here
+  258 |   if (s.D == 64) return run_D<64>(q, s, c, a);
+      |                         ^
+/work/sycl/uq_decode.hpp:72:31: warning: attribute argument 16 is invalid and will be ignored; nvptx64 requires sub_group size 32 [-Wincorrect-sub-group-size]
+   72 |   [[sycl::reqd_sub_group_size(SGS)]] void operator()(sycl::nd_item<1> it) const {
+      |                               ^
+/work/sycl/uq_decode.hpp:212:20: note: in instantiation of template class 'uq::SplitKernel<64, 64, 128, 16>' requested here
+  212 |                    SplitKernel<D, TN, T, SGS>{s, a, nsplit, pps, qs, kv, ps, st});
+      |                    ^
+/work/sycl/uq_decode.hpp:209:41: note: while substituting into a lambda expression here
+  209 |   return q.submit([&](sycl::handler& h) {
+      |                                         ^
+/work/sycl/uq_decode.hpp:226:44: note: in instantiation of function template specialization 'uq::launch_split<64, 64, 128, 16>' requested here
+  226 |   return launch_reduce<D>(q, s, a, nsplit, launch_split<D, TN, T, SGS>(q, s, a, nsplit));
+      |                                            ^
+/work/sycl/uq_decode.hpp:236:3: note: in instantiation of function template specialization 'uq::run_cfg<64, 64, 128, 16>' requested here
+  236 |   UQ_CASE(128, 64, 16) UQ_CASE(128, 64, 32) UQ_CASE(256, 64, 16) UQ_CASE(256, 64, 32)
+      |   ^
+/work/sycl/uq_decode.hpp:232:86: note: expanded from macro 'UQ_CASE'
+  232 | #define UQ_CASE(T_, TN_, SG_) if (key == (T_) * 100000 + (TN_) * 100 + (SG_)) return run_cfg<D, TN_, T_, SG_>(q, s, a, c.nsplit);
+      |                                                                                      ^
+/work/sycl/uq_decode.hpp:258:25: note: in instantiation of function template specialization 'uq::run_D<64>' requested here
+  258 |   if (s.D == 64) return run_D<64>(q, s, c, a);
+      |                         ^
+/work/sycl/uq_decode.hpp:72:31: warning: attribute argument 16 is invalid and will be ignored; nvptx64 requires sub_group size 32 [-Wincorrect-sub-group-size]
+   72 |   [[sycl::reqd_sub_group_size(SGS)]] void operator()(sycl::nd_item<1> it) const {
+      |                               ^
+/work/sycl/uq_decode.hpp:212:20: note: in instantiation of template class 'uq::SplitKernel<64, 64, 256, 16>' requested here
+  212 |                    SplitKernel<D, TN, T, SGS>{s, a, nsplit, pps, qs, kv, ps, st});
+      |                    ^
+/work/sycl/uq_decode.hpp:209:41: note: while substituting into a lambda expression here
+  209 |   return q.submit([&](sycl::handler& h) {
+      |                                         ^
+/work/sycl/uq_decode.hpp:226:44: note: in instantiation of function template specialization 'uq::launch_split<64, 64, 256, 16>' requested here
+  226 |   return launch_reduce<D>(q, s, a, nsplit, launch_split<D, TN, T, SGS>(q, s, a, nsplit));
+      |                                            ^
+/work/sycl/uq_decode.hpp:236:45: note: in instantiation of function template specialization 'uq::run_cfg<64, 64, 256, 16>' requested here
+  236 |   UQ_CASE(128, 64, 16) UQ_CASE(128, 64, 32) UQ_CASE(256, 64, 16) UQ_CASE(256, 64, 32)
+      |                                             ^
+/work/sycl/uq_decode.hpp:232:86: note: expanded from macro 'UQ_CASE'
+  232 | #define UQ_CASE(T_, TN_, SG_) if (key == (T_) * 100000 + (TN_) * 100 + (SG_)) return run_cfg<D, TN_, T_, SG_>(q, s, a, c.nsplit);
+      |                                                                                      ^
+/work/sycl/uq_decode.hpp:258:25: note: in instantiation of function template specialization 'uq::run_D<64>' requested here
+  258 |   if (s.D == 64) return run_D<64>(q, s, c, a);
+      |                         ^
+16 warnings generated.
+
+$ cd /work/b && clang++ -fsycl -O3 -std=c++17 -DUQ_NO_XMX -fsycl-targets=nvptx64-nvidia-cuda -I/work/sycl /work/sycl/bench.cpp -o bench
+In file included from /work/sycl/bench.cpp:4:
+/work/sycl/uq_decode.hpp:72:31: warning: attribute argument 16 is invalid and will be ignored; nvptx64 requires sub_group size 32 [-Wincorrect-sub-group-size]
+   72 |   [[sycl::reqd_sub_group_size(SGS)]] void operator()(sycl::nd_item<1> it) const {
+      |                               ^
+/work/sycl/uq_decode.hpp:212:20: note: in instantiation of template class 'uq::SplitKernel<128, 32, 128, 16>' requested here
+  212 |                    SplitKernel<D, TN, T, SGS>{s, a, nsplit, pps, qs, kv, ps, st});
+      |                    ^
+/work/sycl/uq_decode.hpp:209:41: note: while substituting into a lambda expression here
+  209 |   return q.submit([&](sycl::handler& h) {
+      |                                         ^
+/work/sycl/uq_decode.hpp:226:44: note: in instantiation of function template specialization 'uq::launch_split<128, 32, 128, 16>' requested here
+  226 |   return launch_reduce<D>(q, s, a, nsplit, launch_split<D, TN, T, SGS>(q, s, a, nsplit));
+      |                                            ^
+/work/sycl/uq_decode.hpp:233:3: note: in instantiation of function template specialization 'uq::run_cfg<128, 32, 128, 16>' requested here
+  233 |   UQ_CASE(128, 32, 16) UQ_CASE(128, 32, 32) UQ_CASE(128, 16, 16) UQ_CASE(128, 16, 32)
+      |   ^
+/work/sycl/uq_decode.hpp:232:86: note: expanded from macro 'UQ_CASE'
+  232 | #define UQ_CASE(T_, TN_, SG_) if (key == (T_) * 100000 + (TN_) * 100 + (SG_)) return run_cfg<D, TN_, T_, SG_>(q, s, a, c.nsplit);
+      |                                                                                      ^
+/work/sycl/uq_decode.hpp:257:26: note: in instantiation of function template specialization 'uq::run_D<128>' requested here
+  257 |   if (s.D == 128) return run_D<128>(q, s, c, a);
+      |                          ^
+/work/sycl/uq_decode.hpp:72:31: warning: attribute argument 16 is invalid and will be ignored; nvptx64 requires sub_group size 32 [-Wincorrect-sub-group-size]
+   72 |   [[sycl::reqd_sub_group_size(SGS)]] void operator()(sycl::nd_item<1> it) const {
+      |                               ^
+/work/sycl/uq_decode.hpp:212:20: note: in instantiation of template class 'uq::SplitKernel<128, 16, 128, 16>' requested here
+  212 |                    SplitKernel<D, TN, T, SGS>{s, a, nsplit, pps, qs, kv, ps, st});
+      |                    ^
+/work/sycl/uq_decode.hpp:209:41: note: while substituting into a lambda expression here
+  209 |   return q.submit([&](sycl::handler& h) {
+      |                                         ^
+/work/sycl/uq_decode.hpp:226:44: note: in instantiation of function template specialization 'uq::launch_split<128, 16, 128, 16>' requested here
+  226 |   return launch_reduce<D>(q, s, a, nsplit, launch_split<D, TN, T, SGS>(q, s, a, nsplit));
+      |                                            ^
+/work/sycl/uq_decode.hpp:233:45: note: in instantiation of function template specialization 'uq::run_cfg<128, 16, 128, 16>' requested here
+  233 |   UQ_CASE(128, 32, 16) UQ_CASE(128, 32, 32) UQ_CASE(128, 16, 16) UQ_CASE(128, 16, 32)
+      |                                             ^
+/work/sycl/uq_decode.hpp:232:86: note: expanded from macro 'UQ_CASE'
+  232 | #define UQ_CASE(T_, TN_, SG_) if (key == (T_) * 100000 + (TN_) * 100 + (SG_)) return run_cfg<D, TN_, T_, SG_>(q, s, a, c.nsplit);
+      |                                                                                      ^
+/work/sycl/uq_decode.hpp:257:26: note: in instantiation of function template specialization 'uq::run_D<128>' requested here
+  257 |   if (s.D == 128) return run_D<128>(q, s, c, a);
+      |                          ^
+/work/sycl/uq_decode.hpp:72:31: warning: attribute argument 16 is invalid and will be ignored; nvptx64 requires sub_group size 32 [-Wincorrect-sub-group-size]
+   72 |   [[sycl::reqd_sub_group_size(SGS)]] void operator()(sycl::nd_item<1> it) const {
+      |                               ^
+/work/sycl/uq_decode.hpp:212:20: note: in instantiation of template class 'uq::SplitKernel<128, 32, 64, 16>' requested here
+  212 |                    SplitKernel<D, TN, T, SGS>{s, a, nsplit, pps, qs, kv, ps, st});
+      |                    ^
+/work/sycl/uq_decode.hpp:209:41: note: while substituting into a lambda expression here
+  209 |   return q.submit([&](sycl::handler& h) {
+      |                                         ^
+/work/sycl/uq_decode.hpp:226:44: note: in instantiation of function template specialization 'uq::launch_split<128, 32, 64, 16>' requested here
+  226 |   return launch_reduce<D>(q, s, a, nsplit, launch_split<D, TN, T, SGS>(q, s, a, nsplit));
+      |                                            ^
+/work/sycl/uq_decode.hpp:234:3: note: in instantiation of function template specialization 'uq::run_cfg<128, 32, 64, 16>' requested here
+  234 |   UQ_CASE(64, 32, 16) UQ_CASE(64, 32, 32) UQ_CASE(64, 16, 16)
+      |   ^
+/work/sycl/uq_decode.hpp:232:86: note: expanded from macro 'UQ_CASE'
+  232 | #define UQ_CASE(T_, TN_, SG_) if (key == (T_) * 100000 + (TN_) * 100 + (SG_)) return run_cfg<D, TN_, T_, SG_>(q, s, a, c.nsplit);
+      |                                                                                      ^
+/work/sycl/uq_decode.hpp:257:26: note: in instantiation of function template specialization 'uq::run_D<128>' requested here
+  257 |   if (s.D == 128) return run_D<128>(q, s, c, a);
+      |                          ^
+/work/sycl/uq_decode.hpp:72:31: warning: attribute argument 16 is invalid and will be ignored; nvptx64 requires sub_group size 32 [-Wincorrect-sub-group-size]
+   72 |   [[sycl::reqd_sub_group_size(SGS)]] void operator()(sycl::nd_item<1> it) const {
+      |                               ^
+/work/sycl/uq_decode.hpp:212:20: note: in instantiation of template class 'uq::SplitKernel<128, 16, 64, 16>' requested here
+  212 |                    SplitKernel<D, TN, T, SGS>{s, a, nsplit, pps, qs, kv, ps, st});
+      |                    ^
+/work/sycl/uq_decode.hpp:209:41: note: while substituting into a lambda expression here
+  209 |   return q.submit([&](sycl::handler& h) {
+      |                                         ^
+/work/sycl/uq_decode.hpp:226:44: note: in instantiation of function template specialization 'uq::launch_split<128, 16, 64, 16>' requested here
+  226 |   return launch_reduce<D>(q, s, a, nsplit, launch_split<D, TN, T, SGS>(q, s, a, nsplit));
+      |                                            ^
+/work/sycl/uq_decode.hpp:234:43: note: in instantiation of function template specialization 'uq::run_cfg<128, 16, 64, 16>' requested here
+  234 |   UQ_CASE(64, 32, 16) UQ_CASE(64, 32, 32) UQ_CASE(64, 16, 16)
+      |                                           ^
+/work/sycl/uq_decode.hpp:232:86: note: expanded from macro 'UQ_CASE'
+  232 | #define UQ_CASE(T_, TN_, SG_) if (key == (T_) * 100000 + (TN_) * 100 + (SG_)) return run_cfg<D, TN_, T_, SG_>(q, s, a, c.nsplit);
+      |                                                                                      ^
+/work/sycl/uq_decode.hpp:257:26: note: in instantiation of function template specialization 'uq::run_D<128>' requested here
+  257 |   if (s.D == 128) return run_D<128>(q, s, c, a);
+      |                          ^
+/work/sycl/uq_decode.hpp:72:31: warning: attribute argument 16 is invalid and will be ignored; nvptx64 requires sub_group size 32 [-Wincorrect-sub-group-size]
+   72 |   [[sycl::reqd_sub_group_size(SGS)]] void operator()(sycl::nd_item<1> it) const {
+      |                               ^
+/work/sycl/uq_decode.hpp:212:20: note: in instantiation of template class 'uq::SplitKernel<128, 32, 256, 16>' requested here
+  212 |                    SplitKernel<D, TN, T, SGS>{s, a, nsplit, pps, qs, kv, ps, st});
+      |                    ^
+/work/sycl/uq_decode.hpp:209:41: note: while substituting into a lambda expression here
+  209 |   return q.submit([&](sycl::handler& h) {
+      |                                         ^
+/work/sycl/uq_decode.hpp:226:44: note: in instantiation of function template specialization 'uq::launch_split<128, 32, 256, 16>' requested here
+  226 |   return launch_reduce<D>(q, s, a, nsplit, launch_split<D, TN, T, SGS>(q, s, a, nsplit));
+      |                                            ^
+/work/sycl/uq_decode.hpp:235:3: note: in instantiation of function template specialization 'uq::run_cfg<128, 32, 256, 16>' requested here
+  235 |   UQ_CASE(256, 32, 16) UQ_CASE(256, 32, 32) UQ_CASE(256, 16, 16) UQ_CASE(256, 16, 32)
+      |   ^
+/work/sycl/uq_decode.hpp:232:86: note: expanded from macro 'UQ_CASE'
+  232 | #define UQ_CASE(T_, TN_, SG_) if (key == (T_) * 100000 + (TN_) * 100 + (SG_)) return run_cfg<D, TN_, T_, SG_>(q, s, a, c.nsplit);
+      |                                                                                      ^
+/work/sycl/uq_decode.hpp:257:26: note: in instantiation of function template specialization 'uq::run_D<128>' requested here
+  257 |   if (s.D == 128) return run_D<128>(q, s, c, a);
+      |                          ^
+/work/sycl/uq_decode.hpp:72:31: warning: attribute argument 16 is invalid and will be ignored; nvptx64 requires sub_group size 32 [-Wincorrect-sub-group-size]
+   72 |   [[sycl::reqd_sub_group_size(SGS)]] void operator()(sycl::nd_item<1> it) const {
+      |                               ^
+/work/sycl/uq_decode.hpp:212:20: note: in instantiation of template class 'uq::SplitKernel<128, 16, 256, 16>' requested here
+  212 |                    SplitKernel<D, TN, T, SGS>{s, a, nsplit, pps, qs, kv, ps, st});
+      |                    ^
+/work/sycl/uq_decode.hpp:209:41: note: while substituting into a lambda expression here
+  209 |   return q.submit([&](sycl::handler& h) {
+      |                                         ^
+/work/sycl/uq_decode.hpp:226:44: note: in instantiation of function template specialization 'uq::launch_split<128, 16, 256, 16>' requested here
+  226 |   return launch_reduce<D>(q, s, a, nsplit, launch_split<D, TN, T, SGS>(q, s, a, nsplit));
+      |                                            ^
+/work/sycl/uq_decode.hpp:235:45: note: in instantiation of function template specialization 'uq::run_cfg<128, 16, 256, 16>' requested here
+  235 |   UQ_CASE(256, 32, 16) UQ_CASE(256, 32, 32) UQ_CASE(256, 16, 16) UQ_CASE(256, 16, 32)
+      |                                             ^
+/work/sycl/uq_decode.hpp:232:86: note: expanded from macro 'UQ_CASE'
+  232 | #define UQ_CASE(T_, TN_, SG_) if (key == (T_) * 100000 + (TN_) * 100 + (SG_)) return run_cfg<D, TN_, T_, SG_>(q, s, a, c.nsplit);
+      |                                                                                      ^
+/work/sycl/uq_decode.hpp:257:26: note: in instantiation of function template specialization 'uq::run_D<128>' requested here
+  257 |   if (s.D == 128) return run_D<128>(q, s, c, a);
+      |                          ^
+/work/sycl/uq_decode.hpp:72:31: warning: attribute argument 16 is invalid and will be ignored; nvptx64 requires sub_group size 32 [-Wincorrect-sub-group-size]
+   72 |   [[sycl::reqd_sub_group_size(SGS)]] void operator()(sycl::nd_item<1> it) const {
+      |                               ^
+/work/sycl/uq_decode.hpp:212:20: note: in instantiation of template class 'uq::SplitKernel<128, 64, 128, 16>' requested here
+  212 |                    SplitKernel<D, TN, T, SGS>{s, a, nsplit, pps, qs, kv, ps, st});
+      |                    ^
+/work/sycl/uq_decode.hpp:209:41: note: while substituting into a lambda expression here
+  209 |   return q.submit([&](sycl::handler& h) {
+      |                                         ^
+/work/sycl/uq_decode.hpp:226:44: note: in instantiation of function template specialization 'uq::launch_split<128, 64, 128, 16>' requested here
+  226 |   return launch_reduce<D>(q, s, a, nsplit, launch_split<D, TN, T, SGS>(q, s, a, nsplit));
+      |                                            ^
+/work/sycl/uq_decode.hpp:236:3: note: in instantiation of function template specialization 'uq::run_cfg<128, 64, 128, 16>' requested here
+  236 |   UQ_CASE(128, 64, 16) UQ_CASE(128, 64, 32) UQ_CASE(256, 64, 16) UQ_CASE(256, 64, 32)
+      |   ^
+/work/sycl/uq_decode.hpp:232:86: note: expanded from macro 'UQ_CASE'
+  232 | #define UQ_CASE(T_, TN_, SG_) if (key == (T_) * 100000 + (TN_) * 100 + (SG_)) return run_cfg<D, TN_, T_, SG_>(q, s, a, c.nsplit);
+      |                                                                                      ^
+/work/sycl/uq_decode.hpp:257:26: note: in instantiation of function template specialization 'uq::run_D<128>' requested here
+  257 |   if (s.D == 128) return run_D<128>(q, s, c, a);
+      |                          ^
+/work/sycl/uq_decode.hpp:72:31: warning: attribute argument 16 is invalid and will be ignored; nvptx64 requires sub_group size 32 [-Wincorrect-sub-group-size]
+   72 |   [[sycl::reqd_sub_group_size(SGS)]] void operator()(sycl::nd_item<1> it) const {
+      |                               ^
+/work/sycl/uq_decode.hpp:212:20: note: in instantiation of template class 'uq::SplitKernel<128, 64, 256, 16>' requested here
+  212 |                    SplitKernel<D, TN, T, SGS>{s, a, nsplit, pps, qs, kv, ps, st});
+      |                    ^
+/work/sycl/uq_decode.hpp:209:41: note: while substituting into a lambda expression here
+  209 |   return q.submit([&](sycl::handler& h) {
+      |                                         ^
+/work/sycl/uq_decode.hpp:226:44: note: in instantiation of function template specialization 'uq::launch_split<128, 64, 256, 16>' requested here
+  226 |   return launch_reduce<D>(q, s, a, nsplit, launch_split<D, TN, T, SGS>(q, s, a, nsplit));
+      |                                            ^
+/work/sycl/uq_decode.hpp:236:45: note: in instantiation of function template specialization 'uq::run_cfg<128, 64, 256, 16>' requested here
+  236 |   UQ_CASE(128, 64, 16) UQ_CASE(128, 64, 32) UQ_CASE(256, 64, 16) UQ_CASE(256, 64, 32)
+      |                                             ^
+/work/sycl/uq_decode.hpp:232:86: note: expanded from macro 'UQ_CASE'
+  232 | #define UQ_CASE(T_, TN_, SG_) if (key == (T_) * 100000 + (TN_) * 100 + (SG_)) return run_cfg<D, TN_, T_, SG_>(q, s, a, c.nsplit);
+      |                                                                                      ^
+/work/sycl/uq_decode.hpp:257:26: note: in instantiation of function template specialization 'uq::run_D<128>' requested here
+  257 |   if (s.D == 128) return run_D<128>(q, s, c, a);
+      |                          ^
+/work/sycl/uq_decode.hpp:72:31: warning: attribute argument 16 is invalid and will be ignored; nvptx64 requires sub_group size 32 [-Wincorrect-sub-group-size]
+   72 |   [[sycl::reqd_sub_group_size(SGS)]] void operator()(sycl::nd_item<1> it) const {
+      |                               ^
+/work/sycl/uq_decode.hpp:212:20: note: in instantiation of template class 'uq::SplitKernel<64, 32, 128, 16>' requested here
+  212 |                    SplitKernel<D, TN, T, SGS>{s, a, nsplit, pps, qs, kv, ps, st});
+      |                    ^
+/work/sycl/uq_decode.hpp:209:41: note: while substituting into a lambda expression here
+  209 |   return q.submit([&](sycl::handler& h) {
+      |                                         ^
+/work/sycl/uq_decode.hpp:226:44: note: in instantiation of function template specialization 'uq::launch_split<64, 32, 128, 16>' requested here
+  226 |   return launch_reduce<D>(q, s, a, nsplit, launch_split<D, TN, T, SGS>(q, s, a, nsplit));
+      |                                            ^
+/work/sycl/uq_decode.hpp:233:3: note: in instantiation of function template specialization 'uq::run_cfg<64, 32, 128, 16>' requested here
+  233 |   UQ_CASE(128, 32, 16) UQ_CASE(128, 32, 32) UQ_CASE(128, 16, 16) UQ_CASE(128, 16, 32)
+      |   ^
+/work/sycl/uq_decode.hpp:232:86: note: expanded from macro 'UQ_CASE'
+  232 | #define UQ_CASE(T_, TN_, SG_) if (key == (T_) * 100000 + (TN_) * 100 + (SG_)) return run_cfg<D, TN_, T_, SG_>(q, s, a, c.nsplit);
+      |                                                                                      ^
+/work/sycl/uq_decode.hpp:258:25: note: in instantiation of function template specialization 'uq::run_D<64>' requested here
+  258 |   if (s.D == 64) return run_D<64>(q, s, c, a);
+      |                         ^
+/work/sycl/uq_decode.hpp:72:31: warning: attribute argument 16 is invalid and will be ignored; nvptx64 requires sub_group size 32 [-Wincorrect-sub-group-size]
+   72 |   [[sycl::reqd_sub_group_size(SGS)]] void operator()(sycl::nd_item<1> it) const {
+      |                               ^
+/work/sycl/uq_decode.hpp:212:20: note: in instantiation of template class 'uq::SplitKernel<64, 16, 128, 16>' requested here
+  212 |                    SplitKernel<D, TN, T, SGS>{s, a, nsplit, pps, qs, kv, ps, st});
+      |                    ^
+/work/sycl/uq_decode.hpp:209:41: note: while substituting into a lambda expression here
+  209 |   return q.submit([&](sycl::handler& h) {
+      |                                         ^
+/work/sycl/uq_decode.hpp:226:44: note: in instantiation of function template specialization 'uq::launch_split<64, 16, 128, 16>' requested here
+  226 |   return launch_reduce<D>(q, s, a, nsplit, launch_split<D, TN, T, SGS>(q, s, a, nsplit));
+      |                                            ^
+/work/sycl/uq_decode.hpp:233:45: note: in instantiation of function template specialization 'uq::run_cfg<64, 16, 128, 16>' requested here
+  233 |   UQ_CASE(128, 32, 16) UQ_CASE(128, 32, 32) UQ_CASE(128, 16, 16) UQ_CASE(128, 16, 32)
+      |                                             ^
+/work/sycl/uq_decode.hpp:232:86: note: expanded from macro 'UQ_CASE'
+  232 | #define UQ_CASE(T_, TN_, SG_) if (key == (T_) * 100000 + (TN_) * 100 + (SG_)) return run_cfg<D, TN_, T_, SG_>(q, s, a, c.nsplit);
+      |                                                                                      ^
+/work/sycl/uq_decode.hpp:258:25: note: in instantiation of function template specialization 'uq::run_D<64>' requested here
+  258 |   if (s.D == 64) return run_D<64>(q, s, c, a);
+      |                         ^
+/work/sycl/uq_decode.hpp:72:31: warning: attribute argument 16 is invalid and will be ignored; nvptx64 requires sub_group size 32 [-Wincorrect-sub-group-size]
+   72 |   [[sycl::reqd_sub_group_size(SGS)]] void operator()(sycl::nd_item<1> it) const {
+      |                               ^
+/work/sycl/uq_decode.hpp:212:20: note: in instantiation of template class 'uq::SplitKernel<64, 32, 64, 16>' requested here
+  212 |                    SplitKernel<D, TN, T, SGS>{s, a, nsplit, pps, qs, kv, ps, st});
+      |                    ^
+/work/sycl/uq_decode.hpp:209:41: note: while substituting into a lambda expression here
+  209 |   return q.submit([&](sycl::handler& h) {
+      |                                         ^
+/work/sycl/uq_decode.hpp:226:44: note: in instantiation of function template specialization 'uq::launch_split<64, 32, 64, 16>' requested here
+  226 |   return launch_reduce<D>(q, s, a, nsplit, launch_split<D, TN, T, SGS>(q, s, a, nsplit));
+      |                                            ^
+/work/sycl/uq_decode.hpp:234:3: note: in instantiation of function template specialization 'uq::run_cfg<64, 32, 64, 16>' requested here
+  234 |   UQ_CASE(64, 32, 16) UQ_CASE(64, 32, 32) UQ_CASE(64, 16, 16)
+      |   ^
+/work/sycl/uq_decode.hpp:232:86: note: expanded from macro 'UQ_CASE'
+  232 | #define UQ_CASE(T_, TN_, SG_) if (key == (T_) * 100000 + (TN_) * 100 + (SG_)) return run_cfg<D, TN_, T_, SG_>(q, s, a, c.nsplit);
+      |                                                                                      ^
+/work/sycl/uq_decode.hpp:258:25: note: in instantiation of function template specialization 'uq::run_D<64>' requested here
+  258 |   if (s.D == 64) return run_D<64>(q, s, c, a);
+      |                         ^
+/work/sycl/uq_decode.hpp:72:31: warning: attribute argument 16 is invalid and will be ignored; nvptx64 requires sub_group size 32 [-Wincorrect-sub-group-size]
+   72 |   [[sycl::reqd_sub_group_size(SGS)]] void operator()(sycl::nd_item<1> it) const {
+      |                               ^
+/work/sycl/uq_decode.hpp:212:20: note: in instantiation of template class 'uq::SplitKernel<64, 16, 64, 16>' requested here
+  212 |                    SplitKernel<D, TN, T, SGS>{s, a, nsplit, pps, qs, kv, ps, st});
+      |                    ^
+/work/sycl/uq_decode.hpp:209:41: note: while substituting into a lambda expression here
+  209 |   return q.submit([&](sycl::handler& h) {
+      |                                         ^
+/work/sycl/uq_decode.hpp:226:44: note: in instantiation of function template specialization 'uq::launch_split<64, 16, 64, 16>' requested here
+  226 |   return launch_reduce<D>(q, s, a, nsplit, launch_split<D, TN, T, SGS>(q, s, a, nsplit));
+      |                                            ^
+/work/sycl/uq_decode.hpp:234:43: note: in instantiation of function template specialization 'uq::run_cfg<64, 16, 64, 16>' requested here
+  234 |   UQ_CASE(64, 32, 16) UQ_CASE(64, 32, 32) UQ_CASE(64, 16, 16)
+      |                                           ^
+/work/sycl/uq_decode.hpp:232:86: note: expanded from macro 'UQ_CASE'
+  232 | #define UQ_CASE(T_, TN_, SG_) if (key == (T_) * 100000 + (TN_) * 100 + (SG_)) return run_cfg<D, TN_, T_, SG_>(q, s, a, c.nsplit);
+      |                                                                                      ^
+/work/sycl/uq_decode.hpp:258:25: note: in instantiation of function template specialization 'uq::run_D<64>' requested here
+  258 |   if (s.D == 64) return run_D<64>(q, s, c, a);
+      |                         ^
+/work/sycl/uq_decode.hpp:72:31: warning: attribute argument 16 is invalid and will be ignored; nvptx64 requires sub_group size 32 [-Wincorrect-sub-group-size]
+   72 |   [[sycl::reqd_sub_group_size(SGS)]] void operator()(sycl::nd_item<1> it) const {
+      |                               ^
+/work/sycl/uq_decode.hpp:212:20: note: in instantiation of template class 'uq::SplitKernel<64, 32, 256, 16>' requested here
+  212 |                    SplitKernel<D, TN, T, SGS>{s, a, nsplit, pps, qs, kv, ps, st});
+      |                    ^
+/work/sycl/uq_decode.hpp:209:41: note: while substituting into a lambda expression here
+  209 |   return q.submit([&](sycl::handler& h) {
+      |                                         ^
+/work/sycl/uq_decode.hpp:226:44: note: in instantiation of function template specialization 'uq::launch_split<64, 32, 256, 16>' requested here
+  226 |   return launch_reduce<D>(q, s, a, nsplit, launch_split<D, TN, T, SGS>(q, s, a, nsplit));
+      |                                            ^
+/work/sycl/uq_decode.hpp:235:3: note: in instantiation of function template specialization 'uq::run_cfg<64, 32, 256, 16>' requested here
+  235 |   UQ_CASE(256, 32, 16) UQ_CASE(256, 32, 32) UQ_CASE(256, 16, 16) UQ_CASE(256, 16, 32)
+      |   ^
+/work/sycl/uq_decode.hpp:232:86: note: expanded from macro 'UQ_CASE'
+  232 | #define UQ_CASE(T_, TN_, SG_) if (key == (T_) * 100000 + (TN_) * 100 + (SG_)) return run_cfg<D, TN_, T_, SG_>(q, s, a, c.nsplit);
+      |                                                                                      ^
+/work/sycl/uq_decode.hpp:258:25: note: in instantiation of function template specialization 'uq::run_D<64>' requested here
+  258 |   if (s.D == 64) return run_D<64>(q, s, c, a);
+      |                         ^
+/work/sycl/uq_decode.hpp:72:31: warning: attribute argument 16 is invalid and will be ignored; nvptx64 requires sub_group size 32 [-Wincorrect-sub-group-size]
+   72 |   [[sycl::reqd_sub_group_size(SGS)]] void operator()(sycl::nd_item<1> it) const {
+      |                               ^
+/work/sycl/uq_decode.hpp:212:20: note: in instantiation of template class 'uq::SplitKernel<64, 16, 256, 16>' requested here
+  212 |                    SplitKernel<D, TN, T, SGS>{s, a, nsplit, pps, qs, kv, ps, st});
+      |                    ^
+/work/sycl/uq_decode.hpp:209:41: note: while substituting into a lambda expression here
+  209 |   return q.submit([&](sycl::handler& h) {
+      |                                         ^
+/work/sycl/uq_decode.hpp:226:44: note: in instantiation of function template specialization 'uq::launch_split<64, 16, 256, 16>' requested here
+  226 |   return launch_reduce<D>(q, s, a, nsplit, launch_split<D, TN, T, SGS>(q, s, a, nsplit));
+      |                                            ^
+/work/sycl/uq_decode.hpp:235:45: note: in instantiation of function template specialization 'uq::run_cfg<64, 16, 256, 16>' requested here
+  235 |   UQ_CASE(256, 32, 16) UQ_CASE(256, 32, 32) UQ_CASE(256, 16, 16) UQ_CASE(256, 16, 32)
+      |                                             ^
+/work/sycl/uq_decode.hpp:232:86: note: expanded from macro 'UQ_CASE'
+  232 | #define UQ_CASE(T_, TN_, SG_) if (key == (T_) * 100000 + (TN_) * 100 + (SG_)) return run_cfg<D, TN_, T_, SG_>(q, s, a, c.nsplit);
+      |                                                                                      ^
+/work/sycl/uq_decode.hpp:258:25: note: in instantiation of function template specialization 'uq::run_D<64>' requested here
+  258 |   if (s.D == 64) return run_D<64>(q, s, c, a);
+      |                         ^
+/work/sycl/uq_decode.hpp:72:31: warning: attribute argument 16 is invalid and will be ignored; nvptx64 requires sub_group size 32 [-Wincorrect-sub-group-size]
+   72 |   [[sycl::reqd_sub_group_size(SGS)]] void operator()(sycl::nd_item<1> it) const {
+      |                               ^
+/work/sycl/uq_decode.hpp:212:20: note: in instantiation of template class 'uq::SplitKernel<64, 64, 128, 16>' requested here
+  212 |                    SplitKernel<D, TN, T, SGS>{s, a, nsplit, pps, qs, kv, ps, st});
+      |                    ^
+/work/sycl/uq_decode.hpp:209:41: note: while substituting into a lambda expression here
+  209 |   return q.submit([&](sycl::handler& h) {
+      |                                         ^
+/work/sycl/uq_decode.hpp:226:44: note: in instantiation of function template specialization 'uq::launch_split<64, 64, 128, 16>' requested here
+  226 |   return launch_reduce<D>(q, s, a, nsplit, launch_split<D, TN, T, SGS>(q, s, a, nsplit));
+      |                                            ^
+/work/sycl/uq_decode.hpp:236:3: note: in instantiation of function template specialization 'uq::run_cfg<64, 64, 128, 16>' requested here
+  236 |   UQ_CASE(128, 64, 16) UQ_CASE(128, 64, 32) UQ_CASE(256, 64, 16) UQ_CASE(256, 64, 32)
+      |   ^
+/work/sycl/uq_decode.hpp:232:86: note: expanded from macro 'UQ_CASE'
+  232 | #define UQ_CASE(T_, TN_, SG_) if (key == (T_) * 100000 + (TN_) * 100 + (SG_)) return run_cfg<D, TN_, T_, SG_>(q, s, a, c.nsplit);
+      |                                                                                      ^
+/work/sycl/uq_decode.hpp:258:25: note: in instantiation of function template specialization 'uq::run_D<64>' requested here
+  258 |   if (s.D == 64) return run_D<64>(q, s, c, a);
+      |                         ^
+/work/sycl/uq_decode.hpp:72:31: warning: attribute argument 16 is invalid and will be ignored; nvptx64 requires sub_group size 32 [-Wincorrect-sub-group-size]
+   72 |   [[sycl::reqd_sub_group_size(SGS)]] void operator()(sycl::nd_item<1> it) const {
+      |                               ^
+/work/sycl/uq_decode.hpp:212:20: note: in instantiation of template class 'uq::SplitKernel<64, 64, 256, 16>' requested here
+  212 |                    SplitKernel<D, TN, T, SGS>{s, a, nsplit, pps, qs, kv, ps, st});
+      |                    ^
+/work/sycl/uq_decode.hpp:209:41: note: while substituting into a lambda expression here
+  209 |   return q.submit([&](sycl::handler& h) {
+      |                                         ^
+/work/sycl/uq_decode.hpp:226:44: note: in instantiation of function template specialization 'uq::launch_split<64, 64, 256, 16>' requested here
+  226 |   return launch_reduce<D>(q, s, a, nsplit, launch_split<D, TN, T, SGS>(q, s, a, nsplit));
+      |                                            ^
+/work/sycl/uq_decode.hpp:236:45: note: in instantiation of function template specialization 'uq::run_cfg<64, 64, 256, 16>' requested here
+  236 |   UQ_CASE(128, 64, 16) UQ_CASE(128, 64, 32) UQ_CASE(256, 64, 16) UQ_CASE(256, 64, 32)
+      |                                             ^
+/work/sycl/uq_decode.hpp:232:86: note: expanded from macro 'UQ_CASE'
+  232 | #define UQ_CASE(T_, TN_, SG_) if (key == (T_) * 100000 + (TN_) * 100 + (SG_)) return run_cfg<D, TN_, T_, SG_>(q, s, a, c.nsplit);
+      |                                                                                      ^
+/work/sycl/uq_decode.hpp:258:25: note: in instantiation of function template specialization 'uq::run_D<64>' requested here
+  258 |   if (s.D == 64) return run_D<64>(q, s, c, a);
+      |                         ^
+16 warnings generated.
+
+$ cd /work/b && ONEAPI_DEVICE_SELECTOR=cuda:gpu  ./test_vectors /work/sycl/vectors --sg 32 --sweep
+device: NVIDIA H100 80GB HBM3
+b2k1_d128_p64          nsplit=1 path=portable wg=128 tn=32 sg=32  max_abs_err=9.694e-04  PASS
+b2k1_d128_p64          nsplit=2 path=portable wg=128 tn=32 sg=32  max_abs_err=9.694e-04  PASS
+b2k1_d128_p64          nsplit=3 path=portable wg=128 tn=32 sg=32  max_abs_err=9.694e-04  PASS
+b2k1_d128_p64          nsplit=8 path=portable wg=128 tn=32 sg=32  max_abs_err=9.694e-04  PASS
+b2k4_d128_p64          nsplit=1 path=portable wg=128 tn=32 sg=32  max_abs_err=1.051e-03  PASS
+b2k4_d128_p64          nsplit=2 path=portable wg=128 tn=32 sg=32  max_abs_err=1.051e-03  PASS
+b2k4_d128_p64          nsplit=3 path=portable wg=128 tn=32 sg=32  max_abs_err=1.051e-03  PASS
+b2k4_d128_p64          nsplit=8 path=portable wg=128 tn=32 sg=32  max_abs_err=1.051e-03  PASS
+b1k8_d128_p64          nsplit=1 path=portable wg=128 tn=32 sg=32  max_abs_err=9.325e-04  PASS
+b1k8_d128_p64          nsplit=2 path=portable wg=128 tn=32 sg=32  max_abs_err=9.325e-04  PASS
+b1k8_d128_p64          nsplit=3 path=portable wg=128 tn=32 sg=32  max_abs_err=9.325e-04  PASS
+b1k8_d128_p64          nsplit=8 path=portable wg=128 tn=32 sg=32  max_abs_err=9.325e-04  PASS
+b3k2_d64_p16           nsplit=1 path=portable wg=128 tn=16 sg=32  max_abs_err=1.903e-03  PASS
+b3k2_d64_p16           nsplit=2 path=portable wg=128 tn=16 sg=32  max_abs_err=1.903e-03  PASS
+b3k2_d64_p16           nsplit=3 path=portable wg=128 tn=16 sg=32  max_abs_err=1.903e-03  PASS
+b3k2_d64_p16           nsplit=8 path=portable wg=128 tn=16 sg=32  max_abs_err=1.903e-03  PASS
+b2k16_d128_p32         nsplit=1 path=portable wg=128 tn=32 sg=32  max_abs_err=1.933e-03  PASS
+b2k16_d128_p32         nsplit=2 path=portable wg=128 tn=32 sg=32  max_abs_err=1.933e-03  PASS
+b2k16_d128_p32         nsplit=3 path=portable wg=128 tn=32 sg=32  max_abs_err=1.933e-03  PASS
+b2k16_d128_p32         nsplit=8 path=portable wg=128 tn=32 sg=32  max_abs_err=1.933e-03  PASS
+edge_short_k4          nsplit=1 path=portable wg=128 tn=32 sg=32  max_abs_err=7.715e-03  PASS
+edge_short_k4          nsplit=2 path=portable wg=128 tn=32 sg=32  max_abs_err=7.715e-03  PASS
+edge_short_k4          nsplit=3 path=portable wg=128 tn=32 sg=32  max_abs_err=7.715e-03  PASS
+edge_short_k4          nsplit=8 path=portable wg=128 tn=32 sg=32  max_abs_err=7.715e-03  PASS
+rot_h128_b2k4          nsplit=1 path=portable wg=128 tn=32 sg=32  max_abs_err=7.274e-03  PASS
+rot_h128_b2k4          nsplit=2 path=portable wg=128 tn=32 sg=32  max_abs_err=7.274e-03  PASS
+rot_h128_b2k4          nsplit=3 path=portable wg=128 tn=32 sg=32  max_abs_err=7.274e-03  PASS
+rot_h128_b2k4          nsplit=8 path=portable wg=128 tn=32 sg=32  max_abs_err=7.274e-03  PASS
+paper_rule_b2k4        nsplit=1 path=portable wg=128 tn=32 sg=32  max_abs_err=7.687e-03  PASS
+paper_rule_b2k4        nsplit=2 path=portable wg=128 tn=32 sg=32  max_abs_err=7.687e-03  PASS
+paper_rule_b2k4        nsplit=3 path=portable wg=128 tn=32 sg=32  max_abs_err=7.687e-03  PASS
+paper_rule_b2k4        nsplit=8 path=portable wg=128 tn=32 sg=32  max_abs_err=7.687e-03  PASS
+b4k3_d128_p64_g1       nsplit=1 path=portable wg=128 tn=32 sg=32  max_abs_err=1.951e-03  PASS
+b4k3_d128_p64_g1       nsplit=2 path=portable wg=128 tn=32 sg=32  max_abs_err=1.951e-03  PASS
+b4k3_d128_p64_g1       nsplit=3 path=portable wg=128 tn=32 sg=32  max_abs_err=1.951e-03  PASS
+b4k3_d128_p64_g1       nsplit=8 path=portable wg=128 tn=32 sg=32  max_abs_err=1.951e-03  PASS
+SUMMARY runs=36 fails=0 worst_max_abs_err=7.715e-03
+
+$ cd /work/b && ONEAPI_DEVICE_SELECTOR=cuda:gpu  ./test_vectors /work/sycl/vectors --sg 32 --wg 256 --tn 32 --sweep | tail -3
+b4k3_d128_p64_g1       nsplit=3 path=portable wg=256 tn=32 sg=32  max_abs_err=1.951e-03  PASS
+b4k3_d128_p64_g1       nsplit=8 path=portable wg=256 tn=32 sg=32  max_abs_err=1.951e-03  PASS
+SUMMARY runs=36 fails=0 worst_max_abs_err=7.715e-03
+
+$ cd /work/b && ONEAPI_DEVICE_SELECTOR=cuda:gpu  ./bench --B 2,8 --ctx 4096,16384 --K 1,4,8 --sg 32 --path portable --json /work/b/bench.jsonl
+device: NVIDIA H100 80GB HBM3  compute_units=132  local_mem=227 KB
+peak copy (r+w) 2998.6 GB/s   peak read 3138.7 GB/s
+B=2 ctx=4096 K=1 nsplit=32 wg=128 tn=32 sg=32 path=0 | fused 0.451 ms  19.8 GB/s (1% of read peak)
+B=2 ctx=4096 K=4 nsplit=32 wg=128 tn=32 sg=32 path=0 | fused 0.616 ms  14.5 GB/s (0% of read peak) | K-indep 1.660 ms (x2.69)
+B=2 ctx=4096 K=8 nsplit=32 wg=128 tn=32 sg=32 path=0 | fused 0.796 ms  11.2 GB/s (0% of read peak) | K-indep 3.210 ms (x4.03)
+B=2 ctx=16384 K=1 nsplit=32 wg=128 tn=32 sg=32 path=0 | fused 1.398 ms  25.5 GB/s (1% of read peak)
+B=2 ctx=16384 K=4 nsplit=32 wg=128 tn=32 sg=32 path=0 | fused 2.036 ms  17.5 GB/s (1% of read peak) | K-indep 5.283 ms (x2.59)
+B=2 ctx=16384 K=8 nsplit=32 wg=128 tn=32 sg=32 path=0 | fused 2.744 ms  13.0 GB/s (0% of read peak) | K-indep 10.322 ms (x3.76)
+B=8 ctx=4096 K=1 nsplit=8 wg=128 tn=32 sg=32 path=0 | fused 1.402 ms  25.4 GB/s (1% of read peak)
+B=8 ctx=4096 K=4 nsplit=8 wg=128 tn=32 sg=32 path=0 | fused 2.034 ms  17.5 GB/s (1% of read peak) | K-indep 4.523 ms (x2.22)
+B=8 ctx=4096 K=8 nsplit=8 wg=128 tn=32 sg=32 path=0 | fused 2.740 ms  13.0 GB/s (0% of read peak) | K-indep 8.830 ms (x3.22)
+B=8 ctx=16384 K=1 nsplit=8 wg=128 tn=32 sg=32 path=0 | fused 5.208 ms  27.4 GB/s (1% of read peak)
+B=8 ctx=16384 K=4 nsplit=8 wg=128 tn=32 sg=32 path=0 | fused 7.706 ms  18.5 GB/s (1% of read peak) | K-indep 16.901 ms (x2.19)
+B=8 ctx=16384 K=8 nsplit=8 wg=128 tn=32 sg=32 path=0 | fused 10.582 ms  13.5 GB/s (0% of read peak) | K-indep 33.404 ms (x3.16)
