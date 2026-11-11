@@ -39,6 +39,11 @@ def body(gpu, mode, extra):
             P(sh(f"cd /work/cuda && ./bs_{name} --ks 1 8 --variant 2 {extra}"))
         P("## samepage (L2-resident, compute only)")
         P(sh(f"cd /work/cuda && nvcc -O3 -std=c++17 -arch=native -o bs_full bench_standalone.cu uq_decode.cu 2>&1 | grep -i error; ./bs_full --ks 1 8 --samepage"))
+    elif mode == "buildtest":
+        P(sh("apt-get install -y -q cmake >/dev/null 2>&1; cmake --version | head -1; cd /work && cmake -S cuda -B build 2>&1 | tail -3 && true"))
+        P(sh("cd /work && CC=gcc CXX=g++ TORCH_CUDA_ARCH_LIST=9.0 pip install --no-build-isolation ./cuda 2>&1 | grep -vE 'instantiation|warning|Remark' | tail -25; cd /tmp && python -c \"import torch,uq_cuda; print('pip ext import ok', uq_cuda.ext().block_m(8,64,8))\" 2>&1 | tail -3"))
+    elif mode == "ptxas":
+        P(sh("cd /work/cuda && nvcc -O3 -std=c++17 -arch=native -Xptxas -v -c -o /tmp/x.o uq_decode.cu 2>&1 | grep -A1 -E 'uq_split_w.*(128, 64|Li128ELi64)' | grep -E 'Compiling|registers|spill' | head -80"))
     elif mode == "prof":
         P(sh(f"cd /work/cuda && nvcc -O3 -std=c++17 -arch=native -DUQ_PROF -o bsp bench_standalone.cu uq_decode.cu 2>&1 | grep -i error"))
         P(sh(f"cd /work/cuda && ./bsp --variant 2 {extra}"))

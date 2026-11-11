@@ -2,6 +2,8 @@
 import os
 from setuptools import setup
 from torch.utils.cpp_extension import BuildExtension, CUDAExtension
+# the kernels need sm_80+ (bf16 mma.sync / cp.async); torch's default arch list may include sm_75
+os.environ.setdefault("TORCH_CUDA_ARCH_LIST", "8.0;8.6;8.9;9.0")
 here = os.path.dirname(os.path.abspath(__file__))
 setup(name="uq_cuda", version="0.1", py_modules=["uq_cuda"],
       ext_modules=[CUDAExtension("uq_cuda_ext", ["uq_ext.cpp", "uq_decode.cu"], include_dirs=[here],

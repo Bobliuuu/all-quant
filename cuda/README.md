@@ -31,11 +31,11 @@ the native block-scaled FP4 MMA path (see below).
 
 ## Build / run
 ```bash
-# standalone harness (CMake)
+# standalone harness (CMake; tested on CMake 3.22 + CUDA 12.9, ctest passes on H100; add -DCMAKE_CUDA_ARCHITECTURES=100 for B300)
 cmake -S cuda -B build && cmake --build build -j && ./build/test_vectors cuda/vectors 1e-2
 # or directly:  nvcc -O3 -std=c++17 -arch=native -o test_vectors test_vectors.cu uq_decode.cu && ./test_vectors vectors 1e-2
 # PyTorch
-pip install ./cuda            # or just: import uq_cuda  (JIT-builds uq_cuda_ext on first use)
+pip install --no-build-isolation ./cuda   # needs torch + nvcc + a host g++ (set CC=gcc CXX=g++ if your python reports clang++); or just: import uq_cuda  (JIT-builds uq_cuda_ext on first use)
 ```
 ```python
 from uq_cuda import uq_decode_cuda          # same argument order as uqmt.attn.uq_decode
