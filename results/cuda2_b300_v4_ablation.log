@@ -1,0 +1,6 @@
+ablation S1_ABL=1 (K=8, uniform ctx32768):
+K=8 sm100 best 0.2768 ms (st=2 ns=9) 1030 GB/s 15.7% peak
+ablation S1_ABL=2 (K=8, uniform ctx32768):
+K=8 sm100 best 0.2850 ms (st=4 ns=9) 1001 GB/s 15.4% peak
+ablation S1_ABL=3 (K=8, uniform ctx32768):
+K=8 sm100 best 0.1997 ms (st=2 ns=2) 1428 GB/s 22.0% peak

@@ -1,0 +1,13 @@
+b3_vecF.log:RESULT variant4 vectors runs=60 fails=0 worst_err_beyond_bf16_rounding=2.073e-03
+b3_ref.log:  REF K=1 var1 ns=2: max abs err 1.210e-01, excess over 2^-6 rel 5.463e-03 (max |ref| 45.167)
+b3_ref.log:  REF K=1 var1 ns=9: max abs err 1.210e-01, excess over 2^-6 rel 3.828e-03 (max |ref| 45.167)
+b3_ref.log:  REF K=1 var1 ns=16: max abs err 1.210e-01, excess over 2^-6 rel 1.954e-03 (max |ref| 45.167)
+b3_ref.log:  REF K=1 var4 ns=2: max abs err 1.210e-01, excess over 2^-6 rel 7.009e-03 (max |ref| 45.167)
+b3_ref.log:  REF K=1 var4 ns=9: max abs err 1.210e-01, excess over 2^-6 rel 5.171e-03 (max |ref| 45.167)
+b3_ref.log:  REF K=1 var4 ns=16: max abs err 1.210e-01, excess over 2^-6 rel 5.314e-03 (max |ref| 45.167)
+b3_ref.log:  REF K=8 var1 ns=2: max abs err 1.252e-01, excess over 2^-6 rel 1.629e-02 (max |ref| 47.862)
+b3_ref.log:  REF K=8 var1 ns=9: max abs err 1.252e-01, excess over 2^-6 rel 7.968e-03 (max |ref| 47.862)
+b3_ref.log:  REF K=8 var1 ns=16: max abs err 1.249e-01, excess over 2^-6 rel 9.189e-03 (max |ref| 47.862)
+b3_ref.log:  REF K=8 var4 ns=2: max abs err 1.252e-01, excess over 2^-6 rel 1.629e-02 (max |ref| 47.862)
+b3_ref.log:  REF K=8 var4 ns=9: max abs err 1.252e-01, excess over 2^-6 rel 7.968e-03 (max |ref| 47.862)
+b3_ref.log:  REF K=8 var4 ns=16: max abs err 1.249e-01, excess over 2^-6 rel 9.189e-03 (max |ref| 47.862)
