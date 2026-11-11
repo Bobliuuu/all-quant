@@ -1,0 +1,127 @@
+1
+00:00:01,199 --> 00:00:05,418
+UltraQuant: four-bit KV caching for context-heavy agents.
+
+2
+00:00:05,468 --> 00:00:12,947
+This is a short tour of the idea, and of one fused decode kernel that makes speculative decoding cheap on a four-bit cache.
+
+3
+00:00:14,697 --> 00:00:23,451
+When a language model generates text, each new token attends to every earlier token, so the GPU must read the whole key-value cache from memory.
+
+4
+00:00:23,501 --> 00:00:30,010
+That is almost no arithmetic per byte: about one floating point operation for every byte read in half precision.
+
+5
+00:00:30,060 --> 00:00:39,485
+To keep its matrix units busy, an MI300X needs roughly one hundred sixty operations per byte, and a B300 about two hundred seventy.
+
+6
+00:00:39,535 --> 00:00:42,202
+These ratios come from our measured peaks.
+
+7
+00:00:42,252 --> 00:00:47,745
+So decode waits on memory, and for long-context agents the KV cache is the bottleneck.
+
+8
+00:00:47,795 --> 00:00:50,563
+Fewer bytes means faster tokens.
+
+9
+00:00:52,313 --> 00:01:00,572
+UltraQuant stores each value as a four-bit float, E2M1: one sign bit, two exponent bits, one mantissa bit.
+
+10
+00:01:00,622 --> 00:01:06,363
+Every group of thirty-two values shares one eight-bit power-of-two scale, called UE8M0.
+
+11
+00:01:06,413 --> 00:01:14,807
+For a head dimension of one hundred twenty-eight, that is sixty-four bytes of values plus four bytes of scales: sixty-eight bytes per head and token.
+
+12
+00:01:14,857 --> 00:01:20,285
+Half precision needs two hundred fifty-six, and FP8 needs one hundred twenty-eight.
+
+13
+00:01:20,335 --> 00:01:24,284
+That is about three point eight times smaller than half precision.
+
+14
+00:01:26,034 --> 00:01:31,921
+Speculative decoding and multi-token prediction verify K candidate tokens in a single step.
+
+15
+00:01:31,971 --> 00:01:38,177
+A straightforward kernel treats them as K independent queries, and each one re-reads every page of the cache.
+
+16
+00:01:38,227 --> 00:01:43,086
+At K equals eight, that is eight times the memory traffic for the very same data.
+
+17
+00:01:43,136 --> 00:01:45,615
+Our fused kernel reads each page once.
+
+18
+00:01:45,665 --> 00:01:53,303
+The query rows for all K tokens are stacked along the M dimension of the matrix multiply, so one loaded tile serves every token.
+
+19
+00:01:53,353 --> 00:01:57,876
+Same pages, same four-bit dequantisation, one pass.
+
+20
+00:01:59,626 --> 00:02:06,934
+Here are measurements at batch eight, thirty-two thousand tokens of context, sixty-four query heads and eight KV heads.
+
+21
+00:02:06,984 --> 00:02:18,691
+On an MI300X, at K equals eight, the fused kernel takes 0.54 milliseconds, versus 2.22 for independent queries: 4.1 times faster.
+
+22
+00:02:18,741 --> 00:02:28,394
+On a B300, after tuning, K equals eight takes 0.42 milliseconds, versus 2.85: 6.8 times faster.
+
+23
+00:02:28,444 --> 00:02:32,210
+At K equals one there is nothing to share, so the two match.
+
+24
+00:02:32,260 --> 00:02:35,579
+The gain grows with K, because page reads are shared.
+
+25
+00:02:35,629 --> 00:02:43,202
+Tuning mattered: bit-trick dequantisation, a tuned warp count and pipeline depth, and sixteen-way KV splits.
+
+26
+00:02:44,952 --> 00:02:46,926
+What does this mean in practice?
+
+27
+00:02:46,976 --> 00:02:54,669
+A long-context agent keeps more history in the same memory, and speculative verification stops multiplying the cost of reading it.
+
+28
+00:02:54,719 --> 00:02:56,558
+Now the honest caveats.
+
+29
+00:02:56,608 --> 00:03:09,871
+On MI300X, which is gfx942, FP4 is dequantised in software; the paper's native scaled matrix instructions live on CDNA4, gfx950.
+
+30
+00:03:09,921 --> 00:03:21,618
+Our kernels reach about half a terabyte to one terabyte per second of FP4 bytes, well below the HBM peaks of three point nine and six point four terabytes per second, so there is headroom.
+
+31
+00:03:21,668 --> 00:03:25,109
+Outputs match the baseline to about one in ten thousand.
+
+32
+00:03:25,159 --> 00:03:32,872
+The paper is arXiv 2606.20474, and the code and results are in the repository.
