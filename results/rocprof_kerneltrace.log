@@ -1,0 +1,13 @@
+W1111 07:09:02.856528   22942 simple_timer.cpp:55] [rocprofv3] tool initialization ::     0.000520 sec
+W1111 07:09:02.856916   22942 simple_timer.cpp:55] [rocprofv3] 'python e2e_decode.py --mode sweep --uq-dir /root/uqpin --ctxs 8192 --batches 8 --ks 1 --out /root/h2h/rp_smoke.json' ::     0.000000 sec
+F1111 07:09:08.729586   22942 tool.cpp:4780]  :: [/__w/rockrel/rockrel/rocm-systems/projects/rocprofiler-sdk/source/lib/rocprofiler-sdk-tool/tool.cpp:4780]
+	rocprofiler_at_intercept_table_registration(api_timestamps_callback, libs, nullptr)
+
+api registration failed with error code 16: Configuration request occurred outside of valid rocprofiler configuration period
+*** Check failure stack trace: ***
+W1111 07:09:08.729728   22945 tool.cpp:4559] [PPID=22941][PID=22942][TID=22945][signal_finalization_worker] rocprofv3 finalizing after signal 6...
+W1111 07:09:08.730482   22945 simple_timer.cpp:55] [rocprofv3] output generation ::     0.000412 sec
+W1111 07:09:08.730516   22945 simple_timer.cpp:55] [rocprofv3] tool finalization ::     0.000712 sec
+W1111 07:09:08.730798   22945 tool.cpp:4484] [PPID=22941][PID=22942][TID=22945][signal_finalization_worker] rocprofv3 waiting for 0 children to exit
+timeout: the monitored command dumped core
+exit=134

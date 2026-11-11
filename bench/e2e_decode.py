@@ -79,7 +79,7 @@ class Cache:
     """per-backend KV store for B sequences, capacity Smax (multiple of 64)."""
     def __init__(s, backend, B, Smax):
         s.backend, s.B, s.Smax = backend, B, Smax
-        if backend == "fp16":
+        if backend.startswith("fp16"):
             s.k = [torch.empty(B, Hkv, Smax, D, device=dev, dtype=torch.float16) for _ in range(NL)]
             s.v = [torch.empty_like(s.k[0]) for _ in range(NL)]
         else:
@@ -88,11 +88,11 @@ class Cache:
             s.kc, s.ks, s.vc, s.vs = mk(D // 2), mk(D // 32), mk(D // 2), mk(D // 32)
             s.bt = torch.arange(n, device=dev, dtype=torch.int32).reshape(B, pps)
     def nbytes(s, ntok):
-        if s.backend == "fp16": return s.B * ntok * NL * Hkv * 2 * D * 2
+        if s.backend.startswith("fp16"): return s.B * ntok * NL * Hkv * 2 * D * 2
         return s.B * ntok * NL * Hkv * 2 * (D // 2 + D // 32)
     def write(s, l, pos, k, v):  # k,v [B,Hkv,K,D] fp16 ; positions pos..pos+K-1
         K = k.shape[2]
-        if s.backend == "fp16":
+        if s.backend.startswith("fp16"):
             s.k[l][:, :, pos:pos + K] = k; s.v[l][:, :, pos:pos + K] = v; return
         for src, dc, ds in ((k, s.kc, s.ks), (v, s.vc, s.vs)):
             _quant_append[(s.B * K, Hkv)](src, dc[l], ds[l], pos, K, s.pps, src.stride(0), src.stride(1), src.stride(2), HKV=Hkv, PAGE=PAGE)
@@ -116,6 +116,14 @@ def selfcheck():
 def attend(c, l, q, pos):
     """q [B,Hq,K,D] fp16 (post-rope) ; returns [B,K,Hq*D] fp16. KV for positions<pos+K already written."""
     B, _, K, _ = q.shape; S = pos + K
+    if c.backend == "fp16_bmm":   # bmm + softmax + bmm (amd-experiments' own fp16 decode formulation); much faster than torch SDPA at small M on MI300X
+        qq = q.reshape(B, Hkv, G * K, D)
+        sc = torch.matmul(qq, c.k[l][:, :, :S].transpose(-1, -2)) * (D ** -0.5)
+        if K > 1:
+            j = torch.arange(K, device=dev).repeat(G)
+            sc = sc.masked_fill(~(torch.arange(S, device=dev)[None, :] <= (pos + j)[:, None]), float("-inf"))
+        o = torch.matmul(torch.softmax(sc, -1, dtype=torch.float32).to(torch.float16), c.v[l][:, :, :S])
+        return o.reshape(B, Hq, K, D).transpose(1, 2).reshape(B, K, Hq * D)
     if c.backend == "fp16":
         qq = q.reshape(B, Hkv, G * K, D)
         mask = None
@@ -213,7 +221,7 @@ if a.mode == "sweep":
     for ctx in a.ctxs:
         kv, _ = prefill(code_ids(ctx)[None].to(dev))
         for B in a.batches:
-            for be in ("fp16", "uq_fused", "uq_kindep"):
+            for be in ("fp16", "fp16_bmm", "uq_fused", "uq_kindep"):
                 try:
                     c = Cache(be, B, ctx + 64)
                     for l in range(NL): c.load(l, *kv[l])
@@ -237,11 +245,14 @@ else:
         for i in range(len(seq) - n - 1, -1, -1):
             if seq[i:i + n] == pat: return seq[i + n:i + n + kmax]
         return []
-    def run(backend, kmax):
+    def run(backend, kmax, forced=None):
         c = Cache(backend, 1, a.ctx + 64 * 40 + a.turns * (a.new + 600))
         seq = ids_ctx.tolist(); kv, _ = prefill(ids_ctx[None].to(dev))
         for l in range(NL): c.load(l, *kv[l])
-        del kv; pos = len(seq) - 1; pending = seq[-1]; gen_all = []; stats = []
+        del kv; pos = len(seq) - 1
+        for KK in sorted(set(list(range(1, kmax + 1)) + [16])):   # JIT warm-up: kernels specialise on K; keep compile time out of the timings
+            step(c, torch.zeros(1, KK, dtype=torch.long, device=dev), pos)
+        torch.cuda.synchronize(); pending = seq[-1]; gen_all = []; stats = []
         rng = __import__("random").Random(0)
         for turn in range(a.turns):
             # tool-output / user message: copy a ~15-line slice of the document, ingest in 16-token chunks via the K-query path
@@ -259,6 +270,17 @@ else:
             pending = feed[-1]; torch.cuda.synchronize(); ingest_s = time.perf_counter() - tt
             # generate
             t0 = time.perf_counter(); n_new = 0; nsteps = 0; accepted = 0; out = []
+            if forced is not None:      # teacher-forced top-1 agreement vs the reference generation, in blocks of kmax
+                ref = forced[turn]; agree = 0; i = 0
+                while i < len(ref):
+                    blk = ref[i:i + kmax - 1] if kmax > 1 else []
+                    lg = step(c, torch.tensor([[pending] + blk], device=dev), pos)[0].argmax(-1).tolist()
+                    nxt = (blk + ref[i + len(blk):i + len(blk) + 1])
+                    agree += sum(int(lg[j] == nxt[j]) for j in range(len(nxt)))
+                    seq += nxt; pos += len(blk) + 1; pending = nxt[-1]; i += len(blk) + 1
+                stats.append(dict(turn=turn, ingest_tokens=len(pids), ingest_s=ingest_s, top1_agree=agree / len(ref), n=len(ref)))
+                gen_all.append(ref); print(backend, kmax, "forced", json.dumps(stats[-1]), flush=True)
+                continue
             while n_new < a.new:
                 dr = lookup(seq, 3, kmax - 1) if kmax > 1 else []
                 toks = torch.tensor([[pending] + dr], device=dev)
@@ -274,6 +296,10 @@ else:
         kvb = c.nbytes(pos); del c; torch.cuda.empty_cache()
         return dict(backend=backend, kmax=kmax, turns=stats, gen=gen_all, kv_bytes=kvb)
     res = []
-    for be, km in (("fp16", 1), ("fp16", a.kmax), ("uq_fused", 1), ("uq_fused", a.kmax), ("uq_kindep", a.kmax)):
+    for be, km in (("fp16", 1), ("fp16_bmm", 1), ("fp16_bmm", a.kmax), ("uq_fused", 1), ("uq_fused", a.kmax), ("uq_kindep", a.kmax)):
         res.append(run(be, km))
+        json.dump(dict(device=torch.cuda.get_device_name(0), ctx=a.ctx, runs=res), open(a.out, "w"), indent=1)
+    refgen = res[0]["gen"]
+    for be, km in (("fp16_bmm", 1), ("uq_fused", 1), ("uq_fused", a.kmax), ("uq_kindep", a.kmax), ("fp16_bmm", a.kmax)):
+        r = run(be, km, forced=refgen); r["forced"] = True; res.append(r)
         json.dump(dict(device=torch.cuda.get_device_name(0), ctx=a.ctx, runs=res), open(a.out, "w"), indent=1)

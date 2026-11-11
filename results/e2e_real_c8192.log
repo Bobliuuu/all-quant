@@ -1,0 +1,34 @@
+quant kernel selfcheck: packed match 1.0 scale match 1.0
+fp16 1 {"turn": 0, "ingest_tokens": 206, "ingest_s": 0.357, "gen_tokens": 96, "gen_s": 1.985, "steps": 96, "tokens_per_step": 1.0, "mean_drafts_accepted": 0.0, "tok_per_s": 48.36}
+fp16 1 {"turn": 1, "ingest_tokens": 160, "ingest_s": 0.278, "gen_tokens": 96, "gen_s": 2.015, "steps": 96, "tokens_per_step": 1.0, "mean_drafts_accepted": 0.0, "tok_per_s": 47.648}
+fp16 1 {"turn": 2, "ingest_tokens": 210, "ingest_s": 0.397, "gen_tokens": 96, "gen_s": 2.051, "steps": 96, "tokens_per_step": 1.0, "mean_drafts_accepted": 0.0, "tok_per_s": 46.799}
+fp16_bmm 1 {"turn": 0, "ingest_tokens": 206, "ingest_s": 0.32, "gen_tokens": 96, "gen_s": 1.681, "steps": 96, "tokens_per_step": 1.0, "mean_drafts_accepted": 0.0, "tok_per_s": 57.101}
+fp16_bmm 1 {"turn": 1, "ingest_tokens": 160, "ingest_s": 0.22, "gen_tokens": 96, "gen_s": 1.687, "steps": 96, "tokens_per_step": 1.0, "mean_drafts_accepted": 0.0, "tok_per_s": 56.899}
+fp16_bmm 1 {"turn": 2, "ingest_tokens": 210, "ingest_s": 0.319, "gen_tokens": 96, "gen_s": 1.67, "steps": 96, "tokens_per_step": 1.0, "mean_drafts_accepted": 0.0, "tok_per_s": 57.468}
+fp16_bmm 8 {"turn": 0, "ingest_tokens": 206, "ingest_s": 0.284, "gen_tokens": 97, "gen_s": 0.337, "steps": 15, "tokens_per_step": 6.467, "mean_drafts_accepted": 5.467, "tok_per_s": 288.218}
+fp16_bmm 8 {"turn": 1, "ingest_tokens": 160, "ingest_s": 0.222, "gen_tokens": 100, "gen_s": 0.432, "steps": 19, "tokens_per_step": 5.263, "mean_drafts_accepted": 4.263, "tok_per_s": 231.698}
+fp16_bmm 8 {"turn": 2, "ingest_tokens": 210, "ingest_s": 0.307, "gen_tokens": 103, "gen_s": 0.446, "steps": 19, "tokens_per_step": 5.421, "mean_drafts_accepted": 4.421, "tok_per_s": 231.029}
+uq_fused 1 {"turn": 0, "ingest_tokens": 206, "ingest_s": 0.275, "gen_tokens": 96, "gen_s": 2.053, "steps": 96, "tokens_per_step": 1.0, "mean_drafts_accepted": 0.0, "tok_per_s": 46.767}
+uq_fused 1 {"turn": 1, "ingest_tokens": 160, "ingest_s": 0.202, "gen_tokens": 96, "gen_s": 2.008, "steps": 96, "tokens_per_step": 1.0, "mean_drafts_accepted": 0.0, "tok_per_s": 47.805}
+uq_fused 1 {"turn": 2, "ingest_tokens": 210, "ingest_s": 0.308, "gen_tokens": 96, "gen_s": 2.035, "steps": 96, "tokens_per_step": 1.0, "mean_drafts_accepted": 0.0, "tok_per_s": 47.167}
+uq_fused 8 {"turn": 0, "ingest_tokens": 206, "ingest_s": 0.277, "gen_tokens": 96, "gen_s": 0.325, "steps": 16, "tokens_per_step": 6.0, "mean_drafts_accepted": 5.0, "tok_per_s": 295.793}
+uq_fused 8 {"turn": 1, "ingest_tokens": 160, "ingest_s": 0.216, "gen_tokens": 96, "gen_s": 0.546, "steps": 25, "tokens_per_step": 3.84, "mean_drafts_accepted": 2.84, "tok_per_s": 175.923}
+uq_fused 8 {"turn": 2, "ingest_tokens": 210, "ingest_s": 0.288, "gen_tokens": 96, "gen_s": 0.399, "steps": 19, "tokens_per_step": 5.053, "mean_drafts_accepted": 4.053, "tok_per_s": 240.885}
+uq_kindep 8 {"turn": 0, "ingest_tokens": 206, "ingest_s": 0.326, "gen_tokens": 97, "gen_s": 0.383, "steps": 15, "tokens_per_step": 6.467, "mean_drafts_accepted": 5.467, "tok_per_s": 253.456}
+uq_kindep 8 {"turn": 1, "ingest_tokens": 160, "ingest_s": 0.289, "gen_tokens": 100, "gen_s": 0.493, "steps": 19, "tokens_per_step": 5.263, "mean_drafts_accepted": 4.263, "tok_per_s": 202.737}
+uq_kindep 8 {"turn": 2, "ingest_tokens": 210, "ingest_s": 0.382, "gen_tokens": 101, "gen_s": 0.449, "steps": 17, "tokens_per_step": 5.941, "mean_drafts_accepted": 4.941, "tok_per_s": 224.934}
+fp16_bmm 1 forced {"turn": 0, "ingest_tokens": 206, "ingest_s": 0.2934189019997575, "top1_agree": 1.0, "n": 96}
+fp16_bmm 1 forced {"turn": 1, "ingest_tokens": 160, "ingest_s": 0.2330740480010718, "top1_agree": 1.0, "n": 96}
+fp16_bmm 1 forced {"turn": 2, "ingest_tokens": 210, "ingest_s": 0.3211626759984938, "top1_agree": 1.0, "n": 96}
+uq_fused 1 forced {"turn": 0, "ingest_tokens": 206, "ingest_s": 0.2746622520007804, "top1_agree": 0.9895833333333334, "n": 96}
+uq_fused 1 forced {"turn": 1, "ingest_tokens": 160, "ingest_s": 0.21665424999991956, "top1_agree": 1.0, "n": 96}
+uq_fused 1 forced {"turn": 2, "ingest_tokens": 210, "ingest_s": 0.2896962209997582, "top1_agree": 0.9791666666666666, "n": 96}
+uq_fused 8 forced {"turn": 0, "ingest_tokens": 206, "ingest_s": 0.2773996329997317, "top1_agree": 0.9895833333333334, "n": 96}
+uq_fused 8 forced {"turn": 1, "ingest_tokens": 160, "ingest_s": 0.21247895099986636, "top1_agree": 1.0, "n": 96}
+uq_fused 8 forced {"turn": 2, "ingest_tokens": 210, "ingest_s": 0.2923268819995428, "top1_agree": 0.9791666666666666, "n": 96}
+uq_kindep 8 forced {"turn": 0, "ingest_tokens": 206, "ingest_s": 0.3514773970000533, "top1_agree": 1.0, "n": 96}
+uq_kindep 8 forced {"turn": 1, "ingest_tokens": 160, "ingest_s": 0.2501625180011615, "top1_agree": 1.0, "n": 96}
+uq_kindep 8 forced {"turn": 2, "ingest_tokens": 210, "ingest_s": 0.3706360809992475, "top1_agree": 0.9791666666666666, "n": 96}
+fp16_bmm 8 forced {"turn": 0, "ingest_tokens": 206, "ingest_s": 0.2934367719990405, "top1_agree": 1.0, "n": 96}
+fp16_bmm 8 forced {"turn": 1, "ingest_tokens": 160, "ingest_s": 0.22406410499934282, "top1_agree": 1.0, "n": 96}
+fp16_bmm 8 forced {"turn": 2, "ingest_tokens": 210, "ingest_s": 0.30116683499909414, "top1_agree": 1.0, "n": 96}

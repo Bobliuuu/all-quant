@@ -3,7 +3,7 @@
 Synthetic iid-Gaussian KV, Hkv=8, D=128, page 64 (ours), CUDA-event mean of 30 reps (10-ish for the largest), all methods same box/timer.
 Bytes per K-or-V vector per head: fp16 256, TQ3 52 (4 B norm + 3x16 B bit-planes), UQ FP4+UE8M0 68 (64 B nibbles + 4 B scales).
 Ours: best nsplit of {8,16,32,64} per config (pinned commit 1ec6fbe). Theirs: `turboquant_gqa_attention_fwd` (autotuned split-K GQA path), time includes the 128x128 inverse output rotation; q rotation shown separately.
-fp16: `F.scaled_dot_product_attention` with q reshaped to [B,Hkv,G*K,D] (no KV expansion; non-causal, timing-equivalent).
+fp16 SDPA: `F.scaled_dot_product_attention` with q reshaped to [B,Hkv,G*K,D] (no KV expansion; non-causal, timing-equivalent). WARNING: torch SDPA is a weak fp16 decode baseline on MI300X at small batch (~100 GB/s at B=1); the 'Honest fp16 baseline' section near the end compares against the best of SDPA / bmm / split-KV and is the fair per-call number.
 Apples-to-oranges: TQ3 is 3-bit rotation+Lloyd-Max, K=1 only, no causal-block masking, non-paged contiguous KV; ours is 4-bit MX-style, paged, K<=16 with causal spec masking.
 
 ## Hq/Hkv = 32/8: K=1 decode, ms (lower is better)
@@ -160,5 +160,74 @@ Apples-to-oranges: TQ3 is 3-bit rotation+Lloyd-Max, K=1 only, no causal-block ma
 | 32 | 32768 | iid | 8 | - | 0.9862 | 0.166 | - | - |
 | 32 | 32768 | peaked | 1 | 1.0000 | 0.9935 | 0.144 | 0.9819 | 0.255 |
 | 32 | 32768 | peaked | 8 | - | 0.9935 | 0.144 | - | - |
+
+## Honest fp16 baseline: torch SDPA is NOT the best fp16 decode path on MI300X
+
+Torch's SDPA (flash path, no split-KV) reaches only ~100 GB/s at B=1. The `bmm+softmax+bmm` formulation (what amd-experiments' own decode benchmark uses) and a split-KV-via-bmm variant are far faster at small batch. `fp16 best` = min of the three. Hq/Hkv=32/8; K=8 rows are one call with M=G*K rows (non-causal, timing-equivalent).
+
+| B | ctx | K | SDPA ms | bmm ms | split-KV bmm ms | fp16 best ms | fp16 best GB/s | UQ fused ms | UQ vs fp16 best | UQ vs SDPA | TQ3 K=1 ms |
+|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|
+| 1 | 4096 | 1 | 0.156 | 0.072 | 0.196 | 0.072 | 234 | 0.071 | 1.01x | 2.19x | 0.363 |
+| 1 | 4096 | 8 | 0.156 | 0.072 | 0.194 | 0.072 | 234 | 0.062 | 1.16x | 2.53x | - |
+| 1 | 16384 | 1 | 0.654 | 0.071 | 0.198 | 0.071 | 949 | 0.061 | 1.17x | 10.79x | 0.368 |
+| 1 | 16384 | 8 | 0.657 | 0.076 | 0.194 | 0.076 | 883 | 0.072 | 1.06x | 9.16x | - |
+| 1 | 32768 | 1 | 1.303 | 0.072 | 0.193 | 0.072 | 1873 | 0.079 | 0.90x | 16.46x | 0.374 |
+| 1 | 32768 | 8 | 1.309 | 0.108 | 0.212 | 0.108 | 1245 | 0.100 | 1.08x | 13.05x | - |
+| 1 | 65536 | 1 | 2.602 | 0.121 | 0.195 | 0.121 | 2221 | 0.142 | 0.85x | 18.35x | 0.390 |
+| 1 | 65536 | 8 | 2.614 | 0.249 | 0.364 | 0.249 | 1076 | 0.179 | 1.39x | 14.60x | - |
+| 8 | 4096 | 1 | 0.169 | 0.080 | 0.235 | 0.080 | 1686 | 0.062 | 1.29x | 2.74x | 0.372 |
+| 8 | 4096 | 8 | 0.170 | 0.092 | 0.223 | 0.092 | 1460 | 0.078 | 1.17x | 2.17x | - |
+| 8 | 16384 | 1 | 0.718 | 0.226 | 0.295 | 0.226 | 2371 | 0.172 | 1.32x | 4.18x | 0.571 |
+| 8 | 16384 | 8 | 0.720 | 0.368 | 0.649 | 0.368 | 1457 | 0.227 | 1.62x | 3.17x | - |
+| 8 | 32768 | 1 | 1.440 | 0.426 | 0.497 | 0.426 | 2523 | 0.330 | 1.29x | 4.37x | 1.043 |
+| 8 | 32768 | 8 | 1.440 | 0.728 | 1.262 | 0.728 | 1475 | 0.442 | 1.65x | 3.26x | - |
+| 8 | 65536 | 1 | 2.867 | 0.800 | 0.917 | 0.800 | 2683 | 0.622 | 1.29x | 4.61x | 1.918 |
+| 8 | 65536 | 8 | 2.865 | 1.501 | 2.567 | 1.501 | 1431 | 0.854 | 1.76x | 3.35x | - |
+| 32 | 4096 | 1 | 0.240 | 0.203 | 0.303 | 0.203 | 2645 | 0.177 | 1.15x | 1.35x | 0.569 |
+| 32 | 4096 | 8 | 0.242 | 0.355 | 0.677 | 0.242 | 2218 | 0.245 | 0.99x | 0.99x | - |
+| 32 | 16384 | 1 | 0.984 | 0.765 | 0.933 | 0.765 | 2808 | 0.632 | 1.21x | 1.56x | 1.927 |
+| 32 | 16384 | 8 | 1.006 | 1.496 | 2.630 | 1.006 | 2134 | 0.843 | 1.19x | 1.19x | - |
+| 32 | 32768 | 1 | 1.968 | 1.511 | 1.792 | 1.511 | 2842 | 1.234 | 1.23x | 1.60x | 3.710 |
+| 32 | 32768 | 8 | 2.003 | 2.973 | 5.270 | 2.003 | 2145 | 1.570 | 1.28x | 1.28x | - |
+| 32 | 65536 | 1 | 3.722 | 3.073 | 3.528 | 3.073 | 2795 | 2.301 | 1.34x | 1.62x | 7.136 |
+| 32 | 65536 | 8 | 3.864 | 5.940 | 10.302 | 3.864 | 2223 | 3.028 | 1.28x | 1.28x | - |
+
+UQ moves 3.76x fewer KV bytes than fp16 but reaches only 0.3-1.0 TB/s of the 3.9 TB/s measured HBM peak (dequant ALU + tile structure bound, see results/mi300x_tuning_notes.md), so against a bandwidth-efficient fp16 kernel the per-call gain is ~1.0-1.6x, not 3.76x.
+
+## Cold-cache timings (Infinity Cache flushed before every call), Hq/Hkv=32/8
+
+MI300X has a 256 MB Infinity Cache. The warm tables above repeat the same layer's KV every call, so any config whose KV (fp16: B*ctx*0.52 MB/1k tokens; FP4: 3.76x less) fits in 256 MB is partly served from cache, which flatters small-batch numbers (all B=1 rows, and B=8 up to ~16k for fp16; most UQ rows). Here a 1 GB buffer is written before each call and each call is timed with its own events (adds ~few us of event overhead). A real decode loop cycles 32 layers (4+ GB), so cold numbers are the realistic ones.
+
+| B | ctx | K | fp16 SDPA | fp16 bmm | fp16 best | TQ3 (K=1) / K-indep | UQ fused | UQ vs fp16 best | UQ GB/s (single-pass) | % of measured HBM peak (3909) | UQ K-indep | UQ fused vs UQ K-indep |
+|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|
+| 1 | 4096 | 1 | 0.191 | 0.033 | 0.033 | 0.387 | 0.024 | 1.41x | 189 | 5% | - | - |
+| 1 | 4096 | 8 | 0.193 | 0.041 | 0.041 | 3.100 | 0.032 | 1.28x | 140 | 4% | 0.081 | 2.55x |
+
+## Other KV-quant methods: attention step at B=8, Hq/Hkv=32/8, K=1
+
+Only TQ3 and UQ have fused kernels. fp8/int4 per-tensor (amd-experiments baseline formats), Planar/Iso/Rotor-3 and the TQ3 decompress path are 'dequantise to fp16 then SDPA' (their own bench_all_methods_decode design; fp16 reference here is torch SDPA, 1.4 ms at 32k, bmm would be 0.4 ms). KIVI-style int4 is our own implementation (K per-channel group-32 over tokens, V per-token group-32; asymmetric, fp16 scale+min = 72 B/vec) run through the same unfused path: it shows the *quality* of that format, not a tuned kernel. cos = attention-output cosine vs fp16 on iid Gaussian KV. SemKV/StarKV: no public code found, not run. Their fp8 baseline script scales to 448 although e4m3fnuz max is 240 (NaN outputs: their own results/bench_quality json shows fp8 NaN too); we use 240.
+
+| method | bytes/vec | ctx | ms | cos (iid) |
+|--|--:|--:|--:|--:|
+| fp16_sdpa | 256 | 16384 | 0.719 | 1.0000 |
+| fp8_pertensor_dequant_sdpa | 128 | 16384 | 1.688 | 0.9993 |
+| int4_pertensor_dequant_sdpa | 64 | 16384 | 2.132 | 0.9444 |
+| kivi4_own_dequant_sdpa | 72 | 16384 | 2.297 | 0.9939 |
+| tq3_fused | 52 | 16384 | 0.624 | 0.9655 |
+| tq3_decompress_sdpa | 52 | 16384 | 16.706 | 0.9655 |
+| planar3_decompress_sdpa | 52 | 16384 | 3.067 | 0.9648 |
+| iso3_decompress_sdpa | 52 | 16384 | 5.138 | 0.9653 |
+| rotor3_decompress_sdpa | 52 | 16384 | 4.550 | 0.9656 |
+| uq_fp4_fused_K1 | 68 | 16384 | 0.172 | 0.9861 |
+| fp16_sdpa | 256 | 32768 | 1.433 | 1.0000 |
+| fp8_pertensor_dequant_sdpa | 128 | 32768 | 3.404 | 0.9993 |
+| int4_pertensor_dequant_sdpa | 64 | 32768 | 4.707 | 0.9444 |
+| kivi4_own_dequant_sdpa | 72 | 32768 | 5.069 | 0.9939 |
+| tq3_fused | 52 | 32768 | 1.130 | 0.9650 |
+| tq3_decompress_sdpa | 52 | 32768 | 33.531 | 0.9650 |
+| planar3_decompress_sdpa | 52 | 32768 | 6.263 | 0.9650 |
+| iso3_decompress_sdpa | 52 | 32768 | 10.422 | 0.9650 |
+| rotor3_decompress_sdpa | 52 | 32768 | 9.243 | 0.9653 |
+| uq_fp4_fused_K1 | 68 | 32768 | 0.351 | 0.9860 |
 
 Real-KV accuracy (Mistral-7B) is in results/real_kv_summary.md; synthetic accuracy is mostly a property of the data distribution, not the shape.

@@ -7,3 +7,5 @@ for B in 1 8 32; do for C in 4096 16384 32768 65536; do
   flock /root/gpu.lock timeout 900 python h2h_microbench.py --uq-dir /root/uqpin --amd-dir /root/h2h/kernels \
      --batches $B --ctxs $C --out $R/h2h_raw_B${B}_c${C}.json > $R/h2h_run_B${B}_c${C}.log 2>&1
 done; done; echo ALLDONE > $R/h2h_chunks_done
+# cold-cache variant (Infinity Cache flushed per call), fewer K/Hq: results/h2h_cold_raw_*.json
+# for B in 1 8 32; do for C in 4096 16384 32768 65536; do flock /root/gpu.lock timeout 900 python h2h_microbench.py --uq-dir /root/uqpin --amd-dir /root/h2h/kernels --cold --skip-acc --hqs 32 --ks 1 8 --batches $B --ctxs $C --out $R/h2h_cold_raw_B${B}_c${C}.json; done; done

@@ -1,0 +1,106 @@
+{
+ "device": "AMD Instinct MI300X VF",
+ "rows": [
+  {
+   "B": 8,
+   "ctx": 16384,
+   "Hq": 32,
+   "method": "fp16_sdpa",
+   "K": 1,
+   "ms": 0.7187540054321289,
+   "bytes_per_vec": 256,
+   "cos": 1.0
+  },
+  {
+   "B": 8,
+   "ctx": 16384,
+   "Hq": 32,
+   "method": "fp8_pertensor_dequant_sdpa",
+   "K": 1,
+   "ms": 1.687820053100586,
+   "bytes_per_vec": 128,
+   "cos": 0.9992705583572388
+  },
+  {
+   "B": 8,
+   "ctx": 16384,
+   "Hq": 32,
+   "method": "int4_pertensor_dequant_sdpa",
+   "K": 1,
+   "ms": 2.1317256927490233,
+   "bytes_per_vec": 64,
+   "cos": 0.9444177150726318
+  },
+  {
+   "B": 8,
+   "ctx": 16384,
+   "Hq": 32,
+   "method": "kivi4_own_dequant_sdpa",
+   "K": 1,
+   "ms": 2.297482490539551,
+   "bytes_per_vec": 72,
+   "cos": 0.9939275979995728
+  },
+  {
+   "B": 8,
+   "ctx": 16384,
+   "Hq": 32,
+   "method": "tq3_fused",
+   "K": 1,
+   "ms": 0.6235772132873535,
+   "bytes_per_vec": 52,
+   "cos": 0.9654701352119446
+  },
+  {
+   "B": 8,
+   "ctx": 16384,
+   "Hq": 32,
+   "method": "tq3_decompress_sdpa",
+   "K": 1,
+   "ms": 16.705772399902344,
+   "bytes_per_vec": 52,
+   "cos": 0.965468168258667
+  },
+  {
+   "B": 8,
+   "ctx": 16384,
+   "Hq": 32,
+   "method": "planar3_decompress_sdpa",
+   "K": 1,
+   "ms": 3.067208480834961,
+   "bytes_per_vec": 52,
+   "cos": 0.9648091793060303
+  },
+  {
+   "B": 8,
+   "ctx": 16384,
+   "Hq": 32,
+   "method": "iso3_decompress_sdpa",
+   "K": 1,
+   "ms": 5.1375244140625,
+   "bytes_per_vec": 52,
+   "cos": 0.9653456807136536
+  },
+  {
+   "B": 8,
+   "ctx": 16384,
+   "Hq": 32,
+   "method": "rotor3_decompress_sdpa",
+   "K": 1,
+   "ms": 4.550120544433594,
+   "bytes_per_vec": 52,
+   "cos": 0.9655656814575195
+  },
+  {
+   "B": 8,
+   "ctx": 16384,
+   "Hq": 32,
+   "method": "uq_fp4_fused_K1",
+   "K": 1,
+   "ms": 0.1718304991722107,
+   "bytes_per_vec": 68,
+   "cos": 0.9861353635787964
+  }
+ ],
+ "note": "cos = attention-output cosine vs fp16 SDPA on the same iid-Gaussian KV; unfused methods are dequantise-then-SDPA"
+}

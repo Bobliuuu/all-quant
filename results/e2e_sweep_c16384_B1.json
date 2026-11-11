@@ -1,0 +1,742 @@
+{
+ "device": "AMD Instinct MI300X VF",
+ "model": "mistralai/Mistral-7B-v0.1",
+ "rows": [
+  {
+   "B": 1,
+   "ctx": 16384,
+   "K": 1,
+   "backend": "fp16",
+   "wall_ms": 30.954715728759766,
+   "graph_ms": null,
+   "gpu_ms": 32.135089666666744,
+   "cat_ms": {
+    "other": 4.4884746666667,
+    "gemm": 4.911159000000047,
+    "attention": 22.735456
+   },
+   "top_kernels": [
+    [
+     "attn_fwd.kd",
+     22.735456
+    ],
+    [
+     "Cijk_Alik_Bljk_HHS_BH_Bias_HA_S_SAV_UserArgs_MT256x16x64_MI16x16x1_SN_LDSB1_AFC1_AFEM1_AFE",
+     2.3905343333333398
+    ],
+    [
+     "Cijk_Alik_Bljk_HHS_BH_Bias_HA_S_SAV_UserArgs_MT64x16x128_MI16x16x1_SN_LDSB1_AFC1_AFEM1_AFE",
+     1.052012666666669
+    ],
+    [
+     "void at::native::elementwise_kernel_manual_unroll<128, 8, at::native::gpu_kernel_impl_noca",
+     0.913786666666674
+    ],
+    [
+     "Cijk_Alik_Bljk_HHS_BH_Bias_HA_S_SAV_UserArgs_MT16x16x256_MI16x16x1_SN_LDSB1_AFC1_AFEM1_AFE",
+     0.9049026666666838
+    ],
+    [
+     "Cijk_Alik_Bljk_HHS_BH_Bias_HA_S_SAV_UserArgs_MT32x16x256_MI16x16x1_SN_LDSB1_AFC1_AFEM1_AFE",
+     0.4848110000000167
+    ],
+    [
+     "void at::native::vectorized_elementwise_kernel<8, at::native::CUDAFunctor_add<c10::Half>, ",
+     0.4830363333333685
+    ],
+    [
+     "void at::native::vectorized_elementwise_kernel<8, at::native::BinaryFunctor<c10::Half, c10",
+     0.4592146666666348
+    ]
+   ],
+   "kv_bytes": 2147483648
+  },
+  {
+   "B": 1,
+   "ctx": 16384,
+   "K": 2,
+   "backend": "fp16",
+   "wall_ms": 41.12346267700195,
+   "graph_ms": null,
+   "gpu_ms": 42.25487100000013,
+   "cat_ms": {
+    "other": 6.073459666666804,
+    "gemm": 4.931330999999995,
+    "attention": 31.25008033333333
+   },
+   "top_kernels": [
+    [
+     "attn_fwd.kd",
+     31.25008033333333
+    ],
+    [
+     "void at::native::elementwise_kernel_manual_unroll<128, 8, at::native::gpu_kernel_impl_noca",
+     2.4976433333333063
+    ],
+    [
+     "Cijk_Alik_Bljk_HHS_BH_Bias_HA_S_SAV_UserArgs_MT256x16x64_MI16x16x1_SN_LDSB1_AFC1_AFEM1_AFE",
+     2.3941256666666533
+    ],
+    [
+     "Cijk_Alik_Bljk_HHS_BH_Bias_HA_S_SAV_UserArgs_MT64x16x256_MI16x16x1_SN_LDSB1_AFC1_AFEM1_AFE",
+     1.059989999999997
+    ],
+    [
+     "Cijk_Alik_Bljk_HHS_BH_Bias_HA_S_SAV_UserArgs_MT16x16x256_MI16x16x1_SN_LDSB1_AFC1_AFEM1_AFE",
+     0.9044590000000106
+    ],
+    [
+     "Cijk_Alik_Bljk_HHS_BH_Bias_HA_S_SAV_UserArgs_MT32x16x256_MI16x16x1_SN_LDSB1_AFC1_AFEM1_AFE",
+     0.4939116666666713
+    ],
+    [
+     "void at::native::reduce_kernel<512, 1, at::native::ReduceOp<float, at::native::MeanOps<flo",
+     0.4137953333333651
+    ],
+    [
+     "void at::native::elementwise_kernel_manual_unroll<128, 4, at::native::gpu_kernel_impl_noca",
+     0.38744000000006623
+    ]
+   ],
+   "kv_bytes": 2147483648
+  },
+  {
+   "B": 1,
+   "ctx": 16384,
+   "K": 4,
+   "backend": "fp16",
+   "wall_ms": 41.30864334106445,
+   "graph_ms": null,
+   "gpu_ms": 42.49542966666648,
+   "cat_ms": {
+    "other": 6.248032333333118,
+    "gemm": 5.010515666666678,
+    "attention": 31.236881666666683
+   },
+   "top_kernels": [
+    [
+     "attn_fwd.kd",
+     31.236881666666683
+    ],
+    [
+     "void at::native::elementwise_kernel_manual_unroll<128, 8, at::native::gpu_kernel_impl_noca",
+     2.4908679999999093
+    ],
+    [
+     "Cijk_Alik_Bljk_HHS_BH_Bias_HA_S_SAV_UserArgs_MT256x16x64_MI16x16x1_SN_LDSB1_AFC1_AFEM1_AFE",
+     2.4172293333332955
+    ],
+    [
+     "Cijk_Alik_Bljk_HHS_BH_Bias_HA_S_SAV_UserArgs_MT64x16x128_MI16x16x1_SN_LDSB1_AFC1_AFEM1_AFE",
+     1.0628396666666757
+    ],
+    [
+     "Cijk_Alik_Bljk_HHS_BH_Bias_HA_S_SAV_UserArgs_MT16x16x512_MI16x16x1_SN_LDSB1_AFC1_AFEM1_AFE",
+     0.9506579999999791
+    ],
+    [
+     "Cijk_Alik_Bljk_HHS_BH_Bias_HA_S_SAV_UserArgs_MT32x16x256_MI16x16x1_SN_LDSB1_AFC1_AFEM1_AFE",
+     0.5005560000000576
+    ],
+    [
+     "void at::native::reduce_kernel<512, 1, at::native::ReduceOp<float, at::native::MeanOps<flo",
+     0.46153000000000954
+    ],
+    [
+     "void at::native::elementwise_kernel_manual_unroll<128, 4, at::native::gpu_kernel_impl_noca",
+     0.39405433333336565
+    ]
+   ],
+   "kv_bytes": 2147483648
+  },
+  {
+   "B": 1,
+   "ctx": 16384,
+   "K": 8,
+   "backend": "fp16",
+   "wall_ms": 42.21554183959961,
+   "graph_ms": null,
+   "gpu_ms": 43.29070000000024,
+   "cat_ms": {
+    "other": 6.213081666666849,
+    "gemm": 5.040369000000084,
+    "attention": 32.037249333333314
+   },
+   "top_kernels": [
+    [
+     "attn_fwd.kd",
+     32.037249333333314
+    ],
+    [
+     "void at::native::elementwise_kernel_manual_unroll<128, 8, at::native::gpu_kernel_impl_noca",
+     2.445181666666766
+    ],
+    [
+     "Cijk_Alik_Bljk_HHS_BH_Bias_HA_S_SAV_UserArgs_MT256x16x64_MI16x16x1_SN_LDSB1_AFC1_AFEM1_AFE",
+     2.433495333333378
+    ],
+    [
+     "Cijk_Alik_Bljk_HHS_BH_Bias_HA_S_SAV_UserArgs_MT64x16x256_MI16x16x1_SN_LDSB1_AFC1_AFEM1_AFE",
+     1.0817206666666719
+    ],
+    [
+     "Cijk_Alik_Bljk_HHS_BH_Bias_HA_S_SAV_UserArgs_MT16x16x512_MI16x16x1_SN_LDSB1_AFC1_AFEM1_AFE",
+     0.9425170000000425
+    ],
+    [
+     "void at::native::reduce_kernel<512, 1, at::native::ReduceOp<float, at::native::MeanOps<flo",
+     0.5403253333332804
+    ],
+    [
+     "Cijk_Alik_Bljk_HHS_BH_Bias_HA_S_SAV_UserArgs_MT32x16x256_MI16x16x1_SN_LDSB1_AFC1_AFEM1_AFE",
+     0.502561666666649
+    ],
+    [
+     "void at::native::elementwise_kernel_manual_unroll<128, 4, at::native::gpu_kernel_impl_noca",
+     0.39136833333331017
+    ]
+   ],
+   "kv_bytes": 2147483648
+  },
+  {
+   "B": 1,
+   "ctx": 16384,
+   "K": 1,
+   "backend": "fp16_bmm",
+   "wall_ms": 17.130861282348633,
+   "graph_ms": null,
+   "gpu_ms": 10.443657999999909,
+   "cat_ms": {
+    "other": 3.882604999999941,
+    "gemm": 6.053585999999981,
+    "attention": 0.5074669999999869
+   },
+   "top_kernels": [
+    [
+     "Cijk_Alik_Bljk_HHS_BH_Bias_HA_S_SAV_UserArgs_MT256x16x64_MI16x16x1_SN_LDSB1_AFC1_AFEM1_AFE",
+     2.889529333333338
+    ],
+    [
+     "Cijk_Alik_Bljk_HHS_BH_Bias_HA_S_SAV_UserArgs_MT64x16x128_MI16x16x1_SN_LDSB1_AFC1_AFEM1_AFE",
+     1.0551813333333306
+    ],
+    [
+     "void at::native::elementwise_kernel_manual_unroll<128, 8, at::native::gpu_kernel_impl_noca",
+     0.9272796666666518
+    ],
+    [
+     "Cijk_Alik_Bljk_HHS_BH_Bias_HA_S_SAV_UserArgs_MT16x16x256_MI16x16x1_SN_LDSB1_AFC1_AFEM1_AFE",
+     0.9213933333333442
+    ],
+    [
+     "Cijk_Ailk_Bljk_HHS_BH_Bias_HA_S_SAV_UserArgs_MT16x16x256_MI16x16x1_SN_LDSB1_AFC1_AFEM1_AFE",
+     0.6268339999999936
+    ],
+    [
+     "Cijk_Alik_Bljk_HHS_BH_Bias_HA_S_SAV_UserArgs_MT32x16x256_MI16x16x1_SN_LDSB1_AFC1_AFEM1_AFE",
+     0.5083699999999833
+    ],
+    [
+     "void at::native::(anonymous namespace)::cunn_SoftMaxForwardFast<8, c10::Half, float, float",
+     0.5074669999999869
+    ],
+    [
+     "void at::native::vectorized_elementwise_kernel<8, at::native::CUDAFunctor_add<c10::Half>, ",
+     0.4477706666666613
+    ]
+   ],
+   "kv_bytes": 2147483648
+  },
+  {
+   "B": 1,
+   "ctx": 16384,
+   "K": 2,
+   "backend": "fp16_bmm",
+   "wall_ms": 22.919275283813477,
+   "graph_ms": null,
+   "gpu_ms": 11.972433666666879,
+   "cat_ms": {
+    "other": 5.283219666666854,
+    "gemm": 6.170305666666693,
+    "attention": 0.5189083333333314
+   },
+   "top_kernels": [
+    [
+     "Cijk_Alik_Bljk_HHS_BH_Bias_HA_S_SAV_UserArgs_MT256x16x64_MI16x16x1_SN_LDSB1_AFC1_AFEM1_AFE",
+     2.916629000000019
+    ],
+    [
+     "void at::native::elementwise_kernel_manual_unroll<128, 8, at::native::gpu_kernel_impl_noca",
+     2.3034523333334165
+    ],
+    [
+     "Cijk_Alik_Bljk_HHS_BH_Bias_HA_S_SAV_UserArgs_MT64x16x256_MI16x16x1_SN_LDSB1_AFC1_AFEM1_AFE",
+     1.0797566666666691
+    ],
+    [
+     "Cijk_Alik_Bljk_HHS_BH_Bias_HA_S_SAV_UserArgs_MT16x16x256_MI16x16x1_SN_LDSB1_AFC1_AFEM1_AFE",
+     0.9099556666666526
+    ],
+    [
+     "Cijk_Ailk_Bljk_HHS_BH_Bias_HA_S_SAV_UserArgs_MT16x16x256_MI16x16x1_SN_LDSB1_AFC1_AFEM1_AFE",
+     0.6630480000000091
+    ],
+    [
+     "Cijk_Alik_Bljk_HHS_BH_Bias_HA_S_SAV_UserArgs_MT32x16x256_MI16x16x1_SN_LDSB1_AFC1_AFEM1_AFE",
+     0.5218040000000144
+    ],
+    [
+     "void at::native::(anonymous namespace)::cunn_SoftMaxForwardFast<8, c10::Half, float, float",
+     0.5189083333333314
+    ],
+    [
+     "void at::native::reduce_kernel<512, 1, at::native::ReduceOp<float, at::native::MeanOps<flo",
+     0.40485633333330573
+    ]
+   ],
+   "kv_bytes": 2147483648
+  },
+  {
+   "B": 1,
+   "ctx": 16384,
+   "K": 4,
+   "backend": "fp16_bmm",
+   "wall_ms": 21.903963088989258,
+   "graph_ms": null,
+   "gpu_ms": 12.41099500000014,
+   "cat_ms": {
+    "other": 5.533003666666854,
+    "gemm": 6.26096766666661,
+    "attention": 0.617023666666676
+   },
+   "top_kernels": [
+    [
+     "Cijk_Alik_Bljk_HHS_BH_Bias_HA_S_SAV_UserArgs_MT256x16x64_MI16x16x1_SN_LDSB1_AFC1_AFEM1_AFE",
+     2.9445466666666484
+    ],
+    [
+     "void at::native::elementwise_kernel_manual_unroll<128, 8, at::native::gpu_kernel_impl_noca",
+     2.337016666666745
+    ],
+    [
+     "Cijk_Alik_Bljk_HHS_BH_Bias_HA_S_SAV_UserArgs_MT64x16x128_MI16x16x1_SN_LDSB1_AFC1_AFEM1_AFE",
+     1.0944963333333095
+    ],
+    [
+     "Cijk_Alik_Bljk_HHS_BH_Bias_HA_S_SAV_UserArgs_MT16x16x512_MI16x16x1_SN_LDSB1_AFC1_AFEM1_AFE",
+     0.9175176666666656
+    ],
+    [
+     "Cijk_Ailk_Bljk_HHS_BH_Bias_HA_S_SAV_UserArgs_MT16x16x256_MI16x16x1_SN_LDSB1_AFC1_AFEM1_AFE",
+     0.6914613333332986
+    ],
+    [
+     "void at::native::(anonymous namespace)::cunn_SoftMaxForwardFast<8, c10::Half, float, float",
+     0.617023666666676
+    ],
+    [
+     "Cijk_Alik_Bljk_HHS_BH_Bias_HA_S_SAV_UserArgs_MT32x16x256_MI16x16x1_SN_LDSB1_AFC1_AFEM1_AFE",
+     0.5324170000000251
+    ],
+    [
+     "void at::native::reduce_kernel<512, 1, at::native::ReduceOp<float, at::native::MeanOps<flo",
+     0.4595533333333396
+    ]
+   ],
+   "kv_bytes": 2147483648
+  },
+  {
+   "B": 1,
+   "ctx": 16384,
+   "K": 8,
+   "backend": "fp16_bmm",
+   "wall_ms": 26.41886329650879,
+   "graph_ms": null,
+   "gpu_ms": 13.33465566666675,
+   "cat_ms": {
+    "other": 6.208703000000114,
+    "gemm": 6.747630333333292,
+    "attention": 0.3783223333333439
+   },
+   "top_kernels": [
+    [
+     "Cijk_Alik_Bljk_HHS_BH_Bias_HA_S_SAV_UserArgs_MT256x16x64_MI16x16x1_SN_LDSB1_AFC1_AFEM1_AFE",
+     2.4701009999999664
+    ],
+    [
+     "void at::native::elementwise_kernel_manual_unroll<128, 8, at::native::gpu_kernel_impl_noca",
+     2.456444333333337
+    ],
+    [
+     "Cijk_Alik_Bljk_HHS_BH_Bias_HA_S_SAV_UserArgs_MT64x16x256_MI16x16x1_SN_LDSB1_AFC1_AFEM1_AFE",
+     1.1018996666666694
+    ],
+    [
+     "Cijk_Ailk_Bljk_HHS_BH_Bias_HA_S_SAV_UserArgs_MT16x16x256_MI16x16x1_SN_LDSB1_AFC1_AFEM1_AFE",
+     0.9950316666666754
+    ],
+    [
+     "Cijk_Alik_Bljk_HHS_BH_Bias_HA_S_SAV_UserArgs_MT16x16x512_MI16x16x1_SN_LDSB1_AFC1_AFEM1_AFE",
+     0.9386983333333291
+    ],
+    [
+     "Cijk_Alik_Bljk_HHS_BH_Bias_HA_S_SAV_UserArgs_MT256x32x64_MI16x16x1_SN_LDSB1_AFC1_AFEM1_AFE",
+     0.623158000000025
+    ],
+    [
+     "Cijk_Alik_Bljk_HHS_BH_Bias_HA_S_SAV_UserArgs_MT32x16x256_MI16x16x1_SN_LDSB1_AFC1_AFEM1_AFE",
+     0.5378656666666316
+    ],
+    [
+     "void at::native::reduce_kernel<512, 1, at::native::ReduceOp<float, at::native::MeanOps<flo",
+     0.5267853333333263
+    ]
+   ],
+   "kv_bytes": 2147483648
+  },
+  {
+   "B": 1,
+   "ctx": 16384,
+   "K": 1,
+   "backend": "uq_fused",
+   "wall_ms": 23.00592803955078,
+   "graph_ms": null,
+   "gpu_ms": 10.829732333333284,
+   "cat_ms": {
+    "other": 4.045470999999928,
+    "gemm": 5.006283333333345,
+    "attention": 1.7779780000000123
+   },
+   "top_kernels": [
+    [
+     "Cijk_Alik_Bljk_HHS_BH_Bias_HA_S_SAV_UserArgs_MT256x16x64_MI16x16x1_SN_LDSB1_AFC1_AFEM1_AFE",
+     2.45213666666665
+    ],
+    [
+     "_split_kernel.kd",
+     1.6328526666666698
+    ],
+    [
+     "Cijk_Alik_Bljk_HHS_BH_Bias_HA_S_SAV_UserArgs_MT64x16x128_MI16x16x1_SN_LDSB1_AFC1_AFEM1_AFE",
+     1.0778306666666806
+    ],
+    [
+     "Cijk_Alik_Bljk_HHS_BH_Bias_HA_S_SAV_UserArgs_MT16x16x256_MI16x16x1_SN_LDSB1_AFC1_AFEM1_AFE",
+     0.9102423333333417
+    ],
+    [
+     "void at::native::elementwise_kernel_manual_unroll<128, 8, at::native::gpu_kernel_impl_noca",
+     0.6846753333333283
+    ],
+    [
+     "Cijk_Alik_Bljk_HHS_BH_Bias_HA_S_SAV_UserArgs_MT32x16x256_MI16x16x1_SN_LDSB1_AFC1_AFEM1_AFE",
+     0.5136620000000125
+    ],
+    [
+     "void at::native::elementwise_kernel_manual_unroll<128, 4, at::native::gpu_kernel_impl<at::",
+     0.44779166666668135
+    ],
+    [
+     "void at::native::vectorized_elementwise_kernel<8, at::native::CUDAFunctor_add<c10::Half>, ",
+     0.4216446666666876
+    ]
+   ],
+   "kv_bytes": 570425344
+  },
+  {
+   "B": 1,
+   "ctx": 16384,
+   "K": 2,
+   "backend": "uq_fused",
+   "wall_ms": 21.359615325927734,
+   "graph_ms": null,
+   "gpu_ms": 10.996439333333427,
+   "cat_ms": {
+    "other": 4.249740666666765,
+    "gemm": 4.968706666666652,
+    "attention": 1.777992000000011
+   },
+   "top_kernels": [
+    [
+     "Cijk_Alik_Bljk_HHS_BH_Bias_HA_S_SAV_UserArgs_MT256x16x64_MI16x16x1_SN_LDSB1_AFC1_AFEM1_AFE",
+     2.430688333333342
+    ],
+    [
+     "_split_kernel.kd",
+     1.6289516666666826
+    ],
+    [
+     "void at::native::elementwise_kernel_manual_unroll<128, 8, at::native::gpu_kernel_impl_noca",
+     1.2676819999999578
+    ],
+    [
+     "Cijk_Alik_Bljk_HHS_BH_Bias_HA_S_SAV_UserArgs_MT64x16x256_MI16x16x1_SN_LDSB1_AFC1_AFEM1_AFE",
+     1.0626096666666602
+    ],
+    [
+     "Cijk_Alik_Bljk_HHS_BH_Bias_HA_S_SAV_UserArgs_MT16x16x256_MI16x16x1_SN_LDSB1_AFC1_AFEM1_AFE",
+     0.9014100000000002
+    ],
+    [
+     "Cijk_Alik_Bljk_HHS_BH_Bias_HA_S_SAV_UserArgs_MT32x16x256_MI16x16x1_SN_LDSB1_AFC1_AFEM1_AFE",
+     0.5215066666666599
+    ],
+    [
+     "void at::native::elementwise_kernel_manual_unroll<128, 4, at::native::gpu_kernel_impl<at::",
+     0.4421440000000035
+    ],
+    [
+     "void at::native::reduce_kernel<512, 1, at::native::ReduceOp<float, at::native::MeanOps<flo",
+     0.4004363333333553
+    ]
+   ],
+   "kv_bytes": 570425344
+  },
+  {
+   "B": 1,
+   "ctx": 16384,
+   "K": 4,
+   "backend": "uq_fused",
+   "wall_ms": 22.130359649658203,
+   "graph_ms": null,
+   "gpu_ms": 11.127487333333306,
+   "cat_ms": {
+    "other": 4.340540666666646,
+    "gemm": 4.999305000000012,
+    "attention": 1.7876416666666484
+   },
+   "top_kernels": [
+    [
+     "Cijk_Alik_Bljk_HHS_BH_Bias_HA_S_SAV_UserArgs_MT256x16x64_MI16x16x1_SN_LDSB1_AFC1_AFEM1_AFE",
+     2.4329223333333387
+    ],
+    [
+     "_split_kernel.kd",
+     1.6356869999999997
+    ],
+    [
+     "void at::native::elementwise_kernel_manual_unroll<128, 8, at::native::gpu_kernel_impl_noca",
+     1.2538099999999694
+    ],
+    [
+     "Cijk_Alik_Bljk_HHS_BH_Bias_HA_S_SAV_UserArgs_MT64x16x128_MI16x16x1_SN_LDSB1_AFC1_AFEM1_AFE",
+     1.0728630000000028
+    ],
+    [
+     "Cijk_Alik_Bljk_HHS_BH_Bias_HA_S_SAV_UserArgs_MT16x16x512_MI16x16x1_SN_LDSB1_AFC1_AFEM1_AFE",
+     0.8977756666666632
+    ],
+    [
+     "Cijk_Alik_Bljk_HHS_BH_Bias_HA_S_SAV_UserArgs_MT32x16x256_MI16x16x1_SN_LDSB1_AFC1_AFEM1_AFE",
+     0.5159636666666789
+    ],
+    [
+     "void at::native::reduce_kernel<512, 1, at::native::ReduceOp<float, at::native::MeanOps<flo",
+     0.45614833333331156
+    ],
+    [
+     "void at::native::elementwise_kernel_manual_unroll<128, 4, at::native::gpu_kernel_impl<at::",
+     0.43947900000003254
+    ]
+   ],
+   "kv_bytes": 570425344
+  },
+  {
+   "B": 1,
+   "ctx": 16384,
+   "K": 8,
+   "backend": "uq_fused",
+   "wall_ms": 23.047391891479492,
+   "graph_ms": null,
+   "gpu_ms": 11.732223333333256,
+   "cat_ms": {
+    "other": 4.415801666666546,
+    "gemm": 5.044732000000047,
+    "attention": 2.271689666666662
+   },
+   "top_kernels": [
+    [
+     "Cijk_Alik_Bljk_HHS_BH_Bias_HA_S_SAV_UserArgs_MT256x16x64_MI16x16x1_SN_LDSB1_AFC1_AFEM1_AFE",
+     2.4588346666666694
+    ],
+    [
+     "_split_kernel.kd",
+     2.117223333333326
+    ],
+    [
+     "void at::native::elementwise_kernel_manual_unroll<128, 8, at::native::gpu_kernel_impl_noca",
+     1.2500633333332778
+    ],
+    [
+     "Cijk_Alik_Bljk_HHS_BH_Bias_HA_S_SAV_UserArgs_MT64x16x256_MI16x16x1_SN_LDSB1_AFC1_AFEM1_AFE",
+     1.0919443333333312
+    ],
+    [
+     "Cijk_Alik_Bljk_HHS_BH_Bias_HA_S_SAV_UserArgs_MT16x16x512_MI16x16x1_SN_LDSB1_AFC1_AFEM1_AFE",
+     0.9083663333333486
+    ],
+    [
+     "Cijk_Alik_Bljk_HHS_BH_Bias_HA_S_SAV_UserArgs_MT32x16x256_MI16x16x1_SN_LDSB1_AFC1_AFEM1_AFE",
+     0.53177133333336
+    ],
+    [
+     "void at::native::reduce_kernel<512, 1, at::native::ReduceOp<float, at::native::MeanOps<flo",
+     0.5155896666666379
+    ],
+    [
+     "void at::native::elementwise_kernel_manual_unroll<128, 4, at::native::gpu_kernel_impl<at::",
+     0.41947666666668343
+    ]
+   ],
+   "kv_bytes": 570425344
+  },
+  {
+   "B": 1,
+   "ctx": 16384,
+   "K": 2,
+   "backend": "uq_kindep",
+   "wall_ms": 26.707714080810547,
+   "graph_ms": null,
+   "gpu_ms": 12.893149999999954,
+   "cat_ms": {
+    "other": 5.074038999999979,
+    "gemm": 5.0727550000000114,
+    "attention": 2.7463559999999636
+   },
+   "top_kernels": [
+    [
+     "_split_kernel.kd",
+     2.597420999999976
+    ],
+    [
+     "Cijk_Alik_Bljk_HHS_BH_Bias_HA_S_SAV_UserArgs_MT256x16x64_MI16x16x1_SN_LDSB1_AFC1_AFEM1_AFE",
+     2.4930203333333614
+    ],
+    [
+     "void at::native::elementwise_kernel_manual_unroll<128, 8, at::native::gpu_kernel_impl_noca",
+     1.2752500000000317
+    ],
+    [
+     "Cijk_Alik_Bljk_HHS_BH_Bias_HA_S_SAV_UserArgs_MT64x16x256_MI16x16x1_SN_LDSB1_AFC1_AFEM1_AFE",
+     1.0819353333333246
+    ],
+    [
+     "Cijk_Alik_Bljk_HHS_BH_Bias_HA_S_SAV_UserArgs_MT16x16x256_MI16x16x1_SN_LDSB1_AFC1_AFEM1_AFE",
+     0.8952010000000157
+    ],
+    [
+     "void at::native::elementwise_kernel_manual_unroll<128, 4, at::native::gpu_kernel_impl<at::",
+     0.7418356666666873
+    ],
+    [
+     "Cijk_Alik_Bljk_HHS_BH_Bias_HA_S_SAV_UserArgs_MT32x16x256_MI16x16x1_SN_LDSB1_AFC1_AFEM1_AFE",
+     0.5235263333333167
+    ],
+    [
+     "void at::native::reduce_kernel<512, 1, at::native::ReduceOp<float, at::native::MeanOps<flo",
+     0.4008043333333309
+    ]
+   ],
+   "kv_bytes": 570425344
+  },
+  {
+   "B": 1,
+   "ctx": 16384,
+   "K": 4,
+   "backend": "uq_kindep",
+   "wall_ms": 27.030860900878906,
+   "graph_ms": null,
+   "gpu_ms": 13.192047000000116,
+   "cat_ms": {
+    "other": 5.145775666666724,
+    "gemm": 5.114817333333371,
+    "attention": 2.9314540000000213
+   },
+   "top_kernels": [
+    [
+     "_split_kernel.kd",
+     2.784045666666665
+    ],
+    [
+     "Cijk_Alik_Bljk_HHS_BH_Bias_HA_S_SAV_UserArgs_MT256x16x64_MI16x16x1_SN_LDSB1_AFC1_AFEM1_AFE",
+     2.526294333333359
+    ],
+    [
+     "void at::native::elementwise_kernel_manual_unroll<128, 8, at::native::gpu_kernel_impl_noca",
+     1.2582240000000287
+    ],
+    [
+     "Cijk_Alik_Bljk_HHS_BH_Bias_HA_S_SAV_UserArgs_MT64x16x128_MI16x16x1_SN_LDSB1_AFC1_AFEM1_AFE",
+     1.0954469999999974
+    ],
+    [
+     "Cijk_Alik_Bljk_HHS_BH_Bias_HA_S_SAV_UserArgs_MT16x16x512_MI16x16x1_SN_LDSB1_AFC1_AFEM1_AFE",
+     0.8959446666666624
+    ],
+    [
+     "void at::native::elementwise_kernel_manual_unroll<128, 4, at::native::gpu_kernel_impl<at::",
+     0.7356960000000413
+    ],
+    [
+     "Cijk_Alik_Bljk_HHS_BH_Bias_HA_S_SAV_UserArgs_MT32x16x256_MI16x16x1_SN_LDSB1_AFC1_AFEM1_AFE",
+     0.5177650000000211
+    ],
+    [
+     "void at::native::reduce_kernel<512, 1, at::native::ReduceOp<float, at::native::MeanOps<flo",
+     0.45315166666666684
+    ]
+   ],
+   "kv_bytes": 570425344
+  },
+  {
+   "B": 1,
+   "ctx": 16384,
+   "K": 8,
+   "backend": "uq_kindep",
+   "wall_ms": 28.2058048248291,
+   "graph_ms": null,
+   "gpu_ms": 16.239291999999928,
+   "cat_ms": {
+    "other": 5.472114999999966,
+    "gemm": 5.171355666666615,
+    "attention": 5.5958213333333475
+   },
+   "top_kernels": [
+    [
+     "_split_kernel.kd",
+     5.435544333333316
+    ],
+    [
+     "Cijk_Alik_Bljk_HHS_BH_Bias_HA_S_SAV_UserArgs_MT256x16x64_MI16x16x1_SN_LDSB1_AFC1_AFEM1_AFE",
+     2.545949333333286
+    ],
+    [
+     "void at::native::elementwise_kernel_manual_unroll<128, 8, at::native::gpu_kernel_impl_noca",
+     1.2549856666665953
+    ],
+    [
+     "Cijk_Alik_Bljk_HHS_BH_Bias_HA_S_SAV_UserArgs_MT64x16x256_MI16x16x1_SN_LDSB1_AFC1_AFEM1_AFE",
+     1.096006666666654
+    ],
+    [
+     "Cijk_Alik_Bljk_HHS_BH_Bias_HA_S_SAV_UserArgs_MT16x16x512_MI16x16x1_SN_LDSB1_AFC1_AFEM1_AFE",
+     0.9162703333333123
+    ],
+    [
+     "void at::native::elementwise_kernel_manual_unroll<128, 4, at::native::gpu_kernel_impl<at::",
+     0.7427336666666415
+    ],
+    [
+     "Cijk_Alik_Bljk_HHS_BH_Bias_HA_S_SAV_UserArgs_MT32x16x256_MI16x16x1_SN_LDSB1_AFC1_AFEM1_AFE",
+     0.5327073333333573
+    ],
+    [
+     "void at::native::reduce_kernel<512, 1, at::native::ReduceOp<float, at::native::MeanOps<flo",
+     0.5214810000000232
+    ]
+   ],
+   "kv_bytes": 570425344
+  }
+ ],
+ "note": "eager HF-module layer loop; context KV = real Mistral prefill of python source, replicated over batch"
+}

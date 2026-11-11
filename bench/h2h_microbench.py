@@ -13,6 +13,8 @@ ap.add_argument("--ctxs", type=int, nargs="+", default=[4096, 16384, 32768, 6553
 ap.add_argument("--hqs", type=int, nargs="+", default=[32, 64])
 ap.add_argument("--ks", type=int, nargs="+", default=[1, 2, 4, 8])
 ap.add_argument("--reps", type=int, default=30)
+ap.add_argument("--cold", action="store_true", help="flush the 256 MB MI300X Infinity Cache (write a 1 GB buffer) before every timed call; time each call with its own events")
+ap.add_argument("--skip-acc", action="store_true")
 a = ap.parse_args()
 if a.out.endswith('h2h_raw.json'): sys.exit('superseded by chunked runs (run_h2h_chunked.sh)')
 sys.path.insert(0, a.uq_dir); sys.path.insert(0, a.amd_dir)
@@ -27,7 +29,17 @@ tq = TurboQuantMI300X(bits=3, device=dev)
 B_FP16, B_TQ3, B_UQ = D * 2, 52, D // 2 + D // 32   # bytes per K-or-V vector
 
 
+_FLUSH = None
 def tmeter(fn, reps):
+    global _FLUSH
+    if a.cold:
+        if _FLUSH is None: _FLUSH = torch.empty(1 << 30, dtype=torch.uint8, device=dev)
+        for _ in range(2): fn()
+        tot = 0.0
+        for _ in range(max(10, reps // 2)):
+            _FLUSH.zero_(); s_, e_ = torch.cuda.Event(enable_timing=True), torch.cuda.Event(enable_timing=True)
+            s_.record(); fn(); e_.record(); e_.synchronize(); tot += s_.elapsed_time(e_)
+        return tot / max(10, reps // 2)
     for _ in range(3): fn()
     torch.cuda.synchronize()
     s, e = torch.cuda.Event(enable_timing=True), torch.cuda.Event(enable_timing=True)
@@ -100,7 +112,7 @@ for B in a.batches:
         print(f"   built in {time.time()-t0:.0f}s  mem={torch.cuda.memory_allocated()/1e9:.1f}GB", flush=True)
 
         # ---------------- accuracy (b=0 slice) ----------------
-        if True:
+        if not a.skip_acc:
             for regime in ("iid", "peaked"):
                 for Hq in (32,):
                     G = Hq // HKV
@@ -144,6 +156,10 @@ for B in a.batches:
                 qs = lambda KK: torch.randn(B, HKV, G * KK, D, device=dev, dtype=torch.float16)
                 qf, qf1 = qs(K), qs(1)
                 row("fp16_sdpa_fused", tmeter(lambda: F.scaled_dot_product_attention(qf, kf, vf, scale=SM), reps), B_FP16)
+                def bmm_attn(q_, k_, v_):
+                    sc_ = torch.matmul(q_, k_.transpose(-1, -2)) * SM
+                    return torch.matmul(torch.softmax(sc_, -1, dtype=torch.float32).to(q_.dtype), v_)
+                row("fp16_bmm_fused", tmeter(lambda: bmm_attn(qf, kf, vf), reps), B_FP16)
                 if K > 1:
                     def f_ind():
                         for _ in range(K): F.scaled_dot_product_attention(qf1, kf, vf, scale=SM)

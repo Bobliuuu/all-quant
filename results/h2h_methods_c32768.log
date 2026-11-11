@@ -1,0 +1,11 @@
+{"B": 8, "ctx": 32768, "Hq": 32, "method": "fp16_sdpa", "K": 1, "ms": 1.4330147743225097, "bytes_per_vec": 256, "cos": 1.0}
+{"B": 8, "ctx": 32768, "Hq": 32, "method": "fp8_pertensor_dequant_sdpa", "K": 1, "ms": 3.4038787841796876, "bytes_per_vec": 128, "cos": 0.9992602467536926}
+{"B": 8, "ctx": 32768, "Hq": 32, "method": "int4_pertensor_dequant_sdpa", "K": 1, "ms": 4.7065269470214846, "bytes_per_vec": 64, "cos": 0.944376528263092}
+{"B": 8, "ctx": 32768, "Hq": 32, "method": "kivi4_own_dequant_sdpa", "K": 1, "ms": 5.069291305541992, "bytes_per_vec": 72, "cos": 0.9938642382621765}
+[MFMARotate] MFMA rotation kernel ready (tq_mfma_rotate_cov5.hsaco)
+{"B": 8, "ctx": 32768, "Hq": 32, "method": "tq3_fused", "K": 1, "ms": 1.1304334640502929, "bytes_per_vec": 52, "cos": 0.9649968147277832}
+{"B": 8, "ctx": 32768, "Hq": 32, "method": "tq3_decompress_sdpa", "K": 1, "ms": 33.53135681152344, "bytes_per_vec": 52, "cos": 0.9649981260299683}
+{"B": 8, "ctx": 32768, "Hq": 32, "method": "planar3_decompress_sdpa", "K": 1, "ms": 6.262851333618164, "bytes_per_vec": 52, "cos": 0.965028703212738}
+{"B": 8, "ctx": 32768, "Hq": 32, "method": "iso3_decompress_sdpa", "K": 1, "ms": 10.422280883789062, "bytes_per_vec": 52, "cos": 0.9650379419326782}
+{"B": 8, "ctx": 32768, "Hq": 32, "method": "rotor3_decompress_sdpa", "K": 1, "ms": 9.242759704589844, "bytes_per_vec": 52, "cos": 0.9652930498123169}
+{"B": 8, "ctx": 32768, "Hq": 32, "method": "uq_fp4_fused_K1", "K": 1, "ms": 0.35061700344085694, "bytes_per_vec": 68, "cos": 0.9860204458236694}
