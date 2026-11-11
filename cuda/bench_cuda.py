@@ -79,8 +79,17 @@ for K in a.ks:
         if best is None or ms < best[0]: best = (ms, c)
     ms_f, cfg = best
     f = lambda: uq_decode_cuda(q, kc, ks, vc, vs, bt, seq, fused=True, **cfg)
-    u = lambda: uq_decode_cuda(q, kc, ks, vc, vs, bt, seq, fused=False, **cfg)
-    ms_f = timeit(f); ms_u = timeit(u)
+    ms_f = timeit(f)
+    # K-independent baseline: K=1 problems, tuned over a small grid (the fused cfg is invalid for BLOCK_M=16)
+    ms_u, ucfg = None, None
+    ucands = [dict(variant=2, mb=1, nwarps=nw, stages=2, nsplit=ns) for nw in (2, 4) for ns in (8, 16, 24)] + [dict(variant=1, nwarps=4, stages=3, nsplit=ns) for ns in (16, 32)]
+    for c in ucands:
+        try:
+            t_ = timeit(lambda: uq_decode_cuda(q, kc, ks, vc, vs, bt, seq, fused=False, **c), 5)
+        except Exception:
+            continue
+        if ms_u is None or t_ < ms_u: ms_u, ucfg = t_, c
+    ms_u = timeit(lambda: uq_decode_cuda(q, kc, ks, vc, vs, bt, seq, fused=False, **ucfg))
     row.update(cuda_fused_ms=ms_f, cuda_base_ms=ms_u, cuda_cfg=cfg, cuda_fused_GBps=kvb / ms_f / 1e6,
                cuda_pct_peak=100 * kvb / ms_f / 1e6 / peak, cuda_speedup_vs_base=ms_u / ms_f)
     if a.check:

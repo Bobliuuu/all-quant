@@ -1,0 +1,34 @@
+NVIDIA A100-SXM4-80GB, 8.0, 610.57.04
+
+Cuda compilation tools, release 12.9, V12.9.86
+Build cuda_12.9.r12.9/compiler.36037853_0
+
+2.13.0+cu129 3.7.1 (8, 0)
+
+uq_decode.cu(488): warning #177-D: variable "stages" was declared but never referenced
+    int stages = 3;
+        ^
+          detected during:
+            instantiation of "cudaError_t dispatch_w<D,PAGE>(const UQParams &, int, int, cudaStream_t) [with D=128, PAGE=16]" at line 531
+            instantiation of "cudaError_t dispatch_dp<D,PAGE>(const UQParams &, int, int, cudaStream_t) [with D=128, PAGE=16]" at line 542
+
+Remark: The warnings can be suppressed with "-diag-suppress <warning-number>"
+
+
+case main       K=1 done
+case main       K=2 done
+case main       K=4 done
+case main       K=8 done
+case gqa8_p128  K=1 done
+case gqa8_p128  K=2 done
+case gqa8_p128  K=4 done
+case gqa8_p128  K=8 done
+case d64_p32    K=1 done
+case d64_p32    K=2 done
+case d64_p32    K=4 done
+case p16_g4     K=1 done
+case p16_g4     K=3 done
+case p16_g4     K=8 done
+case edge_short K=8 done
+RESULT runs=1680 fails=0 worst_max_abs_err=9.720e-03 worst_err_beyond_bf16_rounding=2.073e-03 tol=1.0e-02
+

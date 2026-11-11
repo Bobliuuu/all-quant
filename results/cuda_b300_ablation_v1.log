@@ -1,0 +1,41 @@
+NVIDIA B300 SXM6 AC, 10.3, 610.57.04
+
+Cuda compilation tools, release 12.9, V12.9.86
+Build cuda_12.9.r12.9/compiler.36037853_0
+
+2.13.0+cu129 3.7.1 (10, 3)
+
+## variant full
+
+HBM copy peak 6484 GB/s
+device NVIDIA B300 SXM6 AC SMs 148
+K=1 best 0.2428 ms  (nw=4 st=2 ns=24)  1175 GB/s  18.1% of copy peak
+K=8 best 0.3784 ms  (nw=4 st=3 ns=24)  754 GB/s  11.6% of copy peak
+
+## variant nodeq
+
+HBM copy peak 6484 GB/s
+device NVIDIA B300 SXM6 AC SMs 148
+K=1 best 0.1620 ms  (nw=2 st=4 ns=32)  1760 GB/s  27.1% of copy peak
+K=8 best 0.2894 ms  (nw=4 st=2 ns=32)  985 GB/s  15.2% of copy peak
+
+## variant nommma
+
+HBM copy peak 6486 GB/s
+device NVIDIA B300 SXM6 AC SMs 148
+K=1 best 0.2032 ms  (nw=4 st=2 ns=16)  1403 GB/s  21.6% of copy peak
+K=8 best 0.3089 ms  (nw=4 st=4 ns=16)  923 GB/s  14.2% of copy peak
+
+## variant nodeq_nommma
+
+HBM copy peak 6484 GB/s
+device NVIDIA B300 SXM6 AC SMs 148
+K=1 best 0.1427 ms  (nw=2 st=4 ns=32)  1998 GB/s  30.8% of copy peak
+K=8 best 0.2551 ms  (nw=4 st=4 ns=24)  1118 GB/s  17.2% of copy peak
+
+## samepage (L2-resident, compute only)
+HBM copy peak 6487 GB/s
+device NVIDIA B300 SXM6 AC SMs 148
+K=1 best 0.2376 ms  (nw=4 st=2 ns=24)  1200 GB/s  18.5% of copy peak
+K=8 best 0.3702 ms  (nw=4 st=3 ns=24)  770 GB/s  11.9% of copy peak
+
