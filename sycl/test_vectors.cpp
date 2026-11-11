@@ -25,12 +25,17 @@ int main(int argc, char** argv) {
   sycl::queue q{sycl::default_selector_v, sycl::property::queue::enable_profiling{}};
   std::printf("device: %s\n", q.get_device().get_info<sycl::info::device::name>().c_str());
   std::ifstream mf(dir + "/manifest.txt");
-  std::string name; int B, K, HQ, HKV, D, PAGE, MP; double sm;
+  std::string name, line; int B, K, HQ, HKV, D, PAGE, MP; double sm;
   int fails = 0, runs = 0; double worst = 0;
-  while (mf >> name >> B >> K >> HQ >> HKV >> D >> PAGE >> MP >> sm) {
+  while (std::getline(mf, line)) {
+    if (line.empty()) continue;
+    char nm[256]; int nvf = 0; double kts = 1, vts = 1;
+    const int nf = std::sscanf(line.c_str(), "%255s %d %d %d %d %d %d %d %lf %d %lf %lf", nm, &B, &K, &HQ, &HKV, &D, &PAGE, &MP, &sm, &nvf, &kts, &vts);
+    if (nf < 9) continue;
+    name = nm;
     auto ld = [&](const char* n) { return uqc::read_file(dir + "/" + name + "." + n + ".bin"); };
     auto vq = ld("q"), vkc = ld("kc"), vks = ld("ks"), vvc = ld("vc"), vvs = ld("vs"), vbt = ld("bt"), vsl = ld("sl"), vref = ld("ref");
-    uq::Shape s{B, K, HQ, HKV, D, PAGE, MP, (float)sm};
+    uq::Shape s{B, K, HQ, HKV, D, PAGE, MP, (float)(sm * kts)};  // NVFP4: K per-tensor scale folded into the softmax scale
     std::vector<int> nsplits = sweep ? std::vector<int>{1, 2, 3, 8} : std::vector<int>{cfg0.nsplit};
     for (int ns : nsplits) {
       uq::Cfg c = cfg0; c.nsplit = ns;
@@ -43,13 +48,14 @@ int main(int argc, char** argv) {
       auto* ml = sycl::malloc_device<float>(uq::ml_elems(s, ns), q);
       size_t nout = (size_t)B * K * HQ * D;
       auto* out = sycl::malloc_device<uq::bf16>(nout, q);
-      uq::Args a{dq, dkc, dks, dvc, dvs, dbt, dsl, mo, ml, out};
+      uq::Args a{dq, dkc, dks, dvc, dvs, dbt, dsl, mo, ml, out, nvf, (float)vts};
       uq::decode(q, s, c, a).wait();
       std::vector<uq::bf16> hout(nout);
       q.memcpy(hout.data(), out, nout * sizeof(uq::bf16)).wait();
       const float* ref = (const float*)vref.data();
       // bf16 P (XMX path) adds an error proportional to |V| (cancellation), not to |ref|: allow 6e-3 abs
-      const double floor_extra = c.path >= 1 ? 6e-3 : 0.0;
+      double refmax = 0; { const float* rr = (const float*)vref.data(); for (size_t i = 0; i < vref.size() / 4; i++) refmax = std::fmax(refmax, std::fabs(rr[i])); }
+      const double floor_extra = c.path >= 1 ? 6e-3 * std::fmax(1.0, refmax / 2.0) : 0.0;   // bf16 P rounding error scales with |V|
       size_t wi2 = 0; double wo2 = 0, wr2 = 0; double maxabs = 0, maxtol = 0, wo = 0, wr = 0; size_t wi = 0; bool nan = false;
       for (size_t i = 0; i < nout; i++) {
         double o = (float)hout[i], r = ref[i], e = std::fabs(o - r);

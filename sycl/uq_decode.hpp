@@ -39,6 +39,8 @@ struct Cfg {
 struct Args {
   const bf16* q; const u8 *kc, *ks, *vc, *vs; const int *bt, *sl;
   float *mo, *ml; bf16* out;
+  int nv = 0;        // 1: NVFP4 scales (e4m3fn byte per 16 values, ks/vs [pages,Hkv,PAGE,D/16]); 0: UE8M0 per 32
+  float v_ts = 1.f;  // NVFP4 per-tensor V scale (applied to the output); the K per-tensor scale is folded into Shape::sm_scale by the caller
 };
 
 inline size_t mo_elems(const Shape& s, int nsplit) { return (size_t)s.B * s.HKV * nsplit * s.M() * s.D; }
@@ -62,6 +64,15 @@ SYCL_EXTERNAL inline float fp4_val(unsigned c) {
 #endif
 }
 SYCL_EXTERNAL inline float ue8m0(unsigned s) { return sycl::bit_cast<float>(s << 23); }  // 2^(s-127), s in 1..254
+// E4M3FN scale byte (sign bit 0) -> fp32, exact integer decode: normal (1+m/8) 2^(e-7), subnormal m/8 2^-6 (== fp16 bits (b&0x7F)<<7 times 256)
+SYCL_EXTERNAL inline float e4m3(unsigned b) {
+  const unsigned e = (b >> 3) & 15u, m = b & 7u;
+  return e ? sycl::bit_cast<float>(((e + 120u) << 23) | (m << 20)) : (float)m * 0.001953125f;
+}
+// scale of element pair/element e (byte index within the row) for either format
+SYCL_EXTERNAL inline float scale_of(int nv, const u8* sc, size_t row, int D, int e) {
+  return nv ? e4m3(sc[row * (D / 16) + e / 8]) : ue8m0(sc[row * (D / 32) + e / 16]);
+}
 
 // ---- portable split kernel -------------------------------------------------------
 template <int D, int TN, int T, int SGS>
@@ -105,7 +116,7 @@ struct SplitKernel {
           const int n = i / DH, e = i % DH;
           const size_t row = cbase + tile * TN + n;
           const unsigned byte = a.kc[row * DH + e];
-          const float sc = ue8m0(a.ks[row * NG + (2 * e) / 32]);
+          const float sc = scale_of(a.nv, a.ks, row, D, e);
           KV[n * KST + 2 * e] = fp4_val(byte & 0xFu) * sc;
           KV[n * KST + 2 * e + 1] = fp4_val(byte >> 4) * sc;
         }
@@ -144,7 +155,7 @@ struct SplitKernel {
           const int n = i / DH, e = i % DH;
           const size_t row = cbase + tile * TN + n;
           const unsigned byte = a.vc[row * DH + e];
-          const float sc = ue8m0(a.vs[row * NG + (2 * e) / 32]);
+          const float sc = scale_of(a.nv, a.vs, row, D, e);
           KV[n * KST + 2 * e] = fp4_val(byte & 0xFu) * sc;
           KV[n * KST + 2 * e + 1] = fp4_val(byte >> 4) * sc;
         }
@@ -197,7 +208,7 @@ struct ReduceKernel {
       num += w * a.mo[((base + i) * M + r) * D + d]; den += w;
     }
     const int j = r / G, g = r % G;
-    a.out[((size_t)(b * s.K + j) * s.HQ + hk * G + g) * D + d] = bf16(num / sycl::fmax(den, 1e-30f));
+    a.out[((size_t)(b * s.K + j) * s.HQ + hk * G + g) * D + d] = bf16(num / sycl::fmax(den, 1e-30f) * a.v_ts);
   }
 };
 
@@ -252,13 +263,14 @@ inline sycl::event decode(sycl::queue& q, const Shape& s, const Cfg& c, const Ar
 #ifndef UQ_NO_XMX
   if (c.path == 4) {   // "best": ESIMD when supported, else the joint_matrix path
     Cfg c2 = c;
-    if (esimd_supported(s)) { c2.path = 3; c2.wg = 64; } else { c2.path = 1; c2.wg = 256; c2.tn = 32; }
+    if (esimd_supported(s, a)) { c2.path = 3; c2.wg = 64; } else { c2.path = 1; c2.wg = 256; c2.tn = 32; }
     return decode(q, s, c2, a);
   }
   if (c.path == 3) {
-    if (esimd_supported(s)) return run_esimd(q, s, c, a);
+    if (esimd_supported(s, a)) return run_esimd(q, s, c, a);
     Cfg c2 = c; c2.path = 1; c2.wg = 256; if (s.PAGE % 32) c2.tn = 16; return decode(q, s, c2, a);
   }
+  if (c.path == 2 && a.nv) { Cfg c2 = c; c2.path = 1; c2.wg = 256; return decode(q, s, c2, a); }
   if (c.path == 2) {
     if (s.D == 128) return run_xmx2<128>(q, s, c, a);
     if (s.D == 64) return run_xmx2<64>(q, s, c, a);

@@ -125,7 +125,7 @@ int main(int argc, char** argv) {
 
       const double uniq_bytes = 2.0 * B * (double)ctx * HKV * (D / 2 + D / 32);
       std::vector<int> nss;
-      if (sweep) nss = {1, 2, 4, 8, 16, 32, 64}; else if (nsplit) nss = {nsplit};
+      if (sweep) nss = {1, 2, 4, 6, 8, 12, 16, 24, 32, 48, 64, 96}; else if (nsplit) nss = {nsplit};
       else { int want = std::max(1, 4 * eus / std::max(1, B * HKV)); int ns = 1; while (ns * 2 <= want && ns * 2 <= std::max(1, npg)) ns *= 2; nss = {ns}; }
       for (int ns : nss) {
         if (ns > npg) continue;

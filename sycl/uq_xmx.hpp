@@ -16,6 +16,12 @@ SYCL_EXTERNAL inline uint32_t fp4_pair(unsigned byte, int off) {  // low nibble 
   return fp4_bf16bits(byte & 0xFu, off) | (fp4_bf16bits(byte >> 4, off) << 16);
 }
 
+// NVFP4: pair of nibble values times an arbitrary (e4m3) float scale, as bf16 bits. Exact: e2m1 (1 mantissa bit) x e4m3 (3 bits) <= 5 bits.
+SYCL_EXTERNAL inline uint32_t nv_pair(unsigned byte, float sc) {
+  const float lo = fp4_val(byte & 0xFu) * sc, hi = fp4_val(byte >> 4) * sc;
+  return (sycl::bit_cast<uint32_t>(lo) >> 16) | (sycl::bit_cast<uint32_t>(hi) & 0xFFFF0000u);
+}
+
 template <int D, int TN, int T>
 struct SplitKernelXMX {
   Shape s; Args a; int nsplit, pps;
@@ -70,10 +76,16 @@ struct SplitKernelXMX {
             const int e4 = i / TN, n = i % TN;
             const size_t row = cbase + tile * TN + n;
             const uint32_t w = *reinterpret_cast<const uint32_t*>(a.kc + row * DH + e4 * 4);
+            if (a.nv) {
+              const float sc = e4m3(a.ks[row * (D / 16) + e4 / 2]);
+#pragma unroll
+              for (int q = 0; q < 4; q++) KV32[(e4 * 4 + q) * TN + n] = nv_pair((w >> (8 * q)) & 0xFFu, sc);
+            } else {
             const uint32_t off = (uint32_t)((sycl::max((int)a.ks[row * NG + (e4 * 8) / 32], 95) - 95) << 7);
             const uint32_t offp = off | (off << 16);
 #pragma unroll
             for (int q = 0; q < 4; q++) { const sycl::uint2 l = lut[(w >> (8 * q)) & 0xFFu]; KV32[(e4 * 4 + q) * TN + n] = (l.x() + offp) & l.y(); }
+            }
           }
         }
         sycl::group_barrier(it.get_group());
@@ -121,16 +133,26 @@ struct SplitKernelXMX {
             const size_t r0 = cbase + tile * TN + 2 * tp, r1 = r0 + 1;
             const uint32_t w0 = *reinterpret_cast<const uint32_t*>(a.vc + r0 * DH + e4 * 4);
             const uint32_t w1 = *reinterpret_cast<const uint32_t*>(a.vc + r1 * DH + e4 * 4);
+            uint32_t o[8];
+            if (a.nv) {
+              const float sc0 = e4m3(a.vs[r0 * (D / 16) + e4 / 2]), sc1 = e4m3(a.vs[r1 * (D / 16) + e4 / 2]);
+#pragma unroll
+              for (int q = 0; q < 4; q++) {
+                const uint32_t x0 = nv_pair((w0 >> (8 * q)) & 0xFFu, sc0), x1 = nv_pair((w1 >> (8 * q)) & 0xFFu, sc1);
+                o[2 * q] = (x0 & 0xFFFFu) | (x1 << 16);
+                o[2 * q + 1] = (x0 >> 16) | (x1 & 0xFFFF0000u);
+              }
+            } else {
             const uint32_t f0 = (uint32_t)((sycl::max((int)a.vs[r0 * NG + (e4 * 8) / 32], 95) - 95) << 7);
             const uint32_t f1 = (uint32_t)((sycl::max((int)a.vs[r1 * NG + (e4 * 8) / 32], 95) - 95) << 7);
             const uint32_t p0 = f0 | (f0 << 16), p1 = f1 | (f1 << 16);
-            uint32_t o[8];
 #pragma unroll
             for (int q = 0; q < 4; q++) {
               const sycl::uint2 l0 = lut[(w0 >> (8 * q)) & 0xFFu], l1 = lut[(w1 >> (8 * q)) & 0xFFu];
               const uint32_t x0 = (l0.x() + p0) & l0.y(), x1 = (l1.x() + p1) & l1.y();
               o[2 * q] = (x0 & 0xFFFFu) | (x1 << 16);
               o[2 * q + 1] = (x0 >> 16) | (x1 & 0xFFFF0000u);
+            }
             }
             sycl::uint4* dst = reinterpret_cast<sycl::uint4*>(KV32 + tp * D + e4 * 8);
             dst[0] = sycl::uint4(o[0], o[1], o[2], o[3]);

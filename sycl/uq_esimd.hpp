@@ -358,7 +358,7 @@ template <int RC, int MT, int NTH>
 sycl::event run_esimd_cfg(sycl::queue& q, const Shape& s, const Args& a, int nsplit) {
   return launch_reduce<128>(q, s, a, nsplit, launch_split_esimd<RC, MT, NTH>(q, s, a, nsplit));
 }
-inline bool esimd_supported(const Shape& s) { return s.D == 128 && s.PAGE % 16 == 0 && s.M() <= 64 && (s.HQ % s.HKV) == 0; }
+inline bool esimd_supported(const Shape& s, const Args& a) { return !a.nv && s.D == 128 && s.PAGE % 16 == 0 && s.M() <= 64 && (s.HQ % s.HKV) == 0; }
 inline sycl::event run_esimd(sycl::queue& q, const Shape& s, const Cfg& c, const Args& a) {
   const int nth = c.wg / 16 > 0 ? c.wg / 16 : 1;   // threads per work-group (cfg.wg = 16*threads, like the other paths)
   const int M = s.M();
