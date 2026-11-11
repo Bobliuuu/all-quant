@@ -1,0 +1,14 @@
+NVIDIA H200, 9.0, 610.57.04
+
+Cuda compilation tools, release 12.9, V12.9.86
+Build cuda_12.9.r12.9/compiler.36037853_0
+
+2.13.0+cu129 3.7.1 (9, 0)
+
+device NVIDIA H200 SMs 132
+HBM copy peak 4267 GB/s
+{"K": 1, "device": "NVIDIA H200", "hbm_copy_GBps": 4266.8812, "kv_bytes": 285212672, "cuda_fused_ms": 0.2488, "cuda_base_ms": 0.2492, "cuda_cfg": {"nwarps": 2, "stages": 2, "nsplit": 8}, "cuda_fused_GBps": 1146.2156, "cuda_pct_peak": 26.8631, "cuda_speedup_vs_base": 1.0014, "cuda_err": 0.0001, "triton_fused_ms": 0.3738, "triton_base_ms": 0.374, "triton_cfg": {"w": 4, "s": 2, "n": 32}, "triton_fused_GBps": 762.9728, "cuda_vs_triton": 1.5023}
+{"K": 2, "device": "NVIDIA H200", "hbm_copy_GBps": 4266.8812, "kv_bytes": 285212672, "cuda_fused_ms": 0.2493, "cuda_base_ms": 0.5005, "cuda_cfg": {"nwarps": 2, "stages": 2, "nsplit": 8}, "cuda_fused_GBps": 1143.9402, "cuda_pct_peak": 26.8098, "cuda_speedup_vs_base": 2.0076, "cuda_err": 0.0001, "triton_fused_ms": 0.3771, "triton_base_ms": 0.7378, "triton_cfg": {"w": 4, "s": 2, "n": 32}, "triton_fused_GBps": 756.2424, "cuda_vs_triton": 1.5127}
+{"K": 4, "device": "NVIDIA H200", "hbm_copy_GBps": 4266.8812, "kv_bytes": 285212672, "cuda_fused_ms": 0.3007, "cuda_base_ms": 0.9802, "cuda_cfg": {"nwarps": 4, "stages": 2, "nsplit": 16}, "cuda_fused_GBps": 948.4495, "cuda_pct_peak": 22.2282, "cuda_speedup_vs_base": 3.2597, "cuda_err": 0.0001, "triton_fused_ms": 0.5006, "triton_base_ms": 1.4212, "triton_cfg": {"w": 4, "s": 2, "n": 16}, "triton_fused_GBps": 569.7787, "cuda_vs_triton": 1.6646}
+{"K": 8, "device": "NVIDIA H200", "hbm_copy_GBps": 4266.8812, "kv_bytes": 285212672, "cuda_fused_ms": 0.4332, "cuda_base_ms": 1.9064, "cuda_cfg": {"nwarps": 4, "stages": 3, "nsplit": 8}, "cuda_fused_GBps": 658.3662, "cuda_pct_peak": 15.4297, "cuda_speedup_vs_base": 4.4006, "cuda_err": 0.0002, "triton_fused_ms": 0.4609, "triton_base_ms": 2.7587, "triton_cfg": {"w": 4, "s": 3, "n": 16}, "triton_fused_GBps": 618.785, "cuda_vs_triton": 1.064}
+

@@ -9,7 +9,7 @@
 #include <vector>
 #include <fstream>
 #include <sstream>
-#define CK(x) do { cudaError_t e = (x); if (e != cudaSuccess) { printf("CUDA error %s at %s:%d\n", cudaGetErrorString(e), __FILE__, __LINE__); exit(2);} } while (0)
+#define CK(x) do { cudaError_t e_ = (x); if (e_ != cudaSuccess) { printf("CUDA error %s at %s:%d\n", cudaGetErrorString(e_), __FILE__, __LINE__); exit(2);} } while (0)
 
 static std::vector<char> rd(const std::string& p) {
   std::ifstream f(p, std::ios::binary); if (!f) { printf("missing %s\n", p.c_str()); exit(2); }
@@ -22,7 +22,7 @@ int main(int argc, char** argv) {
   std::string dir = argc > 1 ? argv[1] : "vectors";
   double tol = argc > 2 ? atof(argv[2]) : 1e-3;
   std::ifstream mf(dir + "/manifest.txt");
-  std::string line; int fails = 0, runs = 0; double worst = 0;
+  std::string line; int fails = 0, runs = 0; double worst = 0, worst_ex = 0;
   while (std::getline(mf, line)) {
     std::istringstream is(line); std::string tag, name; int K, B, HQ, HKV, D, PAGE, pages, mp;
     is >> tag >> name >> K >> B >> HQ >> HKV >> D >> PAGE >> pages >> mp;
@@ -43,15 +43,22 @@ int main(int argc, char** argv) {
       if (e == cudaErrorInvalidValue) { cudaGetLastError(); cudaFree(mo); cudaFree(ml); continue; }  // unsupported combo
       CK(e); CK(cudaDeviceSynchronize());
       std::vector<uint16_t> h(on); CK(cudaMemcpy(h.data(), p.out, on * 2, cudaMemcpyDeviceToHost));
-      double mx = 0; for (size_t i = 0; i < on; i++) { double d = fabs((double)bf2f(h[i]) - rf[i]); if (!(d <= mx)) mx = std::isnan(d) ? 1e9 : d; }
-      runs++; worst = std::max(worst, mx);
-      if (mx > tol) { fails++; printf("FAIL %s K=%d nw=%d st=%d ns=%d maxerr=%.3e\n", name.c_str(), K, nw, st, ns, mx); }
+      // raw max abs err, and err in excess of the bf16 output rounding (bf16 P and output rounding: allow 2^-7 relative)
+      double mx = 0, mxx = 0;
+      for (size_t i = 0; i < on; i++) {
+        double d = fabs((double)bf2f(h[i]) - rf[i]);
+        if (std::isnan(d)) d = 1e9;
+        double ex = d - fabs((double)rf[i]) * (1.0 / 128);
+        if (d > mx) mx = d; if (ex > mxx) mxx = ex;
+      }
+      runs++; worst = std::max(worst, mx); worst_ex = std::max(worst_ex, mxx);
+      if (mxx > tol) { fails++; printf("FAIL %s K=%d nw=%d st=%d ns=%d maxerr=%.3e excess=%.3e\n", name.c_str(), K, nw, st, ns, mx, mxx); }
       cudaFree(mo); cudaFree(ml);
     }
     printf("case %-10s K=%d done\n", name.c_str(), K);
     cudaFree((void*)p.q); cudaFree((void*)p.kc); cudaFree((void*)p.ks); cudaFree((void*)p.vc); cudaFree((void*)p.vs);
     cudaFree((void*)p.block_table); cudaFree((void*)p.seq_lens); cudaFree(p.out);
   }
-  printf("RESULT runs=%d fails=%d worst_max_abs_err=%.3e tol=%.1e\n", runs, fails, worst, tol);
+  printf("RESULT runs=%d fails=%d worst_max_abs_err=%.3e worst_err_beyond_bf16_rounding=%.3e tol=%.1e\n", runs, fails, worst, worst_ex, tol);
   return fails ? 1 : 0;
 }

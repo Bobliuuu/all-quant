@@ -10,6 +10,12 @@ _ext = None
 def ext(verbose=False):
     global _ext
     if _ext is None:
+        try:
+            import uq_cuda_ext as _e   # pip install ./cuda
+            _ext = _e
+            return _ext
+        except ImportError:
+            pass
         _ext = load("uq_cuda_ext", [os.path.join(_HERE, "uq_ext.cpp"), os.path.join(_HERE, "uq_decode.cu")],
                     extra_include_paths=[_HERE], extra_cuda_cflags=["-O3", "--use_fast_math", "-lineinfo"],
                     verbose=verbose)
