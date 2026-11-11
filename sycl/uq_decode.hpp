@@ -257,7 +257,7 @@ inline sycl::event decode(sycl::queue& q, const Shape& s, const Cfg& c, const Ar
   }
   if (c.path == 3) {
     if (esimd_supported(s)) return run_esimd(q, s, c, a);
-    Cfg c2 = c; c2.path = 2; return decode(q, s, c2, a);
+    Cfg c2 = c; c2.path = 1; c2.wg = 256; if (s.PAGE % 32) c2.tn = 16; return decode(q, s, c2, a);
   }
   if (c.path == 2) {
     if (s.D == 128) return run_xmx2<128>(q, s, c, a);
