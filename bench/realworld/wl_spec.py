@@ -6,9 +6,8 @@ import asyncio, aiohttp, os
 from rwlib import *
 
 def prompts(n, file_tokens_chars):
-    root = "/root/vllm-venv/lib/python3.12/site-packages/vllm/v1/core"
     files = []
-    for dp, dn, fn in sorted(os.walk("/root/vllm-venv/lib/python3.12/site-packages/vllm/v1")):
+    for dp, dn, fn in sorted(os.walk(os.path.join(vllm_src_root(), "v1"))):
         for f in sorted(fn):
             if f.endswith(".py"):
                 s = open(os.path.join(dp, f), errors="ignore").read()

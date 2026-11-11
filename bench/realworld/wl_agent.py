@@ -26,8 +26,11 @@ def build(srv, prefix_tokens, turns, chunk_tokens):
     return prefix, rest, cpt
 
 
-async def session(sid, srv, prefix, rest, cpt, turns, chunk_tokens, gen, out):
+async def session(sid, srv, prefix, rest, cpt, turns, chunk_tokens, gen, out, distinct=False):
     hist = prefix
+    if distinct:  # per-session private repo snapshot: no prefix sharing (stresses KV capacity)
+        k = (sid * 1009 + 11) % max(1, len(rest) // 2)
+        hist = f"You are a coding agent for project #{sid}. Repository contents follow.\n" + rest[k:k + len(prefix)]
     step = int(chunk_tokens * cpt)
     async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=1800)) as s:
         for t in range(turns):
@@ -48,7 +51,7 @@ def run(srv, a):
         async with aiohttp.ClientSession() as s:
             await stream_completion(s, srv.url, prefix + "\n### QUESTION\nHi\n### ANSWER\n", 4)
         t0 = time.perf_counter()
-        await asyncio.gather(*[session(i, srv, prefix, rest, cpt, a.turns, a.chunk_tokens, a.gen, out)
+        await asyncio.gather(*[session(i, srv, prefix, rest, cpt, a.turns, a.chunk_tokens, a.gen, out, a.distinct)
                                for i in range(a.sessions)])
         return out, time.perf_counter() - t0
     out, wall = asyncio.run(go())

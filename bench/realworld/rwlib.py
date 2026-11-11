@@ -7,22 +7,27 @@ config, waits for readiness, exposes scrape helpers, and always tears the server
 import asyncio, json, os, re, signal, subprocess, sys, time
 import aiohttp
 
-VENV = "/root/vllm-venv"
-MODELS = "/root/models"
+VENV = os.environ.get("RW_VENV", "/root/vllm-venv")
+MODELS = os.environ.get("RW_MODELS", "/root/models")
+
+
+def vllm_src_root():
+    import importlib.util
+    return os.path.dirname(importlib.util.find_spec("vllm").origin)
 
 
 class Server:
-    def __init__(self, model, kv, port=8100, extra=(), maxlen=40960, gmu=0.90, log=None, env=None):
+    def __init__(self, model, kv, port=8100, extra=(), maxlen=32768, gmu=0.90, log=None, env=None):
         self.model, self.kv, self.port = model, kv, port
         self.extra, self.maxlen, self.gmu = list(extra), maxlen, gmu
-        self.log = log or f"/root/rw/logs/server_{model}_{kv}_{port}.log"
+        self.log = log or os.path.join(os.environ.get("RW_LOGS", "/root/rw/logs"), f"server_{model}_{kv}_{port}.log")
         self.env = env or {}
         self.proc = None
         self.url = f"http://127.0.0.1:{port}"
 
     def __enter__(self):
         os.makedirs(os.path.dirname(self.log), exist_ok=True)
-        cmd = [f"{VENV}/bin/vllm", "serve", f"{MODELS}/{self.model}", "--served-model-name", "m",
+        cmd = [os.environ.get("RW_VLLM_BIN", f"{VENV}/bin/vllm"), "serve", f"{MODELS}/{self.model}", "--served-model-name", "m",
                "--dtype", "bfloat16", "--max-model-len", str(self.maxlen),
                "--gpu-memory-utilization", str(self.gmu), "--port", str(self.port)]
         if self.kv != "auto":
@@ -36,7 +41,7 @@ class Server:
         import urllib.request
         while True:
             if self.proc.poll() is not None:
-                raise RuntimeError(f"server died, see {self.log}")
+                L = open(self.log, errors="ignore").read(); errs = [l for l in L.splitlines() if "Error" in l or "error" in l][:12]; raise RuntimeError("server died: " + " || ".join(x[:300] for x in errs) + " TAIL " + L[-600:])
             try:
                 urllib.request.urlopen(self.url + "/v1/models", timeout=2).read()
                 break
@@ -138,7 +143,8 @@ def tokenize(server_url, text):
     return json.loads(urllib.request.urlopen(req, timeout=60).read())["tokens"]
 
 
-def codebase_text(root="/root/vllm-venv/lib/python3.12/site-packages/vllm/v1", max_chars=2_000_000):
+def codebase_text(root=None, max_chars=2_000_000):
+    root = root or os.path.join(vllm_src_root(), "v1")
     """Deterministic pseudo-'repo' text: real python sources, sorted, with file headers."""
     parts = []; tot = 0
     for dp, dn, fn in sorted(os.walk(root)):

@@ -1,0 +1,438 @@
+{
+ "tag": "cuda_h100_rag_fp8",
+ "model": "Mistral-7B-v0.1",
+ "kv": "fp8",
+ "extra": "",
+ "ts": "2026-11-11T07:44:27Z",
+ "server": {
+  "kv_cache_tokens": 1461360,
+  "max_concurrency_at_maxlen": 44.6,
+  "kv_cache_gib": 55.79,
+  "weights_gib": 13.5,
+  "attn_backend": "FLASH_ATTN",
+  "startup_s": 54.0
+ },
+ "result": {
+  "workload": "rag_hotpotqa",
+  "n": 100,
+  "ctx_tokens": 16000,
+  "EM": 0.15,
+  "F1": 0.23014751622646357,
+  "wall_s": 47.39251370599999,
+  "ttft_p50": 5.362583540000003,
+  "ttft_p99": 7.159950120000019,
+  "samples": [
+   {
+    "gold": "yes",
+    "pred": "Yes, they were both American."
+   },
+   {
+    "gold": "Chief of Protocol",
+    "pred": "Lord High Treasurer"
+   },
+   {
+    "gold": "Animorphs",
+    "pred": "The Hork-Bajir Chronicles"
+   },
+   {
+    "gold": "no",
+    "pred": "Yes, the Laleli Mosque and Esma Sultan Mansion are located in the same neighborhood in Istan"
+   },
+   {
+    "gold": "Greenwich Village, New York City",
+    "pred": "The director of the romantic comedy \"Big Stone Gap\" is based in what New York city?"
+   },
+   {
+    "gold": "YG Entertainment",
+    "pred": "YG Entertainment"
+   },
+   {
+    "gold": "Eenasul Fateh",
+    "pred": "Drew Barry"
+   },
+   {
+    "gold": "3,677 seated",
+    "pred": "9,000"
+   },
+   {
+    "gold": "Terry Richardson",
+    "pred": "Terry Richardson is older, he is 61 years old."
+   },
+   {
+    "gold": "yes",
+    "pred": "Yes"
+   },
+   {
+    "gold": "Kansas Song",
+    "pred": "Rock Chalk Jayhawk"
+   },
+   {
+    "gold": "David Weissman",
+    "pred": "David Weissman"
+   },
+   {
+    "gold": "1999",
+    "pred": "1991"
+   },
+   {
+    "gold": "no",
+    "pred": "Yes, both Random House Tower and 888 7th Avenue are used for real estate."
+   },
+   {
+    "gold": "from 1986 to 2013",
+    "pred": "1945 and 1969"
+   },
+   {
+    "gold": "9,984",
+    "pred": "Brown State Fishing Lake is in a country that has a population of 320,000,0"
+   },
+   {
+    "gold": "the North Atlantic Conference",
+    "pred": "The America East Conference"
+   },
+   {
+    "gold": "yes",
+    "pred": "Yes, they are both Opera composers."
+   },
+   {
+    "gold": "1969 until 1974",
+    "pred": "1993-1997"
+   },
+   {
+    "gold": "Robert Erskine Childers DSC",
+    "pred": "Henry Roth"
+   },
+   {
+    "gold": "Pedro Rodr\u00edguez",
+    "pred": "Sergio P\u00e9rez"
+   },
+   {
+    "gold": "Sonic",
+    "pred": ""
+   },
+   {
+    "gold": "keyboard function keys",
+    "pred": "The Apple Remote was originally designed to interact with the Apple TV."
+   },
+   {
+    "gold": "Badly Drawn Boy",
+    "pred": "Badly Drawn Boy"
+   },
+   {
+    "gold": "World's Best Goalkeeper",
+    "pred": "Jesper Schmeichel"
+   },
+   {
+    "gold": "Barton Lee Hazlewood",
+    "pred": "Nancy Sinatra and Lee Hazlewood."
+   },
+   {
+    "gold": "1838",
+    "pred": "1968"
+   },
+   {
+    "gold": "yes",
+    "pred": "Yes, both Dictyosperma, and Huernia are described as a genus."
+   },
+   {
+    "gold": "Henry J. Kaiser",
+    "pred": "Edgar Kaiser Sr."
+   },
+   {
+    "gold": "Arena of Khazan",
+    "pred": "The adventure is called \"Arena of Khazan\"."
+   },
+   {
+    "gold": "2000",
+    "pred": "Poison's album \"Shut Up, Make Love\" was released on 2016-04"
+   },
+   {
+    "gold": "Fujioka, Gunma",
+    "pred": "Japan"
+   },
+   {
+    "gold": "Charles Eug\u00e8ne",
+    "pred": "Charles Nungesser"
+   },
+   {
+    "gold": "no",
+    "pred": "Yes, they are."
+   },
+   {
+    "gold": "Letters to Cleo",
+    "pred": "Screaming Trees had more members."
+   },
+   {
+    "gold": "October 1922",
+    "pred": "The Bolsheviks were defeated by the White Army in the course of a civil war that ended when the Bolshe"
+   },
+   {
+    "gold": "2000",
+    "pred": "1995"
+   },
+   {
+    "gold": "World War II",
+    "pred": "World War II"
+   },
+   {
+    "gold": "no",
+    "pred": "No, Elko Regional Airport is located in Elko, Nevada, and Gerald R. Ford International Airport is located"
+   },
+   {
+    "gold": "New York City",
+    "pred": "Ralph Hefferline was a psychology professor at a university that is located in what city?"
+   },
+   {
+    "gold": "Scotch Collie",
+    "pred": "The Manchester Terrier."
+   },
+   {
+    "gold": "Mumbai",
+    "pred": "The company that Sachin Warrier worked for as a software engineer was headquartered in the United States."
+   },
+   {
+    "gold": "1962",
+    "pred": "1984"
+   },
+   {
+    "gold": "sovereignty",
+    "pred": "The Second Battle of Agordat"
+   },
+   {
+    "gold": "Nelson Rockefeller",
+    "pred": "Joe Biden"
+   },
+   {
+    "gold": "Yellowcraig",
+    "pred": "North Berwick"
+   },
+   {
+    "gold": "Phil Spector",
+    "pred": "Phil Spector"
+   },
+   {
+    "gold": "Organizations could come together to address global issues",
+    "pred": "A former Soviet statesman initiated a forum for party democracy and the power separation within the Communist Party."
+   },
+   {
+    "gold": "yes",
+    "pred": "Yes, they are both types of plant."
+   },
+   {
+    "gold": "English Electric Canberra",
+    "pred": "The English Electric Canberra was a British first-generation jet-powered medium bomber that was used in the"
+   },
+   {
+    "gold": "2009 Big 12 Conference",
+    "pred": "The 2015 Colorado Buffaloes football team represented the University of Colorado at Boulder during the"
+   },
+   {
+    "gold": "1,462",
+    "pred": "Carrefour"
+   },
+   {
+    "gold": "Indianapolis Motor Speedway",
+    "pred": "Indianapolis Motor Speedway"
+   },
+   {
+    "gold": "Rome",
+    "pred": "In the 1936 film \"Tosca\", the \"Prince of tenors\" Lawrence Tibb"
+   },
+   {
+    "gold": "Max Martin, Savan Kotecha and Ilya Salmanzadeh",
+    "pred": "Ellie Goulding worked with Starsmith, Fraser T Smith, Richard Stannard, Ash Howes"
+   },
+   {
+    "gold": "Marion, South Australia",
+    "pred": "Adelaide"
+   },
+   {
+    "gold": "Drifting",
+    "pred": "D1NZ is a series based on what oversteering technique?"
+   },
+   {
+    "gold": "Keith Bostic",
+    "pred": "Jerry Glanville is younger than Keith Bostic."
+   },
+   {
+    "gold": "35,124",
+    "pred": "114,600"
+   },
+   {
+    "gold": "no",
+    "pred": "Yes, both Cypress and Ajuga are genera."
+   },
+   {
+    "gold": "shortest player ever to play in the National Basketball Association",
+    "pred": "The former NBA player who was a member of the Charlotte Hornets during their 1992-93 season"
+   },
+   {
+    "gold": "Ronald Shusett",
+    "pred": "Joe Dante"
+   },
+   {
+    "gold": "Adeline Virginia Woolf",
+    "pred": "Emma Bull was born 10 years earlier than Virginia Woolf."
+   },
+   {
+    "gold": "821",
+    "pred": "821"
+   },
+   {
+    "gold": "more than 70 countries",
+    "pred": "100"
+   },
+   {
+    "gold": "Charmed",
+    "pred": "Spill.com"
+   },
+   {
+    "gold": "International Boxing Hall of Fame",
+    "pred": "International Boxing Hall of Fame"
+   },
+   {
+    "gold": "Usher",
+    "pred": "Usher"
+   },
+   {
+    "gold": "Bill Murray",
+    "pred": "Homero C\u00e1rdenas Guill\u00e9n"
+   },
+   {
+    "gold": "Carabao Cup",
+    "pred": "The 2017\u201318 Wigan Athletic F.C. season will be a year in which"
+   },
+   {
+    "gold": "Teen Titans Go!",
+    "pred": "\"Teen Titans\""
+   },
+   {
+    "gold": "276,170 inhabitants",
+    "pred": "The city of 122nd SS-Standarte was formed in2014 is ."
+   },
+   {
+    "gold": "orange",
+    "pred": "Orange"
+   },
+   {
+    "gold": "Tromeo and Juliet",
+    "pred": "\"Son of the Beach\""
+   },
+   {
+    "gold": "William Jefferson Clinton",
+    "pred": "Bill Clinton"
+   },
+   {
+    "gold": "John John Florence",
+    "pred": ""
+   },
+   {
+    "gold": "Ann",
+    "pred": "The actress who plays Bobbi Bacha in Suburban Madness is named Katie Cassidy. Her middle name"
+   },
+   {
+    "gold": "Apalachees",
+    "pred": "Alvaro Mexia had a diplomatic mission with which tribe of indigenous people?"
+   },
+   {
+    "gold": "British",
+    "pred": "British"
+   },
+   {
+    "gold": "1865",
+    "pred": "1895"
+   },
+   {
+    "gold": "Newport",
+    "pred": "The county seat of the county where East Lempster, New Hampshire is located is Concord, New Hampshire."
+   },
+   {
+    "gold": "Bob Seger",
+    "pred": "Robert C Seger born may 6 1945. What was the Rock singers stage name ?"
+   },
+   {
+    "gold": "Conscription",
+    "pred": "The practice of requiring only men to register for the draft was constitutional."
+   },
+   {
+    "gold": "Mondelez International, Inc.",
+    "pred": "Handi-Snacks are a snack food product line sold by the American multinational confectionery, food"
+   },
+   {
+    "gold": "Monica Lewinsky",
+    "pred": "Monica Lewinsky"
+   },
+   {
+    "gold": "April 1, 1949",
+    "pred": "1966"
+   },
+   {
+    "gold": "1866",
+    "pred": "1968"
+   },
+   {
+    "gold": "Canary Islands, Spain",
+    "pred": "Teide National Park and Garajonay National Park are located in the Canary Islands."
+   },
+   {
+    "gold": "250 million",
+    "pred": "1000000"
+   },
+   {
+    "gold": "director",
+    "pred": "They are both film directors."
+   },
+   {
+    "gold": "The Conversation",
+    "pred": "Andrew Jaspan was the co-founder of Lstudio.com."
+   },
+   {
+    "gold": "John Waters",
+    "pred": "John Waters"
+   },
+   {
+    "gold": "Las Vegas Strip in Paradise",
+    "pred": "The Flamingo Hotel in Las Vegas, Nevada."
+   },
+   {
+    "gold": "no",
+    "pred": "Yes, they both contain gin."
+   },
+   {
+    "gold": "March and April",
+    "pred": "In June."
+   },
+   {
+    "gold": "Fairfax County",
+    "pred": "Fairfax County"
+   },
+   {
+    "gold": "IT products and services",
+    "pred": "Kingstone Companies, Inc., which has its headquarters in Kingston, New York, provides property and casualty insurance products"
+   },
+   {
+    "gold": "Levni Yilmaz",
+    "pred": "Pamela B. Green"
+   },
+   {
+    "gold": "Beijing",
+    "pred": "Rabat"
+   },
+   {
+    "gold": "no",
+    "pred": "No, Yingkou and Fuding are not the same level of city. Yingkou is a pre"
+   }
+  ]
+ },
+ "metrics_tail": {
+  "vllm:prefix_cache_queries_total{engine=\"0\",model_name=\"m\"}": 1737314.0,
+  "vllm:prefix_cache_queries_created{engine=\"0\",model_name=\"m\"}": 1794383118.6241922,
+  "vllm:prefix_cache_hits_total{engine=\"0\",model_name=\"m\"}": 0.0,
+  "vllm:prefix_cache_hits_created{engine=\"0\",model_name=\"m\"}": 1794383118.6242044,
+  "vllm:external_prefix_cache_queries_total{engine=\"0\",model_name=\"m\"}": 0.0,
+  "vllm:external_prefix_cache_queries_created{engine=\"0\",model_name=\"m\"}": 1794383118.6242151,
+  "vllm:external_prefix_cache_hits_total{engine=\"0\",model_name=\"m\"}": 0.0,
+  "vllm:external_prefix_cache_hits_created{engine=\"0\",model_name=\"m\"}": 1794383118.6242313,
+  "vllm:cache_config_info{_block_size_resolved=\"True\",block_size=\"16\",cache_dtype=\"fp8\",cache_hit_alignment_tokens=\"None\",effective_attention_block_size=\"None\",enable_mamba_shared_prefix_checkpoint=\"False\",enable_prefix_caching=\"True\",engine=\"0\",gpu_memory_utilization=\"0.9\",hash_block_size=\"None\",is_attention_free=\"False\",kv_cache_dtype_skip_layers=\"[]\",kv_cache_layout=\"None\",kv_cache_max_concurrency=\"44.59718969555035\",kv_cache_memory_bytes=\"None\",kv_cache_size_tokens=\"1461360\",kv_offloading_backend=\"native\",kv_offloading_size=\"None\",kv_sharing_fast_prefill=\"False\",mamba_block_size=\"None\",mamba_cache_dtype=\"auto\",mamba_cache_mode=\"none\",mamba_page_size_padded=\"None\",mamba_ssm_cache_dtype=\"auto\",num_cpu_blocks=\"None\",num_gpu_blocks=\"57129\",num_gpu_blocks_override=\"None\",prefix_cache_retention_interval=\"0\",prefix_caching_hash_algo=\"sha256\",prefix_match_unit=\"None\",replayssm_buffer_len=\"16\",simple_cpu_offload_num_blocks=\"None\",skip_page_size_padded=\"None\",sliding_window=\"4096\",swa_bounded_replay=\"True\",use_kda_recoverssm=\"False\",use_replayssm=\"False\",user_specified_block_size=\"False\"}": 1.0
+ }
+}
