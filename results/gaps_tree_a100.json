@@ -1,0 +1,62 @@
+{
+ "device": "NVIDIA A100 (Modal)",
+ "note": "MI300X box was unreachable (ssh refused) throughout, so this is A100 via Modal only. Timings jitter +-20% between kernels that run identical code (tree_nomask vs causal differ by up to 28% in either direction across two runs), so only these conclusions are supported: mask cost is within noise of the unmasked tree kernel, and the single-pass tree kernel is 1.3-3.9x faster than K independent queries. B=8 ctx=32768 Hq32 Hkv8 D128 page64, random codes, 20 iters x3 min.",
+ "rows": [
+  {
+   "K": 2,
+   "B": 8,
+   "ctx": 32768,
+   "causal_ms": 1.17391357421875,
+   "tree_nomask_ms": 1.161574363708496,
+   "tree_chainmask_ms": 1.2956159591674805,
+   "tree_binary_ms": 1.1673600196838378,
+   "tree_star_ms": 0.9235967636108399,
+   "independent_K_ms": 1.5538687705993652,
+   "mask_overhead_pct_vs_causal": -0.5582655042790208,
+   "mask_overhead_pct_vs_nomask": 0.4980874368534005,
+   "speedup_vs_independent": 1.331096443597758
+  },
+  {
+   "K": 4,
+   "B": 8,
+   "ctx": 32768,
+   "causal_ms": 0.9108991622924805,
+   "tree_nomask_ms": 1.1594752311706542,
+   "tree_chainmask_ms": 1.2941311836242675,
+   "tree_binary_ms": 1.1686911582946777,
+   "tree_star_ms": 0.9257472038269043,
+   "independent_K_ms": 2.5436159133911134,
+   "mask_overhead_pct_vs_causal": 28.30082699312253,
+   "mask_overhead_pct_vs_nomask": 0.7948360496427886,
+   "speedup_vs_independent": 2.1764654377146897
+  },
+  {
+   "K": 8,
+   "B": 8,
+   "ctx": 32768,
+   "causal_ms": 1.1533823966979981,
+   "tree_nomask_ms": 1.4798336029052734,
+   "tree_chainmask_ms": 1.5741439819335938,
+   "tree_binary_ms": 1.2535296440124513,
+   "tree_star_ms": 1.1404288291931153,
+   "independent_K_ms": 4.364492797851563,
+   "mask_overhead_pct_vs_causal": 8.682917963822167,
+   "mask_overhead_pct_vs_nomask": -15.292527379330512,
+   "speedup_vs_independent": 3.481762731897715
+  },
+  {
+   "K": 16,
+   "B": 8,
+   "ctx": 32768,
+   "causal_ms": 2.623846435546875,
+   "tree_nomask_ms": 2.6796031951904298,
+   "tree_chainmask_ms": 2.796953582763672,
+   "tree_binary_ms": 2.1571584701538087,
+   "tree_star_ms": 2.1573631286621096,
+   "independent_K_ms": 8.383846282958984,
+   "mask_overhead_pct_vs_causal": -17.7864054492883,
+   "mask_overhead_pct_vs_nomask": -19.49709292683138,
+   "speedup_vs_independent": 3.8865231270474085
+  }
+ ]
+}
