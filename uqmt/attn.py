@@ -65,11 +65,37 @@ def _fp4(c):
 
 
 @triton.jit
+def _fp8e4b8(c):
+    # e2m1 code -> e4m3fnuz bits by placement: sign | code3<<2 equals true value * 2**-7
+    # (normals and the 0.5 subnormal alike). -0 would be NaN in fnuz, so force it to +0.
+    m = c & 7
+    bits = ((c & 8) << 4) | (m << 2)
+    bits = tl.where(m == 0, 0, bits)
+    return bits.to(tl.uint8).to(tl.float8e4b8, bitcast=True)
+
+
+@triton.jit
+def _kgroup(q8, KC, KS, cbase, offs_n, g: tl.constexpr, DH: tl.constexpr, NG: tl.constexpr, PAGE: tl.constexpr):
+    offs16 = tl.arange(0, 16)
+    kb = tl.load(KC + (cbase + offs_n[:, None]) * DH + g * 16 + offs16[None, :]).to(tl.int32)
+    k8 = tl.reshape(tl.join(_fp8e4b8(kb & 0xF), _fp8e4b8(kb >> 4)), [PAGE, 32])
+    sc = tl.load(KS + (cbase + offs_n) * NG + g)
+    sc = tl.exp2(sc.to(tl.float32) - 120.0)  # 2**(s-127) * 2**7 undoes the e4b8 placement factor
+    return tl.dot(q8, tl.trans(k8)) * sc[None, :]
+
+
+@triton.jit
+def _qgroup(qbase, rows_ok, g: tl.constexpr):
+    o = tl.arange(0, 32)
+    return tl.load(qbase + g * 32 + o[None, :], mask=rows_ok[:, None], other=0.0).to(tl.float32).to(tl.float8e4b8)
+
+
+@triton.jit
 def _split_kernel(
     Q, KC, KS, VC, VS, BT, SL, MO, ML, sm_scale,
     K: tl.constexpr, G: tl.constexpr, G_PAD: tl.constexpr, BLOCK_M: tl.constexpr,
     HQ: tl.constexpr, HKV: tl.constexpr, D: tl.constexpr, PAGE: tl.constexpr,
-    MAX_PAGES: tl.constexpr, NSPLIT: tl.constexpr, PPS: tl.constexpr,
+    MAX_PAGES: tl.constexpr, NSPLIT: tl.constexpr, PPS: tl.constexpr, FP8K: tl.constexpr,
 ):
     b = tl.program_id(0)
     hk = tl.program_id(1)
@@ -88,6 +114,11 @@ def _split_kernel(
     q_e = tl.load(qbase + 2 * offs_h[None, :], mask=row_ok[:, None], other=0.0)
     q_o = tl.load(qbase + 2 * offs_h[None, :] + 1, mask=row_ok[:, None], other=0.0)
 
+    if FP8K:
+        q0 = _qgroup(qbase, row_ok, 0)
+        q1 = _qgroup(qbase, row_ok, 1)
+        q2 = _qgroup(qbase, row_ok, 2)
+        q3 = _qgroup(qbase, row_ok, 3)
     m_i = tl.full([BLOCK_M], float("-inf"), tl.float32)
     l_i = tl.zeros([BLOCK_M], tl.float32)
     acc_e = tl.zeros([BLOCK_M, DH], tl.float32)
@@ -100,12 +131,18 @@ def _split_kernel(
     for p in range(p_lo, p_hi):
         page = tl.load(BT + b * MAX_PAGES + p).to(tl.int64)
         cbase = (page * HKV + hk) * PAGE
-        kb = tl.load(KC + (cbase + offs_n[:, None]) * DH + offs_h[None, :])
-        ksc = tl.load(KS + (cbase + offs_n[:, None]) * (D // GROUP) + (offs_h // (GROUP // 2))[None, :])
-        kscale = tl.exp2(ksc.to(tl.float32) - 127.0)
-        k_lo = (_fp4((kb & 0xF).to(tl.int32)) * kscale).to(tl.bfloat16)
-        k_hi = (_fp4((kb >> 4).to(tl.int32)) * kscale).to(tl.bfloat16)
-        s = tl.dot(q_e, tl.trans(k_lo)) + tl.dot(q_o, tl.trans(k_hi))
+        if FP8K:
+            s = _kgroup(q0, KC, KS, cbase, offs_n, 0, DH, D // 32, PAGE)
+            s += _kgroup(q1, KC, KS, cbase, offs_n, 1, DH, D // 32, PAGE)
+            s += _kgroup(q2, KC, KS, cbase, offs_n, 2, DH, D // 32, PAGE)
+            s += _kgroup(q3, KC, KS, cbase, offs_n, 3, DH, D // 32, PAGE)
+        else:
+            kb = tl.load(KC + (cbase + offs_n[:, None]) * DH + offs_h[None, :])
+            ksc = tl.load(KS + (cbase + offs_n[:, None]) * (D // GROUP) + (offs_h // (GROUP // 2))[None, :])
+            kscale = tl.exp2(ksc.to(tl.float32) - 127.0)
+            k_lo = (_fp4((kb & 0xF).to(tl.int32)) * kscale).to(tl.bfloat16)
+            k_hi = (_fp4((kb >> 4).to(tl.int32)) * kscale).to(tl.bfloat16)
+            s = tl.dot(q_e, tl.trans(k_lo)) + tl.dot(q_o, tl.trans(k_hi))
         pos = p * PAGE + offs_n
         s = tl.where(pos[None, :] < limit[:, None], s * (sm_scale * LOG2E), float("-inf"))
         m_new = tl.maximum(m_i, tl.max(s, 1))
@@ -168,7 +205,7 @@ def _run(q, kc, ks, vc, vs, block_table, seq_lens, sm_scale, nsplit):
     _split_kernel[(B, HKV, nsplit)](
         q, kc, ks, vc, vs, block_table, seq_lens, mo, ml, sm_scale,
         K=K, G=G, G_PAD=G_PAD, BLOCK_M=BLOCK_M, HQ=HQ, HKV=HKV, D=D, PAGE=PAGE,
-        MAX_PAGES=max_pages, NSPLIT=nsplit, PPS=pps, num_warps=int(os.environ.get('UQ_WARPS', 2)), num_stages=int(os.environ.get('UQ_STAGES', 2)))
+        MAX_PAGES=max_pages, NSPLIT=nsplit, PPS=pps, FP8K=bool(int(os.environ.get('UQ_FP8K', 0))), num_warps=int(os.environ.get('UQ_WARPS', 2)), num_stages=int(os.environ.get('UQ_STAGES', 2)))
     _reduce_kernel[(B, HKV, K * G_PAD)](
         mo, ml, out, K=K, G=G, G_PAD=G_PAD, BLOCK_M=BLOCK_M, HQ=HQ, HKV=HKV, D=D,
         NSPLIT=nsplit)

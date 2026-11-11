@@ -11,3 +11,9 @@ Findings
 - Peaks (peak.py): bf16 640 TFLOPS, fp8 1.12 PFLOPS, HBM copy 3.9 TB/s. Kernel is still well below HBM peak.
 
 Not tried: fp8-MFMA path with per-group column scaling (MX-style scaled dot emulation), persistent kernel with software pipelining of block-table loads, bf16 partials.
+
+## fp8-MFMA K-score path (UQ_FP8K=1, default off)
+FP4->e4m3fnuz by bit placement (value*2^-7, folded into group scale), fp8 queries, per-32-group fp8 dots with column scaling.
+Correct (max err 4e-3 vs 3e-4 for bf16 path; the error is fp8 query quantisation) but SLOWER on MI300X:
+best K=1 0.38 ms (bf16 path 0.36), K=8 0.66 ms (bf16 path 0.54). Extra join/reshape shuffles + 4 small dots outweigh the cheaper dequant.
+Kept behind the flag; not used by default.
