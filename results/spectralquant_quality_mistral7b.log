@@ -1,0 +1,5 @@
+[transformers] `torch_dtype` is deprecated! Use `dtype` instead!
+calibrated in 10s; mean d_eff K 67.7 V 94.4; planes K (80, 24, 8, 0) V (112, 112, 24, 8); bytes/vec K 46 V 64 (ideal 40.5/55.6)
+fp16 4.872425489260302
+sq 10.536155702960697
+attn cos 0.7870319131761789

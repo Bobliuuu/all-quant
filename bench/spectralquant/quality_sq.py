@@ -11,9 +11,14 @@ import qeval
 
 ap = argparse.ArgumentParser(); ap.add_argument("--model", default="mistral7b"); ap.add_argument("--out", required=True)
 ap.add_argument("--nwin", type=int, default=8); ap.add_argument("--ncal", type=int, default=16); ap.add_argument("--skip-fp16", action="store_true")
+ap.add_argument("--sink", type=int, default=0, help="DIAGNOSTIC (not in the published scheme): keep the first N tokens of every sequence in fp16 (attention-sink handling as in KVQuant)")
 ap.add_argument("--opts", default="{}"); a = ap.parse_args(); opts = json.loads(a.opts)
 model, tok = qeval.load(a.model); cfg = model.config
-W = qeval.wiki_ids(tok); Wtr = qeval.wiki_ids(tok, "train")
+def wiki_ids(split):
+    from datasets import load_dataset
+    ds = load_dataset("Salesforce/wikitext", "wikitext-2-raw-v1", split=split)
+    return tok("\n\n".join(ds["text"]), return_tensors="pt").input_ids[0]
+W = wiki_ids("test"); Wtr = wiki_ids("train")
 NL = cfg.num_hidden_layers; H = cfg.num_key_value_heads
 
 
@@ -49,13 +54,20 @@ print(f"calibrated in {time.time() - t0:.0f}s; mean d_eff K {sum(dk) / NL:.1f} V
 
 class SQCacheHF(DynamicCache):
     def update(self, k, v, li, kw=None):
-        return super().update(sq.roundtrip(LP[li], k, True), sq.roundtrip(LP[li], v, False), li, kw)
+        first = a.sink > 0 and self.get_seq_length(li) == 0
+        kq, vq = sq.roundtrip(LP[li], k, True), sq.roundtrip(LP[li], v, False)
+        if first: kq[:, :, :a.sink] = k[:, :, :a.sink]; vq[:, :, :a.sink] = v[:, :, :a.sink]
+        return super().update(kq, vq, li, kw)
 
 
 class Meth:
     def __init__(self, c): self.c = c
     def make_cache(self): return self.c()
-    def seq_fq(self, x, is_key, layer=-1): return sq.roundtrip(LP[layer], x, is_key) if self.c is SQCacheHF else x
+    def seq_fq(self, x, is_key, layer=-1):
+        if self.c is not SQCacheHF: return x
+        y = sq.roundtrip(LP[layer], x, is_key)
+        if a.sink: y[:, :, :a.sink] = x[:, :, :a.sink]
+        return y
 
 
 @torch.no_grad()
@@ -86,7 +98,7 @@ def attn_error(method, ids, T=2048, nq=128):
     return dict(per_layer=rows, mean_cos=sum(r["cos"] for r in rows) / NL, mean_rel_err=sum(r["rel_err"] for r in rows) / NL)
 
 
-res = dict(model=a.model, method="spectralquant_triton", opts=opts, d_eff_k_mean=sum(dk) / NL, d_eff_v_mean=sum(dv) / NL, planes_k=LP[0].planes_k, planes_v=LP[0].planes_v,
+res = dict(sink_fp16_tokens=a.sink, model=a.model, method="spectralquant_triton", opts=opts, d_eff_k_mean=sum(dk) / NL, d_eff_v_mean=sum(dv) / NL, planes_k=LP[0].planes_k, planes_v=LP[0].planes_v,
            bytes_per_vec=(bk + bvv) / 2, bytes_per_vec_k=bk, bytes_per_vec_v=bvv, ideal_bytes_k=ideal_k, ideal_bytes_v=ideal_v)
 sqm, fpm = Meth(SQCacheHF), Meth(DynamicCache)
 if not a.skip_fp16:
