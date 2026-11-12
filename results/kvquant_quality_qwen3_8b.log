@@ -1,0 +1,12 @@
+[transformers] `torch_dtype` is deprecated! Use `dtype` instead!
+Loading weights:   0%|          | 0/399 [00:00<?, ?it/s]Loading weights:   0%|          | 1/399 [00:00<02:13,  2.98it/s]Loading weights:   7%|▋         | 27/399 [00:00<00:04, 79.25it/s]Loading weights:  13%|█▎        | 50/399 [00:00<00:02, 123.69it/s]Loading weights:  19%|█▉        | 76/399 [00:00<00:02, 160.53it/s]Loading weights:  25%|██▌       | 101/399 [00:00<00:01, 185.28it/s]Loading weights:  31%|███▏      | 125/399 [00:00<00:01, 194.86it/s]Loading weights:  37%|███▋      | 149/399 [00:00<00:01, 207.54it/s]Loading weights:  45%|████▍     | 179/399 [00:01<00:00, 232.50it/s]Loading weights:  51%|█████     | 204/399 [00:01<00:00, 216.20it/s]Loading weights:  58%|█████▊    | 232/399 [00:01<00:00, 230.55it/s]Loading weights:  64%|██████▍   | 256/399 [00:01<00:00, 228.66it/s]Loading weights:  70%|███████   | 280/399 [00:01<00:00, 222.02it/s]Loading weights:  77%|███████▋  | 307/399 [00:01<00:00, 235.22it/s]Loading weights:  83%|████████▎ | 332/399 [00:01<00:00, 236.55it/s]Loading weights:  89%|████████▉ | 356/399 [00:01<00:00, 234.66it/s]Loading weights:  95%|█████████▌| 380/399 [00:01<00:00, 229.49it/s]Loading weights: 100%|██████████| 399/399 [00:01<00:00, 199.52it/s]
+rope theta 1000000
+Using the latest cached version of the dataset since Salesforce/wikitext couldn't be found on the Hugging Face Hub (offline mode is enabled).
+Found the latest cached dataset configuration 'wikitext-2-raw-v1' at /root/.cache/huggingface/datasets/Salesforce___wikitext/wikitext-2-raw-v1/0.0.0/b08601e04326c79dfdd32d625aee71d232d685c3 (last modified on Wed Nov 11 06:46:40 2026).
+[transformers] Token indices sequence length is longer than the specified maximum sequence length for this model (299078 > 131072). Running this sequence through the model will result in indexing errors
+Using the latest cached version of the dataset since Salesforce/wikitext couldn't be found on the Hugging Face Hub (offline mode is enabled).
+Found the latest cached dataset configuration 'wikitext-2-raw-v1' at /root/.cache/huggingface/datasets/Salesforce___wikitext/wikitext-2-raw-v1/0.0.0/b08601e04326c79dfdd32d625aee71d232d685c3 (last modified on Wed Nov 11 06:46:40 2026).
+calibrated in 4s
+fp16 8.521646954049313
+kvq 9.585216840553812
+attn cos 0.8639320681492487 k_rel 0.06676816215945615 v_rel 0.10157972781194581

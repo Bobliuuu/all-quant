@@ -1,0 +1,11 @@
+[transformers] `torch_dtype` is deprecated! Use `dtype` instead!
+Loading weights:   0%|          | 0/291 [00:00<?, ?it/s]Loading weights:   0%|          | 1/291 [00:00<00:51,  5.62it/s]Loading weights:   7%|▋         | 20/291 [00:00<00:03, 87.18it/s]Loading weights:  13%|█▎        | 38/291 [00:00<00:02, 121.94it/s]Loading weights:  20%|█▉        | 58/291 [00:00<00:01, 140.01it/s]Loading weights:  26%|██▌       | 76/291 [00:00<00:01, 150.59it/s]Loading weights:  32%|███▏      | 94/291 [00:00<00:01, 156.78it/s]Loading weights:  38%|███▊      | 112/291 [00:00<00:01, 155.25it/s]Loading weights:  45%|████▌     | 131/291 [00:00<00:01, 158.51it/s]Loading weights:  52%|█████▏    | 150/291 [00:01<00:00, 165.19it/s]Loading weights:  57%|█████▋    | 167/291 [00:01<00:00, 164.38it/s]Loading weights:  63%|██████▎   | 184/291 [00:01<00:00, 164.58it/s]Loading weights:  70%|███████   | 204/291 [00:01<00:00, 171.70it/s]Loading weights:  76%|███████▋  | 222/291 [00:01<00:00, 172.58it/s]Loading weights:  82%|████████▏ | 240/291 [00:01<00:00, 170.16it/s]Loading weights:  89%|████████▊ | 258/291 [00:01<00:00, 168.77it/s]Loading weights:  95%|█████████▍| 276/291 [00:01<00:00, 170.17it/s]Loading weights: 100%|██████████| 291/291 [00:01<00:00, 157.62it/s]
+rope theta 10000.0
+Using the latest cached version of the dataset since Salesforce/wikitext couldn't be found on the Hugging Face Hub (offline mode is enabled).
+Found the latest cached dataset configuration 'wikitext-2-raw-v1' at /root/.cache/huggingface/datasets/Salesforce___wikitext/wikitext-2-raw-v1/0.0.0/b08601e04326c79dfdd32d625aee71d232d685c3 (last modified on Wed Nov 11 06:46:40 2026).
+Using the latest cached version of the dataset since Salesforce/wikitext couldn't be found on the Hugging Face Hub (offline mode is enabled).
+Found the latest cached dataset configuration 'wikitext-2-raw-v1' at /root/.cache/huggingface/datasets/Salesforce___wikitext/wikitext-2-raw-v1/0.0.0/b08601e04326c79dfdd32d625aee71d232d685c3 (last modified on Wed Nov 11 06:46:40 2026).
+calibrated in 5s
+fp16 4.872425489260302
+kvq 5.092894963004125
+attn cos 0.8113768920302391 k_rel 0.06660334614571184 v_rel 0.10101581760682166
