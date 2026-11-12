@@ -157,7 +157,7 @@ Porting the op to a new vendor took hours, versus about two weeks for TurboQuant
 
 ## Video
 
-[3.7-minute explainer](video/ultraquant_explainer.mp4) (subtitles in [video/ultraquant_explainer.srt](video/ultraquant_explainer.srt)).
+[3.9-minute explainer](video/ultraquant_explainer.mp4) (subtitles in [video/ultraquant_explainer.srt](video/ultraquant_explainer.srt)).
 
 ## Reproduce
 
