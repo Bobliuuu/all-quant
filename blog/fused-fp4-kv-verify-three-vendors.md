@@ -228,13 +228,28 @@ For K = 8 we therefore report TurboQuant two ways: eight sequential single-query
 - Fused FP4 multi-token verify on NVIDIA in general: FlashInfer's trtllm-gen kernels do it for NVFP4 on Blackwell and are faster than our port on B300.
 
 **What we contribute, as far as we can find:**
-1. **The UltraQuant format with fused K-query verify, ported to CUDA and SYCL.** The format and a vLLM backend for it already exist upstream (vLLM PR #57057, merged 2026-10-06): AMD gfx950 FlyDSL decode plus a Triton fallback, listed for ROCm only in the source we read, with single-query decode paths. We did not run it. In the public sources we checked we found no CUDA or SYCL implementation of the format with fused K-query verify, and no FP4 KV decode on Intel/SYCL. The search trails are in [cuda/PRIOR_ART.md](../cuda/PRIOR_ART.md) and [sycl/PRIOR_ART.md](../sycl/PRIOR_ART.md). This is a "no public port found" statement; the search was not exhaustive.
+1. **The UltraQuant format with fused K-query verify, ported to CUDA and SYCL.** The format and a vLLM backend for it already exist upstream (vLLM PR #57057, merged 2026-10-06): AMD gfx950 FlyDSL decode plus a Triton fallback, listed for ROCm only in the source we read, with single-query decode paths. We ran that backend at serving level on MI300X (below) but did not time it as a kernel against ours. In the public sources we checked we found no CUDA or SYCL implementation of the format with fused K-query verify, and no FP4 KV decode on Intel/SYCL. The search trails are in [cuda/PRIOR_ART.md](../cuda/PRIOR_ART.md) and [sycl/PRIOR_ART.md](../sycl/PRIOR_ART.md). This is a "no public port found" statement; the search was not exhaustive.
 2. **One validated op across three vendors**, with a layout that drops into the upstream cache by permutation (Part 1).
 3. **A reproducible comparison** of KV quantisers with real fused kernels on one MI300X harness and two models (Part 2), and against TurboQuant at more shapes (Part 3).
 
+## Serving-level check on MI300X (vLLM's native backend, not our kernel)
+
+We ran vLLM 0.33.0 on MI300X with Qwen3-8B and three KV formats: bf16, fp8 and vLLM's native `ultraquant_4bit` backend (its own FlyDSL/Triton kernel). Mistral-7B cannot use that backend (sliding window). The FP4 runs needed `--attention-backend TRITON_ATTN`, so backend and KV format are confounded in every speed number. Each cell is one run on a GPU shared with other jobs.
+
+| metric | bf16 KV | fp8 KV | FP4 KV |
+|---|---|---|---|
+| KV capacity, tokens | 1.09M | 2.18M (2.00x) | 3.16M (2.89x) |
+| RAG HotpotQA-in-16k F1, n=100 | 0.655 | 0.647 | 0.618 |
+| Median first divergent greedy token vs bf16 | reference | 24 | 10 |
+| Agent (32 x 24k sessions, KV oversubscribed) tok/s | 47.9 | 38.1 | 59.4 |
+| Agent TTFT p50 (s) | 69 | 74 | 30 |
+| Plain decode (K=0) tok/s | 1052 | 1091 | 767 |
+
+The capacity gain and the oversubscribed-agent gain are real: bf16 KV holds 185k tokens in the agent configuration and FP4 holds 544k,. Plain decode is slower with FP4, and the quality cost is real (F1 about 0.04 lower; greedy output diverges from bf16 after about 10 tokens versus 24 for fp8). Speculative K=4/8 numbers exist but are noisy (bf16 K=4 is slower than bf16 K=0), so we do not draw conclusions from them. This supports the KV-capacity argument for FP4; it is not a kernel-speed claim for the kernel in this repo. Data: `results/realworld_mi300x_summary.md` and `results/realworld_mi300x_*.json`.
+
 ## What this does not show yet
 
-- No end-to-end serving throughput for FP4 KV. Step numbers are kernel-level measurements and a projection.
+- No serving-level number for **our** kernel. The serving numbers below are for vLLM's native `ultraquant_4bit` backend, and our step numbers are kernel-level measurements and a projection.
 - Perplexity and cosine come from single runs on small samples, the Planar/Iso/Rotor perplexity comes from a quantiser simulation rather than the kernel, and the comparison kernels are untuned ports; task accuracy (RULER, SWE-bench style) is not measured.
 - MI300X (gfx942) has no native scaled FP4 MFMA; the native path needs gfx950, which we have not measured.
 - At batch 1 there is no whole-step gain. The reliable benefit is **3.76x more KV tokens per GB**, plus cheaper verification at large batch and long context.

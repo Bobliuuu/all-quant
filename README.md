@@ -4,7 +4,7 @@
 
 This repo implements one operation: **decode / speculative-verify attention over a 4-bit paged KV cache in the UltraQuant format** (FP4 e2m1 values, one UE8M0 power-of-two scale per 32 channels: 68 bytes per head per token for K or V at head_dim 128, **3.76x smaller than fp16, 1.88x smaller than fp8**), where **all K speculative queries and the GQA group share a single pass over the KV pages**.
 
-The same op is ported to **AMD (Triton, MI300X)**, **NVIDIA (native CUDA, `mma.sync`; A100, H100, L40S, B300, RTX PRO 6000)** and **Intel (SYCL / XMX, Arc B390)**. All three consume the same cache layout, are checked against the same CPU reference vectors, and the layout is byte-compatible (a pure permute) with the upstream vLLM/SGLang UltraQuant cache ([cuda/UPSTREAM_COMPAT.md](cuda/UPSTREAM_COMPAT.md)). **Prior art, stated plainly:** the UltraQuant format and a vLLM backend for it already exist upstream (vLLM PR #57057, `--kv-cache-dtype ultraquant_4bit`, merged 2026-10-06; AMD gfx950-oriented, FlyDSL D=256 decode plus a Triton fallback). In the vLLM source we read on 2026-11-12 it is listed for ROCm only, and its decode paths pass `max_query_len=1`, i.e. no K-query read sharing; we did not run it. K-query KV sharing in general is not new either, and on B300 vendor NVFP4 kernels are faster than our port (see "Where we stand"). In the public sources we checked we found no CUDA or SYCL implementation of the UltraQuant layout with fused K-query verify ([cuda/PRIOR_ART.md](cuda/PRIOR_ART.md), [sycl/PRIOR_ART.md](sycl/PRIOR_ART.md); the search was not exhaustive).
+The same op is ported to **AMD (Triton, MI300X)**, **NVIDIA (native CUDA, `mma.sync`; A100, H100, L40S, B300, RTX PRO 6000)** and **Intel (SYCL / XMX, Arc B390)**. All three consume the same cache layout, are checked against the same CPU reference vectors, and the layout is byte-compatible (a pure permute) with the upstream vLLM/SGLang UltraQuant cache ([cuda/UPSTREAM_COMPAT.md](cuda/UPSTREAM_COMPAT.md)). **Prior art, stated plainly:** the UltraQuant format and a vLLM backend for it already exist upstream (vLLM PR #57057, `--kv-cache-dtype ultraquant_4bit`, merged 2026-10-06; AMD gfx950-oriented, FlyDSL D=256 decode plus a Triton fallback). In the vLLM source we read on 2026-11-12 it is listed for ROCm only, and its decode paths pass `max_query_len=1`, i.e. no K-query read sharing; we ran that backend at serving level on MI300X (below), but did not time it as a kernel against ours. K-query KV sharing in general is not new either, and on B300 vendor NVFP4 kernels are faster than our port (see "Where we stand"). In the public sources we checked we found no CUDA or SYCL implementation of the UltraQuant layout with fused K-query verify ([cuda/PRIOR_ART.md](cuda/PRIOR_ART.md), [sycl/PRIOR_ART.md](sycl/PRIOR_ART.md); the search was not exhaustive).
 
 **Headline numbers** (measured; one attention layer, batch 8, context 32768, Hq64/Hkv8/D128, page 64, synthetic KV):
 
@@ -93,7 +93,7 @@ The ESIMD path is 1.4x to 2.2x faster than the earlier XMX path. Against the bas
 | B300: **FlashInfer trtllm-gen NVFP4** (fp8 q, NVFP4 E4M3/16 scales, tcgen05) | **0.066 / 0.077 / 0.097 / 0.094 ms, 2.1x (K=1) to 3.3x (K=8) faster than our port**, and it already does fused K-query verify |
 | B300: BitDecoding-FP4 (single-query; K independent decodes) | 0.068 / 0.131 / 0.261 / 0.521 ms |
 | B300: FlashInfer trtllm-gen fp8 KV, fp8 q (2x the bytes) | 0.080 / 0.081 / 0.083 / 0.087 ms |
-| vLLM upstream UltraQuant backend (PR #57057) | exists since 2026-10-06; ROCm-listed, single-query decode paths in the source we read; not run by us, no timing comparison |
+| vLLM upstream UltraQuant backend (PR #57057) | exists since 2026-10-06; ROCm-listed, single-query decode paths in the source we read; run by us at serving level on MI300X with Qwen3-8B (see "Serving-level evaluation"), no kernel-level timing comparison with ours |
 | Arc B390: ours (ESIMD) vs torch-XPU f16 SDPA / IPEX / llama.cpp q4_0 | B8/16k K=1/4/8: 1.72 / 1.77 / 3.47 ms vs 4.90 / 5.87 / 5.81 / 4.99-10.1 / 2.03 / 2.29 / 3.88 (llama.cpp competitive at K=1, ours ahead at K>=4) |
 
 So: **we do not beat vendor-tuned NVFP4 kernels on B300**, and fused FP4 K-query verify exists there already (FlashInfer). What this repo offers is the exact UltraQuant format (UE8M0 per 32, bf16 queries, any page size, ragged lengths and causal verify masks), K-query sharing, and one validated implementation across AMD, NVIDIA and Intel. The CUDA port is 1.1x to 2.8x faster than our Triton kernel on every NVIDIA GPU measured (H100 2.1-2.3x, B300 1.6-2.2x).
@@ -143,7 +143,22 @@ Whole-step speedup of fused FP4 vs the best fp16 attention (higher is better):
 
 ### Serving-level evaluation: status
 
-[bench/realworld/](bench/realworld/) holds an agent / RAG / needle / speculative-decoding / greedy-drift harness for vLLM. **No UltraQuant FP4 serving number exists yet**; FP4 serving on MI300X is pending. What was run (Modal H100, stock vLLM, Mistral-7B and Qwen3-8B) is a **proxy with fp8 KV (2x smaller) vs bf16 KV, not FP4 and not UltraQuant**: KV capacity doubles exactly; a 48-session 24k-token agent trace did not gain throughput (prefill/queue-bound); HotpotQA-in-noise F1 was unchanged (0.236 vs 0.234); n-gram speculative decoding at concurrency 32 was 25% faster with fp8 KV at K=4; and fp8 KV changed greedy output early (median first divergence at token 30 versus 513 for a bf16 rerun). These show what a smaller KV changes in serving, nothing about 4-bit accuracy. Details and caveats: [results/realworld_summary.md](results/realworld_summary.md). vLLM 0.33 ships its own native UltraQuant backend with a different cache layout; testing that backend on MI300X is the planned FP4 serving run.
+[bench/realworld/](bench/realworld/) holds an agent / RAG / needle / speculative-decoding / greedy-drift harness for vLLM.
+
+**MI300X, vLLM 0.33.0, Qwen3-8B, bf16 vs fp8 vs FP4 KV.** These runs use **vLLM's own native `ultraquant_4bit` backend** (its FlyDSL/Triton kernel), **not our uqmt kernel**, so this validates the KV-capacity story, not a speed claim for our kernel. Qwen3-8B only (Mistral-7B cannot use the backend because of its sliding window). The FP4 runs needed `--attention-backend TRITON_ATTN`, so attention backend and KV format are confounded in the speed numbers. Single runs on a GPU shared with other jobs, no CIs.
+
+| metric | bf16 KV | fp8 KV | FP4 (`ultraquant_4bit`) KV |
+|---|---|---|---|
+| KV capacity, tokens (gmu 0.9) | 1.09M | 2.18M (2.00x) | 3.16M (2.89x) |
+| RAG HotpotQA-in-16k F1, n=100 | 0.655 | 0.647 | 0.618 |
+| Greedy drift vs bf16, median first divergent token (24 prompts x 512) | reference | 24 | 10 |
+| Agent, 32 x 24k-token sessions, KV oversubscribed: out tok/s | 47.9 | 38.1 | 59.4 |
+| Agent TTFT p50 (s) | 69 | 74 | 30 |
+| Plain decode (n-gram spec K=0, conc 8) tok/s | 1052 | 1091 | 767 |
+
+Capacity (2.89x, below 4x because vLLM keeps four layers at bf16) and the oversubscribed-agent gain (bf16 KV holds 185k tokens, FP4 544k) are real; plain decode is slower with FP4; the quality cost is real (F1 about 0.04 lower; greedy output diverges from bf16 after about 10 tokens, earlier than fp8). Speculative K=4/8 runs exist but are noisy (bf16 K=4 below bf16 K=0) and are not used here. Full table and caveats: [results/realworld_mi300x_summary.md](results/realworld_mi300x_summary.md), raw `results/realworld_mi300x_*.json`.
+
+Earlier proxy on Modal H100 (stock vLLM, Mistral-7B and Qwen3-8B, fp8 vs bf16 KV): [results/realworld_summary.md](results/realworld_summary.md).
 
 ## Porting effort
 
