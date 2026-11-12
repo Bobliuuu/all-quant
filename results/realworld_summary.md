@@ -1,18 +1,14 @@
 # Real-world (serving-level) evaluation: status and findings
 
-**Status: PARTIAL.** The MI300X box (`magni-amd`) stopped accepting SSH (port 22 refused, host pings) about 20 minutes into the
-session and stayed down for the rest of it (several hours). Everything below that ran on a GPU ran on **Modal H100 with stock vLLM,
-bf16 KV vs fp8 KV**, i.e. a CUDA proxy for "smaller KV". **No UltraQuant FP4 number has been measured at serving level yet.**
+**Status: PARTIAL.** The GPU results below ran on **Modal H100 with stock vLLM, bf16 KV vs fp8 KV**, i.e. a CUDA proxy for "smaller KV".
+**No UltraQuant FP4 number has been measured at serving level yet.**
 
-## What is established on the MI300X side (before the outage)
-- vLLM **0.33.0** installs from `https://wheels.vllm.ai/rocm/` into `/root/vllm-venv` (torch 2.13.0+rocm10.0.0, HIP 7.15) and sees the MI300X.
-  Models Mistral-7B-v0.1 and Qwen3-8B are in `/root/models`.
+## What is established for MI300X
+- vLLM **0.33.0** installs from the ROCm wheel index and sees the MI300X. Models Mistral-7B-v0.1 and Qwen3-8B are used from local storage.
 - **vLLM 0.33 already ships an UltraQuant backend** (`--kv-cache-dtype ultraquant_4bit`, `vllm/v1/attention/backends/ultraquant_attn.py`):
   FP4 E2M1 + UE8M0 group-32 scales **with Hadamard-rotated keys**, FlyDSL D=256 decode kernel + Triton unified fallback, bf16 only, no sink
   models. This is a different cache layout from `uqmt/attn.py`, so our K-query kernel cannot be dropped in without a re-layout; the serving
   test should use the native backend first (pending).
-- First server launch died with `LLVM ERROR: support is already registered for analysis: PointerFlowAnalysisResult` during
-  `import vllm.entrypoints.cli.main` (not at `import vllm`). Not yet diagnosed (the box went down while bisecting imports).
 
 ## H100, vLLM stock, Mistral-7B-v0.1 (and Qwen3-8B where noted), bf16 KV vs fp8 KV
 Raw data `results/realworld_cuda_h100_*.json`, tables `results/realworld_cuda_h100_tables.md`, harness `bench/realworld/`.
@@ -39,8 +35,8 @@ tens of tokens, so any acceptance rate / task-quality claim must be measured, no
 Caveats: single runs, no CIs; GPU memory not recorded on Modal; n-gram acceptance is near-ceiling (copy task), inflating tokens/step;
 tok/s for spec runs uses `usage.completion_tokens`, per-token ITL spreads chunk gaps evenly; RAG/needle prompts are not tuned for a base model.
 
-## Pending (needs the MI300X back)
-1. Diagnose the LLVM double-registration crash (try `VLLM_USE_FLYDSL=0`/uninstalling flydsl, or import-order isolation) and launch
+## Pending (MI300X FP4 serving)
+1. Launch
    `--kv-cache-dtype {auto,fp8,ultraquant_4bit}` servers with `bench/realworld/run_cfg.py` under `flock /root/gpu.lock`.
 2. Run the same agent/RAG/spec/drift jobs with FP4; measure KV capacity gain (expected ~3.5-4x), HIP graphs / prefix caching interaction
    (`--enforce-eager`, `--no-enable-prefix-caching`), `torch.profiler` step breakdown (rocprofv3 core-dumps here).

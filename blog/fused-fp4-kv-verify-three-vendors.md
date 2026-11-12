@@ -78,36 +78,75 @@ For scale, the TurboQuant-on-AMD effort in `Bobliuuu/amd-experiments` was 15 com
 
 ## Part 2. How UltraQuant relates to other schemes, and whether it is the best
 
-Short answer: **no, it is not the most accurate and not the fastest everywhere.** The table puts the schemes through the same cache path on two models.
+Short answer: **no. UltraQuant is not the most accurate scheme here, and FP8 is faster at K=1.** It is faster and more accurate than TurboQuant 3-bit, it is far ahead of SpectralQuant and of Planar/Iso/Rotor at 3 bits, and it keeps two things the others do not have in this table: a fused K-query kernel over the cache and the same op on three vendors with the upstream cache layout.
 
-Protocol (`results/quality_summary.md`): quantise on cache write, dequantise on read, through a Hugging Face cache; WikiText-2, 8 windows of 2048 tokens, first 1024 via chunked prefill and the rest token by token. Attention cosine is on real post-RoPE K/V over the last 128 queries. Single run per cell, small sample, so differences under about 0.02 perplexity are noise. "Ported kernel" means a real kernel exists in this repo or in amd-experiments and was run unchanged; "quality only" means our quantise-dequantise reimplementation of the published scheme (not the authors' code, no tuned kernel), so it shows accuracy but says nothing about speed.
+To make that claim testable, every method below was given a real fused Triton decode kernel on the same MI300X and run through one harness (`bench/ports/common.py`, `bench/ports/run_port.py`, summary in `results/ports_summary.md`). One table, one set of shapes: B8, ctx 32768, Hq64/Hkv8/D128, page 64, cold cache (the 256 MB Infinity Cache flushed before every call). GB/s counts stored KV bytes only. The ms and cosine columns come from `results/ports_*.json`; the perplexity and real-KV cosine columns come from the same files for the ported methods, from `results/quality_raw/` for UltraQuant, TurboQuant and the three block-rotation methods (earlier runs with the identical protocol), and from `results/spectralquant_quality_*.json` for SpectralQuant. Sorted by K=1 time.
 
-| Scheme | Bytes per vector | Mistral-7B ppl delta | Qwen3-8B ppl delta | Qwen3-8B attn cosine | Evidence |
-|---|---|---|---|---|---|
-| fp16 | 256 | 0 (4.873) | 0 (8.522) | 1.000 | reference |
-| FP8 e4m3 (per-token scale) | 130 | +0.003 | +0.008 | 0.999 | quality only |
-| KIVI-4 | 80 | +0.007 | +0.025 | 0.998 | quality only |
-| KVQuant-4 | 85 | +0.041 | -0.007 | 0.982 | quality only |
-| NVFP4 (E4M3 per 16) | 72 | +0.052 | +0.103 | 0.980 | quality only; through our NVFP4 kernel path: +0.047 / +0.061 (`results/nvfp4_summary.md`) |
-| **UltraQuant FP4/UE8M0** | **68** | **+0.139** | **+0.562** | **0.932** | ported kernel (this repo) |
-| MXFP4 (UE8M0 per 32) | 68 | +0.190 | +0.481 | 0.923 | quality only; through the kernel +0.130 / +0.550 |
-| QServe-style int4 | 68 | +0.067 | +7.987 | 0.942 | quality only (no SmoothAttention) |
-| TurboQuant 4-bit | 68 | +0.026 | +0.581 | 0.979 | amd-experiments port, run unchanged |
-| TurboQuant 3-bit | 52 | +0.142 | +1.995 | 0.933 | amd-experiments port, run unchanged |
-| PlanarQuant 3 / IsoQuant 3 / RotorQuant 3 | 52 | +6.101 / +2.537 / +3.089 | +16.703 / +13.870 / +13.395 | 0.716 / 0.721 / 0.722 | amd-experiments port, run unchanged |
+| method | B/vec | ms K=1 | ms K=8 | GB/s K=1 | kernel attn cos | ppl delta Mistral | ppl delta Qwen3 | attn cos real KV Mistral / Qwen3 | marker |
+|---|---|---|---|---|---|---|---|---|---|
+| FP8 e4m3 | 128 | 0.294 | 0.510 | 1825 | 0.998 | +0.008 | +0.032 | 0.998 / 0.997 | ported kernel |
+| **UltraQuant FP4 (this repo)** | 68 | 0.361 | 0.551 | 790 | 0.965 | +0.139 | +0.562 | 0.963 / 0.932 | ported kernel (repo) |
+| MXFP4 | 68 | 0.389 | 0.538 | 734 | 0.962 | +0.190 | +0.482 | 0.943 / 0.923 | ported kernel |
+| QServe-int4 | 68 | 0.397 | 0.629 | 719 | 0.981 | +0.047 | +0.005 | 0.985 / 0.963 | ported kernel |
+| NVFP4 | 72 | 0.411 | 0.536 | 735 | 0.981 | +0.056 | +0.081 | 0.989 / 0.979 | ported kernel |
+| KIVI-4 | 80 | 0.540 | 0.784 | 621 | 0.993 | +0.010 | +0.026 | 0.996 / 0.998 | ported kernel |
+| RotorQuant-3 | 52 | 0.766 | 1.583 | 285 | 0.905 | +3.089 | +13.395 | 0.709 / 0.722 | ported kernel; quality from quantiser sim |
+| PlanarQuant-3 | 52 | 0.777 | 1.575 | 281 | 0.896 | +6.101 | +16.703 | 0.699 / 0.716 | ported kernel; quality from quantiser sim |
+| IsoQuant-3 | 52 | 0.790 | 1.584 | 276 | 0.916 | +2.537 | +13.870 | 0.713 / 0.721 | ported kernel; quality from quantiser sim |
+| KVQuant-4 | 66 | 0.822 | n/a | 337 | 0.949 | +0.220 | +1.064 | 0.811 / 0.864 | ported kernel |
+| TurboQuant-3 | 52 | 1.168 | 8.651 | 187 | 0.937 | +0.142 | +1.995 | 0.968 / 0.933 | ported kernel (amd-experiments, K calls) |
+| SpectralQuant | 48.5 | 1.429 | 1.733 | 142 | 0.931 | +5.664 | +7.018 | 0.787 / 0.790 | ported kernel (own Triton, package semantics) |
 
-(`results/quality_summary.md`; NVFP4 kernel path from `results/nvfp4_summary.md`.)
+Reading the columns:
+- *kernel attn cos* is the cosine between the kernel output and fp32 attention on synthetic LLM-like KV (the harness's `make_kv`), at K=1. *attn cos real KV* is the per-layer cosine on real post-RoPE K/V of the two models over the last 128 queries. Mistral-7B-v0.1 and Qwen3-8B, WikiText-2, 8 windows of 2048 tokens, first 1024 via chunked prefill and the rest token by token (`bench/quality/qeval.py`, `results/quality_summary.md`). Single run per cell, so perplexity differences under about 0.02 are noise. The ported methods were re-run with an fp16 baseline of 4.872 / 8.522; `results/quality_raw` has 4.873 / 8.522.
+- *ported kernel* means a real decode kernel was run in this harness. For Planar/Iso/Rotor the perplexity comes from the identical quantiser run as a quantise-dequantise simulation (`results/quality_raw`) and not through the Triton kernel; the kernel is checked against that quantiser (`results/ports_blockrot_notes.md`). Quantisers that have no kernel (for example KIVI-2) are not in this table; they are in `results/quality_summary.md`, labelled quality only.
+- fp16 SDPA on the same shapes takes 1.473 ms at K=1 and 1.477 ms at K=8 at 256 B per vector (`results/ports_summary.md`).
 
-![Perplexity increase against bytes per vector](img/accuracy_vs_bytes.png)
+![Speed against accuracy on MI300X](img/speed_vs_accuracy_mi300x.png)
 
-*Chart: `results/quality_ppl.json` and `results/quality_bytes.json`, rendered by `blog/make_charts.py`. Rows marked "quality only" above are simulations.*
+*Chart: same data as the table (`results/ports_*.json`, `results/quality_raw/`, `results/spectralquant_quality_*.json`), rendered by `blog/make_charts.py`. Lower-left is better; the vertical axis is symlog.*
 
-### Reading the table
+### Is UltraQuant the best? Where it loses and where it wins
 
-- **Accuracy leaders.** FP8, KIVI-4 and KVQuant-4 have the lowest perplexity penalty, at 80 to 130 bytes per vector. If memory is not the constraint, they are the safer choice. NVFP4 sits between them and 68-byte FP4: its perplexity penalty is lower than plain UltraQuant on both models (+0.052 against +0.139 on Mistral-7B, +0.103 against +0.562 on Qwen3-8B) for 4 more bytes per vector.
-- **At the same 68 bytes, UltraQuant is not ahead.** MXFP4 is similar (lower on Qwen3-8B, higher on Mistral-7B); TurboQuant 4-bit has a lower penalty on Mistral-7B and a similar one on Qwen3-8B, with higher attention cosine (0.979 against 0.932); the QServe-style int4 simulation is lower on Mistral-7B but fails on Qwen3-8B without its SmoothAttention step. The paper's scale constant (c = 0.156) did not transfer to these two models: it measured +0.310 and +0.929 here (rows `uq_fp4_c156` in `results/quality_summary.md`). The repo's own scale rule is equivalent to the paper's `round(log2(c*amax))` at c = 0.236 (`docs/SCALE_RULE.md`).
-- **At 3 bits the accuracy cost is larger.** TurboQuant 3-bit at 52 bytes shows +1.995 perplexity on Qwen3-8B; Planar/Iso/Rotor 3-bit show a much larger loss on both models in our runs (attention cosine 0.72). We checked that this is not a path bug: on real Mistral keys their per-vector error is about twice TurboQuant's at 4 bits, which is consistent with 2D and 4D block rotations spreading outlier channels less well (`results/quality_summary.md`, protocol notes).
-- **Draft acceptance falls with 4-bit KV.** Probability that all 8 verified tokens match fp16 (`accept@8`, Qwen3-8B): fp16 0.985, FP8 (scaled) 0.825, KIVI-4 0.795, NVFP4 0.460, UltraQuant 0.265. On Mistral-7B: UltraQuant 0.610, NVFP4 0.740. This offsets part of the per-step speed gain, so quality has to be checked per model.
+**Where it loses.**
+- **At equal bytes, QServe-int4 is better on accuracy.** Both store 68 B/vec and the speed is close (K=1 0.361 against 0.397 ms, K=8 0.551 against 0.629 ms: UltraQuant is 9 to 12% faster), but QServe-style per-token int4 with SmoothAttention shows +0.047 / +0.005 perplexity (Mistral / Qwen3) against +0.139 / +0.562.
+- **NVFP4 is more accurate for +4 B.** +0.056 / +0.081 for 72 B/vec, at 0.411 against 0.361 ms at K=1; at K=8 the two are within 3% (0.536 against 0.551 ms). This is why the README recommends the NVFP4 scale path when upstream bit-compatibility is not needed.
+- **FP8 and KIVI-4 are more accurate** (perplexity delta at most 0.032) for 1.9x and 1.2x the bytes. FP8 is also faster at K=1 (0.294 against 0.361 ms; K=8 0.510 against 0.551 ms): dequantisation is one convert, so it reaches 47% of the HBM copy peak, whereas the FP4 kernels reach about 20%. On gfx942 4-bit storage does not buy speed over FP8 at small K; the UltraQuant advantage over FP8 is capacity (3.8x against 2x), not latency. KIVI-4 is slower (0.540 ms) because of per-channel scale and min traffic and its bf16 residual window.
+- **KVQuant-4 (dense) is behind on both axes here.** 66 B/vec, 0.822 ms at K=1 (K=4 and K=8 timings are not in `results/ports_kvquant.json` yet), perplexity +0.220 / +1.064 and real-KV cosine 0.811 / 0.864. This is the dense-only path of the scheme (no sparse outliers, no attention-sink fp16 token, no Fisher weighting), the K codebook is calibrated offline on WikiText-2 train, and the port keeps pre-RoPE keys and applies RoPE inside the kernel. The full scheme with outliers would sit higher on accuracy; it was not ported. The earlier quantise-dequantise row for KVQuant-4 in `results/quality_summary.md` (+0.041 / -0.007) is a different implementation and the two should not be mixed.
+- **MXFP4 shares our kernel.** Same bytes and same speed by construction; only the scale rule differs. The OCP floor-exponent rule is worse on Mistral (+0.190 against +0.139) and better on Qwen3 (+0.482 against +0.562), so neither scale rule is uniformly ahead.
+
+**Where it wins.**
+- **Against TurboQuant 3-bit (52 B).** Perplexity delta is +0.139 / +0.562 against +0.142 / +1.995, so equal on Mistral and much better on Qwen3. It is 3.2x faster at K=1 (0.361 against 1.168 ms) and 15.7x faster at K=8 (0.551 against 8.651 ms), because the TurboQuant kernel has no K-query mode and K calls are needed. TurboQuant stores 24% fewer bytes. TurboQuant 4-bit (68 B) is a closer accuracy match and is ahead on Mistral; it was run only through the quality harness (`results/quality_summary.md`), so it has no speed row here.
+- **Against SpectralQuant (48.5 B).** About 3x to 4x faster (0.361 against 1.429 ms at K=1, 0.551 against 1.733 ms at K=8, `results/ports_summary.md`) and much more accurate: +0.139 / +0.562 against +5.664 / +7.018 perplexity, real-KV attention cosine 0.963 / 0.932 against 0.787 / 0.790. SpectralQuant does store fewer bytes. Our port is dequantisation-bound at 117 to 142 GB/s, so a register-resident codebook or a HIP kernel could narrow the speed gap; that was not attempted (`results/spectralquant_summary.md`).
+- **Against PlanarQuant / IsoQuant / RotorQuant at 3 bits (52 B).** Their fused kernels time the same as each other (0.766 to 0.790 ms at K=1, 1.575 to 1.584 ms at K=8), so UltraQuant is 2.1x to 2.2x faster at K=1 and 2.9x at K=8. Perplexity delta is +2.5 to +6.1 on Mistral and +13.4 to +16.7 on Qwen3, against +0.139 / +0.562. This is not a port bug: our port matches the amd-experiments quantiser (cosine 1.0000), and on real keys a block-local 2D/3D/4D rotation cannot spread a dominant channel. Qwen3 keys put on average 26% of their energy in one channel against 6.6% on Mistral (`results/ports_blockrot_diag_realkv.json`, `results/ports_blockrot_notes.md`). We do not claim the upstream repositories behave this way with their own pipelines.
+- **Fused K-query and layout.** At K=8 the fused UltraQuant call costs 1.5x a K=1 call (0.551 against 0.361 ms). FP8, NVFP4, MXFP4 and KIVI-4 are fused in the same way, and QServe-int4 uses a plain K-query tile, so the speed advantage over them here comes from format and kernel, not from K-sharing. What UltraQuant adds is that the format is the upstream UltraQuant cache layout (byte permute, Part 1) and the same op runs on CUDA and SYCL.
+
+**Fairness conditions.**
+- Same harness, same shapes, same cold-cache timer for every row; timings are single runs on a shared GPU serialised by a lock, noise about 5%.
+- KIVI-4 and QServe use the plain K-query tile (a tile of K x GQA-group rows over one KV pass), because their papers have no fused multi-query design. TurboQuant's kernel has no K-query mode, so it is timed as K independent calls (its K=8 timing is the sum of eight calls).
+- FP8 scales and QServe SmoothAttention lambdas are calibrated online from the first K/V a layer sees, a stand-in for offline calibration.
+- SpectralQuant uses its default `standard` preset only, calibrated on one WikiText-2 set, written from the open-source Dynamis-Labs `spectralquant` package (version 0.3.1). There is no arXiv paper, and the repository's paper PDF could not be fetched, so the port follows the shipped code. Other presets were not run; more bits would trade bytes for accuracy.
+- UltraQuant and TurboQuant quality rows are from earlier `results/quality_raw` runs, not re-measured in the port session.
+- Kernel attention cosine is on synthetic KV and mostly reflects the data distribution; the real-KV columns are the ones to trust.
+
+**Draft acceptance falls with 4-bit KV.** Probability that all 8 verified tokens match fp16 (`accept@8`, Qwen3-8B, `results/quality_summary.md`): fp16 0.985, FP8 (scaled) 0.825, KIVI-4 0.795, NVFP4 0.460, UltraQuant 0.265. On Mistral-7B: UltraQuant 0.610, NVFP4 0.740. This offsets part of the per-step speed gain, so quality has to be checked per model. The paper's scale constant (c = 0.156) did not transfer to these two models (+0.310 / +0.929 here, `uq_fp4_c156` in `results/quality_summary.md`); the repo's scale rule equals the paper's `round(log2(c*amax))` at c = 0.236 (`docs/SCALE_RULE.md`).
+
+### Porting the comparison methods
+
+The comparison methods were ported with the same discipline as the UltraQuant kernels: a real fused kernel, checked against the quantiser it reads (own-cache relative error about 2e-3 for the FP8/FP4 formats, about 5e-3 for KIVI and QServe where bf16 rounding of p x scale and the residual enters), then timed. Numbers are from `bench/ports/PORTING_LOG.md`, `results/ports_blockrot_notes.md` and `results/spectralquant_summary.md`. LOC counts kernel plus port module; hours are agent wall-clock including debugging and excluding time queued for the shared GPU.
+
+| Method | Kernel design | LOC | Hours | Deviations from the published scheme |
+|---|---|---|---|---|
+| FP8 e4m3 | 1 B/element, per-tensor scale folded into the softmax scale and the combine kernel | 128 | 0.7 | e4m3fnuz (native on gfx942, max 240); scale from the whole written tensor |
+| NVFP4 | existing `uqmt/nvfp4.py` kernel behind the harness | 62 (+278 reused) | 0.3 | none in the format; per-tensor scale from the written tensor |
+| MXFP4 | UltraQuant UE8M0/32 kernel, OCP floor-exponent quantiser | 71 | 0.4 | none; no rotation |
+| KIVI-4 | per-channel K, per-token V, plus a bf16 residual window of 128 to 159 tokens read in the same pass | 245 | 1.5 | channel-pair packing for K (same bytes, same math); bf16 residual; static cache |
+| QServe KV4 | per-token asymmetric int4, SmoothAttention lambda applied to q in-kernel | 174 | 1.0 | lambda from written post-RoPE K, not offline pre-RoPE calibration; Triton bf16 instead of the CUDA PRMT kernel; KV only |
+| KVQuant-4 (dense nuq4) | per-channel static K (pre-RoPE, RoPE in kernel), per-token V, per-layer 4-bit non-uniform codebooks | about 230 (core 83, kernel 81, port 66) | not logged | dense path only: no sparse outliers, no sink token, no Fisher weighting; K=4/8 timings not yet recorded |
+| Planar / Iso / Rotor 3 and 4 bit | bit-plane storage, dense 128x128 block rotation outside the kernel, shared decode kernel | about 230 for all | about 3 | bit-plane storage (52 / 68 B) instead of int8 indices; Rotor drops the pad-derived 129th coordinate; single seed-42 rotation as upstream; no QJL |
+| SpectralQuant | calibration, quantise-on-write kernel, fused split-KV decode with per-dimension LUT dequant | about 440 | about 4 | written from the package semantics, no upstream GPU kernel; exact Lloyd-Max codebooks; QJL not implemented (off by default); no paging |
+
+Plumbing (adapters, nsplit tuner, quality hook, sync script) took about 0.8 h. The block-rotation kernel needed one rewrite (byte-gather plus LUT gather 1.20 ms to expand-bits-in-registers plus select chain 0.78 ms at K=1), and the SpectralQuant port gained 1.4x from a launch-parameter sweep (2.012 to 1.429 ms at K=1, `results/spectralquant_tune.json`). The kernels are not tuned beyond that, so the table is a statement about these ports on this GPU, not about the best possible kernel for each method.
 
 ### Speed, where a kernel exists
 
@@ -131,7 +170,7 @@ On B300 the vendor-tuned NVFP4 kernel is 2.1x faster than ours at K=1 and 3.3x f
 - **Large batch, long context, speculative verify.** On Mistral-7B shapes on MI300X the fused kernel is 1.0x to 1.75x faster per call than the best fp16 attention (cold cache), and a whole decode step is 1.4x to 1.6x faster at batch 8 with 16k to 32k context and K=8 (`results/h2h_summary.md`, `results/e2e_summary.md`; the step numbers are a projection from GPU kernel time).
 
 **Where it loses.**
-- **Accuracy-first deployments:** FP8, KIVI-4 and KVQuant-4 are closer to fp16 (table above).
+- **Accuracy-first deployments:** FP8, KIVI-4, QServe-int4 and NVFP4 are closer to fp16 (table above).
 - **Speed on Blackwell:** FlashInfer's NVFP4 path is faster on B300 (table above).
 - **Batch 1 and short context:** the whole-step gain is about 1.0x (0.96x to 1.15x); attention is only 4-17% of the step there (`results/e2e_summary.md`).
 - **Smaller formats:** TurboQuant 3-bit (52 bytes) and KIVI-2 (48 bytes) store fewer bytes per vector; they pay for it in accuracy in the table above.
@@ -191,12 +230,12 @@ For K = 8 we therefore report TurboQuant two ways: eight sequential single-query
 **What we contribute, as far as we can find:**
 1. **The UltraQuant format with fused K-query verify, ported to CUDA and SYCL.** The format and a vLLM backend for it already exist upstream (vLLM PR #57057, merged 2026-10-06): AMD gfx950 FlyDSL decode plus a Triton fallback, listed for ROCm only in the source we read, with single-query decode paths. We did not run it. In the public sources we checked we found no CUDA or SYCL implementation of the format with fused K-query verify, and no FP4 KV decode on Intel/SYCL. The search trails are in [cuda/PRIOR_ART.md](../cuda/PRIOR_ART.md) and [sycl/PRIOR_ART.md](../sycl/PRIOR_ART.md). This is a "no public port found" statement; the search was not exhaustive.
 2. **One validated op across three vendors**, with a layout that drops into the upstream cache by permutation (Part 1).
-3. **A reproducible comparison** of KV quantisers on two models (Part 2) and against TurboQuant on one harness (Part 3).
+3. **A reproducible comparison** of KV quantisers with real fused kernels on one MI300X harness and two models (Part 2), and against TurboQuant at more shapes (Part 3).
 
 ## What this does not show yet
 
 - No end-to-end serving throughput for FP4 KV. Step numbers are kernel-level measurements and a projection.
-- Several rows in the accuracy table are quantise-dequantise simulations (marked), so they carry no speed number. Perplexity and cosine come from single runs on small samples; task accuracy (RULER, SWE-bench style) is not measured.
+- Perplexity and cosine come from single runs on small samples, the Planar/Iso/Rotor perplexity comes from a quantiser simulation rather than the kernel, and the comparison kernels are untuned ports; task accuracy (RULER, SWE-bench style) is not measured.
 - MI300X (gfx942) has no native scaled FP4 MFMA; the native path needs gfx950, which we have not measured.
 - At batch 1 there is no whole-step gain. The reliable benefit is **3.76x more KV tokens per GB**, plus cheaper verification at large batch and long context.
 
