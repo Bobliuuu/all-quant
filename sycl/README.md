@@ -46,9 +46,9 @@ pass both. Not done: running upstream vLLM's own Triton fallback on an Intel GPU
 
 ## Benchmarks
 See `results/sycl_arcb390_xmx_sweep.{log,jsonl}`, `results/sycl_arcb390_portable_sweep.{log,jsonl}`, `results/sycl_tuning_notes.md`.
-Hq32 Hkv8 D128 PAGE64, ms (best nsplit), Arc B390 (read peak ~430-455 GB/s, copy peak ~535 GB/s):
+Hq32 Hkv8 D128 PAGE64, ms (best nsplit), Arc B390 (CORRECTED: the 430-455 GB/s "read peak" originally quoted here was measured on uniform data and is not valid; the random-data read ceiling is ~105-113 GB/s, so the "% read peak" column below is ~4x too low; for the current numbers see the sycl2 update below and `results/sycl2_summary.json`):
 
-| B | ctx | K | XMX fused | XMX K-indep | portable fused | FP4-KV GB/s (XMX) | % read peak |
+| B | ctx | K | XMX fused | XMX K-indep | portable fused | FP4-KV GB/s (XMX) | % of the (invalid) uniform-data peak |
 |---|---|---|---|---|---|---|---|
 | 2 | 16384 | 1 | 0.67 | - | 3.09 | 53 | 12 |
 | 2 | 16384 | 4 | 0.87 | 2.22 | 6.98 | 41 | 9.5 |
@@ -72,8 +72,7 @@ than f16, effective ~44 GB/s of KV, i.e. similarly ALU-bound); verify of 8 token
 Not comparable in absolute ms (whole model, different head counts); neither is paged FP4/UltraQuant. Supports K-query verify: ours yes, llama.cpp yes (q4_0/q8_0, non-paged, integer 4-bit),
 torch SDPA yes (dense). FP4/MX KV: ours only.
 
-Honest summary: correct and 8x faster than the portable path with XMX, fused verify is 2.7-3x faster than re-reading KV per query, but at
-~10% of memory-bandwidth peak the kernel is still ALU/barrier bound (not memory bound). See tuning notes for the ablation and next steps.
+Honest summary: correct and 8x faster than the portable path with XMX, fused verify is 2.7-3x faster than re-reading KV per query, but the earlier XMX kernel was ALU/barrier bound at about half of the true (random-data) read ceiling (the "~10% of peak" originally written here used the invalid uniform-data peak). See tuning notes for the ablation and next steps.
 Verifying K=4 tokens costs 1.3x one token (fused) vs 3.5x (K independent).
 
 Second box (Lunar Lake, Arc 140V Xe2) could not run: its GPU is in driver error state (Windows code 39) and needs a driver reinstall by an admin.

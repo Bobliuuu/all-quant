@@ -19,6 +19,7 @@ vLLM XPU, SGLang XPU, intel/llm-scaler / ipex-llm, intel/sycl-tla (cutlass-sycl)
    (first CRI code upstreamed in "Upstream CRI code (#833)", 2026-07-10)
 
 Also: **upstream vLLM already contains the FP4 E2M1 + UE8M0 per-32-group 4-bit KV *format*** ("UltraQuant", `ultraquant_4bit`, PR #57057, 2026-10-06), paged, with a Triton fallback for decode and small-chunk continuation. It is ROCm-oriented (FlyDSL D=256 scaled-MFMA kernel on CDNA4). I found no XPU routing for it (see vLLM row). Any claim must be scoped to Intel GPUs and must not claim the format is novel.
+  Re-checked 2026-11-12 against vLLM main source: PR #57057 is merged; `platforms/xpu.py` and `platforms/cuda.py` have no UltraQuant reference (only `rocm.py` lists the backend); the FlyDSL entry takes one query per sequence and the backend's decode and small-chunk paths pass `max_query_len=1` (no K-query read sharing in the paths read). Not run on Intel by us.
    https://github.com/vllm-project/vllm/blob/main/vllm/v1/attention/ops/ultraquant/format.py
    https://github.com/vllm-project/vllm/blob/main/vllm/v1/attention/backends/ultraquant_attn.py
 

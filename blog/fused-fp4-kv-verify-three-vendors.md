@@ -40,14 +40,14 @@ One attention layer, batch 8, context 32768, Hq64/Hkv8/D128, page 64, synthetic 
 
 | | MI300X (Triton) | B300 (CUDA) | H100 (CUDA) |
 |---|---|---|---|
-| K=1 decode | 0.36 ms | 0.140 ms | 0.161 ms |
-| K=8 verify, fused | 0.54 ms | 0.350 ms | 0.431 ms |
-| K=8 fused vs K independent launches | 4.1x | 2.9x | 2.7x |
+| K=1 decode | 0.36 ms | 0.139 ms | 0.163 ms |
+| K=8 verify, fused | 0.54 ms | 0.307 ms | 0.215 ms |
+| K=8 fused vs K independent launches | 4.1x | 3.3x | 5.6x |
 
 - **Fusion works as designed.** Fused K=8 costs about 1.5x a K=1 call on MI300X, not 8x. K=1 gains nothing, as expected.
 - **Real shapes.** On Mistral-7B shapes on MI300X the fused kernel is 1.0x to 1.75x faster per call than the best fp16 attention while reading 3.76x fewer bytes.
 - **Whole decode step (MI300X, Mistral-7B, projected from GPU kernel time).** 1.3x to 1.6x at batch 8 with 16k to 32k context and K=8, about 1.0x at batch 1. Attention is only 4-17% of the step at batch 1 and 27-57% at batch 8, so this is bounded by Amdahl's law.
-- **Intel.** On Arc B390 the XMX path is 1.4x to 2.4x faster than torch-XPU dense f16 SDPA at K=1-4 while reading 3.8x fewer bytes (at K=8 it is 0.7x to 1.0x, not faster). FP4 is decoded in software, since XMX has no fp4.
+- **Intel.** On Arc B390 (B8, 16k) the ESIMD/DPAS path takes 1.72 / 1.77 / 3.47 ms at K=1/4/8 versus 4.90 / 5.87 / 5.81 ms for torch-XPU f16 SDPA, while reading 3.8x fewer bytes; it is 1.4-2.2x faster than our earlier XMX path. llama.cpp's integer q4_0 KV is competitive at K=1 (2.03 ms) and slower at K>=4. FP4 is decoded in software, since XMX has no fp4; the kernel reaches about 75% of the GPU's measured random-data read ceiling at K=1.
 - **Correctness.** CUDA passes all 15 reference vectors in every launchable configuration on all five NVIDIA GPUs. SYCL passes 36/36 vectors per path on Arc B390, and on CPU, A100 and H100. Triton passes 50 pytest cases on MI300X.
 - **Accuracy.** Plain FP4/UE8M0 costs +0.14 perplexity on Mistral-7B and +0.56 on Qwen3-8B (wikitext-2). The NVFP4 scale path cuts the Qwen3-8B penalty to about +0.06 through the kernel, for 4 more bytes per vector. FP8 and KIVI-4 remain the accuracy leaders. Acceptance of speculative drafts drops under 4-bit KV, so quality needs to be validated per model.
 
@@ -60,10 +60,10 @@ We are careful here, because most of the pieces already exist.
 **Not new, and we do not claim it:**
 - Sharing KV reads across several queries. FlashInfer multi-query decode, tree attention and other verify kernels already do it.
 - A new FP4 algorithm. The format is UltraQuant's, from its paper and the AMD work around it.
-- Fused FP4 multi-token verify on NVIDIA in general. FlashInfer's trtllm-gen kernels do it for NVFP4 on Blackwell, and **on B300 they are faster than our port** (K=8: 0.094 ms vs 0.350 ms). We do not beat vendor-tuned NVFP4 kernels.
+- Fused FP4 multi-token verify on NVIDIA in general. FlashInfer's trtllm-gen kernels do it for NVFP4 on Blackwell, and **on B300 they are faster than our port** (K=8: 0.094 ms vs 0.307 ms). We do not beat vendor-tuned NVFP4 kernels.
 
 **What we contribute, as far as we can find:**
-1. **The UltraQuant format with fused K-query verify, ported to CUDA and SYCL.** Upstream UltraQuant's fast path is AMD gfx950 scaled-MFMA with a Triton fallback. We found no public CUDA or SYCL port of the format, and no FP4 KV decode on Intel/SYCL. The prior-art surveys with their search trail are in [cuda/PRIOR_ART.md](../cuda/PRIOR_ART.md) and [sycl/PRIOR_ART.md](../sycl/PRIOR_ART.md). This is a "no public port found" statement; the search was not exhaustive.
+1. **The UltraQuant format with fused K-query verify, ported to CUDA and SYCL.** The UltraQuant format and a vLLM backend for it already exist upstream (vLLM PR #57057, merged 2026-10-06): AMD gfx950 FlyDSL decode plus a Triton fallback, listed for ROCm only in the source we read, with single-query decode paths. We did not run it. In the public sources we checked we found no CUDA or SYCL implementation of the format with fused K-query verify, and no FP4 KV decode on Intel/SYCL. The prior-art surveys with their search trail are in [cuda/PRIOR_ART.md](../cuda/PRIOR_ART.md) and [sycl/PRIOR_ART.md](../sycl/PRIOR_ART.md). The wording is "no public port found", not "does not exist"; the search was not exhaustive.
 2. **One validated op across three vendors.** Same layout, same vectors, same semantics (bf16 queries, any page size, ragged lengths, per-query causal masks), and a layout that drops into the upstream cache by permutation. Cross-vendor portability of a quantised-KV kernel is what the vendor-specific kernels do not offer.
 3. **A measured comparison of the effort.** Porting this op to a new vendor took hours of agent time (CUDA about 2.5 hours, roughly 1.5 kLOC), against about two weeks of human work for TurboQuant on AMD. That comparison is not like-for-like: TurboQuant also needs rotations, codebooks and bit-plane packing, and our ports are one op without engine integration. Both end up ALU/latency-bound for the same reason: decoding sub-byte KV costs more issue slots than its bytes cost in memory time at decode sizes.
 4. **A like-for-like quality comparison of KV quantisers** (UltraQuant, NVFP4, MXFP4, TurboQuant, PlanarQuant/IsoQuant/RotorQuant, KIVI, KVQuant, QServe-style int4, FP8) on two models through the same cache path.

@@ -8,7 +8,7 @@ Effort record (2026-11-11 overnight). Agent-driven; wall clock approximate from 
 | 0 | inventory both Intel boxes; discover DPC++ install route | - | box 1: Arc B390 Xe3 driver 32.0.101.9033, no oneAPI; box 2: Arc 140V (Lunar Lake) GPU in Windows error 39 (driver 32.0.101.5564 from 2024), unusable without admin driver reinstall (restart-device denied by policy) |
 | 1 | DPC++ v7.2.0 `sycl_windows.tar.gz` (372 MB) extracted to user dir; MSVC (VS 18 Community) for linking; `sycl-ls` sees Level Zero + OpenCL GPU | - | ~25 min including discovery; no admin needed |
 | 2 | vector generator (CPU torch, 8 cases), portable kernel (`uq_decode.hpp`), harness | ~270 | first run on GPU: 5/7 pass, 2 "fail" only because my tolerance ignored bf16 P rounding; fp32 P -> all pass. Time to first correct: ~1.5 h session time |
-| 3 | benchmark harness + copy-kernel peak | +160 | portable: 1-3% of read peak, ALU bound |
+| 3 | benchmark harness + copy-kernel peak | +160 | portable: 1-3% of the (later found invalid, uniform-data) read peak, ALU bound |
 | 4 | XMX joint_matrix path | +190 | first compile+run correct on first attempt; 3.5x faster |
 | 5 | bit-fold dequant, LUT dequant | | 4.2 -> 3.5 ms (B8 ctx16k K4) |
 | 6 | tuning sweeps; 3-barrier and 16B-load variants (both slower, reverted) | | wg256/tn32 best: 3.19 ms |
@@ -39,11 +39,11 @@ Facts from `sycl/AMD_PORT_NOTES.md` (read-only study of the repo; AMD numbers ar
 | calendar | 13 active days (Apr 13-26), 15 bulk commits, per-iteration history not recoverable | one overnight session, commits per milestone |
 | kernels | HIP C++ ~1.0k LOC (+1.3k tests/bench), Triton 1834 LOC, only Triton ran end-to-end | one SYCL source ~450 LOC kernels (portable + XMX), one harness |
 | correctness | cosine thresholds (>=0.92..0.99), statistical | bit-exact vectors, max abs err vs fp32 reference, per-case, with edge cases |
-| perf vs peak | fused attention ~2.8% of 5.3 TB/s (146 GB/s), crossover with FP16 at ~16K ctx | ~10-13% of read peak (45-58 GB/s of FP4 KV) |
+| perf vs peak | fused attention ~2.8% of 5.3 TB/s (146 GB/s), crossover with FP16 at ~16K ctx | XMX path ~50% of the measured random-data read ceiling at K=1 (45-58 GB/s of ~105-113 GB/s; originally mis-stated as 10-13% against an invalid uniform-data peak); ESIMD path ~75% at K=1 |
 | toolchain pain | COV5/COV6 mismatch (error 209), arch-string features, wheel repins, vLLM stack, profiler counters blocked | 372 MB tarball, no admin; remote shell friction; one box with a broken driver |
 | portability | separate HIP (wave64, MFMA, ballot) and Triton paths | one SYCL source; portable path + Intel-only XMX path behind a macro |
 | end to end | vLLM parity to +10% (Amdahl: attention 30% of step) | not integrated (kernel level only) |
-Both efforts end up ALU/latency-bound, far from bandwidth peak, for the same reason: dequantising sub-byte KV costs more issue slots than the bytes cost memory time on this size of decode problem.
+Both efforts end up ALU/latency-bound for the same reason (AMD at ~3% of its HBM peak, SYCL XMX at ~50% and ESIMD ~75% of Arc's much lower real read ceiling at K=1): dequantising sub-byte KV costs more issue slots than the bytes cost memory time on this size of decode problem.
 
 ## Addendum 2026-11-11 (sycl2 pass): ESIMD/DPAS path, NVFP4, corrected bandwidth ceiling
 (earlier text above is kept unchanged; where it quotes "% of read peak" see item 1.)

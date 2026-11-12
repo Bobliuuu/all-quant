@@ -1,3 +1,5 @@
+> CORRECTION (2026-11-12): every "% of read peak" figure in this file (1%, 10%) used a 430-455 GB/s peak that was measured on uniform data and is invalid. The random-data read ceiling is ~105-113 GB/s, so the XMX kernel was at ~50% of peak at K=1. See `results/sycl2_profile.md`.
+
 # SYCL tuning notes (Arc B390, Xe3 iGPU, 96 XVEs, 128 KB SLM/core)
 
 Peak (copy kernel, `bench --peakonly`): ~535 GB/s copy (r+w), ~430-455 GB/s read-only. "% of peak" below is FP4 KV

@@ -16,9 +16,20 @@ cited source, (b) measured by us (`results/priorart_B300.json`, `results/priorar
 * **BitDecoding-FP4 (MIT) is single-query only** (its own vLLM guard rejects speculative decoding), NVIDIA SM100/103 only, CUDA >= 13.
   It supports NVFP4 and (in code) MXFP4/E8M0. Its "stacked / two-term query" splits ONE query into two FP4 residual terms; it is not K speculative tokens.
 * **What is left that is true for us** (and is what the claim should say): the **UltraQuant KV layout** (E2M1 + UE8M0 per-32 scale, Hadamard-rotated K and Q, V unrotated,
-  68 B per 128-element vector) with a **fused K-query verify**, running **cross-vendor** (CUDA + AMD gfx950/MI300-class + Intel SYCL). "No public CUDA port of UltraQuant
-  found" is the accurate wording, not "does not exist". On raw NVIDIA B300 speed, the existing NVFP4 kernels are currently **faster than our Triton fused kernel**
+  68 B per 128-element vector) with a **fused K-query verify**, running **cross-vendor** (CUDA + AMD gfx950/MI300-class + Intel SYCL). "No public CUDA port of UltraQuant with fused K-query verify
+  found" is the accurate wording (upstream vLLM has a ROCm UltraQuant backend, section 1b), not "does not exist". On raw NVIDIA B300 speed, the existing NVFP4 kernels are currently **faster than our Triton fused kernel**
   (see section 4), so do not claim a speed win over them unless the CUDA port measures one.
+
+## 1b. Upstream vLLM UltraQuant backend (read from public vLLM main source, 2026-11-12; we did not run it)
+
+* **It exists and is merged**: vLLM PR #57057 "[Attention] Add UltraQuant 4-bit KV cache backend (FlyDSL D=256)" (merged 2026-10-06), `--kv-cache-dtype ultraquant_4bit`,
+  `vllm/v1/attention/backends/ultraquant_attn.py`, ops in `vllm/v1/attention/ops/ultraquant/` and `flydsl_ultraquant_decode.py`. Format: FP4 E2M1 + UE8M0 per-32 scales, Hadamard-rotated keys, bf16 queries only, no attention-sink models.
+* **Platform**: the backend is listed in the ROCm platform's backend candidates (`vllm/platforms/rocm.py`); `vllm/platforms/cuda.py` and `xpu.py` contain no UltraQuant reference. The FlyDSL decode kernel requires gfx950 and head_dim 256 (GQA 6/8/16);
+  everything else goes through a Triton unified kernel whose QK path is written for native scaled FP4 MFMA on CDNA4. Whether the Triton fallback can be forced on CUDA we did **not** test.
+* **K-query fusion**: the FlyDSL entry point takes one query per sequence (`query (B, Hq, D)`); the backend's decode path and its small-chunk continuation path call the Triton unified kernel with `max_query_len=1`
+  (a chunk of q tokens becomes q single-query rows, so the KV is re-read per token). The unified kernel itself has query-block support, so we cannot say verify batches never share a read in any configuration;
+  we only say the paths we read do not. AMD's own blog describes the same (verify expanded into B*K single-token rows).
+* **What this changes for us**: "UltraQuant format on vLLM" is not new and is not ours. Our claim is limited to a standalone fused K-query verify kernel for that layout on AMD gfx942 (Triton), NVIDIA (CUDA) and Intel (SYCL).
 
 ## 2. What we searched (so "found no X" is auditable)
 
@@ -27,7 +38,7 @@ cited source, (b) measured by us (`results/priorart_B300.json`, `results/priorar
 * vLLM FlashInfer attention backend API docs; SGLang `quantized_kv_cache` docs, LMSYS NVFP4-KV blog, SGLang PR #21601 (open at time of search); TensorRT-LLM docs (key features, feature-combination matrix);
   FlashAttention-3 README/paper and the vLLM FP8-KV blog; SageAttention3 paper (arXiv 2505.11594).
 * Web search for the combination "UltraQuant CUDA port / MXFP4 UE8M0 KV K-query verify". Not exhaustively done by us: GitHub code search and the forks of the vLLM/SGLang UltraQuant PRs (including SGLang PR #41949)
-  were checked by the coordinating agent, not re-run here. Upstream UltraQuant's fast path is AMD gfx950 FlyDSL scaled-MFMA with a Triton fallback in vLLM (reported by the coordinator, not independently verified here).
+  were checked by the coordinating agent, not re-run here. Upstream vLLM's UltraQuant backend was re-read from public source on 2026-11-12: see section 1b.
 * Not searched / **unverified**: closed-source NVIDIA internals, TensorRT-LLM source (only docs were read), Mooncake/LMDeploy/other engines.
 
 ## 3. Per-project facts
@@ -100,6 +111,6 @@ FlashInfer's NVFP4 K>=4 is 47-59% of peak, i.e. there is headroom, but it is not
 
 ## 5. Suggested wording for our claim
 
-> Fused K-query (speculative-verify) paged decode attention over an **UltraQuant-format** FP4 KV cache (E2M1 + UE8M0 per-32 scales, Hadamard-rotated K/Q, 68 B per 128-vector), implemented on NVIDIA CUDA, AMD and Intel from one specification. We found no public CUDA implementation of this layout. K-query KV sharing in general, and NVFP4 (E4M3-per-16) multi-token decode on Blackwell (FlashInfer trtllm-gen), already exist.
+> Fused K-query (speculative-verify) paged decode attention over an **UltraQuant-format** FP4 KV cache (E2M1 + UE8M0 per-32 scales, Hadamard-rotated K/Q, 68 B per 128-vector), implemented on NVIDIA CUDA, AMD and Intel from one specification. In the public sources we checked (section 2), we found no CUDA implementation of this layout with fused K-query verify; upstream vLLM's UltraQuant backend is ROCm-oriented (section 1b). K-query KV sharing in general, and NVFP4 (E4M3-per-16) multi-token decode on Blackwell (FlashInfer trtllm-gen), already exist.
 
 Do not say: "first FP4 K-query verify", "first on NVIDIA", "BitDecoding cannot do FP4 decode" (it can, K=1), or "faster than NVFP4 kernels" unless measured on the CUDA port.

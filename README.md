@@ -4,17 +4,17 @@
 
 This repo implements one operation: **decode / speculative-verify attention over a 4-bit paged KV cache in the UltraQuant format** (FP4 e2m1 values, one UE8M0 power-of-two scale per 32 channels: 68 bytes per head per token for K or V at head_dim 128, **3.76x smaller than fp16, 1.88x smaller than fp8**), where **all K speculative queries and the GQA group share a single pass over the KV pages**.
 
-The same op is ported to **AMD (Triton, MI300X)**, **NVIDIA (native CUDA, `mma.sync`; A100, H100, L40S, B300, RTX PRO 6000)** and **Intel (SYCL / XMX, Arc B390)**. All three consume the same cache layout, are checked against the same CPU reference vectors, and the layout is byte-compatible (a pure permute) with the upstream vLLM/SGLang UltraQuant cache ([cuda/UPSTREAM_COMPAT.md](cuda/UPSTREAM_COMPAT.md)). We found no public CUDA or SYCL port of the UltraQuant format ([cuda/PRIOR_ART.md](cuda/PRIOR_ART.md), [sycl/PRIOR_ART.md](sycl/PRIOR_ART.md)); K-query KV sharing itself is not new, and on B300 vendor NVFP4 kernels are faster (see "Where we stand").
+The same op is ported to **AMD (Triton, MI300X)**, **NVIDIA (native CUDA, `mma.sync`; A100, H100, L40S, B300, RTX PRO 6000)** and **Intel (SYCL / XMX, Arc B390)**. All three consume the same cache layout, are checked against the same CPU reference vectors, and the layout is byte-compatible (a pure permute) with the upstream vLLM/SGLang UltraQuant cache ([cuda/UPSTREAM_COMPAT.md](cuda/UPSTREAM_COMPAT.md)). **Prior art, stated plainly:** the UltraQuant format and a vLLM backend for it already exist upstream (vLLM PR #57057, `--kv-cache-dtype ultraquant_4bit`, merged 2026-10-06; AMD gfx950-oriented, FlyDSL D=256 decode plus a Triton fallback). In the vLLM source we read on 2026-11-12 it is listed for ROCm only, and its decode paths pass `max_query_len=1`, i.e. no K-query read sharing; we did not run it. K-query KV sharing in general is not new either, and on B300 vendor NVFP4 kernels are faster than our port (see "Where we stand"). In the public sources we checked we found no CUDA or SYCL implementation of the UltraQuant layout with fused K-query verify ([cuda/PRIOR_ART.md](cuda/PRIOR_ART.md), [sycl/PRIOR_ART.md](sycl/PRIOR_ART.md); the search was not exhaustive).
 
 **Headline numbers** (measured; one attention layer, batch 8, context 32768, Hq64/Hkv8/D128, page 64, synthetic KV):
 
 | | MI300X (Triton) | B300 (CUDA) | H100 (CUDA) |
 |---|---|---|---|
-| K=1 decode | 0.36 ms | 0.140 ms | 0.161 ms |
-| K=8 verify, fused | 0.54 ms | 0.350 ms | 0.431 ms |
-| K=8 fused vs K independent launches | 4.1x | 2.9x (CUDA), 6.8x (Triton) | 2.7x |
+| K=1 decode | 0.36 ms | 0.139 ms | 0.163 ms |
+| K=8 verify, fused | 0.54 ms | 0.307 ms | 0.215 ms |
+| K=8 fused vs K independent launches | 4.1x | 3.3x (CUDA), 6.8x (Triton) | 5.6x |
 
-On real Mistral-7B on MI300X the fused kernel is **1.0-1.75x faster than the best fp16 attention per call** (typically 1.3-1.6x) while reading 3.76x fewer bytes, and a whole decode step is **1.3-1.6x faster at batch 8 / 16k-32k context with K=8**, but **about 1.0x at batch 1**. The robust win is memory: **3.76x more KV tokens per GB**.
+On real Mistral-7B on MI300X the fused kernel is **1.0-1.75x faster than the best fp16 attention per call** (typically 1.3-1.6x) while reading 3.76x fewer bytes, and a whole decode step is **1.3-1.6x faster at batch 8 / 16k-32k context with K=8** (MI300X; on H100 with the CUDA port 1.52x at K=1 and 2.15x at K=8, B=8 / 32k), but **about 1.0x at batch 1** on MI300X. The robust win is memory: **3.76x more KV tokens per GB**.
 
 ```
  plain decode of K speculative tokens          UltraQuant fused K-query
@@ -62,18 +62,26 @@ Single layer, B=8, ctx=32768, Hq64/Hkv8/D128, page 64, best tuned config per K, 
 | GPU / backend | K=1 ms | K=2 | K=4 | K=8 | FP4 GB/s at K=1 (% of measured HBM copy) |
 |---|---|---|---|---|---|
 | **MI300X**, Triton (HBM copy 3.9 TB/s) | 0.361 | 0.373 | 0.453 | 0.542 | 789 (20%) |
-| **B300**, CUDA (6.57 TB/s) | 0.140 | 0.142 | 0.253 | 0.350 | 2045 (31%) |
+| **B300**, CUDA (6.57 TB/s) | 0.139 | 0.142 | 0.255 | 0.307 | 2055 (31%) |
 | B300, Triton | 0.308 | 0.310 | 0.425 | 0.494 | 925 |
-| **H100**, CUDA (3.03 TB/s) | 0.161 | 0.163 | 0.291 | 0.431 | 1767 (58%) |
-| **A100 80GB SXM**, CUDA (1.75 TB/s) | 0.259 | 0.268 | 0.458 | 0.709 | 1102 (63%) |
-| **L40S**, CUDA | 0.390 | n/a here | n/a here | 0.523 | 731 |
-| **RTX PRO 6000**, CUDA | 0.206 | 0.208 | 0.277 | 0.362 | 1388 (95%) |
+| **H100**, CUDA (3.03 TB/s) | 0.163 | 0.164 | 0.215 | 0.215 | 1747 (58%) |
+| **A100 80GB SXM**, CUDA (1.75 TB/s) | 0.256 | 0.266 | 0.465 | 0.713 | 1113 (64%) |
+| **L40S**, CUDA | 0.391 | 0.395 | 0.431 | 0.494 | 729 |
+| **RTX PRO 6000**, CUDA | 0.208 | 0.210 | 0.288 | 0.381 | 1375 (94%) |
 
-Fused versus the same kernel run K times (CUDA, same GPU): 1.9-2.1x at K=2, 2.1x at K=4, 2.4-2.9x at K=8 (RTX PRO 6000 1.35x / 1.8x / 2.7x); MI300X Triton 1.83x / 2.59x / 4.10x; B300 Triton 1.79x / 2.82x / 6.77x. K=1 gains nothing from fusion, as expected. (L40S K=2/4 rows are in `results/cuda_summary_b8_c32k.json`; `copy_` underreports GDDR read bandwidth, so percentages there are not meaningful.)
+Fused versus the same kernel run K times (CUDA, same GPU), K=2 / 4 / 8: H100 2.0x / 2.9x / 5.6x, B300 2.05x / 2.1x / 3.3x, A100 2.0x / 2.1x / 2.6x, RTX PRO 6000 1.45x / 1.9x / 2.7x, L40S 1.1x / 1.55x / 2.5x; MI300X Triton 1.83x / 2.59x / 4.10x; B300 Triton 1.79x / 2.82x / 6.77x. K=1 gains nothing from fusion, as expected. The H100 K>=4 rows use the sm_90a wgmma variant, the B300 K=8 row the tcgen05 variant (1.14x over the `mma.sync` kernel; the rest of the B300 rows are unchanged `mma.sync` kernels). CUDA numbers are `results/cuda2_summary.json`; `copy_` underreports GDDR read bandwidth, so L40S percentages are not meaningful.
 
-**Intel Arc B390 (SYCL, XMX `joint_matrix`)**, Hq32/Hkv8/D128, ms per layer call (`results/sycl_arcb390_xmx_sweep.log`): B8 / 16k ctx K=1 2.48, K=4 3.19, K=8 6.30; B2 / 16k K=1 0.67, K=4 0.87. That is 1.4-2.4x faster than torch-XPU dense f16 SDPA at K=1-4 (5.01 ms at B8/16k/K=1) while reading 3.8x fewer bytes, at 5-13% of the part's read bandwidth; at K=8 it is not faster (0.7-1.0x of SDPA, which batches the 8 queries densely). FP4 is decoded in software; XMX has no fp4.
+**Intel Arc B390 (SYCL; ESIMD/DPAS path, XMX `joint_matrix` path)**, Hq32/Hkv8/D128, B8, 16k context, ms per layer call (`results/sycl2_summary.json`, baselines `results/sycl2_baselines_*.json`):
 
-**Correctness:** CUDA passes the 15 CPU reference vectors in every launchable config on all five NVIDIA GPUs (1260-1856 launches each, `results/cuda_*_vectors_check.log`); error vs the fp32 reference at the benchmark shape is 1.1e-4 to 1.5e-4. SYCL passes 36/36 vectors per path on Arc B390, and also on CPU (OpenCL), A100 and H100. The Triton kernel passes 50 pytest cases on MI300X (ragged lengths, head_dim 64/128, GQA 1-16, K up to 16, pages 16-128, negative-zero codes, scale extremes, CUDA/HIP-graph replay); `tests/` run on CPU without a GPU, GPU tests skip cleanly.
+| K | UltraQuant ESIMD | UltraQuant XMX (earlier) | torch-XPU f16 SDPA | IPEX paged f16 | llama.cpp q4_0 KV |
+|---|---|---|---|---|---|
+| 1 | **1.72** | 2.62 | 4.90 | 4.99 | 2.03 |
+| 4 | **1.77** | 3.49 | 5.87 | 10.03 | 2.29 |
+| 8 | **3.47** | 7.24 | 5.81 | 10.06 | 3.88 |
+
+The ESIMD path is 1.4x to 2.2x faster than the earlier XMX path. Against the baselines on this part: ahead of torch-XPU and IPEX f16 attention while reading 3.8x fewer bytes, roughly level with llama.cpp's integer q4_0 KV at K=1 (2.03 vs 1.72 ms), and ahead of it at K>=4 (llama.cpp is non-paged integer 4-bit, not the UltraQuant format). The measured random-data read ceiling of this GPU is about 105-113 GB/s (uniform data reads 2.5-4x faster because of compression and is not a valid peak): ESIMD reaches ~75% of it at K=1 and K=4 and ~38% at K=8; the earlier XMX path ~50% at K=1. FP4 is decoded in software; XMX has no fp4.
+
+**Correctness:** CUDA passes the 15 CPU reference vectors in every launchable config on all five NVIDIA GPUs (1260-1856 launches each, `results/cuda_*_vectors_check.log`); error vs the fp32 reference at the benchmark shape is 1.1e-4 to 1.5e-4. SYCL passes 36/36 vectors per path on Arc B390 (UE8M0; NVFP4 10/10), and also on CPU (OpenCL), A100 and H100. The CUDA NVFP4 path passes its own vectors (2016 launches on H100) and the cuda2 harness has 0 failures on all five GPUs (`results/cuda2_*_vectors*.log`). The Triton kernel passes 50 pytest cases on MI300X (ragged lengths, head_dim 64/128, GQA 1-16, K up to 16, pages 16-128, negative-zero codes, scale extremes, CUDA/HIP-graph replay); `tests/` run on CPU without a GPU, GPU tests skip cleanly.
 
 ## Where we stand
 
@@ -81,13 +89,14 @@ Fused versus the same kernel run K times (CUDA, same GPU): 1.9-2.1x at K=2, 2.1x
 |---|---|
 | MI300X, real Mistral-7B shapes: ours vs best fp16 attention (cold cache) | 1.0-1.75x faster per call (parity at B=32 / 4k / K=8); vs torch SDPA 3.3-18x at B<=8 (SDPA is a weak baseline there) |
 | MI300X, K=8, B8 / 32k: ours vs K calls of amd-experiments' TQ3 kernel | 0.48 ms vs 8.5 ms (their kernel is K=1 only) |
-| B300, K=1/2/4/8: ours CUDA | 0.140 / 0.142 / 0.253 / 0.350 ms |
-| B300: **FlashInfer trtllm-gen NVFP4** (fp8 q, NVFP4 E4M3/16 scales, tcgen05) | **0.066 / 0.077 / 0.097 / 0.094 ms, 2.1x (K=1) to 3.7x (K=8) faster than our port**, and it already does fused K-query verify |
+| B300, K=1/2/4/8: ours CUDA | 0.139 / 0.142 / 0.255 / 0.307 ms |
+| B300: **FlashInfer trtllm-gen NVFP4** (fp8 q, NVFP4 E4M3/16 scales, tcgen05) | **0.066 / 0.077 / 0.097 / 0.094 ms, 2.1x (K=1) to 3.3x (K=8) faster than our port**, and it already does fused K-query verify |
 | B300: BitDecoding-FP4 (single-query; K independent decodes) | 0.068 / 0.131 / 0.261 / 0.521 ms |
 | B300: FlashInfer trtllm-gen fp8 KV, fp8 q (2x the bytes) | 0.080 / 0.081 / 0.083 / 0.087 ms |
-| Arc B390: ours vs torch-XPU f16 SDPA | 1.4-2.4x faster at K=1-4 (0.7-1.0x at K=8), 3.8x fewer bytes |
+| vLLM upstream UltraQuant backend (PR #57057) | exists since 2026-10-06; ROCm-listed, single-query decode paths in the source we read; not run by us, no timing comparison |
+| Arc B390: ours (ESIMD) vs torch-XPU f16 SDPA / IPEX / llama.cpp q4_0 | B8/16k K=1/4/8: 1.72 / 1.77 / 3.47 ms vs 4.90 / 5.87 / 5.81 / 4.99-10.1 / 2.03 / 2.29 / 3.88 (llama.cpp competitive at K=1, ours ahead at K>=4) |
 
-So: **we do not beat vendor-tuned NVFP4 kernels on B300**, and fused FP4 K-query verify exists there already (FlashInfer). What this repo offers is the exact UltraQuant format (UE8M0 per 32, bf16 queries, any page size, ragged lengths and causal verify masks), K-query sharing, and one validated implementation across AMD, NVIDIA and Intel. The CUDA port is 1.05-2.8x faster than our Triton kernel on every NVIDIA GPU measured.
+So: **we do not beat vendor-tuned NVFP4 kernels on B300**, and fused FP4 K-query verify exists there already (FlashInfer). What this repo offers is the exact UltraQuant format (UE8M0 per 32, bf16 queries, any page size, ragged lengths and causal verify masks), K-query sharing, and one validated implementation across AMD, NVIDIA and Intel. The CUDA port is 1.1x to 2.8x faster than our Triton kernel on every NVIDIA GPU measured (H100 2.1-2.3x, B300 1.6-2.2x).
 
 ## Accuracy: how the quantisers compare
 
@@ -128,7 +137,11 @@ Whole-step speedup of fused FP4 vs the best fp16 attention (higher is better):
 
 **Amdahl framing:** attention is 4-17% of the step at batch 1 and 27-57% at batch 8 (8k to 32k context), so the whole-step gain is bounded; even free attention would give only 2.4x at B=8 / 32k. At batch 1 expect no gain (0.96-1.15x). The value is (1) **3.76x KV capacity** (B=8 / 32k: 34.4 GB of fp16 KV becomes 9.1 GB), which is what lets a memory-bound server hold longer contexts or bigger batches, and (2) 1.3-1.6x on **large-batch, long-context speculative verify**. On a real 3-turn agent-like run at B=1 the lower draft acceptance under FP4 KV cancelled the per-step gain (projected 440 vs 460 tok/s). Attention-output cosine on real Mistral K/V is 0.975 for FP4/UE8M0, equal to TurboQuant-3 (0.975), with perplexity +3.0% vs +2.7% on 4k windows.
 
-Real-world agent/RAG/needle harness: [bench/realworld/](bench/realworld/); H100 stock-vLLM bf16-vs-fp8 KV proxy results are in [results/realworld_summary.md](results/realworld_summary.md). No UltraQuant FP4 serving-level number is reported here.
+**Same step on H100 with the CUDA port** (Mistral-7B, B=8, ctx 32768, eager HF-module loop, CUDA-graph replay time; fp16 baseline = torch SDPA, the faster of the two fp16 formulations there; `results/cuda2_e2e_mistral7b_h100_b8_c32k.json`): K=1 14.4 ms vs 22.0 ms (**1.52x**), K=8 16.2 ms vs 34.8 ms (**2.15x**); K=8 with the same kernel run K times is 50.4 ms, so K-query sharing is worth 3.1x at the step level. (B300 ratios from the same harness are not quoted: the fp16 SDPA of that torch build is unusually slow and flatters us.)
+
+### Serving-level evaluation: status
+
+[bench/realworld/](bench/realworld/) holds an agent / RAG / needle / speculative-decoding / greedy-drift harness for vLLM. **No UltraQuant FP4 serving number exists yet**: the MI300X was unreachable during the serving runs, so FP4 serving on MI300X is pending. What was run (Modal H100, stock vLLM, Mistral-7B and Qwen3-8B) is a **proxy with fp8 KV (2x smaller) vs bf16 KV, not FP4 and not UltraQuant**: KV capacity doubles exactly; a 48-session 24k-token agent trace did not gain throughput (prefill/queue-bound); HotpotQA-in-noise F1 was unchanged (0.236 vs 0.234); n-gram speculative decoding at concurrency 32 was 25% faster with fp8 KV at K=4; and fp8 KV changed greedy output early (median first divergence at token 30 versus 513 for a bf16 rerun). These show what a smaller KV changes in serving, nothing about 4-bit accuracy. Details and caveats: [results/realworld_summary.md](results/realworld_summary.md). vLLM 0.33 ships its own native UltraQuant backend with a different cache layout; testing that backend on MI300X is the planned FP4 serving run.
 
 ## Porting effort
 
@@ -160,8 +173,8 @@ Tuning notes: `results/mi300x_tuning_notes.md`, `results/b300_tuning_notes.md`, 
 
 ## Limitations
 
-* **Software FP4 dequant on gfx942 and Intel Arc.** MI300X has no FP4 or scaled-FP4 MFMA and Arc's XMX has no fp4; e2m1 is decoded in registers. The kernel reaches only **4-26% of MI300X HBM peak** (20% at K=1 B8/32k), so most of the 3.76x byte saving is not converted into time. Native scaled MFMA needs gfx950 (MI350/MI355X); not measured here.
-* **No native block-scaled FP4 MMA path on NVIDIA** (tcgen05 on B300; `mma.sync` block-scale on sm_120 studied but not fused). On B300 K=8 the CUDA kernel is at the legacy `mma.sync` bf16 ceiling. Vendor NVFP4 kernels are faster there.
+* **Software FP4 dequant on gfx942 and Intel Arc.** MI300X has no FP4 or scaled-FP4 MFMA and Arc's XMX has no fp4; e2m1 is decoded in registers (on Arc the ESIMD kernel reaches about 75% of the measured random-data read ceiling at K=1 and 38% at K=8). The kernel reaches only **4-26% of MI300X HBM peak** (20% at K=1 B8/32k), so most of the 3.76x byte saving is not converted into time. Native scaled MFMA needs gfx950 (MI350/MI355X); not measured here.
+* **No native block-scaled FP4 MMA path on NVIDIA** (`mma.sync` block-scale on sm_120 and CUTLASS tcgen05 block-scaled QK on B300 were studied, not fused). The B300 K=8 kernel uses a bf16 tcgen05 variant (only 1.14x over `mma.sync`) and is still 3.3x slower than FlashInfer's NVFP4 kernel; vendor NVFP4 kernels are faster there.
 * **Mostly synthetic and microbenchmark data.** Real-model numbers cover Mistral-7B-v0.1 (kernel/whole-step, MI300X) and Mistral-7B / Qwen3-8B (accuracy); perplexity and cosine come from single runs on small samples (8 to 16 windows); task accuracy (SWE-bench-style, RULER) is not measured. Many methods in the accuracy table are our own simulations of the published schemes.
 * The whole-step results are a decode loop of our own over HF modules, not a served vLLM run; wall-clock steps are launch-bound, so tokens/s are projections from GPU kernel time. Draft acceptance was measured only at B=1 with a prompt-lookup drafter.
 * SemKV and StarKV were not benchmarked (no public code found).
