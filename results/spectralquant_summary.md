@@ -17,7 +17,7 @@ Scheme (preset `standard`, package default engine): per (layer, kv head) eigende
 ## 2. The port (what was built)
 
 - `sq_triton.py`: calibration (host, torch), **quantise-on-write kernel** (rotation as fp32 `tl.dot`, binary-search nearest Lloyd-Max level with per-dim thresholds, bit-plane packing), **fused split-KV decode kernel** (bit-plane unpack + per-dim LUT dequant of K and V in the rotated basis, online softmax, causal K-query mask, GQA rows = G x K) + reduce kernel; q is rotated by Vrot_k once per call and the output by Vrot_v^T (both included in the timing).
-- Storage: dims sorted by eigenvalue so bits/dim is non-increasing; plane0 = 2 low bits of every dim (32 B), planes 3..6 hold bit j-1 of the first N_j dims (N_j/8 B each). B8/ctx32k synthetic-LLM run: 38 B (K) + 59 B (V). On the real models the plane geometry is unified over layers: Mistral-7B 46 B (K) + 64 B (V) = 55 B/vec average (ideal, unpadded 48.0), Qwen3-8B 54.5 B (46.2 ideal) = **4.7x / 5.5x vs fp16 (ideal)**, vs the claimed 5.95x (the claim ignores plane padding and per-head tables; mean d_eff at 90%: Mistral K 68 / V 94, Qwen3 K 44 / V 92 of 128).
+- Storage: dims sorted by eigenvalue so bits/dim is non-increasing; plane0 = 2 low bits of every dim (32 B), planes 3..6 hold bit j-1 of the first N_j dims (N_j/8 B each). B8/ctx32k synthetic-LLM run: 38 B (K) + 59 B (V). On the real models the plane geometry is unified over layers: Mistral-7B 46 B (K) + 64 B (V) = 55 B/vec average (ideal, unpadded 48.0), Qwen3-8B 54.5 B (46.2 ideal) = **4.7x vs fp16 packed (5.3x Mistral / 5.5x Qwen3 ideal, unpadded)**, vs the claimed 5.95x (the claim ignores plane padding and per-head tables; mean d_eff at 90%: Mistral K 68 / V 94, Qwen3 K 44 / V 92 of 128).
 - Correctness (`test_sq.py`): Triton quantise+pack+dequant equals a torch nearest-centroid reference except ties (3e-5 of elements differ by >1e-2); fused decode equals attention over the dequantised cache, cos 0.999998 (rel 1.9e-3, fp16 P/V rounding) at K = 1/2/4/8.
 
 ### Deviations (honest list)
@@ -56,7 +56,7 @@ SpectralQuant write path (quantise 1/2/4/8 new tokens x 64 heads, incl. rotation
 | TurboQuant turbo3 (amd-experiments) | 52 | +0.142 | +1.995 | 0.968 / 0.933 | 0.937 |
 | TurboQuant turbo4 | 68 | +0.026 | +0.581 | 0.992 / 0.979 | n/a |
 | **SpectralQuant port (standard preset)** | 55 padded / 48 ideal | **+5.664** (10.54) | **+7.018** (15.54) | **0.787 / 0.790** | 0.931 |
-| SpectralQuant + first token kept fp16 (diagnostic, not in the published scheme) | +0.1 B | +4.234 (9.11) | +0.450 (8.97) | 0.887 / 0.955 | n/a |
+| SpectralQuant + first token kept fp16 (diagnostic, not in the published scheme) | 55 | +4.234 (9.11) | +0.450 (8.97) | 0.887 / 0.955 | n/a |
 
 (UltraQuant / TurboQuant rows are copied from `results/quality_summary.md`, measured earlier with the same protocol on CUDA; they were not re-measured on this box. The speed rows were.)
 
