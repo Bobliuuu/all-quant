@@ -1,0 +1,438 @@
+{
+ "tag": "mi300x_rag_q3_bf16",
+ "model": "Qwen3-8B",
+ "kv": "auto",
+ "extra": " ",
+ "ts": "2026-11-12T13:59:44Z",
+ "server": {
+  "kv_cache_tokens": 1092384,
+  "max_concurrency_at_maxlen": 33.34,
+  "kv_cache_gib": 150.02,
+  "weights_gib": 15.27,
+  "attn_backend": null,
+  "startup_s": 42.0
+ },
+ "result": {
+  "workload": "rag_hotpotqa",
+  "n": 100,
+  "ctx_tokens": 16000,
+  "EM": 0.55,
+  "F1": 0.6545164835164836,
+  "wall_s": 180.21321586599515,
+  "ttft_p50": 20.79824575499515,
+  "ttft_p99": 35.84278635299415,
+  "samples": [
+   {
+    "gold": "yes",
+    "pred": "No."
+   },
+   {
+    "gold": "Chief of Protocol",
+    "pred": "Janet Waldo"
+   },
+   {
+    "gold": "Animorphs",
+    "pred": "Animorphs"
+   },
+   {
+    "gold": "no",
+    "pred": "No."
+   },
+   {
+    "gold": "Greenwich Village, New York City",
+    "pred": "Greenwich Village"
+   },
+   {
+    "gold": "YG Entertainment",
+    "pred": "YG Entertainment"
+   },
+   {
+    "gold": "Eenasul Fateh",
+    "pred": "Eenasul Fateh"
+   },
+   {
+    "gold": "3,677 seated",
+    "pred": "4,000"
+   },
+   {
+    "gold": "Terry Richardson",
+    "pred": "Terry Richardson"
+   },
+   {
+    "gold": "yes",
+    "pred": "Yes"
+   },
+   {
+    "gold": "Kansas Song",
+    "pred": "Kansas Song"
+   },
+   {
+    "gold": "David Weissman",
+    "pred": "David Weissman"
+   },
+   {
+    "gold": "1999",
+    "pred": "1999"
+   },
+   {
+    "gold": "no",
+    "pred": "No"
+   },
+   {
+    "gold": "from 1986 to 2013",
+    "pred": "1994\u20131999"
+   },
+   {
+    "gold": "9,984",
+    "pred": "31,000,000"
+   },
+   {
+    "gold": "the North Atlantic Conference",
+    "pred": "North Atlantic Conference"
+   },
+   {
+    "gold": "yes",
+    "pred": "Yes"
+   },
+   {
+    "gold": "1969 until 1974",
+    "pred": "1969\u20131974"
+   },
+   {
+    "gold": "Robert Erskine Childers DSC",
+    "pred": "Henry Roth"
+   },
+   {
+    "gold": "Pedro Rodr\u00edguez",
+    "pred": "Sergio P\u00e9rez"
+   },
+   {
+    "gold": "Sonic",
+    "pred": "Sonic the Hedgehog"
+   },
+   {
+    "gold": "keyboard function keys",
+    "pred": "Front Row"
+   },
+   {
+    "gold": "Badly Drawn Boy",
+    "pred": "Wolf Alice"
+   },
+   {
+    "gold": "World's Best Goalkeeper",
+    "pred": "World's Best Goalkeeper"
+   },
+   {
+    "gold": "Barton Lee Hazlewood",
+    "pred": "Lee Hazlewood, Nancy Sinatra"
+   },
+   {
+    "gold": "1838",
+    "pred": "1838"
+   },
+   {
+    "gold": "yes",
+    "pred": "Yes"
+   },
+   {
+    "gold": "Henry J. Kaiser",
+    "pred": "Henry J. Kaiser"
+   },
+   {
+    "gold": "Arena of Khazan",
+    "pred": "Crusaders of Khazan"
+   },
+   {
+    "gold": "2000",
+    "pred": "2000"
+   },
+   {
+    "gold": "Fujioka, Gunma",
+    "pred": "Japan"
+   },
+   {
+    "gold": "Charles Eug\u00e8ne",
+    "pred": "Charles Nungesser and Fran\u00e7ois Coli"
+   },
+   {
+    "gold": "no",
+    "pred": "No"
+   },
+   {
+    "gold": "Letters to Cleo",
+    "pred": "Screaming Trees"
+   },
+   {
+    "gold": "October 1922",
+    "pred": "1922"
+   },
+   {
+    "gold": "2000",
+    "pred": "2000"
+   },
+   {
+    "gold": "World War II",
+    "pred": "World War II"
+   },
+   {
+    "gold": "no",
+    "pred": "No."
+   },
+   {
+    "gold": "New York City",
+    "pred": "New York City"
+   },
+   {
+    "gold": "Scotch Collie",
+    "pred": "Scotch Collie"
+   },
+   {
+    "gold": "Mumbai",
+    "pred": "Kochi"
+   },
+   {
+    "gold": "1962",
+    "pred": "1962"
+   },
+   {
+    "gold": "sovereignty",
+    "pred": "sovereignty"
+   },
+   {
+    "gold": "Nelson Rockefeller",
+    "pred": "Nelson Rockefeller"
+   },
+   {
+    "gold": "Yellowcraig",
+    "pred": "Yellowcraigs"
+   },
+   {
+    "gold": "Phil Spector",
+    "pred": "Phil Spector"
+   },
+   {
+    "gold": "Organizations could come together to address global issues",
+    "pred": "World Summit of Nobel Peace Laureates"
+   },
+   {
+    "gold": "yes",
+    "pred": "Yes"
+   },
+   {
+    "gold": "English Electric Canberra",
+    "pred": "English Electric Canberra"
+   },
+   {
+    "gold": "2009 Big 12 Conference",
+    "pred": "2009, Big 12 Conference"
+   },
+   {
+    "gold": "1,462",
+    "pred": "1,462"
+   },
+   {
+    "gold": "Indianapolis Motor Speedway",
+    "pred": "Darlington Raceway"
+   },
+   {
+    "gold": "Rome",
+    "pred": "New York City"
+   },
+   {
+    "gold": "Max Martin, Savan Kotecha and Ilya Salmanzadeh",
+    "pred": "Max Martin, Savan Kotecha, Ilya Salmanzadeh"
+   },
+   {
+    "gold": "Marion, South Australia",
+    "pred": "Marion"
+   },
+   {
+    "gold": "Drifting",
+    "pred": "Drifting"
+   },
+   {
+    "gold": "Keith Bostic",
+    "pred": "Jerry Glanville"
+   },
+   {
+    "gold": "35,124",
+    "pred": "101,000"
+   },
+   {
+    "gold": "no",
+    "pred": "Yes"
+   },
+   {
+    "gold": "shortest player ever to play in the National Basketball Association",
+    "pred": "shortest player in NBA history"
+   },
+   {
+    "gold": "Ronald Shusett",
+    "pred": "Ridley Scott"
+   },
+   {
+    "gold": "Adeline Virginia Woolf",
+    "pred": "Virginia Woolf"
+   },
+   {
+    "gold": "821",
+    "pred": "821"
+   },
+   {
+    "gold": "more than 70 countries",
+    "pred": "70"
+   },
+   {
+    "gold": "Charmed",
+    "pred": "Charmed"
+   },
+   {
+    "gold": "International Boxing Hall of Fame",
+    "pred": "International Boxing Hall of Fame"
+   },
+   {
+    "gold": "Usher",
+    "pred": "Usher"
+   },
+   {
+    "gold": "Bill Murray",
+    "pred": "Brian Doyle-Murray"
+   },
+   {
+    "gold": "Carabao Cup",
+    "pred": "Carabao Cup"
+   },
+   {
+    "gold": "Teen Titans Go!",
+    "pred": "Teen Titans"
+   },
+   {
+    "gold": "276,170 inhabitants",
+    "pred": "Strasbourg"
+   },
+   {
+    "gold": "orange",
+    "pred": "orange"
+   },
+   {
+    "gold": "Tromeo and Juliet",
+    "pred": "Tromeo and Juliet"
+   },
+   {
+    "gold": "William Jefferson Clinton",
+    "pred": "Bill Clinton"
+   },
+   {
+    "gold": "John John Florence",
+    "pred": "John John Florence"
+   },
+   {
+    "gold": "Ann",
+    "pred": "Christopher"
+   },
+   {
+    "gold": "Apalachees",
+    "pred": "Ais"
+   },
+   {
+    "gold": "British",
+    "pred": "British"
+   },
+   {
+    "gold": "1865",
+    "pred": "1865"
+   },
+   {
+    "gold": "Newport",
+    "pred": "Lempster"
+   },
+   {
+    "gold": "Bob Seger",
+    "pred": "Bob Seger"
+   },
+   {
+    "gold": "Conscription",
+    "pred": "requiring only men to register for the draft"
+   },
+   {
+    "gold": "Mondelez International, Inc.",
+    "pred": "Mondelez International"
+   },
+   {
+    "gold": "Monica Lewinsky",
+    "pred": "Monica Lewinsky"
+   },
+   {
+    "gold": "April 1, 1949",
+    "pred": "1949"
+   },
+   {
+    "gold": "1866",
+    "pred": "1866"
+   },
+   {
+    "gold": "Canary Islands, Spain",
+    "pred": "Canary Islands, Spain"
+   },
+   {
+    "gold": "250 million",
+    "pred": "250 million"
+   },
+   {
+    "gold": "director",
+    "pred": "Film director and cinematographer"
+   },
+   {
+    "gold": "The Conversation",
+    "pred": "The Conversation"
+   },
+   {
+    "gold": "John Waters",
+    "pred": "John Waters"
+   },
+   {
+    "gold": "Las Vegas Strip in Paradise",
+    "pred": "Las Vegas"
+   },
+   {
+    "gold": "no",
+    "pred": "No"
+   },
+   {
+    "gold": "March and April",
+    "pred": "March and April"
+   },
+   {
+    "gold": "Fairfax County",
+    "pred": "Fairfax County"
+   },
+   {
+    "gold": "IT products and services",
+    "pred": "IT products and services"
+   },
+   {
+    "gold": "Levni Yilmaz",
+    "pred": "Lev Yilmaz"
+   },
+   {
+    "gold": "Beijing",
+    "pred": "Beijing"
+   },
+   {
+    "gold": "no",
+    "pred": "No."
+   }
+  ]
+ },
+ "metrics_tail": {
+  "vllm:prefix_cache_queries_total{engine=\"0\",model_name=\"m\"}": 1741089.0,
+  "vllm:prefix_cache_queries_created{engine=\"0\",model_name=\"m\"}": 1794492024.8638704,
+  "vllm:prefix_cache_hits_total{engine=\"0\",model_name=\"m\"}": 1584.0,
+  "vllm:prefix_cache_hits_created{engine=\"0\",model_name=\"m\"}": 1794492024.8638961,
+  "vllm:external_prefix_cache_queries_total{engine=\"0\",model_name=\"m\"}": 0.0,
+  "vllm:external_prefix_cache_queries_created{engine=\"0\",model_name=\"m\"}": 1794492024.863909,
+  "vllm:external_prefix_cache_hits_total{engine=\"0\",model_name=\"m\"}": 0.0,
+  "vllm:external_prefix_cache_hits_created{engine=\"0\",model_name=\"m\"}": 1794492024.863922,
+  "vllm:cache_config_info{_block_size_resolved=\"True\",block_size=\"16\",cache_dtype=\"auto\",cache_hit_alignment_tokens=\"None\",effective_attention_block_size=\"16\",enable_mamba_shared_prefix_checkpoint=\"False\",enable_prefix_caching=\"True\",engine=\"0\",gpu_memory_utilization=\"0.9\",hash_block_size=\"None\",is_attention_free=\"False\",kv_cache_dtype_skip_layers=\"[]\",kv_cache_layout=\"None\",kv_cache_max_concurrency=\"33.3369140625\",kv_cache_memory_bytes=\"None\",kv_cache_size_tokens=\"1092384\",kv_offloading_backend=\"native\",kv_offloading_size=\"None\",kv_sharing_fast_prefill=\"False\",mamba_block_size=\"None\",mamba_cache_dtype=\"auto\",mamba_cache_mode=\"none\",mamba_page_size_padded=\"None\",mamba_ssm_cache_dtype=\"auto\",num_cpu_blocks=\"None\",num_gpu_blocks=\"68274\",num_gpu_blocks_override=\"None\",prefix_cache_retention_interval=\"0\",prefix_caching_hash_algo=\"sha256\",prefix_match_unit=\"None\",replayssm_buffer_len=\"16\",simple_cpu_offload_num_blocks=\"None\",skip_page_size_padded=\"None\",sliding_window=\"None\",swa_bounded_replay=\"True\",use_kda_recoverssm=\"False\",use_replayssm=\"False\",user_specified_block_size=\"False\"}": 1.0
+ }
+}
