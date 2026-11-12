@@ -403,36 +403,60 @@ def s_step(g, t, cues, T):
     g.text(8, 15.5, "Value: KV cache 3.76x smaller, and cheap K-token verify at large batch and long context.", 17, OURS, alpha=pr(t, cues[2], 1))
     g.text(8, 11, "results/e2e_summary.md, cuda2_e2e_mistral7b_h100_b8_c32k.json (eager loop; projections from GPU kernel time)", 13, MUTED, alpha=pr(t, cues[2], 1))
 
-# ---------------------------------------------------------------- real-world proxy (H100, bf16 vs fp8 KV)
-def realworld():
-    txt = md_lines("realworld_summary.md")
-    def row(prefix):
-        for l in txt:
-            if l.startswith(prefix): return [c.strip() for c in l.strip().strip("|").split("|")]
-    cap = row("| KV capacity"); spec = row("| n-gram spec decode, code edit, conc=32"); drift = row("| Greedy drift")
-    nums = lambda c: [int(x.replace(",", "")) for x in re.findall(r"\d[\d,]*", c)]
-    return dict(cap=(nums(cap[1])[0], nums(cap[2])[0]), spec=(nums(spec[1])[0], nums(spec[2])[0]),
-                drift_med=int(re.search(r"median divergence at token (\d+)", drift[2]).group(1)))
+# ---------------------------------------------------------------- ported AMD kernels (MI300X)
+def ports_rows():
+    out = {}
+    for l in md_lines("ports_summary.md"):
+        if l.startswith("| ") and not l.startswith("| method") and not l.startswith("|---"):
+            c = [x.strip() for x in l.strip().strip("|").split("|")]
+            out[re.sub(r"[*]|\s*\(.*\)", "", c[0]).strip()] = (c[1], c[2], c[5], c[8].split("/")[-1].strip())
+    return out
 
+def s_ports(g, t, cues, T):
+    title(g, "Compared against ported kernels (MI300X)", "real fused AMD kernels, same shapes: B=8, ctx 32768, cold cache; ms (lower is better), ppl delta on Qwen3-8B")
+    r = ports_rows()
+    items = [("UltraQuant FP4", "UltraQuant FP4", OURS), ("fp8", "FP8", MUTED), ("kivi4", "KIVI-4", MI), ("nvfp4", "NVFP4", MI),
+             ("mxfp4", "MXFP4", BASE), ("qserve_int4", "QServe int4", MI), ("TurboQuant-3", "TurboQuant-3", BASE)]
+    hd = pr(t, 0.4, 0.8)
+    for x, h in ((72, "B/vec"), (92, "K=1 ms"), (116, "K=8 ms"), (146, "ppl delta")):
+        g.text(x, 80, h, 16, MUTED, "right", alpha=hd)
+    for j, (k, lab, c) in enumerate(items):
+        B, k1, k8, pp = r[k]
+        y = 72 - j * 7.2
+        e = pr(t, 0.8 + 0.35 * j, 0.8)
+        g.text(10, y, lab, 19, c, weight="bold", alpha=e)
+        for x, v in ((72, B), (92, k1), (116, k8), (146, pp)):
+            g.text(x, y, v, 19, FG, "right", alpha=e)
+    p1 = pr(t, cues[1], 1)
+    g.text(10, 19, "UltraQuant is not the most accurate: QServe-int4 at equal bytes and NVFP4 (+4 B) are better; FP8 is faster at K=1.", 17, FG, alpha=p1)
+    g.text(10, 14, "It is faster and more accurate than TurboQuant-3 (no K-query mode) and SpectralQuant; its edge over FP8 is capacity (3.8x vs 2x).", 17, OURS, alpha=p1)
+    g.text(10, 9, "results/ports_summary.md, bench/ports/PORTING_LOG.md (single runs on a shared GPU, noise ~5%)", 13, MUTED, alpha=p1)
+
+# ---------------------------------------------------------------- serving level (MI300X, Qwen3-8B, vLLM native FP4 backend)
 def s_realworld(g, t, cues, T):
-    title(g, "Real-world data so far: a proxy, not FP4", "stock vLLM on H100, Mistral-7B, bf16 KV vs fp8 KV (2x smaller). No UltraQuant FP4 serving number exists yet.")
-    r = realworld()
-    panels = [("KV capacity (tokens, 80 GB)", r["cap"], "bf16", "fp8", f"{r['cap'][1]/r['cap'][0]:.1f}x"),
-              ("n-gram spec decode, conc 32, K=4 (tok/s)", r["spec"], "bf16", "fp8", f"+{100*(r['spec'][1]/r['spec'][0]-1):.0f}%")]
-    for pi, (lab, (a1, a2), l1, l2, gain) in enumerate(panels):
-        x0 = 10 + pi * 92
-        e = pr(t, 0.6 + pi * 3.5, 1.0)
-        g.text(x0, 76, lab, 18, FG, weight="bold", alpha=pr(t, 0.4 + pi * 3.5, 0.8))
-        for bi, (v, c, bl) in enumerate(((a1, MUTED, l1), (a2, BASE, l2))):
-            h = 28 * v / a2 * e
-            g.rect(x0 + bi * 24, 38, 18, h, c, alpha=0.95)
-            g.text(x0 + bi * 24 + 9, 38 + h + 3, f"{v:,}", 17, c, "center", weight="bold", alpha=e)
-            g.text(x0 + bi * 24 + 9, 34, bl, 16, MUTED, "center", alpha=e)
-        g.text(x0 + 56, 52, gain, 30, BASE, weight="bold", alpha=e)
-    pd = pr(t, cues[1], 1.0)
-    g.text(10, 24, f"Cost: fp8 KV changes greedy output early: median first divergence at token {r['drift_med']} (bf16-vs-bf16 rerun noise floor: token 513).", 18, FG, alpha=pd)
-    g.text(10, 18, "So acceptance and task quality of any lossy KV format must be measured, not assumed. Agent throughput: no gain (prefill-bound).", 18, FG, alpha=pd)
-    g.text(10, 11, "results/realworld_summary.md, realworld_cuda_h100_*.json (single runs, no CIs)", 13, MUTED, alpha=pd)
+    title(g, "Serving level: vLLM on MI300X, Qwen3-8B", "bf16 vs fp8 vs FP4 KV. FP4 = vLLM's own native ultraquant_4bit backend, NOT our kernel. Single runs, no CIs.")
+    cols = [("bf16", MUTED), ("fp8", BASE), ("FP4", OURS)]
+    # (label, values, shown, bar-normalising max)
+    panels = [("KV capacity (M tokens)", (1.09, 2.18, 3.16), ["1.09M", "2.18M", "3.16M (2.89x)"]),
+              ("RAG F1, 16k context (n=100)", (0.655, 0.647, 0.618), ["0.655", "0.647", "0.618"]),
+              ("Greedy drift: median first divergent token", (None, 24, 10), ["ref", "24", "10"]),
+              ("Agent, KV oversubscribed (out tok/s)", (47.9, 38.1, 59.4), ["47.9", "38.1", "59.4"])]
+    for pi, (lab, vals, shown) in enumerate(panels):
+        x0 = 8 + (pi % 2) * 92; y0 = 40 if pi < 2 else 0
+        yb = 64 if pi < 2 else 31
+        c0 = cues[0] if pi < 2 else cues[1]
+        e = pr(t, c0 + 0.6 + (pi % 2) * 2.5, 1.0)
+        g.text(x0, yb + 24, lab, 16, FG, weight="bold", alpha=e)
+        mx = max(v for v in vals if v)
+        for bi, ((l, c), v, sh) in enumerate(zip(cols, vals, shown)):
+            h = 16 * ((v or 0) / mx) * e
+            g.rect(x0 + bi * 28, yb, 20, max(h, 0.3), c, alpha=0.95)
+            g.text(x0 + bi * 28 + 10, yb + h + 2.5, sh, 14, c, "center", weight="bold", alpha=e)
+            g.text(x0 + bi * 28 + 10, yb - 2.5, l, 14, MUTED, "center", alpha=e)
+    pd = pr(t, cues[2], 1.0)
+    g.text(8, 19, "Costs: plain decode is slower with FP4 (767 vs 1052 tok/s); F1 is about 0.04 lower; greedy output diverges earlier than fp8.", 16, FG, alpha=pd)
+    g.text(8, 14.5, "FP4 runs needed a different attention backend, so backend and KV format are confounded in the speed numbers.", 16, FG, alpha=pd)
+    g.text(8, 10.3, "results/realworld_mi300x_summary.md, realworld_mi300x_*.json", 12, MUTED, alpha=pd)
 
 # ---------------------------------------------------------------- caveats
 def s_caveats(g, t, cues, T):
@@ -444,13 +468,13 @@ def s_caveats(g, t, cues, T):
         "On B300, NVIDIA's FlashInfer NVFP4 kernels are faster than ours today; we do not claim a speed win there.",
         f"Our Triton kernel reaches {mi[8]['fused_GBps']:.0f}-{mi[1]['fused_GBps']:.0f} GB/s of FP4 bytes on MI300X vs {mi_peak['hbm_copy_GBps']/1000:.1f} TB/s HBM copy: headroom remains.",
         "Intel Arc B390 is an integrated GPU: far slower in absolute terms; the point is the same op runs there.",
-        "Kernel microbenchmarks and a projected whole-step model: no end-to-end serving throughput yet. No gain at K = 1.",
-        "FP4 costs perplexity (about +0.5 for MXFP4-style scales on Qwen3-8B); NVFP4 scales cut that to +0.06.",
+        "The serving test used vLLM's native FP4 backend, not our kernel; plain decode is slower with FP4, and quality drops.",
+        "Single runs on shared GPUs, no CIs. UltraQuant is not the most accurate format; no gain at K = 1.",
     ]
     cs = [0.4, 4, 8, 12, 16, 19]
     for j, it in enumerate(items):
-        g.text(8, 80 - j * 8.5, "- " + it, 21, FG, alpha=pr(t, cs[min(j, len(cues)-1)] if False else cues[min(j // 2, len(cues) - 1)] + (j % 2) * 3.5, 1))
+        g.text(8, 80 - j * 8.5, "- " + it, 21, FG, alpha=pr(t, cues[min(j // 2, len(cues) - 1)] + (j % 2) * 3.5, 1))
     g.text(96, 15, "arXiv 2606.20474  |  github.com/Bobliuuu/ultraquant-more", 24, MUTED, "center", alpha=pr(t, cues[-1], 1))
 
 SCENES = [("title", s_title), ("vendors", s_vendors), ("memory", s_memory), ("pack", s_pack), ("kquery", s_kquery),
-          ("results", s_results), ("position", s_position), ("quality", s_quality), ("step", s_step), ("realworld", s_realworld), ("caveats", s_caveats)]
+          ("results", s_results), ("position", s_position), ("quality", s_quality), ("ports", s_ports), ("step", s_step), ("realworld", s_realworld), ("caveats", s_caveats)]

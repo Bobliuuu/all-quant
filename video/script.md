@@ -45,11 +45,18 @@ End to end, the whole decode step is one point three to one point six times fast
 At batch one there is almost no gain, because attention is a small slice of the step.
 The real value is a cache three point eight times smaller, and cheap verification at large batch and long context.
 
+## ports
+We also ported the comparison methods to real fused AMD kernels and timed them on the same MI300X shapes.
+UltraQuant is not the most accurate: QServe int4 at equal bytes and NVFP4 are better, and FP8 is faster at K equals one.
+It is faster and more accurate than TurboQuant-3, and its edge over FP8 is capacity, not latency.
+
 ## realworld
-The only serving-level data so far is a proxy: stock vLLM on an H100, comparing bf16 and fp8 KV, not FP4.
-Fp8 doubles capacity and speeds up spec decode by about a quarter, but greedy output drifts within tens of tokens, so quality must be measured.
+Serving level, on an MI300X with vLLM and Qwen3-8B. This used vLLM's own native four-bit backend, not our kernel.
+KV capacity grows from one point one million tokens in bf16 to two point two million in fp8 and three point two million in FP4, two point nine times.
+RAG F1 slips from 0.655 to 0.618, and greedy output diverges at token ten, against twenty-four for fp8.
+When agents oversubscribe the cache, FP4 serves fifty-nine tokens a second against forty-eight; plain decode is slower, 767 against 1052.
 
 ## caveats
 Caveats. MI300X dequantises FP4 in software, and NVIDIA's vendor kernels are faster on B300.
-These are kernel microbenchmarks and a projected step model, with no FP4 serving numbers yet, and K equals one gains nothing.
+The serving test used vLLM's native backend, not our kernel; plain decode is slower with FP4 and quality drops. These are single runs, and K equals one gains nothing.
 The paper is arXiv 2606.20474. Code and results are in the repository.
