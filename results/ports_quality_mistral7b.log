@@ -1,0 +1,7 @@
+[transformers] `torch_dtype` is deprecated! Use `dtype` instead!
+mistral7b fp16 {"ppl": 4.872425489260302, "attn_cos": 1.0, "attn_rel_err": 0.0, "k_rel": 0.0, "v_rel": 0.0} 24s
+mistral7b port_fp8 {"ppl": 4.879968716995027, "attn_cos": 0.9981559962034225, "attn_rel_err": 0.06499162421096116, "k_rel": 0.026582101185340434, "v_rel": 0.026468256139196455} 22s
+mistral7b port_nvfp4 {"ppl": 4.928333111133579, "attn_cos": 0.9889313951134682, "attn_rel_err": 0.15794113045558333, "k_rel": 0.09278949978761375, "v_rel": 0.09389513288624585} 56s
+mistral7b port_mxfp4 {"ppl": 5.062455955825987, "attn_cos": 0.9426225833594799, "attn_rel_err": 0.31588813196867704, "k_rel": 0.1293378695845604, "v_rel": 0.12028194195590913} 60s
+mistral7b port_kivi4 {"ppl": 4.88201191347393, "attn_cos": 0.996383810415864, "attn_rel_err": 0.05604363384190947, "k_rel": 0.04415137053001672, "v_rel": 0.08036878518760204} 19s
+mistral7b port_qserve_int4 {"ppl": 4.919724359235372, "attn_cos": 0.9851162135601044, "attn_rel_err": 0.16775089758448303, "k_rel": 0.10125224175862968, "v_rel": 0.1153857666067779} 33s

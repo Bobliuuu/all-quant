@@ -1,0 +1,8 @@
+[transformers] `torch_dtype` is deprecated! Use `dtype` instead!
+[transformers] Token indices sequence length is longer than the specified maximum sequence length for this model (299078 > 131072). Running this sequence through the model will result in indexing errors
+qwen3_8b fp16 {"ppl": 8.521646954049313, "attn_cos": 1.0, "attn_rel_err": 0.0, "k_rel": 0.0, "v_rel": 0.0} 31s
+qwen3_8b port_fp8 {"ppl": 8.554031748089193, "attn_cos": 0.9966735790173212, "attn_rel_err": 0.06944807949993345, "k_rel": 0.026701884395960305, "v_rel": 0.02648676781811648} 29s
+qwen3_8b port_nvfp4 {"ppl": 8.602644943534596, "attn_cos": 0.9794591483142641, "attn_rel_err": 0.19531742731730142, "k_rel": 0.09091179383297761, "v_rel": 0.09373329310781425} 68s
+qwen3_8b port_mxfp4 {"ppl": 9.003397739036204, "attn_cos": 0.9231449431843228, "attn_rel_err": 0.3646019647518794, "k_rel": 0.13908419323464236, "v_rel": 0.12031312845647335} 73s
+qwen3_8b port_kivi4 {"ppl": 8.548010297063724, "attn_cos": 0.9975791258944405, "attn_rel_err": 0.04284921562713054, "k_rel": 0.04129912111804717, "v_rel": 0.08104110488461123} 26s
+qwen3_8b port_qserve_int4 {"ppl": 8.526603816706164, "attn_cos": 0.9631079932053884, "attn_rel_err": 0.25265705212950706, "k_rel": 0.09955177559620804, "v_rel": 0.11619261672927274} 42s
