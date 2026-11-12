@@ -11,8 +11,8 @@ import scenes as S
 
 HERE = pathlib.Path(__file__).parent
 WORK = HERE / ".work"; WORK.mkdir(exist_ok=True)
-VOICE, RATE = os.environ.get("UQ_VOICE", "Samantha"), os.environ.get("UQ_RATE", "170")
-PAD, GAP = 0.9, 0.3
+VOICE, RATE = os.environ.get("UQ_VOICE", "Samantha"), os.environ.get("UQ_RATE", "178")
+PAD, GAP = 0.7, 0.25
 
 def parse_script():
     return _parse()
@@ -44,7 +44,7 @@ def narrate(script):
                 subprocess.check_call(["say", "-v", VOICE, "-r", RATE, "-o", str(WORK / "t.aiff"), s])
                 subprocess.check_call(["ffmpeg", "-y", "-v", "error", "-i", str(WORK / "t.aiff"), "-ar", "44100", "-ac", "1", str(f)])
             d = dur(f); cues.append(t); parts.append((t, f)); t += d + GAP
-        T = t + 0.7
+        T = t + 0.5
         plan.append(dict(name=name, sents=sents, cues=cues, T=T, parts=parts))
     return plan
 

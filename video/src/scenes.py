@@ -230,8 +230,8 @@ def s_results(g, t, cues, T):
         q = pr(t, cues[1], 0.8)
         g.rect(8 + 9 - 1, 24, 15, 56, "none", FG, alpha=0.5 * q, lw=2)
         g.text(8, 11.5, "K=1: nothing to share, fused = independent", 17, MUTED, alpha=q)
-    if t > cues[2]:
-        q = pr(t, cues[2], 0.8)
+    if t > cues[1] + 4:
+        q = pr(t, cues[1] + 4, 0.8)
         cfg = {k: r["cfg"] for k, r in b3.items()}
         g.text(100, 16.5, f"B300 K=8: warps={cfg[8]['warps']} stages={cfg[8]['stages']} nsplit={cfg[8]['nsplit']}", 15, MUTED, alpha=q)
         g.text(100, 13, "MI300X: warps=2 stages=2 nsplit=16 (results/*_tuning_notes.md)", 15, MUTED, alpha=q)
@@ -253,13 +253,20 @@ def sycl_best(K=8, B=8, ctx=32768):
             if best is None or r["fused_ms"] < best["fused_ms"]: best = r
     return best
 
+def sycl2_b8_16k():
+    d = load("sycl2_summary.json")
+    return [x for K in (1, 4, 8) for x in d["shapes"] if x["B"] == 8 and x["ctx"] == 16384 and x["K"] == K] if d else []
+
+def sycl2_peak():
+    return load("sycl2_summary.json")["read_peak_random_gbs"]
+
 def vendor_rows():
     """[(vendor, label, speedup, fused_ms, indep_ms)] at K=8, B=8, ctx=32768 from results files."""
     out = []
     mi, b3 = rows("mi300x_b8_c32k_tuned.json"), rows("b300_b8_c32k_tuned.json")
     if mi: out.append(("AMD", "MI300X  (Triton)", mi[8]["speedup"], mi[8]["fused_ms"], mi[8]["base_ms"]))
     if b3: out.append(("NVIDIA", "B300  (Triton)", b3[8]["speedup"], b3[8]["fused_ms"], b3[8]["base_ms"]))
-    cs = load("cuda_summary_b8_c32k.json") or {}
+    cs = {k: load(f"cuda2_{k}_b8_c32k.json") or [] for k in ("b300", "h100", "a100", "l40s", "rtxpro6000")}
     names = {"b300": "B300  (CUDA)", "h100": "H100  (CUDA)", "a100": "A100  (CUDA)", "l40s": "L40S  (CUDA)", "rtxpro6000": "RTX PRO 6000  (CUDA)"}
     for k, n in names.items():
         r = {x["K"]: x for x in cs.get(k, [])}
@@ -275,7 +282,7 @@ def s_vendors(g, t, cues, T):
     for j, (v, c) in enumerate(VCOL.items()):
         g.rect(130 + j * 20, 85, 2.5, 2.5, c, alpha=a); g.text(133.5 + j * 20, 86.2, v, 15, FG, alpha=a)
     for j, (vend, lab, sp, fm, bm) in enumerate(vr):
-        y = 76 - j * 7.6
+        y = 78 - j * 7.0
         e = pr(t, cues[1] + 0.35 * j, 0.9)
         g.text(54, y, lab, 18, FG, "right", alpha=e)
         w = 9.0 * sp * e
@@ -283,9 +290,13 @@ def s_vendors(g, t, cues, T):
         g.text(56 + w + 1.5, y, f"{sp:.1f}x", 20, VCOL[vend], weight="bold", alpha=e)
         g.text(56 + w + 11, y, f"{fm:.2f} vs {bm:.2f} ms", 14, MUTED, alpha=e)
     pc = pr(t, cues[2], 1)
-    g.text(8, 15, "Correctness: CUDA 15 reference vectors, 0 failures on 5 GPUs | SYCL 36/36 cases on Arc B390 | Triton max error vs baseline < 2e-4", 15, FG, alpha=pc)
-    g.text(8, 11.5, "Gain is relative to each backend's own K independent passes. Shapes: Hq 64 (Triton, CUDA), Hq 32 (SYCL); Hkv 8, D 128.", 14, MUTED, alpha=pc)
-    g.text(8, 8.5, "results/mi300x_*, b300_*_tuned, cuda_summary_b8_c32k, sycl_arcb390_xmx_sweep", 13, MUTED, alpha=pc)
+    sy = sycl2_b8_16k()
+    if sy:
+        g.text(8, 21, "Arc B390 ESIMD path (B8, 16k ctx, K=1/4/8): " + " / ".join(f"{x['esimd_ms']:.2f}" for x in sy) + " ms, "
+               + " / ".join(f"{x['speedup']:.1f}x" for x in sy) + " over XMX; true read peak ~" + f"{sycl2_peak():.0f} GB/s (random data)", 15, "#f472b6", alpha=pc)
+    g.text(8, 15.5, "Correctness: CUDA 15 reference vectors, 0 failures on 5 GPUs | SYCL 36/36 cases on Arc B390 | Triton max error vs baseline < 2e-4", 15, FG, alpha=pc)
+    g.text(8, 12, "Gain is relative to each backend's own K independent passes. Shapes: Hq 64 (Triton, CUDA), Hq 32 (SYCL); Hkv 8, D 128.", 14, MUTED, alpha=pc)
+    g.text(8, 9, "results/mi300x_*, b300_*_tuned, cuda2_*_b8_c32k, sycl_arcb390_xmx_sweep, sycl2_summary", 13, MUTED, alpha=pc)
 
 # ---------------------------------------------------------------- honest positioning (B300)
 def s_position(g, t, cues, T):
@@ -294,7 +305,7 @@ def s_position(g, t, cues, T):
     def fi(K):
         r = [x for x in pri["rows"] if x["impl"].startswith("flashinfer.trtllm_batch_decode") and x["kv_format"] == "nvfp4" and x["K"] == K and x.get("ms")]
         return r[0]["ms"]
-    cs = {x["K"]: x for x in load("cuda_summary_b8_c32k.json")["b300"]}
+    cs = {x["K"]: x for x in load("cuda2_b300_b8_c32k.json")}
     tr = rows("b300_b8_c32k_tuned.json")
     items = [("FlashInfer trtllm-gen, NVFP4 (NVIDIA)", fi(1), fi(8), "#9ca3af"),
              ("UltraQuant format, CUDA (ours)", cs[1]["cuda_fused_ms"], cs[8]["cuda_fused_ms"], OURS),
@@ -318,7 +329,7 @@ def s_position(g, t, cues, T):
     g.text(10, 21, "We found no public CUDA or SYCL port of this format; this is an implementation contribution, not a new FP4 algorithm.", 17, FG, alpha=pb)
     pc = pr(t, cues[2], 1)
     g.text(10, 15, "BitDecoding-FP4 is single-query (its guard rejects speculative decoding), so it re-reads the cache K times.", 17, FG, alpha=pc)
-    g.text(10, 10.5, "results/priorart_B300.json, cuda_summary_b8_c32k.json, b300_b8_c32k_tuned.json; cuda/PRIOR_ART.md", 13, MUTED, alpha=pc)
+    g.text(10, 10.5, "results/priorart_B300.json, cuda2_b300_b8_c32k.json, b300_b8_c32k_tuned.json; cuda/PRIOR_ART.md", 13, MUTED, alpha=pc)
 
 # ---------------------------------------------------------------- quality (Qwen3-8B)
 def quality_rows():
@@ -364,25 +375,64 @@ def e2e(ctx, B, K=8):
             return dict(fp16=float(c[1].split()[0]), fused=float(c[5]), attn=float(c[6]), kind=float(c[7]), vs16=float(c[8].rstrip("x")), vsk=float(c[9].rstrip("x")))
     return None
 
+def e2e_h100(K, B=8, ctx=32768):
+    d = load("cuda2_e2e_mistral7b_h100_b8_c32k.json")
+    g = {(r["K"], r["backend"]): r["graph_ms"] for r in d["rows"]}
+    return min(g[(K, "fp16")], g[(K, "fp16_bmm")]) / g[(K, "uq_fused")]
+
 def s_step(g, t, cues, T):
-    title(g, "What it buys: the whole decode step", "Mistral-7B on MI300X, K = 8 verify, GPU time per step (graph-mode projection), fused FP4 vs best fp16")
+    title(g, "What it buys: the whole decode step", "Mistral-7B, GPU time per step (graph-mode projection), fused FP4 vs best fp16 attention")
     a = pr(t, 0.3, 1)
     g.text(8, 80, "Speedup of the full step over fp16 (higher is better)", 20, MUTED, alpha=a)
-    for gi, B in enumerate((8, 1)):
-        x0 = 10 + gi * 92
-        g.text(x0, 70, f"batch {B}", 24, MI if B == 8 else BASE, weight="bold", alpha=pr(t, 0.6 + gi * 4.5, 0.8))
-        for ci, ctx in enumerate((8192, 16384, 32768)):
-            r = e2e(ctx, B)
-            e = pr(t, 1.0 + ci * 0.4 + gi * 4.5, 1.0)
-            h = 28 * (r["vs16"] - 1.0) / 0.7 * e
-            bx = x0 + ci * 28
-            g.rect(bx, 30, 18, 0.35 + h, MI if B == 8 else BASE, alpha=0.95)
-            g.text(bx + 9, 30 + h + 4, f"{r['vs16']:.2f}x", 22, FG, "center", weight="bold", alpha=e)
-            g.text(bx + 9, 26, f"{ctx//1024}k ctx", 16, MUTED, "center", alpha=a)
-    g.line(10, 30, 180, 30, MUTED, 1.2, alpha=0.7)
-    g.text(10, 20, "1.0x = fp16 step. Small gain at batch 1: attention is only ~11% of the step (1.1 of 10.1 ms at 8k).", 17, FG, alpha=pr(t, cues[1], 1))
-    g.text(10, 15.5, "Value: KV cache 3.76x smaller, and cheap K-token verify at large batch and long context.", 17, OURS, alpha=pr(t, cues[2], 1))
-    g.text(10, 11, "results/e2e_summary.md (eager PyTorch loop; tokens/s are projections from GPU kernel time)", 13, MUTED, alpha=pr(t, cues[2], 1))
+    base_y, scale = 30, 26
+    groups = [("MI300X, batch 8, K=8", MI, [(f"{c//1024}k", e2e(c, 8)["vs16"]) for c in (8192, 16384, 32768)]),
+              ("MI300X, batch 1, K=8", BASE, [(f"{c//1024}k", e2e(c, 1)["vs16"]) for c in (8192, 16384, 32768)]),
+              ("H100 CUDA, batch 8, 32k", VCOL["NVIDIA"], [("K=1", e2e_h100(1)), ("K=8", e2e_h100(8))])]
+    for gi, (lab, c, bars) in enumerate(groups):
+        x0 = 8 + gi * 62
+        g.text(x0, 70, lab, 19, c, weight="bold", alpha=pr(t, 0.6 + gi * 3.0, 0.8))
+        for ci, (bl, v) in enumerate(bars):
+            e = pr(t, 1.0 + ci * 0.3 + gi * 3.0, 1.0)
+            h = scale * (v - 1.0) / 1.2 * e
+            bx = x0 + ci * 19
+            g.rect(bx, base_y, 15, 0.35 + h, c, alpha=0.95)
+            g.text(bx + 7.5, base_y + h + 3.5, f"{v:.2f}x", 20, FG, "center", weight="bold", alpha=e)
+            g.text(bx + 7.5, base_y - 3.5, bl, 15, MUTED, "center", alpha=a)
+    g.line(8, base_y, 184, base_y, MUTED, 1.2, alpha=0.7)
+    g.text(8, 20, "1.0x = fp16 step. Small gain at batch 1: attention is only ~11% of the step (1.1 of 10.1 ms at 8k on MI300X).", 17, FG, alpha=pr(t, cues[1], 1))
+    g.text(8, 15.5, "Value: KV cache 3.76x smaller, and cheap K-token verify at large batch and long context.", 17, OURS, alpha=pr(t, cues[2], 1))
+    g.text(8, 11, "results/e2e_summary.md, cuda2_e2e_mistral7b_h100_b8_c32k.json (eager loop; projections from GPU kernel time)", 13, MUTED, alpha=pr(t, cues[2], 1))
+
+# ---------------------------------------------------------------- real-world proxy (H100, bf16 vs fp8 KV)
+def realworld():
+    txt = md_lines("realworld_summary.md")
+    def row(prefix):
+        for l in txt:
+            if l.startswith(prefix): return [c.strip() for c in l.strip().strip("|").split("|")]
+    cap = row("| KV capacity"); spec = row("| n-gram spec decode, code edit, conc=32"); drift = row("| Greedy drift")
+    nums = lambda c: [int(x.replace(",", "")) for x in re.findall(r"\d[\d,]*", c)]
+    return dict(cap=(nums(cap[1])[0], nums(cap[2])[0]), spec=(nums(spec[1])[0], nums(spec[2])[0]),
+                drift_med=int(re.search(r"median divergence at token (\d+)", drift[2]).group(1)))
+
+def s_realworld(g, t, cues, T):
+    title(g, "Real-world data so far: a proxy, not FP4", "stock vLLM on H100, Mistral-7B, bf16 KV vs fp8 KV (2x smaller). No UltraQuant FP4 serving number exists yet.")
+    r = realworld()
+    panels = [("KV capacity (tokens, 80 GB)", r["cap"], "bf16", "fp8", f"{r['cap'][1]/r['cap'][0]:.1f}x"),
+              ("n-gram spec decode, conc 32, K=4 (tok/s)", r["spec"], "bf16", "fp8", f"+{100*(r['spec'][1]/r['spec'][0]-1):.0f}%")]
+    for pi, (lab, (a1, a2), l1, l2, gain) in enumerate(panels):
+        x0 = 10 + pi * 92
+        e = pr(t, 0.6 + pi * 3.5, 1.0)
+        g.text(x0, 76, lab, 18, FG, weight="bold", alpha=pr(t, 0.4 + pi * 3.5, 0.8))
+        for bi, (v, c, bl) in enumerate(((a1, MUTED, l1), (a2, BASE, l2))):
+            h = 28 * v / a2 * e
+            g.rect(x0 + bi * 24, 38, 18, h, c, alpha=0.95)
+            g.text(x0 + bi * 24 + 9, 38 + h + 3, f"{v:,}", 17, c, "center", weight="bold", alpha=e)
+            g.text(x0 + bi * 24 + 9, 34, bl, 16, MUTED, "center", alpha=e)
+        g.text(x0 + 56, 52, gain, 30, BASE, weight="bold", alpha=e)
+    pd = pr(t, cues[1], 1.0)
+    g.text(10, 24, f"Cost: fp8 KV changes greedy output early: median first divergence at token {r['drift_med']} (bf16-vs-bf16 rerun noise floor: token 513).", 18, FG, alpha=pd)
+    g.text(10, 18, "So acceptance and task quality of any lossy KV format must be measured, not assumed. Agent throughput: no gain (prefill-bound).", 18, FG, alpha=pd)
+    g.text(10, 11, "results/realworld_summary.md, realworld_cuda_h100_*.json (single runs, no CIs)", 13, MUTED, alpha=pd)
 
 # ---------------------------------------------------------------- caveats
 def s_caveats(g, t, cues, T):
@@ -403,4 +453,4 @@ def s_caveats(g, t, cues, T):
     g.text(96, 15, "arXiv 2606.20474  |  github.com/Bobliuuu/ultraquant-more", 24, MUTED, "center", alpha=pr(t, cues[-1], 1))
 
 SCENES = [("title", s_title), ("vendors", s_vendors), ("memory", s_memory), ("pack", s_pack), ("kquery", s_kquery),
-          ("results", s_results), ("position", s_position), ("quality", s_quality), ("step", s_step), ("caveats", s_caveats)]
+          ("results", s_results), ("position", s_position), ("quality", s_quality), ("step", s_step), ("realworld", s_realworld), ("caveats", s_caveats)]
