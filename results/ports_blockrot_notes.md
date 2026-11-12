@@ -17,7 +17,7 @@ Shapes: B8, ctx 32768, Hq64/Hkv8/D128, K = 1/2/4/8 query tokens (causal verify b
 | planar4 fused (68) | 1.095 | 1.155 | 1.323 | 2.195 |
 
 All three 3-bit methods time identically: after rotating q (and un-rotating the output) outside the kernel the decode kernel is the same codebook-dequant + online softmax; the
-rotation type only changes a 128x128 matrix. UltraQuant is 2.0x (K=1), 2.0x (K=2), 2.0x (K=4), 2.7x (K=8) faster than these kernels, and 1.9x/3.0x/... faster than TQ3 at K=1/2 (TQ3 has no K-query mode).
+rotation type only changes a 128x128 matrix. UltraQuant is 2.0x (K=1), 2.0x (K=2), 2.0x (K=4), 2.7x (K=8) faster than these 3-bit kernels, and 3.1x/5.8x/9.2x/14.8x faster than TQ3 at K=1/2/4/8 (TQ3 has no K-query mode, so K independent calls). The 3-bit kernels beat TQ3 at every K (1.5x at K=1, 5.5x at K=8).
 These kernels are ALU-bound on bit-plane unpack + 8-way select (only 138-284 GB/s of 5.3 TB/s), not bandwidth bound; fp16 SDPA is slower only at K<=4 thanks to the 5x byte saving. At K=8 they are on par with fp16 SDPA (1.58 vs 1.48 ms).
 Quantise-on-write is a Triton kernel (dense 128x128 rotation by tl.dot, midpoint compares, bit-plane pack); verified bit-compatible with the torch fake-quant (`bench/ports/test_blockrot.py`; decode vs torch attention on the dequantised cache cos 0.999998).
 
