@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "uqmt"
 version = "0.1.0"
-description = "Fused K-query FP4 paged decode attention for AMD MI300X (Triton)"
+description = "Fused K-query FP4 (UltraQuant) paged decode attention: Triton reference with CUDA and SYCL ports"
 readme = "README.md"
 requires-python = ">=3.9"
 dependencies = ["torch"]
