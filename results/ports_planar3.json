@@ -1,0 +1,142 @@
+{
+ "method": "planar3",
+ "kv": "llm",
+ "B": 8,
+ "ctx": 32768,
+ "Hq": 64,
+ "Hkv": 8,
+ "D": 128,
+ "bytes_per_vec": 52,
+ "ms_per_call": {
+  "1": 0.77746080160141,
+  "2": 0.7689571976661682,
+  "4": 0.9654281914234162,
+  "8": 1.5753199934959412
+ },
+ "ms_per_call_hot": {
+  "1": 0.6770583629608155,
+  "2": 0.693112850189209,
+  "4": 0.8915481567382812,
+  "8": 1.5240470886230468
+ },
+ "gbs": {
+  "1": 280.5335105650997,
+  "2": 283.6358235048171,
+  "4": 225.91406583894164,
+  "8": 138.45047920453626
+ },
+ "attn_cos": {
+  "1": 0.8956600427627563,
+  "2": 0.9124559462070465,
+  "4": 0.9015634655952454,
+  "8": 0.9009710550308228
+ },
+ "attn_relerr": {
+  "1": 0.4456130266189575,
+  "2": 0.4066978096961975,
+  "4": 0.42468003928661346,
+  "8": 0.42541100084781647
+ },
+ "baselines": {
+  "uq_fp4_fused": {
+   "1": {
+    "ms": 0.3817447066307068,
+    "gbs": 747.12934337007,
+    "cos": 0.9653477668762207,
+    "bytes_per_vec": 68
+   },
+   "2": {
+    "ms": 0.3858898997306824,
+    "gbs": 739.1037500568262,
+    "cos": 0.9649584889411926,
+    "bytes_per_vec": 68
+   },
+   "4": {
+    "ms": 0.4771135002374649,
+    "gbs": 597.7878887477432,
+    "cos": 0.9613503813743591,
+    "bytes_per_vec": 68
+   },
+   "8": {
+    "ms": 0.5853276908397674,
+    "gbs": 487.2700821497211,
+    "cos": 0.9652875065803528,
+    "bytes_per_vec": 68
+   }
+  },
+  "tq3_gqa_Kindep": {
+   "1": {
+    "ms": 1.1677287101745606,
+    "gbs": 186.77609456685897,
+    "cos": 0.937036782503128,
+    "bytes_per_vec": 52,
+    "note": "K independent K=1 calls (their kernel has no K-query mode); cos is for query 0 only"
+   },
+   "2": {
+    "ms": 2.2327283382415772,
+    "gbs": 97.68488367544586,
+    "cos": 0.9416168630123138,
+    "bytes_per_vec": 52,
+    "note": "K independent K=1 calls (their kernel has no K-query mode); cos is for query 0 only"
+   },
+   "4": {
+    "ms": 4.377051496505738,
+    "gbs": 49.82893351246047,
+    "cos": 0.9419453740119934,
+    "bytes_per_vec": 52,
+    "note": "K independent K=1 calls (their kernel has no K-query mode); cos is for query 0 only"
+   },
+   "8": {
+    "ms": 8.66823787689209,
+    "gbs": 25.161262426983484,
+    "cos": 0.9433717429637909,
+    "bytes_per_vec": 52,
+    "note": "K independent K=1 calls (their kernel has no K-query mode); cos is for query 0 only"
+   }
+  },
+  "fp16_sdpa": {
+   "1": {
+    "ms": 1.475019907951355,
+    "gbs": 727.9507335540391,
+    "cos": 1.0,
+    "bytes_per_vec": 256
+   },
+   "2": {
+    "ms": 1.4763033986091614,
+    "gbs": 727.3178568928189,
+    "cos": 1.0,
+    "bytes_per_vec": 256
+   },
+   "4": {
+    "ms": 1.4800151944160462,
+    "gbs": 725.4937841524355,
+    "cos": 1.0,
+    "bytes_per_vec": 256
+   },
+   "8": {
+    "ms": 1.4771407961845398,
+    "gbs": 726.9055372199314,
+    "cos": 1.0,
+    "bytes_per_vec": 256
+   }
+  }
+ },
+ "write_ms_decode_step": {
+  "1": 0.07475810050964356,
+  "2": 0.07051240205764771,
+  "4": 0.07476609945297241,
+  "8": 0.07126610279083252
+ },
+ "fp16_bytes_per_vec": 256,
+ "ppl_delta": {
+  "mistral7b": 6.101,
+  "qwen3_8b": 16.703,
+  "source": "results/quality_summary.md (amd-experiments quantiser, simulated cache path; the port's fake_quant is bit-identical to it for planar/iso, rotor port drops 1 rotated coord, cos 0.993 vs orig)"
+ },
+ "attn_cos_real_kv": {
+  "mistral7b": 0.699,
+  "qwen3_8b": 0.7164,
+  "source": "quality_summary.md per-layer attention cosine on real KV"
+ },
+ "fused_kernel": "bench/ports/blockrot_common.py (Triton, split-KV, rotated-domain)"
+}

@@ -66,11 +66,17 @@ def _q_kernel(X, RT, CB, P, NRM, N, BT: tl.constexpr, NB: tl.constexpr, D: tl.co
 
 @triton.jit
 def _dequant_tile(P, base, n, d, CB, NB: tl.constexpr):
-    code = tl.zeros([n.shape[0], d.shape[0]], dtype=tl.int32)
+    # one [BN,16]-byte load per bit plane, bits expanded in registers (dim = 8*byte + bit); codebook via select chain (no gather)
+    j = tl.arange(0, 16); sh = tl.arange(0, 8); BN: tl.constexpr = n.shape[0]
+    code = tl.zeros([BN, 128], dtype=tl.int32)
     for p in tl.static_range(NB):
-        byte = tl.load(P + base + n[:, None] * (NB * 16) + p * 16 + (d[None, :] // 8)).to(tl.int32)
-        code |= ((byte >> (d[None, :] % 8)) & 1) << p
-    return tl.load(CB + code)
+        byte = tl.load(P + base + n[:, None] * (NB * 16) + p * 16 + j[None, :]).to(tl.int32)
+        bit = (byte[:, :, None] >> sh[None, None, :]) & 1
+        code |= tl.reshape(bit, [BN, 128]) << p
+    v = tl.zeros([BN, 128], dtype=tl.float32) + tl.load(CB)
+    for i in tl.static_range(1, 1 << NB):
+        v = tl.where(code == i, tl.load(CB + i), v)
+    return v
 
 
 @triton.jit

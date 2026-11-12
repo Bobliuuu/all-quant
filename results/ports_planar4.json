@@ -1,0 +1,59 @@
+{
+ "method": "planar4",
+ "kv": "llm",
+ "B": 8,
+ "ctx": 32768,
+ "Hq": 64,
+ "Hkv": 8,
+ "D": 128,
+ "bytes_per_vec": 68,
+ "ms_per_call": {
+  "1": 1.0953881025314331,
+  "2": 1.1547992944717407,
+  "4": 1.3230498909950257,
+  "8": 2.19535870552063
+ },
+ "ms_per_call_hot": {
+  "1": 1.0142995834350585,
+  "2": 1.0909440040588378,
+  "4": 1.2614680290222169,
+  "8": 2.1799373626708984
+ },
+ "gbs": {
+  "1": 260.3759081743501,
+  "2": 246.9802963730331,
+  "4": 215.57212161175585,
+  "8": 129.91620516628134
+ },
+ "attn_cos": {
+  "1": 0.9470006227493286,
+  "2": 0.9543491005897522,
+  "4": 0.9509648382663727,
+  "8": 0.9488324820995331
+ },
+ "attn_relerr": {
+  "1": 0.31401778757572174,
+  "2": 0.29021158814430237,
+  "4": 0.298169806599617,
+  "8": 0.3024192601442337
+ },
+ "baselines": {},
+ "write_ms_decode_step": {
+  "1": 0.07438120245933533,
+  "2": 0.06999120116233826,
+  "4": 0.06872439980506898,
+  "8": 0.06949009895324706
+ },
+ "fp16_bytes_per_vec": 256,
+ "ppl_delta": {
+  "mistral7b": 2.155,
+  "qwen3_8b": 17.188,
+  "source": "results/quality_summary.md (amd-experiments quantiser, simulated cache path; the port's fake_quant is bit-identical to it for planar/iso, rotor port drops 1 rotated coord, cos 0.993 vs orig)"
+ },
+ "attn_cos_real_kv": {
+  "mistral7b": 0.7457,
+  "qwen3_8b": 0.7558,
+  "source": "quality_summary.md per-layer attention cosine on real KV"
+ },
+ "fused_kernel": "bench/ports/blockrot_common.py (Triton, split-KV, rotated-domain)"
+}
