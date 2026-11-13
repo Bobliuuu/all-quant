@@ -31,6 +31,15 @@ Reference: FP8 e4m3 with one fp32 scale per 128-value vector (8.25 bpv). `-kc` =
 | tq-mse-3-kc | 3.125 | 0.1502 | 0.133, 0.154, 0.132, 0.183 | 18.52 |  |
 | tq-mse-2 | 2.125 | 2.4185 | 2.370, 2.512, 2.475, 2.317 | 143.35 |  |
 | tq-mse-2-kc | 2.125 | 0.8275 | 0.739, 0.901, 0.736, 0.933 | 32.04 |  |
+| pq-3.2 | 3.188 | 0.2229 | 0.172, 0.268, 0.159, 0.293 | 19.43 | 0.057 |
+| pq-3.2-kc | 3.188 | 0.0984 | 0.096, 0.104, 0.084, 0.110 | 17.93 | 0.057 |
+| pq-3.2-kvc | 3.188 | 0.1043 | 0.100, 0.107, 0.088, 0.121 | 18.20 | 0.057 |
+| pq-2.3 | 2.312 | 1.6157 | 1.601, 1.722, 1.524, 1.616 | 69.95 | 0.122 |
+| pq-2.3-kc | 2.312 | 0.2637 | 0.237, 0.290, 0.221, 0.307 | 20.10 | 0.122 |
+| pq-2.3-kvc | 2.312 | 0.3297 | 0.295, 0.361, 0.273, 0.389 | 21.63 | 0.122 |
+| pq-2.1 | 2.125 | 1.9226 | 1.961, 1.962, 1.818, 1.949 | 92.47 | 0.207 |
+| pq-2.1-kc | 2.125 | 0.4403 | 0.387, 0.503, 0.352, 0.519 | 23.14 | 0.207 |
+| pq-2.1-kvc | 2.125 | 0.5246 | 0.439, 0.569, 0.463, 0.627 | 24.85 | 0.207 |
 
 FP8 reference PPL 16.95. Pearl's FP8 noise floor is ~0.04 (nondeterminism); our runs are deterministic, bf16-vs-FP8 shows the FP8 error itself.
 
@@ -38,8 +47,8 @@ FP8 reference PPL 16.95. Pearl's FP8 noise floor is ~0.04 (nondeterminism); our 
 
 | backend | device | passed | worst rel. L2 error (pq) |
 |---|---|---|---|
-| cuda | h100 | 96/96 | 1.1e-06 |
-| hip | mi300x | 96/96 | 1.1e-06 |
+| cuda | NVIDIA H100 | 96/96 | 1.1e-06 |
+| hip | AMD MI300X | 96/96 | 1.1e-06 |
 | sycl | Intel(R) Arc(TM) B390 GPU | 96/96 | 1.1e-06 |
 | sycl | Intel(R) Xeon(R) Platinum 8462Y+ | 96/96 | 1.1e-06 |
 | sycl | NVIDIA H100 80GB HBM3 | 96/96 | 1.1e-06 |
@@ -50,29 +59,29 @@ bytes/token/KV-head: pq 2*bK+2 + 2*bV+2 (102 B at 25/24), bf16 512 B, fp8 264 B.
 
 | device | B | T | Hq | Hkv | pq bits K/V | pq | bf16 (same skeleton) | fp8 (same skeleton) | vendor bf16 |
 |---|---|---|---|---|---|---|---|---|---|
-| NVIDIA H100 80GB HBM3 | 1 | 32768 | 32 | 8 | 25/24 | 283 | 100 | 170 | 63 (torch SDPA) |
-| NVIDIA H100 80GB HBM3 | 32 | 8192 | 32 | 8 | 25/24 | 1827 | 521 | 1051 | 398 (torch SDPA) |
-| NVIDIA H100 80GB HBM3 | 8 | 131072 | 16 | 1 | 25/24 | 1614 | 775 | 1857 | 198 (torch SDPA) |
-| NVIDIA H100 80GB HBM3 | 8 | 32768 | 32 | 1 | 25/24 | 627 | 344 | 963 | 65 (torch SDPA) |
-| NVIDIA H100 80GB HBM3 | 8 | 32768 | 32 | 8 | 16/16 | 1774 | 536 | 1070 | 360 (torch SDPA) |
-| NVIDIA H100 80GB HBM3 | 8 | 32768 | 32 | 8 | 18/17 | 1778 | 536 | 1070 | 360 (torch SDPA) |
-| NVIDIA H100 80GB HBM3 | 8 | 32768 | 32 | 8 | 25/24 | 1862 | 536 | 1070 | 360 (torch SDPA) |
-| AMD Instinct MI300X VF | 1 | 32768 | 32 | 8 | 25/24 | 286 | 154 | 210 |  |
-| AMD Instinct MI300X VF | 8 | 32768 | 32 | 8 | 25/24 | 1412 | 955 | 1246 |  |
-| AMD Instinct MI300X VF | 8 | 32768 | 32 | 8 | 18/17 | 1286 | 955 | 1246 |  |
-| AMD Instinct MI300X VF | 8 | 32768 | 32 | 8 | 16/16 | 1273 | 955 | 1246 |  |
-| AMD Instinct MI300X VF | 32 | 8192 | 32 | 8 | 25/24 | 1384 | 924 | 1211 |  |
-| AMD Instinct MI300X VF | 8 | 32768 | 32 | 1 | 25/24 | 1080 | 771 | 1692 |  |
-| AMD Instinct MI300X VF | 8 | 131072 | 16 | 1 | 25/24 | 2701 | 1852 | 3349 |  |
-| Intel(R) Arc(TM) B390 GPU | 1 | 32768 | 32 | 8 | 25/24 | 2624 | 1597 | 1979 |  |
-| Intel(R) Arc(TM) B390 GPU | 4 | 32768 | 32 | 8 | 25/24 | 10098 | 6085 | 7408 |  |
-| Intel(R) Arc(TM) B390 GPU | 4 | 32768 | 32 | 8 | 16/16 | 9277 | 6085 | 7408 |  |
-| Intel(R) Arc(TM) B390 GPU | 4 | 32768 | 32 | 1 | 25/24 | 4640 | 3635 | 8643 |  |
-| NVIDIA H100 80GB HBM3 | 1 | 32768 | 32 | 8 | 25/24 | 298 | 115 | 369 | 63 (torch SDPA) |
-| NVIDIA H100 80GB HBM3 | 8 | 32768 | 32 | 8 | 25/24 | 2165 | 665 | 2457 | 360 (torch SDPA) |
-| NVIDIA H100 80GB HBM3 | 8 | 32768 | 32 | 8 | 18/17 | 2013 | 665 | 2457 | 360 (torch SDPA) |
-| NVIDIA H100 80GB HBM3 | 8 | 32768 | 32 | 8 | 16/16 | 2005 | 665 | 2457 | 360 (torch SDPA) |
-| NVIDIA H100 80GB HBM3 | 32 | 8192 | 32 | 8 | 25/24 | 2143 | 642 | 2422 | 398 (torch SDPA) |
-| NVIDIA H100 80GB HBM3 | 8 | 32768 | 32 | 1 | 25/24 | 750 | 607 | 1060 | 65 (torch SDPA) |
-| NVIDIA H100 80GB HBM3 | 8 | 131072 | 16 | 1 | 25/24 | 1705 | 1093 | 1997 | 198 (torch SDPA) |
+| NVIDIA H100 80GB HBM3 (CUDA) | 1 | 32768 | 32 | 8 | 25/24 | 283 | 100 | 170 | 63 (torch SDPA) |
+| NVIDIA H100 80GB HBM3 (CUDA) | 32 | 8192 | 32 | 8 | 25/24 | 1827 | 521 | 1051 | 398 (torch SDPA) |
+| NVIDIA H100 80GB HBM3 (CUDA) | 8 | 131072 | 16 | 1 | 25/24 | 1614 | 775 | 1857 | 198 (torch SDPA) |
+| NVIDIA H100 80GB HBM3 (CUDA) | 8 | 32768 | 32 | 1 | 25/24 | 627 | 344 | 963 | 65 (torch SDPA) |
+| NVIDIA H100 80GB HBM3 (CUDA) | 8 | 32768 | 32 | 8 | 16/16 | 1774 | 536 | 1070 | 360 (torch SDPA) |
+| NVIDIA H100 80GB HBM3 (CUDA) | 8 | 32768 | 32 | 8 | 18/17 | 1778 | 536 | 1070 | 360 (torch SDPA) |
+| NVIDIA H100 80GB HBM3 (CUDA) | 8 | 32768 | 32 | 8 | 25/24 | 1862 | 536 | 1070 | 360 (torch SDPA) |
+| AMD Instinct MI300X VF (HIP) | 1 | 32768 | 32 | 8 | 25/24 | 286 | 154 | 210 |  |
+| AMD Instinct MI300X VF (HIP) | 8 | 32768 | 32 | 8 | 25/24 | 1412 | 955 | 1246 |  |
+| AMD Instinct MI300X VF (HIP) | 8 | 32768 | 32 | 8 | 18/17 | 1286 | 955 | 1246 |  |
+| AMD Instinct MI300X VF (HIP) | 8 | 32768 | 32 | 8 | 16/16 | 1273 | 955 | 1246 |  |
+| AMD Instinct MI300X VF (HIP) | 32 | 8192 | 32 | 8 | 25/24 | 1384 | 924 | 1211 |  |
+| AMD Instinct MI300X VF (HIP) | 8 | 32768 | 32 | 1 | 25/24 | 1080 | 771 | 1692 |  |
+| AMD Instinct MI300X VF (HIP) | 8 | 131072 | 16 | 1 | 25/24 | 2701 | 1852 | 3349 |  |
+| Intel(R) Arc(TM) B390 GPU (SYCL) | 1 | 32768 | 32 | 8 | 25/24 | 2624 | 1597 | 1979 |  |
+| Intel(R) Arc(TM) B390 GPU (SYCL) | 4 | 32768 | 32 | 8 | 25/24 | 10098 | 6085 | 7408 |  |
+| Intel(R) Arc(TM) B390 GPU (SYCL) | 4 | 32768 | 32 | 8 | 16/16 | 9277 | 6085 | 7408 |  |
+| Intel(R) Arc(TM) B390 GPU (SYCL) | 4 | 32768 | 32 | 1 | 25/24 | 4640 | 3635 | 8643 |  |
+| NVIDIA H100 80GB HBM3 (SYCL) | 1 | 32768 | 32 | 8 | 25/24 | 298 | 115 | 369 |  |
+| NVIDIA H100 80GB HBM3 (SYCL) | 8 | 32768 | 32 | 8 | 25/24 | 2165 | 665 | 2457 |  |
+| NVIDIA H100 80GB HBM3 (SYCL) | 8 | 32768 | 32 | 8 | 18/17 | 2013 | 665 | 2457 |  |
+| NVIDIA H100 80GB HBM3 (SYCL) | 8 | 32768 | 32 | 8 | 16/16 | 2005 | 665 | 2457 |  |
+| NVIDIA H100 80GB HBM3 (SYCL) | 32 | 8192 | 32 | 8 | 25/24 | 2143 | 642 | 2422 |  |
+| NVIDIA H100 80GB HBM3 (SYCL) | 8 | 32768 | 32 | 1 | 25/24 | 750 | 607 | 1060 |  |
+| NVIDIA H100 80GB HBM3 (SYCL) | 8 | 131072 | 16 | 1 | 25/24 | 1705 | 1093 | 1997 |  |
 

@@ -138,6 +138,17 @@ def ball_tables(bits: int) -> BallTables:
     )
 
 
+_DEV_CACHE = {}
+
+
+def _dev(T: BallTables, name: str, device):
+    """device copy of a table array, cached (avoids a host->device copy per call)."""
+    k = (T.bits, name, str(device))
+    if k not in _DEV_CACHE:
+        _DEV_CACHE[k] = torch.as_tensor(getattr(T, name), device=device)
+    return _DEV_CACHE[k]
+
+
 def rank(y2: torch.Tensor, T: BallTables) -> torch.Tensor:
     """Doubled-coordinate E8 points (N,8) long -> index, or -1 if not in codebook."""
     dev = y2.device
@@ -146,10 +157,10 @@ def rank(y2: torch.Tensor, T: BallTables) -> torch.Tensor:
     keys = torch.zeros(a.shape[0], dtype=torch.long, device=dev)
     for i in range(8):
         keys = keys * 64 + srt[:, i].clamp(max=63)
-    tk = torch.as_tensor(T.keys, device=dev)
+    tk = _dev(T, "keys", dev)
     pos = torch.searchsorted(tk, keys).clamp(max=len(T.keys) - 1)
     found = (tk[pos] == keys) & (srt.max(-1).values <= T.max_abs)
-    lid = torch.as_tensor(T.key_to_leader, device=dev)[pos]
+    lid = _dev(T, "key_to_leader", dev)[pos]
     V = T.max_abs + 2
     cnt = torch.zeros(a.shape[0], V, dtype=torch.long, device=dev)
     cnt.scatter_add_(1, a.clamp(max=V - 1), torch.ones_like(a))
@@ -175,23 +186,23 @@ def rank(y2: torch.Tensor, T: BallTables) -> torch.Tensor:
     j = torch.cumsum(nz, -1) - nz
     s_even = (neg * nz * (1 << j)).sum(-1)
     s = torch.where(odd, s_odd, s_even)
-    nsign = torch.as_tensor(T.nsign, device=dev)[lid]
+    nsign = _dev(T, "nsign", dev)[lid]
     local = r * nsign + s
-    idx = torch.as_tensor(T.offset, device=dev)[lid] + local
-    ok = found & (local < torch.as_tensor(T.size, device=dev)[lid])
+    idx = _dev(T, "offset", dev)[lid] + local
+    ok = found & (local < _dev(T, "size", dev)[lid])
     return torch.where(ok, idx, torch.full_like(idx, -1))
 
 
 def unrank(idx: torch.Tensor, T: BallTables) -> torch.Tensor:
     """index (N,) long -> doubled-coordinate E8 points (N,8) long."""
     dev = idx.device
-    off = torch.as_tensor(T.offset, device=dev)
+    off = _dev(T, "offset", dev)
     lid = torch.searchsorted(off, idx, right=True) - 1
     local = idx - off[lid]
-    nsign = torch.as_tensor(T.nsign, device=dev)[lid]
+    nsign = _dev(T, "nsign", dev)[lid]
     r = local // nsign
     s = local % nsign
-    lead = torch.as_tensor(T.leaders, device=dev)[lid]
+    lead = _dev(T, "leaders", dev)[lid]
     V = T.max_abs + 2
     cnt = torch.zeros(idx.shape[0], V, dtype=torch.long, device=dev)
     cnt.scatter_add_(1, lead, torch.ones_like(lead))

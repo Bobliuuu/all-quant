@@ -25,8 +25,18 @@ class RHT:
         self.s = signs(n, seed)
         self.H = hadamard(n)
 
+        self._c = {}
+
+    def _get(self, t):
+        k = (t.device, t.dtype)
+        if k not in self._c:
+            self._c[k] = (self.s.to(t), self.H.to(t))
+        return self._c[k]
+
     def fwd(self, x):  # x (..., n)
-        return (x * self.s.to(x)) @ self.H.to(x)
+        s, H = self._get(x)
+        return (x * s) @ H
 
     def inv(self, y):
-        return (y @ self.H.to(y).T) * self.s.to(y)
+        s, H = self._get(y)
+        return (y @ H.T) * s
