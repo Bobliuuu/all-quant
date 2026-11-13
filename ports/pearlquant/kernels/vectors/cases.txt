@@ -1,0 +1,8 @@
+small_g4_b25_24
+gqa4_b25_24
+gqa4_b18_17
+gqa4_b16_16
+gqa8_b21_21
+mqa16_b29_24
+edge_t1_b20_20
+edge_t33_b30_14

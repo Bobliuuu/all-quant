@@ -1,0 +1,2 @@
+{"backend":"hip","gpu":"AMD Instinct MI300X VF","fmt":"pq","B":8,"T":32768,"Hq":32,"Hkv":8,"bK":25,"bV":24,"nsplit":128,"us":6193.38,"kv_bytes":213909504,"bytes_per_token_head":102.0,"eff_GB
+{"backend":"hip","gpu":"AMD Instinct MI300X VF","fmt":"pq","B":8,"T":32768,"Hq":32,"Hkv":8,"bK":25,"bV":24,"nsplit":128,"us":2687.74,"kv_bytes":213909504,"bytes_per_token_head":102.0,"eff_GB

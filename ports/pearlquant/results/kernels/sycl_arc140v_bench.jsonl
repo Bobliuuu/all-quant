@@ -1,0 +1,12 @@
+{"backend":"sycl","device":"Intel(R) Arc(TM) 140V GPU (16GB)","fmt":"pq","B":1,"T":32768,"Hq":32,"Hkv":8,"bK":25,"bV":24,"nsplit":8,"us":5056.24,"kv_bytes":26738688,"bytes_per_token_head":102.0,"eff_GBps":5.3}
+{"backend":"sycl","device":"Intel(R) Arc(TM) 140V GPU (16GB)","fmt":"bf16","B":1,"T":32768,"Hq":32,"Hkv":8,"bK":0,"bV":0,"nsplit":8,"us":2835.40,"kv_bytes":134217728,"bytes_per_token_head":512.0,"eff_GBps":47.3}
+{"backend":"sycl","device":"Intel(R) Arc(TM) 140V GPU (16GB)","fmt":"fp8","B":1,"T":32768,"Hq":32,"Hkv":8,"bK":0,"bV":0,"nsplit":8,"us":4167.91,"kv_bytes":69206016,"bytes_per_token_head":264.0,"eff_GBps":16.6}
+{"backend":"sycl","device":"Intel(R) Arc(TM) 140V GPU (16GB)","fmt":"pq","B":4,"T":32768,"Hq":32,"Hkv":8,"bK":25,"bV":24,"nsplit":256,"us":19873.61,"kv_bytes":106954752,"bytes_per_token_head":102.0,"eff_GBps":5.4}
+{"backend":"sycl","device":"Intel(R) Arc(TM) 140V GPU (16GB)","fmt":"bf16","B":4,"T":32768,"Hq":32,"Hkv":8,"bK":0,"bV":0,"nsplit":8,"us":9902.78,"kv_bytes":536870912,"bytes_per_token_head":512.0,"eff_GBps":54.2}
+{"backend":"sycl","device":"Intel(R) Arc(TM) 140V GPU (16GB)","fmt":"fp8","B":4,"T":32768,"Hq":32,"Hkv":8,"bK":0,"bV":0,"nsplit":16,"us":14546.20,"kv_bytes":276824064,"bytes_per_token_head":264.0,"eff_GBps":19.0}
+{"backend":"sycl","device":"Intel(R) Arc(TM) 140V GPU (16GB)","fmt":"pq","B":4,"T":32768,"Hq":32,"Hkv":8,"bK":16,"bV":16,"nsplit":8,"us":17722.70,"kv_bytes":71303168,"bytes_per_token_head":68.0,"eff_GBps":4.0}
+{"backend":"sycl","device":"Intel(R) Arc(TM) 140V GPU (16GB)","fmt":"bf16","B":4,"T":32768,"Hq":32,"Hkv":8,"bK":0,"bV":0,"nsplit":8,"us":10107.01,"kv_bytes":536870912,"bytes_per_token_head":512.0,"eff_GBps":53.1}
+{"backend":"sycl","device":"Intel(R) Arc(TM) 140V GPU (16GB)","fmt":"fp8","B":4,"T":32768,"Hq":32,"Hkv":8,"bK":0,"bV":0,"nsplit":8,"us":14741.05,"kv_bytes":276824064,"bytes_per_token_head":264.0,"eff_GBps":18.8}
+{"backend":"sycl","device":"Intel(R) Arc(TM) 140V GPU (16GB)","fmt":"pq","B":4,"T":32768,"Hq":32,"Hkv":1,"bK":25,"bV":24,"nsplit":8,"us":9925.01,"kv_bytes":13369344,"bytes_per_token_head":102.0,"eff_GBps":1.3}
+{"backend":"sycl","device":"Intel(R) Arc(TM) 140V GPU (16GB)","fmt":"bf16","B":4,"T":32768,"Hq":32,"Hkv":1,"bK":0,"bV":0,"nsplit":8,"us":7308.67,"kv_bytes":67108864,"bytes_per_token_head":512.0,"eff_GBps":9.2}
+{"backend":"sycl","device":"Intel(R) Arc(TM) 140V GPU (16GB)","fmt":"fp8","B":4,"T":32768,"Hq":32,"Hkv":1,"bK":0,"bV":0,"nsplit":64,"us":16810.06,"kv_bytes":34603008,"bytes_per_token_head":264.0,"eff_GBps":2.1}

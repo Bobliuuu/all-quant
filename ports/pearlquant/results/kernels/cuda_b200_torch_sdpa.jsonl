@@ -1,0 +1,5 @@
+{"backend": "torch-sdpa", "gpu": "NVIDIA B200", "fmt": "bf16", "B": 1, "T": 32768, "Hq": 32, "Hkv": 8, "us": 46.86, "kv_bytes": 134217728, "eff_GBps": 2864.4}
+{"backend": "torch-sdpa", "gpu": "NVIDIA B200", "fmt": "bf16", "B": 32, "T": 8192, "Hq": 32, "Hkv": 8, "us": 409.73, "kv_bytes": 1073741824, "eff_GBps": 2620.6}
+{"backend": "torch-sdpa", "gpu": "NVIDIA B200", "fmt": "bf16", "B": 8, "T": 131072, "Hq": 16, "Hkv": 1, "us": 127.37, "kv_bytes": 536870912, "eff_GBps": 4215.1}
+{"backend": "torch-sdpa", "gpu": "NVIDIA B200", "fmt": "bf16", "B": 8, "T": 32768, "Hq": 32, "Hkv": 1, "us": 46.15, "kv_bytes": 134217728, "eff_GBps": 2908.3}
+{"backend": "torch-sdpa", "gpu": "NVIDIA B200", "fmt": "bf16", "B": 8, "T": 32768, "Hq": 32, "Hkv": 8, "us": 221.24, "kv_bytes": 1073741824, "eff_GBps": 4853.3}

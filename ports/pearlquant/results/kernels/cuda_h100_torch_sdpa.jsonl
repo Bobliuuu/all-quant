@@ -1,0 +1,10 @@
+{"backend": "torch-sdpa", "gpu": "NVIDIA H100 80GB HBM3", "fmt": "bf16", "B": 1, "T": 32768, "Hq": 32, "Hkv": 8, "us": 62.46, "kv_bytes": 134217728, "eff_GBps": 2148.7}
+{"backend": "torch-sdpa", "gpu": "NVIDIA H100 80GB HBM3", "fmt": "bf16", "B": 1, "T": 32768, "Hq": 32, "Hkv": 8, "us": 63.44, "kv_bytes": 134217728, "eff_GBps": 2115.7}
+{"backend": "torch-sdpa", "gpu": "NVIDIA H100 80GB HBM3", "fmt": "bf16", "B": 32, "T": 8192, "Hq": 32, "Hkv": 8, "us": 397.04, "kv_bytes": 1073741824, "eff_GBps": 2704.4}
+{"backend": "torch-sdpa", "gpu": "NVIDIA H100 80GB HBM3", "fmt": "bf16", "B": 32, "T": 8192, "Hq": 32, "Hkv": 8, "us": 397.82, "kv_bytes": 1073741824, "eff_GBps": 2699.0}
+{"backend": "torch-sdpa", "gpu": "NVIDIA H100 80GB HBM3", "fmt": "bf16", "B": 8, "T": 131072, "Hq": 16, "Hkv": 1, "us": 197.4, "kv_bytes": 536870912, "eff_GBps": 2719.8}
+{"backend": "torch-sdpa", "gpu": "NVIDIA H100 80GB HBM3", "fmt": "bf16", "B": 8, "T": 131072, "Hq": 16, "Hkv": 1, "us": 198.38, "kv_bytes": 536870912, "eff_GBps": 2706.2}
+{"backend": "torch-sdpa", "gpu": "NVIDIA H100 80GB HBM3", "fmt": "bf16", "B": 8, "T": 32768, "Hq": 32, "Hkv": 1, "us": 64.19, "kv_bytes": 134217728, "eff_GBps": 2091.1}
+{"backend": "torch-sdpa", "gpu": "NVIDIA H100 80GB HBM3", "fmt": "bf16", "B": 8, "T": 32768, "Hq": 32, "Hkv": 1, "us": 65.16, "kv_bytes": 134217728, "eff_GBps": 2059.7}
+{"backend": "torch-sdpa", "gpu": "NVIDIA H100 80GB HBM3", "fmt": "bf16", "B": 8, "T": 32768, "Hq": 32, "Hkv": 8, "us": 356.94, "kv_bytes": 1073741824, "eff_GBps": 3008.2}
+{"backend": "torch-sdpa", "gpu": "NVIDIA H100 80GB HBM3", "fmt": "bf16", "B": 8, "T": 32768, "Hq": 32, "Hkv": 8, "us": 360.29, "kv_bytes": 1073741824, "eff_GBps": 2980.2}
