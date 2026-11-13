@@ -53,6 +53,14 @@ one (`tools/make_hip_backend.py`), so both drive their kernels identically.
    by every decoder (`& 0xFF`), i.e. they wrap, not clamp (vector `codec_heavy_a13_k2`: 34 such
    symbols; bit-exact behaviour reproduced by the ports).
 
+7. **The default `mma="int8"` path (LatticeLinear) uses more GPU memory than bf16.**  Each layer's
+   `PackedWeight` owns a `Stage2CudaDecoder`, whose constructor allocates `d_out_` (z symbols, 1 B/weight)
+   and `d_bf16_out_` (2 B/weight), plus `d_byte_out_` (1 B/weight) at the first forward, all with raw
+   `cudaMalloc`, invisible to `torch.cuda.memory_allocated()`.  For 6.98e9 linear weights that is about
+   19.5 GiB before the first forward (+6.5 GiB after).  Measured device-level use after conversion was
+   24.2 GiB vs 15.0 GiB for bf16 (`results/repro/tput_T10b.jsonl`, `resident_dev_GiB`), while torch reports
+   2.1 GiB.  The Rice bf16 path (RiceLinear, one shared scratch) is the one that gives the paper's 5.29 GiB.
+
 ## Pitfalls hit (and fixes)
 * **fp8**: MI300X's native fp8 is E4M3-FNUZ, not the OCP E4M3 that `__nv_fp8_e4m3` emits.  Stored
   bytes must match CUDA, so both ports use a software RN+satfinite conversion (`hq_num.hpp`),
@@ -78,3 +86,14 @@ one (`tools/make_hip_backend.py`), so both drive their kernels identically.
 * **AMD box lock**: `/root/gpu.lock` is a stale plain file used by other tenants with `flock`; the
   agreed convention is `mkdir /root/gpu-lock.d`.  `tools/amd_gpu_run.sh` takes both and refuses to
   start while the push-boxes `pb-vllm` container is up.
+
+## SYCL on the MI300X: blocked (not run)
+* The DPC++ nightly (nightly-2026-11-04) Linux release ships Unified Runtime adapters for CUDA, Level Zero and
+  OpenCL only (no `libur_adapter_hip.so`), so it cannot target gfx942.
+* AdaptiveCpp v25.10.0 built from source against the box's ROCm 10.1 LLVM (24.0.0git): CMake needed
+  `-DACPP_EXPERIMENTAL_LLVM=ON` and a placeholder `ACPP_LLC_PATH` (ROCm ships no `llc`).  The build then failed:
+  `llvm/Passes/PassPlugin.h` is not shipped with ROCm's LLVM, and `getTypeDeclType` is deleted in clang 24.
+* Not attempted: building intel/llvm with the HIP adapter from source (hours of CPU on a shared box) and the
+  Codeplay oneAPI-for-AMD plugin (it needs a oneAPI Base Toolkit install on the shared system).
+* So SYCL correctness and performance are measured on Intel Arc B390, NVIDIA H100 (DPC++ CUDA backend) and a
+  Xeon CPU (OpenCL), not on AMD.  The AMD numbers come from the HIP port.

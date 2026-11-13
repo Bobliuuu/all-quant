@@ -137,6 +137,19 @@ def main():
         md.append(f"| {cfg} | {f(p[0], 0)} | {f(d and d['prefill_tok_s'], 0)} | {f(p[1], 1)} | {f(d and d['decode_tok_s'], 1)} | {f(p[2], 2)} | {f(d and d['resident_GiB'], 2)} |")
         js["t10"].append(dict(config=cfg, paper=p, ours=d and {k: d.get(k) for k in ("prefill_tok_s", "decode_tok_s", "resident_GiB", "kv_compression_x")}))
 
+    T = lambda c, k: (tp.get(c) or {}).get(k)
+    md.append("\nNotes, all from the same container run: prefill = one 2048-token forward; decode = 256 single-token steps after a "
+              "128-token prompt (T <= 512, the fused-attention limit); eager PyTorch, batch 1.  "
+              f"KV prefill with the Rice cache attached encodes every 4-token chunk through the host ({f(T('kv', 'prefill_tok_s'), 0)} tok/s); "
+              f"the same forward without the cache runs at {f(T('kv', 'prefill_nocache_tok_s'), 0)} tok/s, i.e. close to bf16, just as the "
+              "paper's 16,261 is close to its 16,505, so the paper's KV prefill row most likely did not encode the cache.  "
+              f"The upstream fused Rice attention (kvf, wkvf, shimmed) decodes at {f(T('kvf', 'decode_tok_s'), 1)} / {f(T('wkvf', 'decode_tok_s'), 1)} tok/s, "
+              f"slower than the decode-full-history path ({f(T('kv', 'decode_tok_s'), 1)} / {f(T('wkv', 'decode_tok_s'), 1)}).  "
+              f"w_int8 device-level resident memory: {f(T('w_int8', 'resident_dev_GiB'), 1)} GiB (torch allocator sees {f(T('w_int8', 'resident_GiB'), 1)} GiB; "
+              "see PORTING_LOG issue 7).  wkv is 2.6 GiB above w after conversion; we did not investigate why "
+              "(the KV-cache template is built before weight conversion, see repro/throughput.py).  Absolute tok/s vary about 20% between H100 containers (bf16 decode 61.9 vs 75.6 tok/s in "
+              "tput_T10 vs tput_T10b).\n")
+
     # ---------------- Table 12 (Qwen2.5-7B-Instruct-1M, KV only, ctx 4096, 72 windows)
     q = {}
     for d in load("repro/ppl_Q12*.jsonl"):

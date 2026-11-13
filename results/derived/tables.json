@@ -320,18 +320,18 @@
    "rot": "none",
    "window": "-",
    "paper_dpct": 0.8,
-   "ours": null,
-   "ours_dpct": null,
-   "bps": null
+   "ours": 10318.233926086808,
+   "ours_dpct": 142285.506211016,
+   "bps": 3.8663416980277923
   },
   {
    "bits": "4",
    "rot": "qjl",
    "window": "-",
    "paper_dpct": 1.4,
-   "ours": null,
-   "ours_dpct": null,
-   "bps": null
+   "ours": 4597.904190355182,
+   "ours_dpct": 63348.349818694216,
+   "bps": 4.012075983460933
   },
   {
    "bits": "4",
@@ -356,18 +356,18 @@
    "rot": "none",
    "window": "-",
    "paper_dpct": 5.5,
-   "ours": null,
-   "ours_dpct": null,
-   "bps": null
+   "ours": 377100.7147991327,
+   "ours_dpct": 5203666.124497415,
+   "bps": 2.872904763098747
   },
   {
    "bits": "3",
    "rot": "qjl",
    "window": "-",
    "paper_dpct": 4.8,
-   "ours": null,
-   "ours_dpct": null,
-   "bps": null
+   "ours": 9773.56742451538,
+   "ours_dpct": 134769.43164845346,
+   "bps": 3.0097096616786625
   },
   {
    "bits": "3",
@@ -392,18 +392,18 @@
    "rot": "none",
    "window": "-",
    "paper_dpct": 42.0,
-   "ours": null,
-   "ours_dpct": null,
-   "bps": null
+   "ours": 1283864.8838916821,
+   "ours_dpct": 17716473.66066257,
+   "bps": 1.901802568326867
   },
   {
    "bits": "2",
    "rot": "qjl",
    "window": "-",
    "paper_dpct": 44.0,
-   "ours": null,
-   "ours_dpct": null,
-   "bps": null
+   "ours": 18802.705831830623,
+   "ours_dpct": 259366.18454088172,
+   "bps": 2.0070625716258608
   },
   {
    "bits": "2",

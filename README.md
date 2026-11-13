@@ -135,22 +135,25 @@ KV "sweet spot" (paper: +0.25 PPL at 3 bps): ours best 3-bps variant `kv:3:signs
 | wkv | 4655 | 246 | 5.4 | 7.9 | 5.69 | 7.93 |
 | wkvf | 4655 | 245 | 5.4 | 2.4 | 5.69 | 7.93 |
 
+Notes, all from the same container run: prefill = one 2048-token forward; decode = 256 single-token steps after a 128-token prompt (T <= 512, the fused-attention limit); eager PyTorch, batch 1.  KV prefill with the Rice cache attached encodes every 4-token chunk through the host (259 tok/s); the same forward without the cache runs at 24829 tok/s, i.e. close to bf16, just as the paper's 16,261 is close to its 16,505, so the paper's KV prefill row most likely did not encode the cache.  The upstream fused Rice attention (kvf, wkvf, shimmed) decodes at 3.1 / 2.4 tok/s, slower than the decode-full-history path (23.1 / 7.9).  w_int8 device-level resident memory: 24.2 GiB (torch allocator sees 2.1 GiB; see PORTING_LOG issue 7).  wkv is 2.6 GiB above w after conversion; we did not investigate why (the KV-cache template is built before weight conversion, see repro/throughput.py).  Absolute tok/s vary about 20% between H100 containers (bf16 decode 61.9 vs 75.6 tok/s in tput_T10 vs tput_T10b).
+
+
 ## Table 12 (Qwen2.5-7B-Instruct-1M, KV only, WikiText-2, ctx 4096, 72 windows)
 
-Our bf16 baseline: - (paper: 7.25).
+Our bf16 baseline: 7.2467 (paper: 7.25).
 
 | bits | correction | window | paper W2 Δ% | ours PPL | ours Δ% | ours eff. bps | ours KV× = 16/bps |
 |---|---|---|---|---|---|---|---|
-| 4 | none | - | +0.8 | - | - | - | - |
-| 4 | qjl | - | +1.4 | - | - | - | - |
+| 4 | none | - | +0.8 | 10318.234 | 142285.5 | 3.87 | 4.1 |
+| 4 | qjl | - | +1.4 | 4597.904 | 63348.3 | 4.01 | 4.0 |
 | 4 | none | 32 | +0.1 | - | - | - | - |
 | 4 | qjl | 32 | +0.2 | - | - | - | - |
-| 3 | none | - | +5.5 | - | - | - | - |
-| 3 | qjl | - | +4.8 | - | - | - | - |
+| 3 | none | - | +5.5 | 377100.715 | 5203666.1 | 2.87 | 5.6 |
+| 3 | qjl | - | +4.8 | 9773.567 | 134769.4 | 3.01 | 5.3 |
 | 3 | none | 32 | +1.8 | - | - | - | - |
 | 3 | qjl | 32 | +1.6 | - | - | - | - |
-| 2 | none | - | +42.0 | - | - | - | - |
-| 2 | qjl | - | +44.0 | - | - | - | - |
+| 2 | none | - | +42.0 | 1283864.884 | 17716473.7 | 1.90 | 8.4 |
+| 2 | qjl | - | +44.0 | 18802.706 | 259366.2 | 2.01 | 8.0 |
 | 2 | none | 32 | +7.4 | - | - | - | - |
 | 2 | qjl | 32 | +14.7 | - | - | - | - |
 | 1.7 | none | 32 | +26.9 | - | - | - | - |
