@@ -50,6 +50,16 @@ Reference: FP8 e4m3 with one fp32 scale per 128-value vector (8.25 bpv). `-kc` =
 
 FP8 reference PPL 16.95. Pearl's FP8 noise floor is ~0.04 (nondeterminism); our runs are deterministic, bf16-vs-FP8 shows the FP8 error itself.
 
+## Needle-in-a-haystack (our RULER-style generator, not RULER), Qwen/Qwen3-8B, 8192 tokens, 12 prompts per task
+
+| config | single needle | multikey (4 needles) |
+|---|---|---|
+| bf16 | 1.00 | 1.00 |
+| pq-3.2-kc | 1.00 | 1.00 |
+| fp8 | 1.00 | 1.00 |
+| nvfp4 | 1.00 | 1.00 |
+| tq-mse-3-kc | 1.00 | 1.00 |
+
 ## Kernel correctness (shared vectors, 8 cases x 3 formats x 4 split counts)
 
 | backend | device | passed | worst rel. L2 error (pq) |

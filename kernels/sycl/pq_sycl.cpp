@@ -227,13 +227,10 @@ void launch_split(sycl::queue& Q, PQArgs a, size_t slm_words) {
         }
         bar(it);
         load_tile<FMT, ND>(a, false, bh, t0, n, wbuf, vtab, tile32, tsc, it);
-        float vv[TT];
-        for (int t = 0; t < TT; ++t) vv[t] = (t < n) ? tsc[t] * tile_elem<FMT>(tile32, t, tid) : 0.f;
-        for (int g = 0; g < G; ++g) {
-          float s = acc[g] * alpha[g];
-          const float* pr = sc + g * TT;
-          for (int t = 0; t < TT; ++t) s += pr[t] * vv[t];
-          acc[g] = s;
+        for (int g = 0; g < G; ++g) acc[g] *= alpha[g];
+        for (int t = 0; t < n; ++t) {
+          const float v = tsc[t] * tile_elem<FMT>(tile32, t, tid);
+          for (int g = 0; g < G; ++g) acc[g] += sc[g * TT + t] * v;
         }
         bar(it);
       }

@@ -104,7 +104,13 @@ Read with care:
 Needle in a haystack (our own RULER-style generator, not the RULER suite; 8k tokens, 12 prompts
 per task, greedy decoding, cache quantized for prefill and every generated token):
 
-(not run)
+| config | single needle | multikey (4 needles) |
+|---|---|---|
+| bf16 | 1.00 | 1.00 |
+| pq-3.2-kc | 1.00 | 1.00 |
+| fp8 | 1.00 | 1.00 |
+| nvfp4 | 1.00 | 1.00 |
+| tq-mse-3-kc | 1.00 | 1.00 |
 
 ## 3. Kernels
 
