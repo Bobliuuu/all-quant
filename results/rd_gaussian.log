@@ -1,0 +1,78 @@
+pq-ball b=14           known  R=1.7500 D=0.13603 waste=0.311
+pq-ball b=14           norm   R=1.7500 D=0.13336 waste=0.297
+pq-ball b=14           fp16   R=1.8750 D=0.13336 waste=0.422
+pq-ball b=16           known  R=2.0000 D=0.09628 waste=0.312
+pq-ball b=16           norm   R=2.0000 D=0.09329 waste=0.289
+pq-ball b=16           fp16   R=2.1250 D=0.09329 waste=0.414
+pq-ball b=18           known  R=2.2500 D=0.07052 waste=0.337
+pq-ball b=18           norm   R=2.2500 D=0.06737 waste=0.304
+pq-ball b=18           fp16   R=2.3750 D=0.06737 waste=0.429
+pq-ball b=20           known  R=2.5000 D=0.05104 waste=0.354
+pq-ball b=20           norm   R=2.5000 D=0.04833 waste=0.314
+pq-ball b=20           fp16   R=2.6250 D=0.04833 waste=0.439
+pq-ball b=21           known  R=2.6250 D=0.04332 waste=0.361
+pq-ball b=21           norm   R=2.6250 D=0.04092 waste=0.320
+pq-ball b=21           fp16   R=2.7500 D=0.04092 waste=0.445
+pq-ball b=22           known  R=2.7500 D=0.03733 waste=0.378
+pq-ball b=22           norm   R=2.7500 D=0.03497 waste=0.331
+pq-ball b=22           fp16   R=2.8750 D=0.03497 waste=0.456
+pq-ball b=24           known  R=3.0000 D=0.02727 waste=0.402
+pq-ball b=24           norm   R=3.0000 D=0.02512 waste=0.342
+pq-ball b=24           fp16   R=3.1250 D=0.02512 waste=0.467
+pq-ball b=26           known  R=3.2500 D=0.01999 waste=0.428
+pq-ball b=26           norm   R=3.2500 D=0.01806 waste=0.355
+pq-ball b=26           fp16   R=3.3750 D=0.01806 waste=0.480
+pq-ball b=28           known  R=3.5000 D=0.01463 waste=0.453
+pq-ball b=28           norm   R=3.5000 D=0.01295 waste=0.364
+pq-ball b=28           fp16   R=3.6250 D=0.01295 waste=0.489
+pq-ball b=29           known  R=3.6250 D=0.01253 waste=0.466
+pq-ball b=29           norm   R=3.6250 D=0.01095 waste=0.369
+pq-ball b=29           fp16   R=3.7500 D=0.01095 waste=0.494
+pq-ball b=30           known  R=3.7500 D=0.01073 waste=0.479
+pq-ball b=30           norm   R=3.7500 D=0.00926 waste=0.373
+pq-ball b=30           fp16   R=3.8750 D=0.00926 waste=0.498
+pq-ball b=32           known  R=4.0000 D=0.00785 waste=0.504
+pq-ball b=32           norm   R=4.0000 D=0.00661 waste=0.379
+pq-ball b=32           fp16   R=4.1250 D=0.00661 waste=0.504
+pq-voronoi q=3         known  R=1.5850 D=0.18227 waste=0.357
+pq-voronoi q=3         fp16   R=1.7500 D=0.17883 waste=0.508
+pq-voronoi q=4         known  R=2.0000 D=0.10502 waste=0.374
+pq-voronoi q=4         fp16   R=2.1250 D=0.10166 waste=0.476
+pq-voronoi q=5         known  R=2.3219 D=0.06859 waste=0.389
+pq-voronoi q=5         fp16   R=2.5000 D=0.06526 waste=0.531
+pq-voronoi q=6         known  R=2.5850 D=0.04886 waste=0.407
+pq-voronoi q=6         fp16   R=2.7500 D=0.04598 waste=0.529
+pq-voronoi q=7         known  R=2.8074 D=0.03660 waste=0.421
+pq-voronoi q=7         fp16   R=3.0000 D=0.03420 waste=0.565
+pq-voronoi q=8         known  R=3.0000 D=0.02875 waste=0.440
+pq-voronoi q=8         fp16   R=3.1250 D=0.02649 waste=0.506
+pq-voronoi q=10        known  R=3.3219 D=0.01912 waste=0.467
+pq-voronoi q=10        fp16   R=3.5000 D=0.01717 waste=0.568
+pq-voronoi q=12        known  R=3.5850 D=0.01378 waste=0.494
+pq-voronoi q=12        fp16   R=3.7500 D=0.01205 waste=0.563
+pq-voronoi q=13        known  R=3.7004 D=0.01190 waste=0.504
+pq-voronoi q=13        fp16   R=3.8750 D=0.01029 waste=0.574
+pq-voronoi q=16        known  R=4.0000 D=0.00822 waste=0.536
+pq-voronoi q=16        fp16   R=4.1250 D=0.00688 waste=0.533
+lloyd-max 1b           known  R=1.0000 D=0.36188 waste=0.267
+turboquant-mse 1b      norm   R=1.0000 D=0.35972 waste=0.262
+turboquant-mse 1b      fp16   R=1.1250 D=0.35972 waste=0.387
+lloyd-max 2b           known  R=2.0000 D=0.11700 waste=0.452
+turboquant-mse 2b      norm   R=2.0000 D=0.11574 waste=0.444
+turboquant-mse 2b      fp16   R=2.1250 D=0.11574 waste=0.569
+lloyd-max 3b           known  R=3.0000 D=0.03442 waste=0.570
+turboquant-mse 3b      norm   R=3.0000 D=0.03388 waste=0.558
+turboquant-mse 3b      fp16   R=3.1250 D=0.03388 waste=0.683
+lloyd-max 4b           known  R=4.0000 D=0.00952 waste=0.642
+turboquant-mse 4b      norm   R=4.0000 D=0.00936 waste=0.630
+turboquant-mse 4b      fp16   R=4.1250 D=0.00936 waste=0.755
+lloyd-max 5b           known  R=5.0000 D=0.00252 waste=0.685
+turboquant-mse 5b      norm   R=5.0000 D=0.00247 waste=0.671
+turboquant-mse 5b      fp16   R=5.1250 D=0.00247 waste=0.796
+nvfp4                  fp16   R=4.5000 D=0.00905 waste=1.106
+fp8 e4m3 (no scale)    known  R=8.0000 D=0.00070 waste=2.762
+fp8 e4m3 fp32/128      fp16   R=8.2500 D=0.00066 waste=2.963
+int3 g32 fp16          fp16   R=3.5000 D=0.05107 waste=1.354
+int4 g32 fp16          fp16   R=4.5000 D=0.00935 waste=1.130
+hyperquant E8+Rice interp R=2.75 waste=0.30308585943616245
+hyperquant E8+Rice interp R=3.75 waste=0.26489860077290167
