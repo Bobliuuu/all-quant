@@ -16,7 +16,7 @@
 #include <cstring>
 #include <cmath>
 
-#if defined(__CUDACC__) || defined(__HIPCC__)
+#if (defined(__CUDACC__) || defined(__HIPCC__)) && !defined(__ACPP__) && !defined(__HIPSYCL__) && !defined(__ADAPTIVECPP__)  // AdaptiveCpp compiles SYCL in clang-HIP mode
 #define HQ_HD __host__ __device__ __forceinline__
 #else
 #define HQ_HD inline

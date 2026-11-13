@@ -33,7 +33,7 @@ and a Xeon CPU through DPC++), with the upstream CUDA kernels as the reference.
   do not compose (both are upstream bugs; we shim them, see PORTING_LOG).  The default `mma="int8"` path keeps
   about 3 B/weight of decoder scratch resident in raw `cudaMalloc`, so it uses **more** GPU memory than bf16.
 * **Ports.**  Every kernel in `cuda/` and `integrations/llama/` was ported.  On the shared vectors, every
-  backend (H100 CUDA, MI300X HIP, Arc B390 SYCL, H100 SYCL, Xeon SYCL) passes the same 84 of 86 checks:
+  backend (H100 CUDA, MI300X HIP, MI300X SYCL via AdaptiveCpp, Arc B390 SYCL, H100 SYCL, Xeon SYCL) passes the same 84 of 86 checks:
   bit-exact bitstreams, symbols, bf16/fp8/int8 outputs and GEMV.  All fail the same 2, which are upstream bugs
   that the ports reproduce faithfully.  End to end, RiceLinear at 4 bps on MI300X with the HIP kernels gives
   PPL 7.4019 vs 7.4020 on H100 with identical stored bits.
@@ -43,7 +43,8 @@ and a Xeon CPU through DPC++), with the upstream CUDA kernels as the reference.
   * the fused GEMV is 1.1-2.2x slower, the warp-specialised GEMM 2.0-2.4x and the fused attention 1.5x.
 
   Moving producer and consumer into separate wave64 wavefronts and smaller GEMV blocks did not close the
-  gap (at most -11%).  SYCL on H100 (DPC++ CUDA backend) runs at 1.0-1.2x the native CUDA time, except the
+  gap (at most -11%).  SYCL on MI300X (AdaptiveCpp, HIP backend) runs at 1.0-1.2x the HIP time for decode, GEMV,
+  GEMM and attention (the RHT is 1.2-1.5x); the untuned portable int8 GEMM is 4x slower at M=2048.  SYCL on H100 (DPC++ CUDA backend) runs at 1.0-1.2x the native CUDA time, except the
   portable untuned int8 GEMM.  Arc B390 (an integrated GPU) runs everything correctly at 1.4-28x the H100
   time.
 
@@ -188,43 +189,44 @@ All our Table 12 rows use `install_kv_residual_quant` (pre-RoPE, symmetric K=V, 
 | sycl:Intel(R) oneAPI Unified Runtime over Level-Zero V2:Intel(R) Arc(TM) B390 GPU sg{16/32/} rht_sg=32 | results/kernels/sycl_arcb390_test.json | 84 | 2 | attn_h4g7_t128, codec_a13_k0_s256.stage3_decode.z |
 | sycl:Intel(R) OpenCL:Intel(R) Xeon(R) Platinum 8481C CPU @ 2.70GHz sg{4/8/16/32/64/} rht_sg=32 | results/kernels/sycl_h100_test_cpu.json | 84 | 2 | attn_h4g7_t128, codec_a13_k0_s256.stage3_decode.z |
 | sycl:NVIDIA CUDA BACKEND:NVIDIA H100 80GB HBM3 sg{32/} rht_sg=32 | results/kernels/sycl_h100_test_nvidia.json | 84 | 2 | attn_h4g7_t128, codec_a13_k0_s256.stage3_decode.z |
+| sycl:HIP (platform 0):AMD Instinct MI300X VF sg{64/} rht_sg=64 | results/kernels/sycl_mi300x_test.json | 84 | 2 | attn_h4g7_t128, codec_a13_k0_s256.stage3_decode.z |
 
 ## Kernel microbenchmarks (same bitstreams on every GPU; Llama-3.1-8B shapes, ~4 bps, sps 512)
 
-| bench | case | metric | H100 CUDA (upstream) | MI300X HIP (port) | MI300X HIP tuned (BT64, WS split) | H100 SYCL (port, DPC++ CUDA) | Arc B390 SYCL (port) | MI300X / H100 CUDA |
-|---|---|---|---|---|---|---|---|---|
-| copy |  | GB/s r+w (memcpy) | 3032.6 | 4018.1 | 4019.6 | 3012.2 | 86.600 | 1.32 |
-| decode | 2-kernel bf16 | ms (14336x4096) | 1.415 | 1.140 | 1.152 | 1.377 | 8.964 | 0.81 |
-| decode | fused bf16 | ms (14336x4096) | 1.177 | 1.033 | 1.032 | 1.187 | 6.547 | 0.88 |
-| decode | fused coop bf16 | ms (14336x4096) | 1.171 | 1.260 | 1.260 | 1.227 | 12.755 | 1.08 |
-| decode | fused fp8 | ms (14336x4096) | 1.120 | 1.057 | 1.028 | 1.208 | 6.427 | 0.94 |
-| decode | fused int8 | ms (14336x4096) | 1.123 | 0.659 | 0.666 | 1.203 | 4.522 | 0.59 |
-| decode | launcher bf16 | ms (14336x4096) | 1.173 | 1.029 | 1.034 | 1.189 | 6.594 | 0.88 |
-| decode | symbols(z) | ms (14336x4096) | 1.114 | 1.022 | 1.026 | 1.081 | 7.567 | 0.92 |
-| decode | 2-kernel bf16 | bitstream GB/s | 20.540 | 25.510 | 25.230 | 21.110 | 3.240 | 1.24 |
-| decode | fused bf16 | bitstream GB/s | 24.700 | 28.130 | 28.170 | 24.480 | 4.440 | 1.14 |
-| decode | fused coop bf16 | bitstream GB/s | 24.810 | 23.060 | 23.080 | 23.700 | 2.280 | 0.93 |
-| decode | fused fp8 | bitstream GB/s | 25.960 | 27.510 | 28.290 | 24.070 | 4.520 | 1.06 |
-| decode | fused int8 | bitstream GB/s | 25.890 | 44.090 | 43.650 | 24.160 | 6.430 | 1.70 |
-| decode | launcher bf16 | bitstream GB/s | 24.790 | 28.250 | 28.130 | 24.440 | 4.410 | 1.14 |
-| decode | symbols(z) | bitstream GB/s | 26.100 | 28.460 | 28.330 | 26.880 | 3.840 | 1.09 |
-| rht | 256 | ms (2048x4096) | 0.013 | 0.011 | 0.011 | 0.015 | 0.203 | 0.81 |
-| rht | 1024 | ms (2048x4096) | 0.015 | 0.014 | 0.013 | 0.017 | 0.200 | 0.93 |
-| gemv | down_proj | ms | 0.454 | 0.505 | 1.494 | 0.506 | 4.311 | 1.11 |
-| gemv | gate/up_proj | ms | 0.430 | 0.511 | 0.604 | 0.482 | 3.493 | 1.19 |
-| gemv | k/v_proj | ms | 0.194 | 0.428 | 0.379 | 0.230 | 0.364 | 2.21 |
-| gemv | q/o_proj | ms | 0.194 | 0.431 | 0.384 | 0.231 | 1.614 | 2.22 |
-| gemv_layer |  | ms/token, 32 layers | 66.843 | 103.8 | 135.3 | 76.477 | 488.1 | 1.55 |
-| gemm_ws | gate/up_proj 4 | ms | 3.954 | 7.715 | 7.213 | 4.301 | 109.6 | 1.95 |
-| gemm_ws | gate/up_proj 8 | ms | 3.964 | 7.944 | 7.255 | 4.325 | 110.6 | 2.00 |
-| gemm_ws | q/o_proj 4 | ms | 1.110 | 2.564 | 2.395 | 1.218 | 31.915 | 2.31 |
-| gemm_ws | q/o_proj 8 | ms | 1.113 | 2.637 | 2.403 | 1.220 | 31.985 | 2.37 |
-| attn | 8 131 | us per layer | 4392.2 | 6628.8 | 6627.8 | 4707.3 | 6269.8 | 1.51 |
-| attn | 8 259 | us per layer | 8768.0 | 13213.3 | 13211.1 | 9396.3 | 12495.5 | 1.51 |
-| attn | 8 511 | us per layer | 17377.3 | 26181.7 | 26178.3 | 18620.4 | 24753.7 | 1.51 |
-| int8_linear | 1 | ms (4096x4096) | 0.361 | 0.642 | 0.647 | 0.676 | 4.197 | 1.78 |
-| int8_linear | 16 | ms (4096x4096) | 0.361 | 0.632 | 0.629 | 0.679 | 1.871 | 1.75 |
-| int8_linear | 2048 | ms (4096x4096) | 0.505 | 0.911 | 0.910 | 39.246 | 71.546 | 1.80 |
+| bench | case | metric | H100 CUDA (upstream) | MI300X HIP (port) | MI300X HIP tuned (BT64, WS split) | MI300X SYCL (port, AdaptiveCpp HIP) | H100 SYCL (port, DPC++ CUDA) | Arc B390 SYCL (port) | MI300X / H100 CUDA |
+|---|---|---|---|---|---|---|---|---|---|
+| copy |  | GB/s r+w (memcpy) | 3032.6 | 4018.1 | 4019.6 | 3959.8 | 3012.2 | 86.600 | 1.32 |
+| decode | 2-kernel bf16 | ms (14336x4096) | 1.415 | 1.140 | 1.152 | 1.139 | 1.377 | 8.964 | 0.81 |
+| decode | fused bf16 | ms (14336x4096) | 1.177 | 1.033 | 1.032 | 1.015 | 1.187 | 6.547 | 0.88 |
+| decode | fused coop bf16 | ms (14336x4096) | 1.171 | 1.260 | 1.260 | 1.268 | 1.227 | 12.755 | 1.08 |
+| decode | fused fp8 | ms (14336x4096) | 1.120 | 1.057 | 1.028 | 1.031 | 1.208 | 6.427 | 0.94 |
+| decode | fused int8 | ms (14336x4096) | 1.123 | 0.659 | 0.666 | 0.660 | 1.203 | 4.522 | 0.59 |
+| decode | launcher bf16 | ms (14336x4096) | 1.173 | 1.029 | 1.034 | 1.017 | 1.189 | 6.594 | 0.88 |
+| decode | symbols(z) | ms (14336x4096) | 1.114 | 1.022 | 1.026 | 1.068 | 1.081 | 7.567 | 0.92 |
+| decode | 2-kernel bf16 | bitstream GB/s | 20.540 | 25.510 | 25.230 | 25.530 | 21.110 | 3.240 | 1.24 |
+| decode | fused bf16 | bitstream GB/s | 24.700 | 28.130 | 28.170 | 28.630 | 24.480 | 4.440 | 1.14 |
+| decode | fused coop bf16 | bitstream GB/s | 24.810 | 23.060 | 23.080 | 22.930 | 23.700 | 2.280 | 0.93 |
+| decode | fused fp8 | bitstream GB/s | 25.960 | 27.510 | 28.290 | 28.190 | 24.070 | 4.520 | 1.06 |
+| decode | fused int8 | bitstream GB/s | 25.890 | 44.090 | 43.650 | 44.060 | 24.160 | 6.430 | 1.70 |
+| decode | launcher bf16 | bitstream GB/s | 24.790 | 28.250 | 28.130 | 28.580 | 24.440 | 4.410 | 1.14 |
+| decode | symbols(z) | bitstream GB/s | 26.100 | 28.460 | 28.330 | 27.220 | 26.880 | 3.840 | 1.09 |
+| rht | 256 | ms (2048x4096) | 0.013 | 0.011 | 0.011 | 0.016 | 0.015 | 0.203 | 0.81 |
+| rht | 1024 | ms (2048x4096) | 0.015 | 0.014 | 0.013 | 0.017 | 0.017 | 0.200 | 0.93 |
+| gemv | down_proj | ms | 0.454 | 0.505 | 1.494 | 0.514 | 0.506 | 4.311 | 1.11 |
+| gemv | gate/up_proj | ms | 0.430 | 0.511 | 0.604 | 0.524 | 0.482 | 3.493 | 1.19 |
+| gemv | k/v_proj | ms | 0.194 | 0.428 | 0.379 | 0.426 | 0.230 | 0.364 | 2.21 |
+| gemv | q/o_proj | ms | 0.194 | 0.431 | 0.384 | 0.431 | 0.231 | 1.614 | 2.22 |
+| gemv_layer |  | ms/token, 32 layers | 66.843 | 103.8 | 135.3 | 104.8 | 76.477 | 488.1 | 1.55 |
+| gemm_ws | gate/up_proj 4 | ms | 3.954 | 7.715 | 7.213 | 9.132 | 4.301 | 109.6 | 1.95 |
+| gemm_ws | gate/up_proj 8 | ms | 3.964 | 7.944 | 7.255 | 9.352 | 4.325 | 110.6 | 2.00 |
+| gemm_ws | q/o_proj 4 | ms | 1.110 | 2.564 | 2.395 | 3.039 | 1.218 | 31.915 | 2.31 |
+| gemm_ws | q/o_proj 8 | ms | 1.113 | 2.637 | 2.403 | 3.107 | 1.220 | 31.985 | 2.37 |
+| attn | 8 131 | us per layer | 4392.2 | 6628.8 | 6627.8 | 7533.9 | 4707.3 | 6269.8 | 1.51 |
+| attn | 8 259 | us per layer | 8768.0 | 13213.3 | 13211.1 | 15038.3 | 9396.3 | 12495.5 | 1.51 |
+| attn | 8 511 | us per layer | 17377.3 | 26181.7 | 26178.3 | 29815.0 | 18620.4 | 24753.7 | 1.51 |
+| int8_linear | 1 | ms (4096x4096) | 0.361 | 0.642 | 0.647 | 0.681 | 0.676 | 4.197 | 1.78 |
+| int8_linear | 16 | ms (4096x4096) | 0.361 | 0.632 | 0.629 | 0.655 | 0.679 | 1.871 | 1.75 |
+| int8_linear | 2048 | ms (4096x4096) | 0.505 | 0.911 | 0.910 | 3.683 | 39.246 | 71.546 | 1.80 |
 <!-- TABLES:END -->
 
 ## Reproduce

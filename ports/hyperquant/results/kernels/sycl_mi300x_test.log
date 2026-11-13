@@ -1,0 +1,88 @@
+backend: sycl:HIP (platform 0):AMD Instinct MI300X VF sg{64/} rht_sg=64
+attn_h4g7_t128                               FAIL  max|err| 0.339 (max|ref| 0.339), q-head rows off: 12/28
+attn_h8g4_p2only                             PASS  max|err| 1.19e-07 (max|ref| 2.28), q-head rows off: 0/32
+attn_h8g4_t300p3                             PASS  max|err| 5.96e-08 (max|ref| 0.187), q-head rows off: 0/32
+attn_h8g4_t508p3                             PASS  max|err| 5.96e-08 (max|ref| 0.17), q-head rows off: 0/32
+attn_h8g4_t64                                PASS  max|err| 8.94e-08 (max|ref| 0.398), q-head rows off: 0/32
+codec_a10_k2_s512.encode(cache)              PASS  words 0/36911 offs 0 ks 0 total_bits 1181138/1181138
+codec_a10_k2_s512.encode(recompute)          PASS  words 0/36911 offs 0 ks 0 total_bits 1181138/1181138
+codec_a10_k2_s512.decode.z                   PASS  0/262144 mismatches
+codec_a10_k2_s512.decode_to_bf16(2-kernel)   PASS  0/262144 not bit-exact, max 0 ulp (allowed 0)
+codec_a10_k2_s512.decode_fused_bf16          PASS  0/262144 not bit-exact, max 0 ulp (allowed 0)
+codec_a10_k2_s512.decode_fused_coop_bf16     PASS  0/262144 not bit-exact, max 0 ulp (allowed 0)
+codec_a10_k2_s512.decode_fused_fp8           PASS  0/262144 mismatches
+codec_a10_k2_s512.decode_fused_int8          PASS  0/262144 mismatches
+codec_a10_k2_s512.launch_fused_decode_bf16   PASS  0/262144 not bit-exact, max 0 ulp (allowed 0)
+codec_a10_k2_s512.decode_interleaved_bf16    PASS  0/262144 not bit-exact, max 0 ulp (allowed 0)
+codec_a10_k2_s512.stage3_decode.z            PASS  0/262144 mismatches
+codec_a13_k0_s256.encode(cache)              PASS  words 0/23161 offs 0 ks 0 total_bits 741149/741149
+codec_a13_k0_s256.encode(recompute)          PASS  words 0/23161 offs 0 ks 0 total_bits 741149/741149
+codec_a13_k0_s256.decode.z                   PASS  0/65536 mismatches
+codec_a13_k0_s256.decode_to_bf16(2-kernel)   PASS  0/65536 not bit-exact, max 0 ulp (allowed 0)
+codec_a13_k0_s256.decode_fused_bf16          PASS  0/65536 not bit-exact, max 0 ulp (allowed 0)
+codec_a13_k0_s256.decode_fused_coop_bf16     PASS  0/65536 not bit-exact, max 0 ulp (allowed 0)
+codec_a13_k0_s256.decode_fused_fp8           PASS  0/65536 mismatches
+codec_a13_k0_s256.decode_fused_int8          PASS  0/65536 mismatches
+codec_a13_k0_s256.launch_fused_decode_bf16   PASS  0/65536 not bit-exact, max 0 ulp (allowed 0)
+codec_a13_k0_s256.decode_interleaved_bf16    PASS  0/65536 not bit-exact, max 0 ulp (allowed 0)
+codec_a13_k0_s256.stage3_decode.z            FAIL  326/65536 mismatches
+codec_a13_k2_s512.encode(cache)              PASS  words 0/42728 offs 0 ks 0 total_bits 1367281/1367281
+codec_a13_k2_s512.encode(recompute)          PASS  words 0/42728 offs 0 ks 0 total_bits 1367281/1367281
+codec_a13_k2_s512.decode.z                   PASS  0/262144 mismatches
+codec_a13_k2_s512.decode_to_bf16(2-kernel)   PASS  0/262144 not bit-exact, max 0 ulp (allowed 0)
+codec_a13_k2_s512.decode_fused_bf16          PASS  0/262144 not bit-exact, max 0 ulp (allowed 0)
+codec_a13_k2_s512.decode_fused_coop_bf16     PASS  0/262144 not bit-exact, max 0 ulp (allowed 0)
+codec_a13_k2_s512.decode_fused_fp8           PASS  0/262144 mismatches
+codec_a13_k2_s512.decode_fused_int8          PASS  0/262144 mismatches
+codec_a13_k2_s512.launch_fused_decode_bf16   PASS  0/262144 not bit-exact, max 0 ulp (allowed 0)
+codec_a13_k2_s512.decode_interleaved_bf16    PASS  0/262144 not bit-exact, max 0 ulp (allowed 0)
+codec_a13_k2_s512.stage3_decode.z            PASS  0/262144 mismatches
+codec_a20_k3_s64.encode(cache)               PASS  words 0/11311 offs 0 ks 0 total_bits 361926/361926
+codec_a20_k3_s64.encode(recompute)           PASS  words 0/11311 offs 0 ks 0 total_bits 361926/361926
+codec_a20_k3_s64.decode.z                    PASS  0/65536 mismatches
+codec_a20_k3_s64.decode_to_bf16(2-kernel)    PASS  0/65536 not bit-exact, max 0 ulp (allowed 0)
+codec_a20_k3_s64.decode_fused_bf16           PASS  0/65536 not bit-exact, max 0 ulp (allowed 0)
+codec_a20_k3_s64.decode_fused_coop_bf16      PASS  0/65536 not bit-exact, max 0 ulp (allowed 0)
+codec_a20_k3_s64.decode_fused_fp8            PASS  0/65536 mismatches
+codec_a20_k3_s64.decode_fused_int8           PASS  0/65536 mismatches
+codec_a20_k3_s64.launch_fused_decode_bf16    PASS  0/65536 not bit-exact, max 0 ulp (allowed 0)
+codec_a20_k3_s64.decode_interleaved_bf16     PASS  0/65536 not bit-exact, max 0 ulp (allowed 0)
+codec_a20_k3_s64.stage3_decode.z             PASS  0/65536 mismatches
+codec_a6_k1_s512.encode(cache)               PASS  words 0/16128 offs 0 ks 0 total_bits 516088/516088
+codec_a6_k1_s512.encode(recompute)           PASS  words 0/16128 offs 0 ks 0 total_bits 516088/516088
+codec_a6_k1_s512.decode.z                    PASS  0/131072 mismatches
+codec_a6_k1_s512.decode_to_bf16(2-kernel)    PASS  0/131072 not bit-exact, max 0 ulp (allowed 0)
+codec_a6_k1_s512.decode_fused_bf16           PASS  0/131072 not bit-exact, max 0 ulp (allowed 0)
+codec_a6_k1_s512.decode_fused_coop_bf16      PASS  0/131072 not bit-exact, max 0 ulp (allowed 0)
+codec_a6_k1_s512.decode_fused_fp8            PASS  0/131072 mismatches
+codec_a6_k1_s512.decode_fused_int8           PASS  0/131072 mismatches
+codec_a6_k1_s512.launch_fused_decode_bf16    PASS  0/131072 not bit-exact, max 0 ulp (allowed 0)
+codec_a6_k1_s512.decode_interleaved_bf16     PASS  0/131072 not bit-exact, max 0 ulp (allowed 0)
+codec_a6_k1_s512.stage3_decode.z             PASS  0/131072 mismatches
+codec_heavy_a13_k2.encode(cache)             PASS  words 0/21630 offs 0 ks 0 total_bits 692146/692146
+codec_heavy_a13_k2.encode(recompute)         PASS  words 0/21630 offs 0 ks 0 total_bits 692146/692146
+codec_heavy_a13_k2.decode.z                  PASS  0/131072 mismatches
+codec_heavy_a13_k2.decode_to_bf16(2-kernel)  PASS  0/131072 not bit-exact, max 0 ulp (allowed 0)
+codec_heavy_a13_k2.decode_fused_bf16         PASS  0/131072 not bit-exact, max 0 ulp (allowed 0)
+codec_heavy_a13_k2.decode_fused_coop_bf16    PASS  0/131072 not bit-exact, max 0 ulp (allowed 0)
+codec_heavy_a13_k2.decode_fused_fp8          PASS  0/131072 mismatches
+codec_heavy_a13_k2.decode_fused_int8         PASS  0/131072 mismatches
+codec_heavy_a13_k2.launch_fused_decode_bf16  PASS  0/131072 not bit-exact, max 0 ulp (allowed 0)
+codec_heavy_a13_k2.decode_interleaved_bf16   PASS  0/131072 not bit-exact, max 0 ulp (allowed 0)
+codec_heavy_a13_k2.stage3_decode.z           PASS  0/131072 mismatches
+gemmws_b11                                   PASS  0/1100 not bit-exact, max 0 ulp (allowed 1)
+gemmws_b3                                    PASS  0/780 not bit-exact, max 0 ulp (allowed 1)
+gemv_n130_k2048_s128                         PASS  0/130 not bit-exact, max 0 ulp (allowed 1)
+gemv_n260_k4096                              PASS  0/260 not bit-exact, max 0 ulp (allowed 1)
+lattice_int8.rowmax_cast.x8                  PASS  0/5120 mismatches
+lattice_int8.rowmax_cast.deq                 PASS  0/5 mismatches
+lattice_int8.decode_int8(W)                  PASS  0/98304 mismatches
+lattice_int8.int8_gemm_tn                    PASS  0/480 mismatches
+lattice_int8.dequant                         PASS  0/480 not bit-exact, max 0 ulp (allowed 0)
+lattice_int8.fp8_rowmax_cast.x               PASS  0/5120 mismatches
+lattice_int8.fp8_rowmax_cast.scale           PASS  0/5 mismatches
+rht_1024                                     PASS  0/24576 not bit-exact, max 0 ulp (allowed 0)
+rht_2048                                     PASS  0/24576 not bit-exact, max 0 ulp (allowed 1)
+rht_256                                      PASS  0/24576 not bit-exact, max 0 ulp (allowed 0)
+rht_512                                      PASS  0/24576 not bit-exact, max 0 ulp (allowed 1)
+SUMMARY sycl:HIP (platform 0):AMD Instinct MI300X VF sg{64/} rht_sg=64: 84 pass, 2 fail

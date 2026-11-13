@@ -87,13 +87,24 @@ one (`tools/make_hip_backend.py`), so both drive their kernels identically.
   agreed convention is `mkdir /root/gpu-lock.d`.  `tools/amd_gpu_run.sh` takes both and refuses to
   start while the push-boxes `pb-vllm` container is up.
 
-## SYCL on the MI300X: blocked (not run)
-* The DPC++ nightly (nightly-2026-11-04) Linux release ships Unified Runtime adapters for CUDA, Level Zero and
-  OpenCL only (no `libur_adapter_hip.so`), so it cannot target gfx942.
-* AdaptiveCpp v25.10.0 built from source against the box's ROCm 10.1 LLVM (24.0.0git): CMake needed
-  `-DACPP_EXPERIMENTAL_LLVM=ON` and a placeholder `ACPP_LLC_PATH` (ROCm ships no `llc`).  The build then failed:
-  `llvm/Passes/PassPlugin.h` is not shipped with ROCm's LLVM, and `getTypeDeclType` is deleted in clang 24.
-* Not attempted: building intel/llvm with the HIP adapter from source (hours of CPU on a shared box) and the
-  Codeplay oneAPI-for-AMD plugin (it needs a oneAPI Base Toolkit install on the shared system).
-* So SYCL correctness and performance are measured on Intel Arc B390, NVIDIA H100 (DPC++ CUDA backend) and a
-  Xeon CPU (OpenCL), not on AMD.  The AMD numbers come from the HIP port.
+## SYCL on the MI300X (AdaptiveCpp, HIP backend): 84/86, same as every other backend
+Toolchain: **AdaptiveCpp v25.10.0 + upstream LLVM/clang 20 (apt.llvm.org) + ROCm 7.0.2 user space**, built in
+a CPU-only Modal container on ubuntu:24.04 (the box's OS) by `sycl/modal_acpp_amd.py`, so nothing heavy ran on
+the shared box.  The SYCL test and bench are compiled there for `--acpp-targets=hip:gfx942`, and the bundle
+(AdaptiveCpp runtime + HIP backend plugin + LLVM 20 `libomp.so.5` + the two binaries, 4.3 MB) runs against the
+box's own ROCm (`libamdhip64.so.7`).  `tools/amd_run_sycl.sh` runs them under `tools/amd_gpu_run.sh`.
+
+* Result: `results/kernels/sycl_mi300x_test.json`: 84 pass, 2 fail (the two upstream bugs, identical to
+  CUDA/HIP/Arc/H100-SYCL/CPU-SYCL).  The device reports a sub-group size of 64 only, so this also exercises the
+  SG=64 instantiation of the RHT (bit-exact) and 64-lane sub-groups in the attention kernel.
+* Bench: `results/kernels/sycl_mi300x_bench.jsonl` (column "MI300X SYCL" in the README tables).
+
+What did not work first, and why:
+* The DPC++ nightly Linux release ships no HIP adapter.
+* AdaptiveCpp against the box's ROCm LLVM (24.0.0git) does not build: no `llvm/Passes/PassPlugin.h` in ROCm's
+  LLVM, clang 24 API changes, no `llc`.  An upstream LLVM release (20) avoids all of that.  ROCm 7.0.2 was
+  picked because its HIP soname matches the box (.so.7) and its device bitcode is LLVM-20 based.
+* `hq_num.hpp` defined its host/device macro for any `__HIPCC__`; AdaptiveCpp compiles SYCL in clang-HIP mode
+  without the HIP runtime headers, so the macro now also excludes `__ACPP__`/`__HIPSYCL__`/`__ADAPTIVECPP__`.
+* The AdaptiveCpp runtime aborts unless its OpenMP host backend loads, which needs LLVM 20's `libomp.so.5`
+  (absent on the box), so it is shipped in the bundle.

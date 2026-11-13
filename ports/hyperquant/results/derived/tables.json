@@ -548,6 +548,16 @@
     "attn_h4g7_t128",
     "codec_a13_k0_s256.stage3_decode.z"
    ]
+  },
+  {
+   "backend": "sycl:HIP (platform 0):AMD Instinct MI300X VF sg{64/} rht_sg=64",
+   "file": "results/kernels/sycl_mi300x_test.json",
+   "passed": 84,
+   "failed": 2,
+   "failing": [
+    "attn_h4g7_t128",
+    "codec_a13_k0_s256.stage3_decode.z"
+   ]
   }
  ],
  "kernel_bench": [
@@ -558,6 +568,7 @@
    "H100 CUDA (upstream)": 3032.6,
    "MI300X HIP (port)": 4018.1,
    "MI300X HIP tuned (BT64, WS split)": 4019.6,
+   "MI300X SYCL (port, AdaptiveCpp HIP)": 3959.8,
    "H100 SYCL (port, DPC++ CUDA)": 3012.2,
    "Arc B390 SYCL (port)": 86.6
   },
@@ -568,6 +579,7 @@
    "H100 CUDA (upstream)": 1.415,
    "MI300X HIP (port)": 1.1396,
    "MI300X HIP tuned (BT64, WS split)": 1.1523,
+   "MI300X SYCL (port, AdaptiveCpp HIP)": 1.1388,
    "H100 SYCL (port, DPC++ CUDA)": 1.3769,
    "Arc B390 SYCL (port)": 8.9636
   },
@@ -578,6 +590,7 @@
    "H100 CUDA (upstream)": 1.1769,
    "MI300X HIP (port)": 1.0333,
    "MI300X HIP tuned (BT64, WS split)": 1.032,
+   "MI300X SYCL (port, AdaptiveCpp HIP)": 1.0153,
    "H100 SYCL (port, DPC++ CUDA)": 1.1874,
    "Arc B390 SYCL (port)": 6.5469
   },
@@ -588,6 +601,7 @@
    "H100 CUDA (upstream)": 1.1715,
    "MI300X HIP (port)": 1.2604,
    "MI300X HIP tuned (BT64, WS split)": 1.2595,
+   "MI300X SYCL (port, AdaptiveCpp HIP)": 1.2679,
    "H100 SYCL (port, DPC++ CUDA)": 1.2267,
    "Arc B390 SYCL (port)": 12.7545
   },
@@ -598,6 +612,7 @@
    "H100 CUDA (upstream)": 1.1197,
    "MI300X HIP (port)": 1.0566,
    "MI300X HIP tuned (BT64, WS split)": 1.0275,
+   "MI300X SYCL (port, AdaptiveCpp HIP)": 1.0313,
    "H100 SYCL (port, DPC++ CUDA)": 1.2075,
    "Arc B390 SYCL (port)": 6.4273
   },
@@ -608,6 +623,7 @@
    "H100 CUDA (upstream)": 1.1229,
    "MI300X HIP (port)": 0.6593,
    "MI300X HIP tuned (BT64, WS split)": 0.6659,
+   "MI300X SYCL (port, AdaptiveCpp HIP)": 0.6598,
    "H100 SYCL (port, DPC++ CUDA)": 1.2031,
    "Arc B390 SYCL (port)": 4.5218
   },
@@ -618,6 +634,7 @@
    "H100 CUDA (upstream)": 1.1725,
    "MI300X HIP (port)": 1.029,
    "MI300X HIP tuned (BT64, WS split)": 1.0335,
+   "MI300X SYCL (port, AdaptiveCpp HIP)": 1.0169,
    "H100 SYCL (port, DPC++ CUDA)": 1.1892,
    "Arc B390 SYCL (port)": 6.5941
   },
@@ -628,6 +645,7 @@
    "H100 CUDA (upstream)": 1.1138,
    "MI300X HIP (port)": 1.0215,
    "MI300X HIP tuned (BT64, WS split)": 1.0261,
+   "MI300X SYCL (port, AdaptiveCpp HIP)": 1.0681,
    "H100 SYCL (port, DPC++ CUDA)": 1.0812,
    "Arc B390 SYCL (port)": 7.5675
   },
@@ -638,6 +656,7 @@
    "H100 CUDA (upstream)": 20.54,
    "MI300X HIP (port)": 25.51,
    "MI300X HIP tuned (BT64, WS split)": 25.23,
+   "MI300X SYCL (port, AdaptiveCpp HIP)": 25.53,
    "H100 SYCL (port, DPC++ CUDA)": 21.11,
    "Arc B390 SYCL (port)": 3.24
   },
@@ -648,6 +667,7 @@
    "H100 CUDA (upstream)": 24.7,
    "MI300X HIP (port)": 28.13,
    "MI300X HIP tuned (BT64, WS split)": 28.17,
+   "MI300X SYCL (port, AdaptiveCpp HIP)": 28.63,
    "H100 SYCL (port, DPC++ CUDA)": 24.48,
    "Arc B390 SYCL (port)": 4.44
   },
@@ -658,6 +678,7 @@
    "H100 CUDA (upstream)": 24.81,
    "MI300X HIP (port)": 23.06,
    "MI300X HIP tuned (BT64, WS split)": 23.08,
+   "MI300X SYCL (port, AdaptiveCpp HIP)": 22.93,
    "H100 SYCL (port, DPC++ CUDA)": 23.7,
    "Arc B390 SYCL (port)": 2.28
   },
@@ -668,6 +689,7 @@
    "H100 CUDA (upstream)": 25.96,
    "MI300X HIP (port)": 27.51,
    "MI300X HIP tuned (BT64, WS split)": 28.29,
+   "MI300X SYCL (port, AdaptiveCpp HIP)": 28.19,
    "H100 SYCL (port, DPC++ CUDA)": 24.07,
    "Arc B390 SYCL (port)": 4.52
   },
@@ -678,6 +700,7 @@
    "H100 CUDA (upstream)": 25.89,
    "MI300X HIP (port)": 44.09,
    "MI300X HIP tuned (BT64, WS split)": 43.65,
+   "MI300X SYCL (port, AdaptiveCpp HIP)": 44.06,
    "H100 SYCL (port, DPC++ CUDA)": 24.16,
    "Arc B390 SYCL (port)": 6.43
   },
@@ -688,6 +711,7 @@
    "H100 CUDA (upstream)": 24.79,
    "MI300X HIP (port)": 28.25,
    "MI300X HIP tuned (BT64, WS split)": 28.13,
+   "MI300X SYCL (port, AdaptiveCpp HIP)": 28.58,
    "H100 SYCL (port, DPC++ CUDA)": 24.44,
    "Arc B390 SYCL (port)": 4.41
   },
@@ -698,6 +722,7 @@
    "H100 CUDA (upstream)": 26.1,
    "MI300X HIP (port)": 28.46,
    "MI300X HIP tuned (BT64, WS split)": 28.33,
+   "MI300X SYCL (port, AdaptiveCpp HIP)": 27.22,
    "H100 SYCL (port, DPC++ CUDA)": 26.88,
    "Arc B390 SYCL (port)": 3.84
   },
@@ -708,6 +733,7 @@
    "H100 CUDA (upstream)": 0.0133,
    "MI300X HIP (port)": 0.0108,
    "MI300X HIP tuned (BT64, WS split)": 0.0108,
+   "MI300X SYCL (port, AdaptiveCpp HIP)": 0.0159,
    "H100 SYCL (port, DPC++ CUDA)": 0.0149,
    "Arc B390 SYCL (port)": 0.2035
   },
@@ -718,6 +744,7 @@
    "H100 CUDA (upstream)": 0.0146,
    "MI300X HIP (port)": 0.0136,
    "MI300X HIP tuned (BT64, WS split)": 0.0135,
+   "MI300X SYCL (port, AdaptiveCpp HIP)": 0.0174,
    "H100 SYCL (port, DPC++ CUDA)": 0.0166,
    "Arc B390 SYCL (port)": 0.2
   },
@@ -728,6 +755,7 @@
    "H100 CUDA (upstream)": 0.4544,
    "MI300X HIP (port)": 0.5055,
    "MI300X HIP tuned (BT64, WS split)": 1.4942,
+   "MI300X SYCL (port, AdaptiveCpp HIP)": 0.5143,
    "H100 SYCL (port, DPC++ CUDA)": 0.5056,
    "Arc B390 SYCL (port)": 4.3109
   },
@@ -738,6 +766,7 @@
    "H100 CUDA (upstream)": 0.4298,
    "MI300X HIP (port)": 0.5108,
    "MI300X HIP tuned (BT64, WS split)": 0.6039,
+   "MI300X SYCL (port, AdaptiveCpp HIP)": 0.5237,
    "H100 SYCL (port, DPC++ CUDA)": 0.4819,
    "Arc B390 SYCL (port)": 3.4928
   },
@@ -748,6 +777,7 @@
    "H100 CUDA (upstream)": 0.1935,
    "MI300X HIP (port)": 0.4279,
    "MI300X HIP tuned (BT64, WS split)": 0.3789,
+   "MI300X SYCL (port, AdaptiveCpp HIP)": 0.4257,
    "H100 SYCL (port, DPC++ CUDA)": 0.2296,
    "Arc B390 SYCL (port)": 0.3637
   },
@@ -758,6 +788,7 @@
    "H100 CUDA (upstream)": 0.1939,
    "MI300X HIP (port)": 0.4312,
    "MI300X HIP tuned (BT64, WS split)": 0.3842,
+   "MI300X SYCL (port, AdaptiveCpp HIP)": 0.4312,
    "H100 SYCL (port, DPC++ CUDA)": 0.2307,
    "Arc B390 SYCL (port)": 1.6139
   },
@@ -768,6 +799,7 @@
    "H100 CUDA (upstream)": 66.843,
    "MI300X HIP (port)": 103.848,
    "MI300X HIP tuned (BT64, WS split)": 135.302,
+   "MI300X SYCL (port, AdaptiveCpp HIP)": 104.817,
    "H100 SYCL (port, DPC++ CUDA)": 76.477,
    "Arc B390 SYCL (port)": 488.053
   },
@@ -778,6 +810,7 @@
    "H100 CUDA (upstream)": 3.9539,
    "MI300X HIP (port)": 7.7152,
    "MI300X HIP tuned (BT64, WS split)": 7.2126,
+   "MI300X SYCL (port, AdaptiveCpp HIP)": 9.1315,
    "H100 SYCL (port, DPC++ CUDA)": 4.3014,
    "Arc B390 SYCL (port)": 109.6318
   },
@@ -788,6 +821,7 @@
    "H100 CUDA (upstream)": 3.9643,
    "MI300X HIP (port)": 7.9435,
    "MI300X HIP tuned (BT64, WS split)": 7.2548,
+   "MI300X SYCL (port, AdaptiveCpp HIP)": 9.352,
    "H100 SYCL (port, DPC++ CUDA)": 4.3254,
    "Arc B390 SYCL (port)": 110.5654
   },
@@ -798,6 +832,7 @@
    "H100 CUDA (upstream)": 1.1098,
    "MI300X HIP (port)": 2.5643,
    "MI300X HIP tuned (BT64, WS split)": 2.3949,
+   "MI300X SYCL (port, AdaptiveCpp HIP)": 3.0387,
    "H100 SYCL (port, DPC++ CUDA)": 1.2175,
    "Arc B390 SYCL (port)": 31.915
   },
@@ -808,6 +843,7 @@
    "H100 CUDA (upstream)": 1.1126,
    "MI300X HIP (port)": 2.6373,
    "MI300X HIP tuned (BT64, WS split)": 2.4027,
+   "MI300X SYCL (port, AdaptiveCpp HIP)": 3.1071,
    "H100 SYCL (port, DPC++ CUDA)": 1.2204,
    "Arc B390 SYCL (port)": 31.985
   },
@@ -818,6 +854,7 @@
    "H100 CUDA (upstream)": 4392.23,
    "MI300X HIP (port)": 6628.75,
    "MI300X HIP tuned (BT64, WS split)": 6627.81,
+   "MI300X SYCL (port, AdaptiveCpp HIP)": 7533.93,
    "H100 SYCL (port, DPC++ CUDA)": 4707.31,
    "Arc B390 SYCL (port)": 6269.78
   },
@@ -828,6 +865,7 @@
    "H100 CUDA (upstream)": 8768.02,
    "MI300X HIP (port)": 13213.3,
    "MI300X HIP tuned (BT64, WS split)": 13211.09,
+   "MI300X SYCL (port, AdaptiveCpp HIP)": 15038.28,
    "H100 SYCL (port, DPC++ CUDA)": 9396.32,
    "Arc B390 SYCL (port)": 12495.55
   },
@@ -838,6 +876,7 @@
    "H100 CUDA (upstream)": 17377.28,
    "MI300X HIP (port)": 26181.69,
    "MI300X HIP tuned (BT64, WS split)": 26178.35,
+   "MI300X SYCL (port, AdaptiveCpp HIP)": 29815.0,
    "H100 SYCL (port, DPC++ CUDA)": 18620.43,
    "Arc B390 SYCL (port)": 24753.68
   },
@@ -848,6 +887,7 @@
    "H100 CUDA (upstream)": 0.3606,
    "MI300X HIP (port)": 0.6424,
    "MI300X HIP tuned (BT64, WS split)": 0.6468,
+   "MI300X SYCL (port, AdaptiveCpp HIP)": 0.6806,
    "H100 SYCL (port, DPC++ CUDA)": 0.676,
    "Arc B390 SYCL (port)": 4.1966
   },
@@ -858,6 +898,7 @@
    "H100 CUDA (upstream)": 0.3607,
    "MI300X HIP (port)": 0.6317,
    "MI300X HIP tuned (BT64, WS split)": 0.6292,
+   "MI300X SYCL (port, AdaptiveCpp HIP)": 0.6546,
    "H100 SYCL (port, DPC++ CUDA)": 0.6791,
    "Arc B390 SYCL (port)": 1.8715
   },
@@ -868,6 +909,7 @@
    "H100 CUDA (upstream)": 0.5051,
    "MI300X HIP (port)": 0.9107,
    "MI300X HIP tuned (BT64, WS split)": 0.9102,
+   "MI300X SYCL (port, AdaptiveCpp HIP)": 3.6825,
    "H100 SYCL (port, DPC++ CUDA)": 39.2464,
    "Arc B390 SYCL (port)": 71.5464
   }

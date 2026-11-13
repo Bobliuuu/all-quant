@@ -199,6 +199,7 @@ def main():
     # ---------------- kernels: benchmarks (last record per key wins)
     sets = [("H100 CUDA (upstream)", "cuda_h100_full_bench.jsonl"), ("MI300X HIP (port)", "hip_mi300x_bench.jsonl"),
             ("MI300X HIP tuned (BT64, WS split)", "hip_mi300x_tuned_bt64_bench.jsonl"),
+            ("MI300X SYCL (port, AdaptiveCpp HIP)", "sycl_mi300x_bench.jsonl"),
             ("H100 SYCL (port, DPC++ CUDA)", "sycl_h100_bench.jsonl"), ("Arc B390 SYCL (port)", "sycl_arcb390_bench.jsonl")]
     B = {}
     for name, fn in sets:
