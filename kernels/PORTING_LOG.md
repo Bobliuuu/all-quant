@@ -43,12 +43,20 @@ float64 attention over the *decoded* cache.
 |---|---|---|---|---|
 | MI300X (HIP) | 1.41 ms | 0.95 ms | 1.25 ms | not measured (no ROCm torch on the shared box) |
 | H100 (CUDA) | 1.86 ms | 0.53 ms | 1.07 ms | torch SDPA 0.36 ms |
+| B200 (CUDA, same code, sm_100a, no tcgen05) | 1.67 ms | 0.52 ms | 1.06 ms | torch SDPA 0.22 ms |
+| H100 (SYCL, DPC++ CUDA backend) | 2.17 ms | 0.67 ms | 2.46 ms | |
 | Arc B390 (SYCL), B=4 | 10.1 ms | 6.09 ms | 7.41 ms | not measured |
 
 The pq kernel reads 5x fewer bytes than bf16 (102 vs 512 bytes per token and KV head) but is
 ALU-bound on codeword decode at GQA-4: each decoded group of 8 serves only 4 query heads.
 The fp8 column is our skeleton with a software e4m3 decode; it is not a tuned FP8 kernel.
 On H100 the gap is largest because INT32 throughput is half the FP32 rate there.
+
+Bench data are random bytes (every b-bit index is a valid codeword), random-mantissa bf16 and random fp8
+values, so the Arc numbers are not inflated by the iGPU's data-dependent compression (the
+ultraquant notes saw ~110 GB/s on random data vs 430+ GB/s on uniform data on this box).
+Correctness on 6 device/backend pairs: CUDA H100, CUDA B200, HIP MI300X, SYCL Arc B390,
+SYCL H100 (CUDA backend), SYCL Xeon CPU (OpenCL): 96/96 each.
 
 ## What was not done
 

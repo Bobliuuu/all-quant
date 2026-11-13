@@ -47,6 +47,7 @@ FP8 reference PPL 16.95. Pearl's FP8 noise floor is ~0.04 (nondeterminism); our 
 
 | backend | device | passed | worst rel. L2 error (pq) |
 |---|---|---|---|
+| cuda | NVIDIA B200 | 96/96 | 1.1e-06 |
 | cuda | NVIDIA H100 | 96/96 | 1.1e-06 |
 | hip | AMD MI300X | 96/96 | 1.1e-06 |
 | sycl | Intel(R) Arc(TM) B390 GPU | 96/96 | 1.1e-06 |
@@ -59,6 +60,13 @@ bytes/token/KV-head: pq 2*bK+2 + 2*bV+2 (102 B at 25/24), bf16 512 B, fp8 264 B.
 
 | device | B | T | Hq | Hkv | pq bits K/V | pq | bf16 (same skeleton) | fp8 (same skeleton) | vendor bf16 |
 |---|---|---|---|---|---|---|---|---|---|
+| NVIDIA B200 (CUDA) | 1 | 32768 | 32 | 8 | 25/24 | 250 | 87 | 160 | 47 (torch SDPA) |
+| NVIDIA B200 (CUDA) | 32 | 8192 | 32 | 8 | 25/24 | 1643 | 507 | 1033 | 410 (torch SDPA) |
+| NVIDIA B200 (CUDA) | 8 | 131072 | 16 | 1 | 25/24 | 1320 | 596 | 1780 | 127 (torch SDPA) |
+| NVIDIA B200 (CUDA) | 8 | 32768 | 32 | 1 | 25/24 | 548 | 357 | 947 | 46 (torch SDPA) |
+| NVIDIA B200 (CUDA) | 8 | 32768 | 32 | 8 | 16/16 | 1583 | 522 | 1063 | 221 (torch SDPA) |
+| NVIDIA B200 (CUDA) | 8 | 32768 | 32 | 8 | 18/17 | 1591 | 522 | 1063 | 221 (torch SDPA) |
+| NVIDIA B200 (CUDA) | 8 | 32768 | 32 | 8 | 25/24 | 1672 | 522 | 1063 | 221 (torch SDPA) |
 | NVIDIA H100 80GB HBM3 (CUDA) | 1 | 32768 | 32 | 8 | 25/24 | 283 | 100 | 170 | 63 (torch SDPA) |
 | NVIDIA H100 80GB HBM3 (CUDA) | 32 | 8192 | 32 | 8 | 25/24 | 1827 | 521 | 1051 | 398 (torch SDPA) |
 | NVIDIA H100 80GB HBM3 (CUDA) | 8 | 131072 | 16 | 1 | 25/24 | 1614 | 775 | 1857 | 198 (torch SDPA) |

@@ -28,7 +28,7 @@ def encode_coords(y: torch.Tensor, q: int) -> torch.Tensor:
 
 
 def decode_coords(c: torch.Tensor, q: int) -> torch.Tensor:
-    yp = _w(c) @ GEN.to(_w(c) if c.is_floating_point() else _wf(c.device))
+    yp = _w(c) @ GEN.to(device=c.device, dtype=_wf(c.device))
     return yp - q * nearest_e8(yp / q)
 
 

@@ -68,4 +68,4 @@ def to_coords(y: torch.Tensor) -> torch.Tensor:
 
 
 def from_coords(c: torch.Tensor) -> torch.Tensor:
-    return _w(c) @ GEN.to(_w(c) if c.is_floating_point() else _wf(c.device))
+    return _w(c) @ GEN.to(device=c.device, dtype=_wf(c.device))

@@ -52,7 +52,38 @@ every fixed-rate code here (0.30 / 0.26).
 
 ## 2. Model quality (Qwen3-8B, not GLM-5.3)
 
-KL_TABLE_PLACEHOLDER
+KL divergence of next-token distributions from an FP8 KV cache (e4m3, fp32 scale per
+128-value vector), PG-19 test books, 4 books x 16,384 tokens, Qwen3-8B. Our KV cache
+is quantized at write time (K after RoPE), so every query sees the decoded cache, as in a real
+decode step. `-kc` adds our K mean-centering.
+
+| config | bits/value | KL from FP8 | PPL (FP8: 16.95) | Pearl's KL on GLM-5.3 |
+|---|---|---|---|---|
+| bf16 | 16 | 0.008 | 16.88 | |
+| NVFP4 | 4.5 | 0.055 | 17.47 | |
+| int4, fp16 scale / 32 | 4.5 | 0.118 | 18.21 | |
+| TurboQuant-MSE 3 b + K-centering | 3.125 | 0.150 | 18.52 | |
+| **pq-repro 3.2** (K 25 / V 24 bits per 8) | 3.19 | 0.223 | 19.43 | 0.057 |
+| **pq-repro 3.2 + K-centering** | 3.19 | **0.098** | 17.93 | 0.057 |
+| **pq-repro 2.3 + K-centering** | 2.31 | **0.264** | 20.10 | 0.122 |
+| **pq-repro 2.1 + K-centering** | 2.125 | **0.440** | 23.14 | 0.207 |
+| pq-repro 2.3 / 2.1, no centering | 2.31 / 2.125 | 1.62 / 1.92 | 70 / 92 | |
+| TurboQuant-MSE 3 b / 2 b, no centering | 3.125 / 2.125 | 1.09 / 2.42 | 42 / 143 | |
+
+Read with care:
+- The ordering matches Pearl's (KL grows steadily as the rate drops), and at about 3.2 bpv the
+  E8 codec beats a scalar Lloyd-Max codec at 3.125 bpv (0.098 vs 0.150). In absolute terms our
+  KL is about 2x Pearl's at every rate, on a different model (GQA, no MLA latent, Qwen3's
+  large-norm layer-0 keys) with our own guesses for every undisclosed choice.
+- Without K mean-centering, Qwen3-8B's keys (large shared component, especially in layer 0)
+  break every low-bit rotated codec at long context: KL > 1 at 2.3 bpv. Centering is exact for
+  attention (each query's logits shift by one constant), costs nothing in the kernel, and
+  fixes most of it. Pearl does not say whether they do anything like this.
+- Centering V as well (`-kvc`) did not help (0.104 / 0.330 / 0.525).
+- Full table, per-book values, Voronoi ablation and the K/V bit-split ablation:
+  [results/SUMMARY.md](results/SUMMARY.md).
+
+NIAH_PLACEHOLDER
 
 ## 3. Kernels
 
@@ -66,8 +97,8 @@ and un-rotated once in the reduce kernel. A cached vector costs exactly 2·b + 2
 
 **Correctness**: 96/96 checks (8 cases x {pq, bf16, fp8} x 4 split counts, relative L2 error
 < 1e-4 against float64 attention over the decoded cache; worst pq error 1.1e-6) on
-CUDA/H100, HIP/MI300X, SYCL/Arc B390 (Intel GPU), SYCL via the DPC++ CUDA backend on H100,
-and SYCL on a Xeon CPU (OpenCL).
+CUDA/H100, CUDA/B200, HIP/MI300X, SYCL/Arc B390 (Intel GPU), SYCL via the DPC++ CUDA backend
+on H100, and SYCL on a Xeon CPU (OpenCL).
 
 **Speed** (B=8, 32k context, Qwen3-8B-like GQA: Hq=32, Hkv=8, D=128, pq at 3.19 bpv, us per call):
 
@@ -75,6 +106,7 @@ and SYCL on a Xeon CPU (OpenCL).
 |---|---|---|---|---|
 | MI300X / HIP | 1412 | 955 | 1246 | not measured |
 | H100 / CUDA | 1862 | 536 | 1070 | 360 (torch SDPA) |
+| B200 / CUDA (same source, no tensor cores) | 1672 | 522 | 1062 | 221 (torch SDPA) |
 | H100 / SYCL (DPC++ CUDA backend) | 2165 | 665 | 2456 | |
 | Arc B390 / SYCL (B=4) | 10098 | 6085 | 7408 | not measured |
 
@@ -83,8 +115,7 @@ kernel is **slower** than bf16 everywhere: it is bound by codeword decode (integ
 by memory. At GQA-4 each decoded group serves only 4 query heads; Pearl's GLM-5.3 uses MLA,
 where one decoded latent serves every head, and their kernel feeds tensor cores. We did not
 reach their "about as fast as NVFP4" result. The optimization history (6.7 ms -> 1.41 ms on
-MI300X, mostly occupancy) is in [kernels/PORTING_LOG.md](kernels/PORTING_LOG.md); B200 was not
-measured (see the summary file for whether that run happened).
+MI300X, mostly occupancy) is in [kernels/PORTING_LOG.md](kernels/PORTING_LOG.md).
 
 ## Reproduce
 
