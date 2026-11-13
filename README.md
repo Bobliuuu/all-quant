@@ -6,7 +6,7 @@
 
 **Quantized-inference kernels on AMD, NVIDIA and Intel GPUs: a fused FP4 KV-cache verify kernel, plus reproductions and three-vendor ports of HyperQuant and PearlQuant**
 
-![AMD: Triton · MI300X](https://img.shields.io/badge/AMD-Triton%20%C2%B7%20MI300X-ed1c24?logo=amd&logoColor=white) ![NVIDIA: CUDA · A100 to B300](https://img.shields.io/badge/NVIDIA-CUDA%20%C2%B7%20A100%20to%20B300-76b900?logo=nvidia&logoColor=white) ![Intel: SYCL · Arc B390](https://img.shields.io/badge/Intel-SYCL%20%C2%B7%20Arc%20B390-0071c5?logo=intel&logoColor=white) ![KV cache: FP4 E2M1 + UE8M0/32](https://img.shields.io/badge/KV%20cache-FP4%20E2M1%20%2B%20UE8M0%2F32-27c8e8) ![fused vs K launches: up to 5.6x](https://img.shields.io/badge/fused%20vs%20K%20launches-up%20to%205.6x-3ddc97) [![license: MIT](https://img.shields.io/badge/license-MIT-f2c14e)](LICENSE) ![python: 3.9+](https://img.shields.io/badge/python-3.9%2B-3776ab?logo=python&logoColor=white)
+![AMD: Triton · MI300X](https://img.shields.io/badge/AMD-Triton%20%C2%B7%20MI300X-ed1c24?logo=amd&logoColor=white) ![NVIDIA: CUDA · A100 to B300](https://img.shields.io/badge/NVIDIA-CUDA%20%C2%B7%20A100%20to%20B300-76b900?logo=nvidia&logoColor=white) ![Intel: SYCL · Arc B390](https://img.shields.io/badge/Intel-SYCL%20%C2%B7%20Arc%20B390-0071c5?logo=intel&logoColor=white) ![KV cache: FP4 E2M1 + UE8M0/32](https://img.shields.io/badge/KV%20cache-FP4%20E2M1%20%2B%20UE8M0%2F32-27c8e8) ![fused vs no KV sharing: up to 5.6x](https://img.shields.io/badge/fused%20vs%20no%20KV%20sharing-up%20to%205.6x-3ddc97) [![license: MIT](https://img.shields.io/badge/license-MIT-f2c14e)](LICENSE) ![python: 3.9+](https://img.shields.io/badge/python-3.9%2B-3776ab?logo=python&logoColor=white)
 
 [🎬 Video](#video) · [📊 Results](#results) · [🔁 Ports](#ports) · [🧩 How it works](#how-it-works) · [🖥️ Three vendors](#three-vendors) · [⚖️ Where we stand](#where-we-stand) · [🧠 Serving](#serving) · [🚀 Install](#install) · [🔁 Reproduce](#reproduce) · [⚠️ Limitations](#caveats) · [🗺️ Repo map](#repo-map)
 
@@ -45,13 +45,13 @@ In the public sources we checked we found no public CUDA or SYCL port of the Ult
 
 Single attention layer, B=8, context 32768, Hq64/Hkv8/D128, page 64, best tuned configuration per K, synthetic KV. All numbers are read from `results/`.
 
-| Fused vs K launches, K=8 (MI300X) | H100 | B300 | KV size vs fp16 | KV capacity in vLLM (FP4) |
+| Fused vs no KV sharing, K=8 (MI300X) | H100 | B300 | KV size vs fp16 | KV capacity in vLLM (FP4) |
 |:---:|:---:|:---:|:---:|:---:|
 | **4.1x** | **5.6x** | **3.3x** | **3.76x** | **2.89x** |
 
-**Time per layer call (ms) and gain of the fused kernel over the same kernel run K times**
+**Time per layer call (ms) and gain of the fused kernel over the same kernel with KV sharing off (one launch, KV read K times)**
 
-| GPU / backend | K=1 | K=2 | K=4 | K=8 | vs K launches, K=2 | K=4 | K=8 |
+| GPU / backend | K=1 | K=2 | K=4 | K=8 | vs no sharing, K=2 | K=4 | K=8 |
 | :--- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
 | MI300X (Triton) | 0.361 | 0.373 | 0.453 | 0.542 | 1.8x | 2.6x | 4.1x |
 | B300 (CUDA) | 0.139 | 0.142 | 0.255 | 0.307 | 2.1x | 2.1x | 3.3x |
@@ -143,7 +143,7 @@ The ESIMD path is faster than the earlier XMX path; FP4 is decoded in software b
 ## ⚖️ Where we stand
 
 **Short version: UltraQuant is not the best KV-cache scheme and not the fastest FP4 kernel.** It is not the most accurate (QServe-int4 at equal bytes, NVFP4 for +4 bytes, FP8 and KIVI-4 beat it),
-FP8 is faster at K=1 on MI300X (0.29 ms against 0.36 ms), and on B300 FlashInfer's NVFP4 kernel is 2.1x to 3.3x faster than our port and already shares the read across queries.
+FP8 is faster at K=1 on MI300X (0.29 ms against 0.36 ms), and on B300 FlashInfer's NVFP4 kernel is 1.8x to 3.3x faster than our port (2.1x at K=1) and already shares the read across queries.
 What the repo offers is the exact UltraQuant format (UE8M0 per 32, bf16 queries, any page size, ragged lengths, causal verify masks), K-query sharing, and one validated implementation across AMD, NVIDIA and Intel.
 It is faster and more accurate than TurboQuant-3 and SpectralQuant and far ahead of Planar/Iso/Rotor at 3 bits.
 
@@ -268,7 +268,7 @@ Public API: `uq_decode`, `quantize_fp4`, `dequantize_fp4`, `reference`, `build_p
 plus `uqmt.quant` (paper scale rule, Hadamard, NVFP4 quantiser variants), `uqmt.tree` (tree-masked verify for EAGLE/Medusa-style trees) and `uqmt.nvfp4` (NVFP4 scale path).
 
 <details>
-<summary>Integration, porting effort, related work</summary>
+<summary>Porting effort, related work</summary>
 
 
 
@@ -286,7 +286,7 @@ plus `uqmt.quant` (paper scale rule, Hadamard, NVFP4 quantiser variants), `uqmt.
 
 ```bash
 pip install -e . pytest && pytest tests -q                  # CPU tests always; GPU tests need a GPU
-cd uqmt && python bench.py --batch 8 --ctx 32768 --ks 1 2 4 8 --nsplit 16 --check   # Triton, fused vs K independent
+cd uqmt && python bench.py --batch 8 --ctx 32768 --ks 1 2 4 8 --nsplit 16 --check   # Triton, fused vs KV sharing off
 UQ_WARPS=8 UQ_STAGES=3 python bench.py --batch 8 --ctx 32768 --ks 8                  # B300 K=8 config
 python peak.py peak.json                                    # device ceilings
 cmake -S cuda -B build && cmake --build build -j && ./build/test_vectors cuda/vectors 1e-2   # CUDA vs reference vectors

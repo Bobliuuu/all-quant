@@ -16,7 +16,7 @@ Single layer, B=8, ctx=32768, Hq64/Hkv8/D128, page 64, best tuned config per K, 
 | **L40S**, CUDA | 0.391 | 0.395 | 0.431 | 0.494 | 729 |
 | **RTX PRO 6000**, CUDA | 0.208 | 0.210 | 0.288 | 0.381 | 1375 (94%) |
 
-Fused versus the same kernel run K times (CUDA, same GPU), K=2 / 4 / 8: H100 2.0x / 2.9x / 5.6x, B300 2.05x / 2.1x / 3.3x, A100 2.0x / 2.1x / 2.6x, RTX PRO 6000 1.45x / 1.9x / 2.7x, L40S 1.1x / 1.55x / 2.5x; MI300X Triton 1.83x / 2.59x / 4.10x; B300 Triton 1.79x / 2.82x / 6.77x. K=1 gains nothing from fusion, as expected. The H100 K>=4 rows use the sm_90a wgmma variant, the B300 K=8 row the tcgen05 variant (1.14x over the `mma.sync` kernel; the rest of the B300 rows are unchanged `mma.sync` kernels). CUDA numbers are `results/cuda2_summary.json`; `copy_` underreports GDDR read bandwidth, so L40S percentages are not meaningful.
+Fused versus the same kernel with KV sharing off (one launch, KV read K times; CUDA, same GPU), K=2 / 4 / 8: H100 2.0x / 2.9x / 5.6x, B300 2.05x / 2.1x / 3.3x, A100 2.0x / 2.1x / 2.6x, RTX PRO 6000 1.45x / 1.9x / 2.7x, L40S 1.1x / 1.55x / 2.5x; MI300X Triton 1.83x / 2.59x / 4.10x; B300 Triton 1.79x / 2.82x / 6.77x. K=1 gains nothing from fusion, as expected. The H100 K>=4 rows use the sm_90a wgmma variant, the B300 K=8 row the tcgen05 variant (1.14x over the `mma.sync` kernel; the rest of the B300 rows are unchanged `mma.sync` kernels). CUDA numbers are `results/cuda2_summary.json`; `copy_` underreports GDDR read bandwidth, so L40S percentages are not meaningful.
 
 **Intel Arc B390 (SYCL; ESIMD/DPAS path, XMX `joint_matrix` path)**, Hq32/Hkv8/D128, B8, 16k context, ms per layer call (`results/sycl2_summary.json`, baselines `results/sycl2_baselines_*.json`):
 
@@ -37,7 +37,7 @@ The ESIMD path is 1.4x to 2.2x faster than the earlier XMX path. Against the bas
 | MI300X, real Mistral-7B shapes: ours vs best fp16 attention (cold cache) | 1.0-1.75x faster per call (parity at B=32 / 4k / K=8); vs torch SDPA 3.3-18x at B<=8 (SDPA is a weak baseline there) |
 | MI300X, K=8, B8 / 32k: ours vs K calls of amd-experiments' TQ3 kernel | 0.48 ms vs 8.5 ms (their kernel is K=1 only) |
 | B300, K=1/2/4/8: ours CUDA | 0.139 / 0.142 / 0.255 / 0.307 ms |
-| B300: **FlashInfer trtllm-gen NVFP4** (fp8 q, NVFP4 E4M3/16 scales, tcgen05) | **0.066 / 0.077 / 0.097 / 0.094 ms, 2.1x (K=1) to 3.3x (K=8) faster than our port**, and it already does fused K-query verify |
+| B300: **FlashInfer trtllm-gen NVFP4** (fp8 q, NVFP4 E4M3/16 scales, tcgen05) | **0.066 / 0.077 / 0.097 / 0.094 ms, 1.8x to 3.3x faster than our port (2.1x at K=1, 1.8x at K=2, 3.3x at K=8)**, and it already does fused K-query verify |
 | B300: BitDecoding-FP4 (single-query; K independent decodes) | 0.068 / 0.131 / 0.261 / 0.521 ms |
 | B300: FlashInfer trtllm-gen fp8 KV, fp8 q (2x the bytes) | 0.080 / 0.081 / 0.083 / 0.087 ms |
 | vLLM upstream UltraQuant backend (PR #57057) | exists since 2026-10-06; ROCm-listed, single-query decode paths in the source we read; run by us at serving level on MI300X with Qwen3-8B (see "Serving-level evaluation"), no kernel-level timing comparison with ours |
@@ -86,7 +86,7 @@ Whole-step speedup of fused FP4 vs the best fp16 attention (higher is better):
 
 **Amdahl framing:** attention is 4-17% of the step at batch 1 and 27-57% at batch 8 (8k to 32k context), so the whole-step gain is bounded; even free attention would give only 2.4x at B=8 / 32k. At batch 1 expect no gain (0.96-1.15x). The value is (1) **3.76x KV capacity** (B=8 / 32k: 34.4 GB of fp16 KV becomes 9.1 GB), which is what lets a memory-bound server hold longer contexts or bigger batches, and (2) 1.3-1.6x on **large-batch, long-context speculative verify**. On a real 3-turn agent-like run at B=1 the lower draft acceptance under FP4 KV cancelled the per-step gain (projected 440 vs 460 tok/s). Attention-output cosine on real Mistral K/V is 0.975 for FP4/UE8M0, equal to TurboQuant-3 (0.975), with perplexity +3.0% vs +2.7% on 4k windows.
 
-**Same step on H100 with the CUDA port** (Mistral-7B, B=8, ctx 32768, eager HF-module loop, CUDA-graph replay time; fp16 baseline = torch SDPA, the faster of the two fp16 formulations there; `results/cuda2_e2e_mistral7b_h100_b8_c32k.json`): K=1 14.4 ms vs 22.0 ms (**1.52x**), K=8 16.2 ms vs 34.8 ms (**2.15x**); K=8 with the same kernel run K times is 50.4 ms, so K-query sharing is worth 3.1x at the step level. (B300 ratios from the same harness are not quoted: the fp16 SDPA of that torch build is unusually slow and flatters us.)
+**Same step on H100 with the CUDA port** (Mistral-7B, B=8, ctx 32768, eager HF-module loop, CUDA-graph replay time; fp16 baseline = torch SDPA, the faster of the two fp16 formulations there; `results/cuda2_e2e_mistral7b_h100_b8_c32k.json`): K=1 14.4 ms vs 22.0 ms (**1.52x**), K=8 16.2 ms vs 34.8 ms (**2.15x**); K=8 with the same kernel and KV sharing off is 50.4 ms, so K-query sharing is worth 3.1x at the step level. (B300 ratios from the same harness are not quoted: the fp16 SDPA of that torch build is unusually slow and flatters us.)
 
 ### Serving-level evaluation: status
 

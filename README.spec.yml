@@ -18,7 +18,7 @@ badges:
   - {label: NVIDIA, message: "CUDA · A100 to B300", color: 76b900, logo: nvidia}
   - {label: Intel, message: "SYCL · Arc B390", color: 0071c5, logo: intel}
   - {label: KV cache, message: "FP4 E2M1 + UE8M0/32", color: 27c8e8}
-  - {label: fused vs K launches, message: "up to {{ n.gain_max.text }}", color: 3ddc97}
+  - {label: fused vs no KV sharing, message: "up to {{ n.gain_max.text }}", color: 3ddc97}
   - {label: license, message: MIT, color: f2c14e, link: LICENSE}
   - {label: python, message: "3.9+", color: 3776ab, logo: python}
 nav:
@@ -66,6 +66,7 @@ numbers:
   fi_k1: {file: results/derived/readme_data.json, path: "b300_vs_flashinfer.K=K=1.flashinfer_nvfp4_ms", fmt: "{:.3f}", unit: " ms"}
   ours_k1: {file: results/derived/readme_data.json, path: "b300_vs_flashinfer.K=K=1.ours_ms", fmt: "{:.3f}", unit: " ms"}
   fi_ratio_1: {file: results/derived/readme_data.json, path: "b300_vs_flashinfer.K=K=1.ratio", fmt: "{:.1f}", unit: "x"}
+  fi_ratio_2: {file: results/derived/readme_data.json, path: "b300_vs_flashinfer.K=K=2.ratio", fmt: "{:.1f}", unit: "x"}
   fi_ratio_8: {file: results/derived/readme_data.json, path: "b300_vs_flashinfer.K=K=8.ratio", fmt: "{:.1f}", unit: "x"}
   # accuracy (perplexity increase vs fp16, Qwen3-8B / Mistral-7B)
   ppl_uq: {file: results/derived/readme_data.json, path: "ports.method=UltraQuant.dppl_qwen", fmt: "{:.3f}"}
@@ -199,7 +200,7 @@ video:
       say: "Time for one attention layer, batch eight, thirty two thousand tokens of context. Going from one speculative token to eight costs little. On MI300X it goes from {{ n.mi_k1.numtext }} to {{ n.mi_k8.numtext }} milliseconds. On H100, from {{ n.h100_k1.numtext }} to {{ n.h100_k8.numtext }}. On B300, from {{ n.b300_k1.numtext }} to {{ n.b300_k8.numtext }}."
     - type: chart
       chart: fused_vs_k
-      say: "Against running the same kernel K times, the fused kernel at K equals eight is {{ n.gain_mi.numtext }} times faster on MI300X, {{ n.gain_h100.numtext }} times on H100, and {{ n.gain_b300.numtext }} times on B300. Across all six GPUs, the gain at K equals eight runs from {{ n.gain_min.numtext }} to {{ n.gain_max.numtext }} times. At K equals one there is nothing to fuse."
+      say: "Against the same kernel with KV sharing off, the fused kernel at K equals eight is {{ n.gain_mi.numtext }} times faster on MI300X, {{ n.gain_h100.numtext }} times on H100, and {{ n.gain_b300.numtext }} times on B300. Across all six GPUs, the gain at K equals eight runs from {{ n.gain_min.numtext }} to {{ n.gain_max.numtext }} times. At K equals one there is nothing to fuse."
     - type: chart
       chart: ports_scatter
       gif: assets/ports_scatter.gif
@@ -220,7 +221,7 @@ video:
       say: "On accuracy, UltraQuant is not the leader. QServe int four at the same sixty eight bytes, NVFP4, FP8 and KIVI four all beat it. NVFP4, for four more bytes, cuts the Qwen three perplexity increase from {{ n.ppl_uq.numtext }} to {{ n.ppl_nvfp4.numtext }}. FP8 is also faster at K equals one."
     - type: chart
       chart: b300_vs_fi
-      say: "On B300, a vendor kernel is faster. FlashInfer's NVFP4 decode, which also shares the read across queries, takes {{ n.fi_k1.numtext }} milliseconds at K equals one, against {{ n.ours_k1.numtext }} for ours. That is {{ n.fi_ratio_1.numtext }} to {{ n.fi_ratio_8.numtext }} times faster. We do not beat vendor tuned kernels there."
+      say: "On B300, a vendor kernel is faster. FlashInfer's NVFP4 decode, which also shares the read across queries, takes {{ n.fi_k1.numtext }} milliseconds at K equals one, against {{ n.ours_k1.numtext }} for ours. That is {{ n.fi_ratio_2.numtext }} to {{ n.fi_ratio_8.numtext }} times faster across K. We do not beat vendor tuned kernels there."
     - type: chart
       chart: kv_capacity
       say: "In a real server? We ran vLLM's own native four bit backend, not our kernel, with Qwen three eight B on MI300X. KV capacity rises from {{ n.cap_bf16.numtext }} million tokens to {{ n.cap_fp4.numtext }} million, which is {{ n.cap_ratio.numtext }} times, because vLLM keeps four layers at full precision."
@@ -245,10 +246,10 @@ video:
       heading: "Is it the best? No. Here is where it wins."
       bullets:
         - "One validated op on AMD, NVIDIA and Intel"
-        - "K queries share one pass: {{ n.gain_min.text }} to {{ n.gain_max.text }} faster than K launches"
+        - "K queries share one pass: {{ n.gain_min.text }} to {{ n.gain_max.text }} faster than the same kernel with KV sharing off"
         - "{{ n.vs_fp16.text }} more KV tokens per GB than fp16"
         - "Exact UltraQuant layout, byte-compatible with upstream"
-      say: "So, is it the best? No. Here is where it wins. One validated implementation across AMD, NVIDIA and Intel. A fused K query pass that is {{ n.gain_min.numtext }} to {{ n.gain_max.numtext }} times faster than K launches. And {{ n.vs_fp16.numtext }} times more KV tokens per gigabyte. In the public sources we checked, we found no public CUDA or SYCL port of this layout with fused K query verify."
+      say: "So, is it the best? No. Here is where it wins. One validated implementation across AMD, NVIDIA and Intel. A fused K query pass that is {{ n.gain_min.numtext }} to {{ n.gain_max.numtext }} times faster than the same kernel with KV sharing off. And {{ n.vs_fp16.numtext }} times more KV tokens per gigabyte. In the public sources we checked, we found no public CUDA or SYCL port of this layout with fused K query verify."
     - type: end
       title: UltraQuant
       subtitle: "Code, results and the blog post are in the repo"
@@ -256,7 +257,7 @@ video:
 
 tables:
   - id: speed_tbl
-    title: "Time per layer call (ms) and gain of the fused kernel over the same kernel run K times"
+    title: "Time per layer call (ms) and gain of the fused kernel over the same kernel with KV sharing off (one launch, KV read K times)"
     file: results/derived/readme_data.json
     rows_path: speed_table
     columns:
@@ -265,7 +266,7 @@ tables:
       - {key: ms2, title: K=2, align: right, fmt: "{:.3f}"}
       - {key: ms4, title: K=4, align: right, fmt: "{:.3f}"}
       - {key: ms8, title: K=8, align: right, fmt: "{:.3f}"}
-      - {key: x2, title: "vs K launches, K=2", align: right, fmt: "{:.1f}", unit: "x"}
+      - {key: x2, title: "vs no sharing, K=2", align: right, fmt: "{:.1f}", unit: "x"}
       - {key: x4, title: "K=4", align: right, fmt: "{:.1f}", unit: "x"}
       - {key: x8, title: "K=8", align: right, fmt: "{:.1f}", unit: "x"}
   - id: vs_fi_tbl
@@ -406,7 +407,7 @@ sections:
     id: results
     body: "Single attention layer, B=8, context 32768, Hq64/Hkv8/D128, page 64, best tuned configuration per K, synthetic KV. All numbers are read from `results/`."
     highlights:
-      - {label: "Fused vs K launches, K=8 (MI300X)", number: gain_mi}
+      - {label: "Fused vs no KV sharing, K=8 (MI300X)", number: gain_mi}
       - {label: "H100", number: gain_h100}
       - {label: "B300", number: gain_b300}
       - {label: "KV size vs fp16", number: vs_fp16}
@@ -470,7 +471,7 @@ sections:
     id: where-we-stand
     body: |
       **Short version: UltraQuant is not the best KV-cache scheme and not the fastest FP4 kernel.** It is not the most accurate (QServe-int4 at equal bytes, NVFP4 for +4 bytes, FP8 and KIVI-4 beat it),
-      FP8 is faster at K=1 on MI300X ({{ n.fp8_ms1 }} against {{ n.uq_ms1 }}), and on B300 FlashInfer's NVFP4 kernel is {{ n.fi_ratio_1 }} to {{ n.fi_ratio_8 }} faster than our port and already shares the read across queries.
+      FP8 is faster at K=1 on MI300X ({{ n.fp8_ms1 }} against {{ n.uq_ms1 }}), and on B300 FlashInfer's NVFP4 kernel is {{ n.fi_ratio_2 }} to {{ n.fi_ratio_8 }} faster than our port ({{ n.fi_ratio_1 }} at K=1) and already shares the read across queries.
       What the repo offers is the exact UltraQuant format (UE8M0 per 32, bf16 queries, any page size, ragged lengths, causal verify masks), K-query sharing, and one validated implementation across AMD, NVIDIA and Intel.
       It is faster and more accurate than TurboQuant-3 and SpectralQuant and far ahead of Planar/Iso/Rotor at 3 bits.
     charts: [ports_scatter, b300_vs_fi]
@@ -537,7 +538,7 @@ sections:
       Public API: `uq_decode`, `quantize_fp4`, `dequantize_fp4`, `reference`, `build_paged_cache` / `PagedFP4Cache`, `UQWorkspace`, `auto_nsplit`, `uqmt.vllm_adapter` (varlen verify wrapper, cache-append hook),
       plus `uqmt.quant` (paper scale rule, Hadamard, NVFP4 quantiser variants), `uqmt.tree` (tree-masked verify for EAGLE/Medusa-style trees) and `uqmt.nvfp4` (NVFP4 scale path).
     details:
-      - summary: "Integration, porting effort, related work"
+      - summary: "Porting effort, related work"
         body: |
           
 
@@ -552,7 +553,7 @@ sections:
     body: |
       ```bash
       pip install -e . pytest && pytest tests -q                  # CPU tests always; GPU tests need a GPU
-      cd uqmt && python bench.py --batch 8 --ctx 32768 --ks 1 2 4 8 --nsplit 16 --check   # Triton, fused vs K independent
+      cd uqmt && python bench.py --batch 8 --ctx 32768 --ks 1 2 4 8 --nsplit 16 --check   # Triton, fused vs KV sharing off
       UQ_WARPS=8 UQ_STAGES=3 python bench.py --batch 8 --ctx 32768 --ks 8                  # B300 K=8 config
       python peak.py peak.json                                    # device ceilings
       cmake -S cuda -B build && cmake --build build -j && ./build/test_vectors cuda/vectors 1e-2   # CUDA vs reference vectors
