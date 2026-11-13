@@ -17,7 +17,7 @@
 <text x="575.0" y="118" text-anchor="middle" font-family="ui-sans-serif,system-ui,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-weight="700" font-size="19" fill="#e6edf6">One tile, M = K x group</text>
 <text x="575.0" y="142" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="13" fill="#8a98ad">stacked into one matrix multiply</text>
 <rect x="440" y="264" width="270" height="104" rx="12" fill="#131a26" stroke="#f2c14e" stroke-width="2"/>
-<text x="575.0" y="302" text-anchor="middle" font-family="ui-sans-serif,system-ui,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-weight="700" font-size="19" fill="#e6edf6">FP4 KV pages (68 B / vector)</text>
+<text x="575.0" y="302" text-anchor="middle" font-family="ui-sans-serif,system-ui,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-weight="700" font-size="19" fill="#e6edf6">FP4 KV pages (68 B)</text>
 <text x="575.0" y="326" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="13" fill="#8a98ad">paged cache, each page read once</text>
 <rect x="840" y="80" width="270" height="104" rx="12" fill="#131a26" stroke="#27c8e8" stroke-width="2"/>
 <text x="975.0" y="118" text-anchor="middle" font-family="ui-sans-serif,system-ui,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-weight="700" font-size="19" fill="#e6edf6">FP4 to bf16 in registers</text>

@@ -1,6 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 278" width="980" height="278" role="img" aria-label="KV-cache capacity on MI300X, vLLM, Qwen3-8B (millions of tokens)">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 278" width="980" height="278" role="img" aria-label="KV capacity, vLLM + Qwen3-8B on MI300X">
 <rect width="980" height="278" rx="16" fill="#0b0f17"/>
-<text x="32" y="44" font-family="ui-sans-serif,system-ui,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-weight="700" font-size="22" fill="#e6edf6">KV-cache capacity on MI300X, vLLM, Qwen3-8B (millions of tokens)</text>
+<text x="32" y="44" font-family="ui-sans-serif,system-ui,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-weight="700" font-size="22" fill="#e6edf6">KV capacity, vLLM + Qwen3-8B on MI300X</text>
 <text x="32" y="68" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="14" fill="#8a98ad">vLLM's native ultraquant_4bit backend keeps 4 layers at bf16, hence below 4x</text>
 <text x="207" y="118" text-anchor="end" font-family="ui-sans-serif,system-ui,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="15" fill="#8a98ad" font-weight="400">bf16 KV</text>
 <rect x="221" y="96" width="210.7" height="30" rx="6" fill="#263044"/>

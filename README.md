@@ -131,9 +131,9 @@ FP8 is faster at K=1 on MI300X (0.29 ms against 0.36 ms), and on B300 FlashInfer
 What the repo offers is the exact UltraQuant format (UE8M0 per 32, bf16 queries, any page size, ragged lengths, causal verify masks), K-query sharing, and one validated implementation across AMD, NVIDIA and Intel.
 It is faster and more accurate than TurboQuant-3 and SpectralQuant and far ahead of Planar/Iso/Rotor at 3 bits.
 
-<p align="center"><img src="assets/ports_scatter.svg" alt="Speed against accuracy on MI300X: real fused kernels" width="100%"></p>
+<p align="center"><img src="assets/ports_scatter.svg" alt="Speed vs accuracy on MI300X: real fused kernels" width="100%"></p>
 
-<p align="center"><img src="assets/b300_vs_fi.svg" alt="B300: FlashInfer NVFP4 is faster than our CUDA port (ms)" width="100%"></p>
+<p align="center"><img src="assets/b300_vs_fi.svg" alt="B300: FlashInfer NVFP4 is faster (ms)" width="100%"></p>
 
 <p align="center"><img src="assets/ports_scatter.gif" alt="animated reveal of the speed-versus-accuracy scatter" width="75%"></p>
 
@@ -204,13 +204,13 @@ The FP4 runs needed `--attention-backend TRITON_ATTN`, so attention backend and 
 
 | KV cache | Capacity (tokens) | vs bf16 | RAG F1 | Drift (median 1st diff. token) | Agent tok/s | Agent TTFT p50 (s) | Plain decode tok/s |
 | :--- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| bf16 KV | 1,092,352 | 1.00x | 0.655 | None | 47.9 | 69 | 1052 |
+| bf16 KV | 1,092,352 | 1.00x | 0.655 | - | 47.9 | 69 | 1052 |
 | fp8 KV | 2,184,656 | 2.00x | 0.647 | 24 | 38.1 | 74 | 1091 |
 | **FP4 (ultraquant_4bit) KV** | **3,157,312** | **2.89x** | **0.618** | **10** | **59.4** | **30** | **767** |
 
 <sub>Source: `results/derived/readme_data.json`</sub>
 
-<p align="center"><img src="assets/kv_capacity.svg" alt="KV-cache capacity on MI300X, vLLM, Qwen3-8B (millions of tokens)" width="100%"></p>
+<p align="center"><img src="assets/kv_capacity.svg" alt="KV capacity, vLLM + Qwen3-8B on MI300X" width="100%"></p>
 
 <details>
 <summary>Real-model whole-step results (Mistral-7B, MI300X and H100)</summary>

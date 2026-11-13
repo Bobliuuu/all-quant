@@ -1,6 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 540" width="980" height="540" role="img" aria-label="Speed against accuracy on MI300X: real fused kernels">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 540" width="980" height="540" role="img" aria-label="Speed vs accuracy on MI300X: real fused kernels">
 <rect width="980" height="540" rx="16" fill="#0b0f17"/>
-<text x="32" y="44" font-family="ui-sans-serif,system-ui,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-weight="700" font-size="22" fill="#e6edf6">Speed against accuracy on MI300X: real fused kernels</text>
+<text x="32" y="44" font-family="ui-sans-serif,system-ui,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-weight="700" font-size="22" fill="#e6edf6">Speed vs accuracy on MI300X: real fused kernels</text>
 <text x="32" y="68" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="14" fill="#8a98ad">K=8 verify, B8, ctx 32k, cold cache; perplexity increase on Qwen3-8B (WikiText-2, single run)</text>
 <line x1="84" x2="950" y1="450" y2="450" stroke="#263044"/>
 <text x="74" y="454" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="12" fill="#8a98ad">0</text>
