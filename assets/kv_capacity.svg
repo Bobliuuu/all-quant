@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 278" width="980" height="278" role="img" aria-label="KV-cache capacity on MI300X, vLLM, Qwen3-8B (millions of tokens)">
+<rect width="980" height="278" rx="16" fill="#0b0f17"/>
+<text x="32" y="44" font-family="ui-sans-serif,system-ui,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-weight="700" font-size="22" fill="#e6edf6">KV-cache capacity on MI300X, vLLM, Qwen3-8B (millions of tokens)</text>
+<text x="32" y="68" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="14" fill="#8a98ad">vLLM's native ultraquant_4bit backend keeps 4 layers at bf16, hence below 4x</text>
+<text x="207" y="118" text-anchor="end" font-family="ui-sans-serif,system-ui,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="15" fill="#8a98ad" font-weight="400">bf16 KV</text>
+<rect x="221" y="96" width="210.7" height="30" rx="6" fill="#263044"/>
+<text x="441.7" y="117" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="15" font-weight="700" fill="#e6edf6">1.09 M tokens</text>
+<text x="207" y="164" text-anchor="end" font-family="ui-sans-serif,system-ui,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="15" fill="#8a98ad" font-weight="400">fp8 KV</text>
+<rect x="221" y="142" width="421.4" height="30" rx="6" fill="#263044"/>
+<text x="652.4" y="163" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="15" font-weight="700" fill="#e6edf6">2.18 M tokens</text>
+<text x="207" y="210" text-anchor="end" font-family="ui-sans-serif,system-ui,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="15" fill="#e6edf6" font-weight="700">FP4 (ultraquant_4bit)</text>
+<rect x="221" y="188" width="609.0" height="30" rx="6" fill="#27c8e8"/>
+<text x="840.0" y="209" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="15" font-weight="700" fill="#e6edf6">3.16 M tokens</text>
+<text x="948" y="264" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="12" fill="#8a98ad">source: derived · higher is better</text>
+</svg>

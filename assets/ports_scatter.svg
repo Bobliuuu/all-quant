@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 540" width="980" height="540" role="img" aria-label="Speed against accuracy on MI300X: real fused kernels">
+<rect width="980" height="540" rx="16" fill="#0b0f17"/>
+<text x="32" y="44" font-family="ui-sans-serif,system-ui,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-weight="700" font-size="22" fill="#e6edf6">Speed against accuracy on MI300X: real fused kernels</text>
+<text x="32" y="68" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="14" fill="#8a98ad">K=8 verify, B8, ctx 32k, cold cache; perplexity increase on Qwen3-8B (WikiText-2, single run)</text>
+<line x1="84" x2="950" y1="450" y2="450" stroke="#263044"/>
+<text x="74" y="454" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="12" fill="#8a98ad">0</text>
+<line x1="84" x2="950" y1="410" y2="410" stroke="#263044"/>
+<text x="74" y="414" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="12" fill="#8a98ad">0.05</text>
+<line x1="84" x2="950" y1="386" y2="386" stroke="#263044"/>
+<text x="74" y="390" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="12" fill="#8a98ad">0.1</text>
+<line x1="84" x2="950" y1="310" y2="310" stroke="#263044"/>
+<text x="74" y="314" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="12" fill="#8a98ad">0.5</text>
+<line x1="84" x2="950" y1="272" y2="272" stroke="#263044"/>
+<text x="74" y="276" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="12" fill="#8a98ad">1</text>
+<line x1="84" x2="950" y1="233" y2="233" stroke="#263044"/>
+<text x="74" y="237" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="12" fill="#8a98ad">2</text>
+<line x1="84" x2="950" y1="181" y2="181" stroke="#263044"/>
+<text x="74" y="185" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="12" fill="#8a98ad">5</text>
+<line x1="84" x2="950" y1="140" y2="140" stroke="#263044"/>
+<text x="74" y="144" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="12" fill="#8a98ad">10</text>
+<line x1="84" x2="950" y1="100" y2="100" stroke="#263044"/>
+<text x="74" y="104" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="12" fill="#8a98ad">20</text>
+<line x1="141" x2="141" y1="100" y2="450" stroke="#263044" stroke-dasharray="2 4"/>
+<text x="141" y="470" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="12" fill="#8a98ad">0.5</text>
+<line x1="317" x2="317" y1="100" y2="450" stroke="#263044" stroke-dasharray="2 4"/>
+<text x="317" y="470" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="12" fill="#8a98ad">1</text>
+<line x1="494" x2="494" y1="100" y2="450" stroke="#263044" stroke-dasharray="2 4"/>
+<text x="494" y="470" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="12" fill="#8a98ad">2</text>
+<line x1="727" x2="727" y1="100" y2="450" stroke="#263044" stroke-dasharray="2 4"/>
+<text x="727" y="470" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="12" fill="#8a98ad">5</text>
+<line x1="904" x2="904" y1="100" y2="450" stroke="#263044" stroke-dasharray="2 4"/>
+<text x="904" y="470" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="12" fill="#8a98ad">10</text>
+<text x="517.0" y="494" text-anchor="middle" font-family="ui-sans-serif,system-ui,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="13" fill="#8a98ad">ms per attention call at K=8 (log scale)</text>
+<text x="16" y="275.0" transform="rotate(-90 16 275.0)" text-anchor="middle" font-family="ui-sans-serif,system-ui,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="13" fill="#8a98ad">perplexity increase vs fp16 (symlog)</text>
+<text x="940" y="438" text-anchor="end" font-family="ui-sans-serif,system-ui,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="14" font-weight="700" fill="#3ddc97">lower left: faster and more accurate</text>
+<circle cx="146.1" cy="420.8" r="7" fill="#3ddc97" fill-opacity=".92" stroke="#0b0f17" stroke-width="2"/>
+<text x="134.1" y="432.8" text-anchor="end" font-family="ui-sans-serif,system-ui,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="13.5" fill="#e6edf6" font-weight="500">FP8</text>
+<circle cx="159.2" cy="312.0" r="7" fill="#f2c14e" fill-opacity=".92" stroke="#0b0f17" stroke-width="2"/>
+<text x="147.2" y="326.0" text-anchor="end" font-family="ui-sans-serif,system-ui,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="13.5" fill="#e6edf6" font-weight="500">MXFP4</text>
+<circle cx="199.2" cy="444.5" r="7" fill="#3ddc97" fill-opacity=".92" stroke="#0b0f17" stroke-width="2"/>
+<text x="211.2" y="448.5" text-anchor="start" font-family="ui-sans-serif,system-ui,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="13.5" fill="#e6edf6" font-weight="500">QServe-int4</text>
+<circle cx="158.5" cy="393.8" r="7" fill="#3ddc97" fill-opacity=".92" stroke="#0b0f17" stroke-width="2"/>
+<text x="146.5" y="387.8" text-anchor="end" font-family="ui-sans-serif,system-ui,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="13.5" fill="#e6edf6" font-weight="500">NVFP4</text>
+<circle cx="255.5" cy="425.3" r="7" fill="#3ddc97" fill-opacity=".92" stroke="#0b0f17" stroke-width="2"/>
+<text x="267.5" y="429.3" text-anchor="start" font-family="ui-sans-serif,system-ui,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="13.5" fill="#e6edf6" font-weight="500">KIVI-4</text>
+<circle cx="434.3" cy="123.3" r="7" fill="#f2c14e" fill-opacity=".92" stroke="#0b0f17" stroke-width="2"/>
+<text x="422.3" y="127.3" text-anchor="end" font-family="ui-sans-serif,system-ui,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="13.5" fill="#e6edf6" font-weight="500">Rotor-3</text>
+<circle cx="433.0" cy="110.5" r="7" fill="#f2c14e" fill-opacity=".92" stroke="#0b0f17" stroke-width="2"/>
+<text x="445.0" y="104.5" text-anchor="start" font-family="ui-sans-serif,system-ui,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="13.5" fill="#e6edf6" font-weight="500">Planar-3</text>
+<circle cx="434.5" cy="121.3" r="7" fill="#f2c14e" fill-opacity=".92" stroke="#0b0f17" stroke-width="2"/>
+<text x="446.5" y="130.3" text-anchor="start" font-family="ui-sans-serif,system-ui,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="13.5" fill="#e6edf6" font-weight="500">Iso-3</text>
+<circle cx="443.8" cy="268.8" r="7" fill="#f2c14e" fill-opacity=".92" stroke="#0b0f17" stroke-width="2"/>
+<text x="455.8" y="272.8" text-anchor="start" font-family="ui-sans-serif,system-ui,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="13.5" fill="#e6edf6" font-weight="500">KVQuant-4</text>
+<circle cx="866.7" cy="233.3" r="7" fill="#f2c14e" fill-opacity=".92" stroke="#0b0f17" stroke-width="2"/>
+<text x="854.7" y="223.3" text-anchor="end" font-family="ui-sans-serif,system-ui,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="13.5" fill="#e6edf6" font-weight="500">TurboQuant-3</text>
+<circle cx="457.4" cy="160.9" r="7" fill="#f2c14e" fill-opacity=".92" stroke="#0b0f17" stroke-width="2"/>
+<text x="469.4" y="164.9" text-anchor="start" font-family="ui-sans-serif,system-ui,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="13.5" fill="#e6edf6" font-weight="500">SpectralQuant</text>
+<circle cx="165.4" cy="303.7" r="11" fill="#27c8e8" fill-opacity=".92" stroke="#0b0f17" stroke-width="2"/>
+<text x="179.4" y="297.7" text-anchor="start" font-family="ui-sans-serif,system-ui,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="13.5" fill="#e6edf6" font-weight="700">UltraQuant</text>
+<circle cx="90" cy="504" r="6" fill="#27c8e8"/><text x="102" y="508" font-family="ui-sans-serif,system-ui,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="13" fill="#8a98ad">UltraQuant</text>
+<circle cx="200" cy="504" r="6" fill="#3ddc97"/><text x="212" y="508" font-family="ui-sans-serif,system-ui,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="13" fill="#8a98ad">more accurate than UltraQuant</text>
+<circle cx="462" cy="504" r="6" fill="#f2c14e"/><text x="474" y="508" font-family="ui-sans-serif,system-ui,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="13" fill="#8a98ad">other methods</text>
+<text x="948" y="526" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="12" fill="#8a98ad">source: results/derived/readme_data.json · lower is better</text>
+</svg>

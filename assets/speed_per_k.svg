@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 460" width="980" height="460" role="img" aria-label="Fused verify attention: time per layer call (ms)">
+<rect width="980" height="460" rx="16" fill="#0b0f17"/>
+<text x="32" y="44" font-family="ui-sans-serif,system-ui,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-weight="700" font-size="22" fill="#e6edf6">Fused verify attention: time per layer call (ms)</text>
+<text x="32" y="68" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="14" fill="#8a98ad">B8, ctx 32768, Hq64/Hkv8/D128, page 64, best tuned config per K, synthetic KV</text>
+<line x1="70" x2="950" y1="372" y2="372" stroke="#263044"/><text x="60" y="376" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="12" fill="#8a98ad">0</text>
+<line x1="70" x2="950" y1="304" y2="304" stroke="#263044"/><text x="60" y="308" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="12" fill="#8a98ad">0.2</text>
+<line x1="70" x2="950" y1="236" y2="236" stroke="#263044"/><text x="60" y="240" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="12" fill="#8a98ad">0.4</text>
+<line x1="70" x2="950" y1="168" y2="168" stroke="#263044"/><text x="60" y="172" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="12" fill="#8a98ad">0.6</text>
+<line x1="70" x2="950" y1="100" y2="100" stroke="#263044"/><text x="60" y="104" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="12" fill="#8a98ad">0.8</text>
+<rect x="92.0" y="248.8" width="26.3" height="123.2" rx="4" fill="#27c8e8"/>
+<text x="105.2" y="242.8" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="10.5" fill="#e6edf6">0.36</text>
+<rect x="121.3" y="324.7" width="26.3" height="47.3" rx="4" fill="#ff6b6b"/>
+<text x="134.5" y="318.7" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="10.5" fill="#e6edf6">0.14</text>
+<rect x="150.7" y="316.3" width="26.3" height="55.7" rx="4" fill="#f2c14e"/>
+<text x="163.8" y="310.3" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="10.5" fill="#e6edf6">0.16</text>
+<rect x="180.0" y="284.7" width="26.3" height="87.3" rx="4" fill="#3ddc97"/>
+<text x="193.2" y="278.7" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="10.5" fill="#e6edf6">0.26</text>
+<rect x="209.3" y="301.3" width="26.3" height="70.7" rx="4" fill="#a78bfa"/>
+<text x="222.5" y="295.3" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="10.5" fill="#e6edf6">0.21</text>
+<rect x="238.7" y="238.7" width="26.3" height="133.3" rx="4" fill="#fb923c"/>
+<text x="251.8" y="232.7" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="10.5" fill="#e6edf6">0.39</text>
+<text x="180" y="394" text-anchor="middle" font-family="ui-sans-serif,system-ui,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="14" fill="#e6edf6">K=1</text>
+<rect x="312.0" y="244.7" width="26.3" height="127.3" rx="4" fill="#27c8e8"/>
+<text x="325.2" y="238.7" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="10.5" fill="#e6edf6">0.37</text>
+<rect x="341.3" y="323.7" width="26.3" height="48.3" rx="4" fill="#ff6b6b"/>
+<text x="354.5" y="317.7" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="10.5" fill="#e6edf6">0.14</text>
+<rect x="370.7" y="316.3" width="26.3" height="55.7" rx="4" fill="#f2c14e"/>
+<text x="383.8" y="310.3" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="10.5" fill="#e6edf6">0.16</text>
+<rect x="400.0" y="281.4" width="26.3" height="90.6" rx="4" fill="#3ddc97"/>
+<text x="413.2" y="275.4" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="10.5" fill="#e6edf6">0.27</text>
+<rect x="429.3" y="300.4" width="26.3" height="71.6" rx="4" fill="#a78bfa"/>
+<text x="442.5" y="294.4" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="10.5" fill="#e6edf6">0.21</text>
+<rect x="458.7" y="237.3" width="26.3" height="134.7" rx="4" fill="#fb923c"/>
+<text x="471.8" y="231.3" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="10.5" fill="#e6edf6">0.40</text>
+<text x="400" y="394" text-anchor="middle" font-family="ui-sans-serif,system-ui,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="14" fill="#e6edf6">K=2</text>
+<rect x="532.0" y="217.6" width="26.3" height="154.4" rx="4" fill="#27c8e8"/>
+<text x="545.2" y="211.6" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="10.5" fill="#e6edf6">0.45</text>
+<rect x="561.3" y="285.1" width="26.3" height="86.9" rx="4" fill="#ff6b6b"/>
+<text x="574.5" y="279.1" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="10.5" fill="#e6edf6">0.25</text>
+<rect x="590.7" y="298.9" width="26.3" height="73.1" rx="4" fill="#f2c14e"/>
+<text x="603.8" y="292.9" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="10.5" fill="#e6edf6">0.21</text>
+<rect x="620.0" y="213.7" width="26.3" height="158.3" rx="4" fill="#3ddc97"/>
+<text x="633.2" y="207.7" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="10.5" fill="#e6edf6">0.46</text>
+<rect x="649.3" y="273.9" width="26.3" height="98.1" rx="4" fill="#a78bfa"/>
+<text x="662.5" y="267.9" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="10.5" fill="#e6edf6">0.29</text>
+<rect x="678.7" y="225.3" width="26.3" height="146.7" rx="4" fill="#fb923c"/>
+<text x="691.8" y="219.3" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="10.5" fill="#e6edf6">0.43</text>
+<text x="620" y="394" text-anchor="middle" font-family="ui-sans-serif,system-ui,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="14" fill="#e6edf6">K=4</text>
+<rect x="752.0" y="187.4" width="26.3" height="184.6" rx="4" fill="#27c8e8"/>
+<text x="765.2" y="181.4" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="10.5" fill="#e6edf6">0.54</text>
+<rect x="781.3" y="267.2" width="26.3" height="104.8" rx="4" fill="#ff6b6b"/>
+<text x="794.5" y="261.2" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="10.5" fill="#e6edf6">0.31</text>
+<rect x="810.7" y="298.6" width="26.3" height="73.4" rx="4" fill="#f2c14e"/>
+<text x="823.8" y="292.6" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="10.5" fill="#e6edf6">0.22</text>
+<rect x="840.0" y="129.1" width="26.3" height="242.9" rx="4" fill="#3ddc97"/>
+<text x="853.2" y="123.1" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="10.5" fill="#e6edf6">0.71</text>
+<rect x="869.3" y="242.1" width="26.3" height="129.9" rx="4" fill="#a78bfa"/>
+<text x="882.5" y="236.1" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="10.5" fill="#e6edf6">0.38</text>
+<rect x="898.7" y="203.6" width="26.3" height="168.4" rx="4" fill="#fb923c"/>
+<text x="911.8" y="197.6" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="10.5" fill="#e6edf6">0.49</text>
+<text x="840" y="394" text-anchor="middle" font-family="ui-sans-serif,system-ui,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="14" fill="#e6edf6">K=8</text>
+<rect x="70" y="416" width="14" height="14" rx="3" fill="#27c8e8"/><text x="90" y="428" font-family="ui-sans-serif,system-ui,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="13" fill="#8a98ad">MI300X (Triton)</text>
+<rect x="226.5" y="416" width="14" height="14" rx="3" fill="#ff6b6b"/><text x="246.5" y="428" font-family="ui-sans-serif,system-ui,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="13" fill="#8a98ad">B300 (CUDA)</text>
+<rect x="353.0" y="416" width="14" height="14" rx="3" fill="#f2c14e"/><text x="373.0" y="428" font-family="ui-sans-serif,system-ui,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="13" fill="#8a98ad">H100 (CUDA)</text>
+<rect x="479.5" y="416" width="14" height="14" rx="3" fill="#3ddc97"/><text x="499.5" y="428" font-family="ui-sans-serif,system-ui,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="13" fill="#8a98ad">A100 (CUDA)</text>
+<rect x="606.0" y="416" width="14" height="14" rx="3" fill="#a78bfa"/><text x="626.0" y="428" font-family="ui-sans-serif,system-ui,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="13" fill="#8a98ad">RTX PRO 6000 (CUDA)</text>
+<rect x="792.5" y="416" width="14" height="14" rx="3" fill="#fb923c"/><text x="812.5" y="428" font-family="ui-sans-serif,system-ui,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="13" fill="#8a98ad">L40S (CUDA)</text>
+<text x="948" y="446" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="12" fill="#8a98ad">source: results/derived/readme_data.json · lower is better</text>
+</svg>
