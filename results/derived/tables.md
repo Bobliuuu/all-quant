@@ -1,0 +1,172 @@
+## bf16 baseline and PPL protocol
+
+| join | BOS | attn | rope | tokens | PPL |
+|---|---|---|---|---|---|
+| nn | bos_prepend | sdpa | llama3 | 289077 | 7.2318 |
+| nn | bos_replace | sdpa | llama3 | 289077 | 7.2366 |
+| nn | nobos | sdpa | llama3 | 289077 | 7.2158 |
+| nn | std | eager | llama3 | 289077 | 7.2163 |
+| nn | std | sdpa | llama3 | 289077 | 7.2166 |
+| nn | std | sdpa | none | 289077 | 7.2367 |
+| nonempty | std | sdpa | llama3 | 288937 | 7.1597 |
+| raw | std | sdpa | llama3 | 288937 | 7.0399 |
+
+Paper: 7.1606 (Sec. 6 Setup). Ours with the matching protocol (empty rows dropped, then "\n\n"-joined): **7.1597**.
+
+## Weights, pseudo-quantization (Sec. 7.1 / 6.7.1)
+
+| lattice | bps | paper | ours tile 128 | Δ | ours tile 1024 | Δ | measured bps (128 / 1024) |
+|---|---|---|---|---|---|---|---|
+| e8int | 3 | 8.744 | 8.856 | 0.112 | 8.754 | 0.010 | 3.009 / 3.005 |
+| e8int | 4 | 7.434 | 7.414 | -0.020 | 7.437 | 0.003 | 4.011 / 4.007 |
+| e8int | 5 | 7.236 | 7.262 | 0.026 | 7.256 | 0.020 | 5.010 / 5.006 |
+| d4int | 3 | 8.835 | - | - | 8.965 | 0.130 | - / 3.006 |
+| d4int | 4 | 7.435 | - | - | 7.490 | 0.055 | - / 4.007 |
+| d4int | 5 | 7.227 | - | - | 7.227 | -0.000 | - / 5.009 |
+| a2int | 3 | 8.973 | - | - | 9.227 | 0.254 | - / 3.006 |
+| a2int | 4 | 7.466 | - | - | 7.471 | 0.005 | - / 4.004 |
+| a2int | 5 | 7.249 | - | - | 7.252 | 0.003 | - / 5.006 |
+| z1int | 3 | 9.318 | - | - | 8.914 | -0.404 | - / 3.007 |
+| z1int | 4 | 7.527 | - | - | 7.476 | -0.051 | - / 4.008 |
+| z1int | 5 | 7.252 | - | - | 7.266 | 0.014 | - / 5.010 |
+
+| HIGGS p=2 | bps | paper | ours (tile 1024) | Δ |
+|---|---|---|---|---|
+| | 3 | 9.527 | - | - |
+| | 3.5 | 8.140 | - | - |
+| | 4 | 7.618 | - | - |
+| | 4.5 | 7.427 | - | - |
+| | 5 | 7.288 | - | - |
+
+## Real codec (RiceLinear / LatticeLinear / FP8Linear), not in the paper's PPL tables
+
+| config | stored bits/weight | PPL |
+|---|---|---|
+| w_real:bf16:3 | 3.086 | 8.839 |
+| w_real:bf16:4 | 4.088 | 7.402 |
+| w_real:bf16:5 | 5.087 | 7.201 |
+| w_real:int8:4 | 4.089 | 7.524 |
+| w_real:fp8:4 | 4.089 | 7.559 |
+
+## KV cache only, E8, pre-RoPE pseudo-quant (Table 6 at 2 bps; 3/4 bps not tabulated in the paper)
+
+| variant | paper 2 bps | ours 2 bps | Δ | ours 3 bps | ours 4 bps | measured bps (2/3/4) |
+|---|---|---|---|---|---|---|
+| none | 10.089 | 10.026 | -0.063 | 7.413 | 7.217 | 1.928 / 2.905 / 3.899 |
+| dither | 9.622 | 9.652 | 0.030 | 7.418 | 7.216 | 1.999 / 2.923 / 3.904 |
+| signs | 9.896 | 9.903 | 0.007 | 7.412 | 7.213 | 1.926 / 2.905 / 3.899 |
+| signs+dith | 9.706 | 9.692 | -0.014 | 7.427 | 7.220 | 1.999 / 2.923 / 3.904 |
+| qjl | 9.557 | 9.544 | -0.013 | 7.437 | 7.213 | 2.009 / 3.011 / 4.012 |
+| qjl+dith | 9.685 | 9.709 | 0.024 | 7.430 | 7.217 | 2.067 / 3.026 / 4.015 |
+
+KV "sweet spot" (paper: +0.25 PPL at 3 bps): ours best 3-bps variant `kv:3:signs:0` = 7.412, **+0.252** vs our bf16.
+
+| residual window (W=32, outer-block K protected) | ours | measured bps |
+|---|---|---|
+| kvres:2:none | 7.441 | 2.579 |
+| kvres:2:qjl | 7.466 | 2.658 |
+| kvres:3:none | 7.196 | 3.512 |
+| kvres:3:qjl | 7.222 | 3.613 |
+
+## Table 7 (4 bps, 8-bit MMA pseudo-quant)
+
+| cast | path | paper | ours (Hadamard 1024) | Δ | ours (Hadamard 128) | Δ |
+|---|---|---|---|---|---|---|
+| fp8 | weights-only | 7.535 | 7.530 | -0.005 | 7.485 | -0.050 |
+| fp8 | weights++KV | 7.644 | 7.645 | 0.001 | 7.596 | -0.048 |
+| int8 | weights-only | 7.433 | 7.436 | 0.003 | 7.414 | -0.019 |
+| int8 | weights++KV | 7.503 | 7.508 | 0.005 | 7.482 | -0.021 |
+
+## Table 10 (H100, Llama-3.1-8B-Instruct, 4 bps, eager, batch 1)
+
+| config | paper prefill tok/s | ours | paper decode tok/s | ours | paper GiB | ours GiB |
+|---|---|---|---|---|---|---|
+| bf16 | 16505 | 31200 | 51.8 | 75.6 | 14.96 | 14.96 |
+| w | 3915 | 4749 | 7.8 | 10.8 | 5.29 | 5.32 |
+| w_int8 | - | 8408 | - | 5.9 | - | 2.10 |
+| kv | 16261 | 259 | 10.8 | 23.1 | 14.99 | 15.10 |
+| kvf | 16261 | 260 | 10.8 | 3.1 | 14.99 | 15.10 |
+| wkv | 4655 | 246 | 5.4 | 7.9 | 5.69 | 7.93 |
+| wkvf | 4655 | 245 | 5.4 | 2.4 | 5.69 | 7.93 |
+
+## Table 12 (Qwen2.5-7B-Instruct-1M, KV only, WikiText-2, ctx 4096, 72 windows)
+
+Our bf16 baseline: - (paper: 7.25).
+
+| bits | correction | window | paper W2 Δ% | ours PPL | ours Δ% | ours eff. bps | ours KV× = 16/bps |
+|---|---|---|---|---|---|---|---|
+| 4 | none | - | +0.8 | - | - | - | - |
+| 4 | qjl | - | +1.4 | - | - | - | - |
+| 4 | none | 32 | +0.1 | - | - | - | - |
+| 4 | qjl | 32 | +0.2 | - | - | - | - |
+| 3 | none | - | +5.5 | - | - | - | - |
+| 3 | qjl | - | +4.8 | - | - | - | - |
+| 3 | none | 32 | +1.8 | - | - | - | - |
+| 3 | qjl | 32 | +1.6 | - | - | - | - |
+| 2 | none | - | +42.0 | - | - | - | - |
+| 2 | qjl | - | +44.0 | - | - | - | - |
+| 2 | none | 32 | +7.4 | - | - | - | - |
+| 2 | qjl | 32 | +14.7 | - | - | - | - |
+| 1.7 | none | 32 | +26.9 | - | - | - | - |
+
+Note: for the no-window rows `measured_bps` excludes the fp16 norm (+0.125 b/scalar); the windowed rows count the bf16 window and protected K at 16 bits, as the paper's effective bps does.
+
+
+## End-to-end PPL on MI300X (ROCm torch 2.8 + HIP port) vs H100 (CUDA)
+
+| config | H100 (CUDA) | MI300X (ROCm) | Δ | stored bits/weight H100 / MI300X |
+|---|---|---|---|---|
+| bf16 | 7.1597 | 7.1604 | 0.0006 | - / - |
+| kv:2:qjl:0 | 9.5437 | 9.5367 | -0.0070 | - / - |
+| w_pseudo:e8int:4:1024 | 7.4371 | 7.4383 | 0.0012 | - / - |
+| w_real:bf16:4 (HIP kernels) | 7.4020 | 7.4019 | -0.0001 | 4.088255 / 4.088255 |
+
+## Kernel correctness on the shared vectors (86 checks per backend)
+
+| backend | file | pass | fail | failing checks |
+|---|---|---|---|---|
+| cuda:NVIDIA H100 80GB HBM3 sm_90 | results/kernels/cuda_h100_full_test.json | 84 | 2 | attn_h4g7_t128, codec_a13_k0_s256.stage3_decode.z |
+| cuda:NVIDIA H100 80GB HBM3 sm_90 | results/kernels/cuda_h100_test.json | 84 | 2 | attn_h4g7_t128, codec_a13_k0_s256.stage3_decode.z |
+| hip:AMD Instinct MI300X VF gfx942:sramecc+:xnack- | results/kernels/hip_mi300x_test.json | 84 | 2 | attn_h4g7_t128, codec_a13_k0_s256.stage3_decode.z |
+| hip:AMD Instinct MI300X VF gfx942:sramecc+:xnack- | results/kernels/hip_mi300x_tuned_bt128_test.json | 84 | 2 | attn_h4g7_t128, codec_a13_k0_s256.stage3_decode.z |
+| hip:AMD Instinct MI300X VF gfx942:sramecc+:xnack- | results/kernels/hip_mi300x_tuned_bt64_test.json | 84 | 2 | attn_h4g7_t128, codec_a13_k0_s256.stage3_decode.z |
+| sycl:Intel(R) oneAPI Unified Runtime over Level-Zero V2:Intel(R) Arc(TM) B390 GPU sg{16/32/} rht_sg=32 | results/kernels/sycl_arcb390_test.json | 84 | 2 | attn_h4g7_t128, codec_a13_k0_s256.stage3_decode.z |
+| sycl:Intel(R) OpenCL:Intel(R) Xeon(R) Platinum 8481C CPU @ 2.70GHz sg{4/8/16/32/64/} rht_sg=32 | results/kernels/sycl_h100_test_cpu.json | 84 | 2 | attn_h4g7_t128, codec_a13_k0_s256.stage3_decode.z |
+| sycl:NVIDIA CUDA BACKEND:NVIDIA H100 80GB HBM3 sg{32/} rht_sg=32 | results/kernels/sycl_h100_test_nvidia.json | 84 | 2 | attn_h4g7_t128, codec_a13_k0_s256.stage3_decode.z |
+
+## Kernel microbenchmarks (same bitstreams on every GPU; Llama-3.1-8B shapes, ~4 bps, sps 512)
+
+| bench | case | metric | H100 CUDA (upstream) | MI300X HIP (port) | MI300X HIP tuned (BT64, WS split) | H100 SYCL (port, DPC++ CUDA) | Arc B390 SYCL (port) | MI300X / H100 CUDA |
+|---|---|---|---|---|---|---|---|---|
+| copy |  | GB/s r+w (memcpy) | 3032.6 | 4018.1 | 4019.6 | 3012.2 | 86.600 | 1.32 |
+| decode | 2-kernel bf16 | ms (14336x4096) | 1.415 | 1.140 | 1.152 | 1.377 | 8.964 | 0.81 |
+| decode | fused bf16 | ms (14336x4096) | 1.177 | 1.033 | 1.032 | 1.187 | 6.547 | 0.88 |
+| decode | fused coop bf16 | ms (14336x4096) | 1.171 | 1.260 | 1.260 | 1.227 | 12.755 | 1.08 |
+| decode | fused fp8 | ms (14336x4096) | 1.120 | 1.057 | 1.028 | 1.208 | 6.427 | 0.94 |
+| decode | fused int8 | ms (14336x4096) | 1.123 | 0.659 | 0.666 | 1.203 | 4.522 | 0.59 |
+| decode | launcher bf16 | ms (14336x4096) | 1.173 | 1.029 | 1.034 | 1.189 | 6.594 | 0.88 |
+| decode | symbols(z) | ms (14336x4096) | 1.114 | 1.022 | 1.026 | 1.081 | 7.567 | 0.92 |
+| decode | 2-kernel bf16 | bitstream GB/s | 20.540 | 25.510 | 25.230 | 21.110 | 3.240 | 1.24 |
+| decode | fused bf16 | bitstream GB/s | 24.700 | 28.130 | 28.170 | 24.480 | 4.440 | 1.14 |
+| decode | fused coop bf16 | bitstream GB/s | 24.810 | 23.060 | 23.080 | 23.700 | 2.280 | 0.93 |
+| decode | fused fp8 | bitstream GB/s | 25.960 | 27.510 | 28.290 | 24.070 | 4.520 | 1.06 |
+| decode | fused int8 | bitstream GB/s | 25.890 | 44.090 | 43.650 | 24.160 | 6.430 | 1.70 |
+| decode | launcher bf16 | bitstream GB/s | 24.790 | 28.250 | 28.130 | 24.440 | 4.410 | 1.14 |
+| decode | symbols(z) | bitstream GB/s | 26.100 | 28.460 | 28.330 | 26.880 | 3.840 | 1.09 |
+| rht | 256 | ms (2048x4096) | 0.013 | 0.011 | 0.011 | 0.015 | 0.203 | 0.81 |
+| rht | 1024 | ms (2048x4096) | 0.015 | 0.014 | 0.013 | 0.017 | 0.200 | 0.93 |
+| gemv | down_proj | ms | 0.454 | 0.505 | 1.494 | 0.506 | 4.311 | 1.11 |
+| gemv | gate/up_proj | ms | 0.430 | 0.511 | 0.604 | 0.482 | 3.493 | 1.19 |
+| gemv | k/v_proj | ms | 0.194 | 0.428 | 0.379 | 0.230 | 0.364 | 2.21 |
+| gemv | q/o_proj | ms | 0.194 | 0.431 | 0.384 | 0.231 | 1.614 | 2.22 |
+| gemv_layer |  | ms/token, 32 layers | 66.843 | 103.8 | 135.3 | 76.477 | 488.1 | 1.55 |
+| gemm_ws | gate/up_proj 4 | ms | 3.954 | 7.715 | 7.213 | 4.301 | 109.6 | 1.95 |
+| gemm_ws | gate/up_proj 8 | ms | 3.964 | 7.944 | 7.255 | 4.325 | 110.6 | 2.00 |
+| gemm_ws | q/o_proj 4 | ms | 1.110 | 2.564 | 2.395 | 1.218 | 31.915 | 2.31 |
+| gemm_ws | q/o_proj 8 | ms | 1.113 | 2.637 | 2.403 | 1.220 | 31.985 | 2.37 |
+| attn | 8 131 | us per layer | 4392.2 | 6628.8 | 6627.8 | 4707.3 | 6269.8 | 1.51 |
+| attn | 8 259 | us per layer | 8768.0 | 13213.3 | 13211.1 | 9396.3 | 12495.5 | 1.51 |
+| attn | 8 511 | us per layer | 17377.3 | 26181.7 | 26178.3 | 18620.4 | 24753.7 | 1.51 |
+| int8_linear | 1 | ms (4096x4096) | 0.361 | 0.642 | 0.647 | 0.676 | 4.197 | 1.78 |
+| int8_linear | 16 | ms (4096x4096) | 0.361 | 0.632 | 0.629 | 0.679 | 1.871 | 1.75 |
+| int8_linear | 2048 | ms (4096x4096) | 0.505 | 0.911 | 0.910 | 39.246 | 71.546 | 1.80 |

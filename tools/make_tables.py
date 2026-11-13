@@ -21,8 +21,8 @@ def load(pattern):
 def ppl_rows():
     rows = {}
     for d in load("repro/ppl_*.jsonl"):
-        if not d.get("ok"):
-            continue
+        if not d.get("ok") or "H100" not in d.get("gpu", "") or d.get("nwin") != 141 or d.get("seq", 2048) != 2048:
+            continue   # Llama-3.1-8B, 141 x 2048, H100 only (MI300X and Qwen rows are reported separately)
         key = (d["config"], d.get("join", "nn"), d.get("variant", "std"), d.get("attn", "sdpa"), d.get("rope", "llama3"), d.get("hadamard"))
         rows[key] = d
     return rows
@@ -137,9 +137,91 @@ def main():
         md.append(f"| {cfg} | {f(p[0], 0)} | {f(d and d['prefill_tok_s'], 0)} | {f(p[1], 1)} | {f(d and d['decode_tok_s'], 1)} | {f(p[2], 2)} | {f(d and d['resident_GiB'], 2)} |")
         js["t10"].append(dict(config=cfg, paper=p, ours=d and {k: d.get(k) for k in ("prefill_tok_s", "decode_tok_s", "resident_GiB", "kv_compression_x")}))
 
+    # ---------------- Table 12 (Qwen2.5-7B-Instruct-1M, KV only, ctx 4096, 72 windows)
+    q = {}
+    for d in load("repro/ppl_Q12*.jsonl"):
+        if d.get("ok"): q[d["config"]] = d
+    P12 = {("4", "none", "-"): 0.8, ("4", "qjl", "-"): 1.4, ("4", "none", "32"): 0.1, ("4", "qjl", "32"): 0.2,
+           ("3", "none", "-"): 5.5, ("3", "qjl", "-"): 4.8, ("3", "none", "32"): 1.8, ("3", "qjl", "32"): 1.6,
+           ("2", "none", "-"): 42.0, ("2", "qjl", "-"): 44.0, ("2", "none", "32"): 7.4, ("2", "qjl", "32"): 14.7, ("1.7", "none", "32"): 26.9}
+    qb = q.get("bf16")
+    md.append("\n## Table 12 (Qwen2.5-7B-Instruct-1M, KV only, WikiText-2, ctx 4096, 72 windows)\n")
+    md.append(f"Our bf16 baseline: {f(qb and qb['ppl'], 4)} (paper: 7.25).\n")
+    md.append("| bits | correction | window | paper W2 Δ% | ours PPL | ours Δ% | ours eff. bps | ours KV× = 16/bps |\n|---|---|---|---|---|---|---|---|")
+    js["t12"] = []
+    for (b_, rot, w), pd in P12.items():
+        cfg = f"kv:{b_}:{rot}:0" if w == "-" else f"kvres:{b_}:{rot}"
+        d = q.get(cfg)
+        o = d and d["ppl"]; dp = (100 * (o / qb["ppl"] - 1)) if (o and qb) else None
+        bps = d and d.get("measured_bps")
+        md.append(f"| {b_} | {rot} | {w} | +{pd} | {f(o)} | {f(dp, 1) if dp is not None else '-'} | {f(bps, 2) if bps else '-'} | {f(16 / bps, 1) if bps else '-'} |")
+        js["t12"].append(dict(bits=b_, rot=rot, window=w, paper_dpct=pd, ours=o, ours_dpct=dp, bps=bps))
+    md.append("\nNote: for the no-window rows `measured_bps` excludes the fp16 norm (+0.125 b/scalar); the windowed rows count the "
+              "bf16 window and protected K at 16 bits, as the paper's effective bps does.\n")
+
+    # ---------------- end-to-end on MI300X with the ported kernels
+    md.append("\n## End-to-end PPL on MI300X (ROCm torch 2.8 + HIP port) vs H100 (CUDA)\n")
+    md.append("| config | H100 (CUDA) | MI300X (ROCm) | Δ | stored bits/weight H100 / MI300X |\n|---|---|---|---|---|")
+    js["rocm_e2e"] = []
+    for d in load("repro/ppl_rocm_mi300x.jsonl"):
+        h = get(rows, d["config"])
+        hp = h and h["ppl"]
+        md.append(f"| {d['config']}{' (HIP kernels)' if d.get('kernels') else ''} | {f(hp, 4)} | {d['ppl']:.4f} | {f(d['ppl'] - hp, 4) if hp else '-'} | "
+                  f"{f(h and h.get('stored_bits_per_weight'), 6)} / {f(d.get('stored_bits_per_weight'), 6)} |")
+        js["rocm_e2e"].append(dict(config=d["config"], h100=hp, mi300x=d["ppl"]))
+
+    # ---------------- kernels: correctness per backend
+    md.append("\n## Kernel correctness on the shared vectors (86 checks per backend)\n")
+    md.append("| backend | file | pass | fail | failing checks |\n|---|---|---|---|---|")
+    js["kernel_tests"] = []
+    for fn in sorted(glob.glob(os.path.join(R, "kernels", "*test*.json"))):
+        d = json.load(open(fn))
+        bad = [t["test"] for t in d["tests"] if not t["pass"]]
+        md.append(f"| {d['backend']} | {os.path.relpath(fn, ROOT)} | {d['pass']} | {d['fail']} | {', '.join(bad)} |")
+        js["kernel_tests"].append(dict(backend=d["backend"], file=os.path.relpath(fn, ROOT), passed=d["pass"], failed=d["fail"], failing=bad))
+    # ---------------- kernels: benchmarks (last record per key wins)
+    sets = [("H100 CUDA (upstream)", "cuda_h100_full_bench.jsonl"), ("MI300X HIP (port)", "hip_mi300x_bench.jsonl"),
+            ("MI300X HIP tuned (BT64, WS split)", "hip_mi300x_tuned_bt64_bench.jsonl"),
+            ("H100 SYCL (port, DPC++ CUDA)", "sycl_h100_bench.jsonl"), ("Arc B390 SYCL (port)", "sycl_arcb390_bench.jsonl")]
+    B = {}
+    for name, fn in sets:
+        p = os.path.join(R, "kernels", fn)
+        if not os.path.exists(p):
+            continue
+        for line in open(p):
+            if not line.startswith("{"): continue
+            d = json.loads(line)
+            key = (d["bench"], d.get("variant") or d.get("shape") or "", d.get("H", ""), d.get("T", ""), d.get("M", ""), d.get("B", ""))
+            B.setdefault(key, {})[name] = d
+    names = [n for n, _ in sets]
+    def val(d, k):
+        return d.get(k) if d else None
+    md.append("\n## Kernel microbenchmarks (same bitstreams on every GPU; Llama-3.1-8B shapes, ~4 bps, sps 512)\n")
+    md.append("| bench | case | metric | " + " | ".join(names) + " | MI300X / H100 CUDA |\n|---|---|---|" + "---|" * (len(names) + 1))
+    order = [("copy", "gbps_rw", "GB/s r+w (memcpy)"), ("decode", "ms", "ms (14336x4096)"), ("decode", "bitstream_GBps", "bitstream GB/s"),
+             ("rht", "ms", "ms (2048x4096)"), ("gemv", "ms", "ms"), ("gemv_layer", "ms_per_token_32_layers", "ms/token, 32 layers"),
+             ("gemm_ws", "ms", "ms"), ("attn", "us", "us per layer"), ("int8_linear", "ms", "ms (4096x4096)")]
+    js["kernel_bench"] = []
+    for bench, metric, label in order:
+        for key in sorted(k for k in B if k[0] == bench):
+            row = B[key]
+            case = " ".join(str(x) for x in key[1:] if x != "")
+            vals = [val(row.get(n), metric) for n in names]
+            h, a = vals[0], vals[1]
+            ratio = (a / h) if (h and a) else None
+            md.append(f"| {bench} | {case} | {label} | " + " | ".join(f(v, 3 if isinstance(v, float) and v < 100 else 1) for v in vals) +
+                      f" | {f(ratio, 2) if ratio else '-'} |")
+            js["kernel_bench"].append(dict(bench=bench, case=case, metric=metric, **{n: v for n, v in zip(names, vals)}))
+
     os.makedirs(os.path.join(R, "derived"), exist_ok=True)
     open(os.path.join(R, "derived", "tables.md"), "w").write("\n".join(md) + "\n")
     json.dump(js, open(os.path.join(R, "derived", "tables.json"), "w"), indent=1)
+    import sys
+    if "--readme" in sys.argv:
+        rp = os.path.join(ROOT, "README.md"); t = open(rp).read()
+        a, b = t.index("<!-- TABLES:BEGIN -->"), t.index("<!-- TABLES:END -->")
+        t = t[:a] + "<!-- TABLES:BEGIN -->\n<!-- generated by tools/make_tables.py from results/ -->\n\n" + "\n".join(md) + "\n" + t[b:]
+        open(rp, "w").write(t)
     print("\n".join(md))
 
 

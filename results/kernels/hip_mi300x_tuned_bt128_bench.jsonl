@@ -1,0 +1,25 @@
+{"bench":"copy","backend":"hip:AMD Instinct MI300X VF gfx942:sramecc+:xnack-","bytes":1073741824,"gbps_rw":4023.1}
+{"bench":"decode","backend":"hip:AMD Instinct MI300X VF gfx942:sramecc+:xnack-","variant":"symbols(z)","N":14336,"K":4096,"sps":512,"alpha":7.100,"k":2,"bits_per_sym":3.9603,"ms":1.0280,"Gsym_s":57.12,"bitstream_GBps":28.28,"out_GBps":57.12}
+{"bench":"decode","backend":"hip:AMD Instinct MI300X VF gfx942:sramecc+:xnack-","variant":"2-kernel bf16","N":14336,"K":4096,"sps":512,"alpha":7.100,"k":2,"bits_per_sym":3.9603,"ms":1.1461,"Gsym_s":51.23,"bitstream_GBps":25.36,"out_GBps":102.47}
+{"bench":"decode","backend":"hip:AMD Instinct MI300X VF gfx942:sramecc+:xnack-","variant":"fused bf16","N":14336,"K":4096,"sps":512,"alpha":7.100,"k":2,"bits_per_sym":3.9603,"ms":1.0419,"Gsym_s":56.36,"bitstream_GBps":27.90,"out_GBps":112.72}
+{"bench":"decode","backend":"hip:AMD Instinct MI300X VF gfx942:sramecc+:xnack-","variant":"fused coop bf16","N":14336,"K":4096,"sps":512,"alpha":7.100,"k":2,"bits_per_sym":3.9603,"ms":1.2571,"Gsym_s":46.71,"bitstream_GBps":23.12,"out_GBps":93.42}
+{"bench":"decode","backend":"hip:AMD Instinct MI300X VF gfx942:sramecc+:xnack-","variant":"fused fp8","N":14336,"K":4096,"sps":512,"alpha":7.100,"k":2,"bits_per_sym":3.9603,"ms":1.0618,"Gsym_s":55.30,"bitstream_GBps":27.38,"out_GBps":55.30}
+{"bench":"decode","backend":"hip:AMD Instinct MI300X VF gfx942:sramecc+:xnack-","variant":"fused int8","N":14336,"K":4096,"sps":512,"alpha":7.100,"k":2,"bits_per_sym":3.9603,"ms":0.6639,"Gsym_s":88.45,"bitstream_GBps":43.79,"out_GBps":88.45}
+{"bench":"decode","backend":"hip:AMD Instinct MI300X VF gfx942:sramecc+:xnack-","variant":"launcher bf16","N":14336,"K":4096,"sps":512,"alpha":7.100,"k":2,"bits_per_sym":3.9603,"ms":1.0375,"Gsym_s":56.60,"bitstream_GBps":28.02,"out_GBps":113.19}
+{"bench":"rht","backend":"hip:AMD Instinct MI300X VF gfx942:sramecc+:xnack-","rows":2048,"K":4096,"H":256,"ms":0.0108,"GBps_rw":3093.4}
+{"bench":"rht","backend":"hip:AMD Instinct MI300X VF gfx942:sramecc+:xnack-","rows":2048,"K":4096,"H":1024,"ms":0.0137,"GBps_rw":2452.7}
+{"bench":"gemv","backend":"hip:AMD Instinct MI300X VF gfx942:sramecc+:xnack-","shape":"q/o_proj","N":4096,"K":4096,"ms":0.3867,"bitstream_GBps":21.48}
+{"bench":"gemm_ws","backend":"hip:AMD Instinct MI300X VF gfx942:sramecc+:xnack-","shape":"q/o_proj","N":4096,"K":4096,"B":4,"ms":2.3949}
+{"bench":"gemm_ws","backend":"hip:AMD Instinct MI300X VF gfx942:sramecc+:xnack-","shape":"q/o_proj","N":4096,"K":4096,"B":8,"ms":2.4026}
+{"bench":"gemv","backend":"hip:AMD Instinct MI300X VF gfx942:sramecc+:xnack-","shape":"k/v_proj","N":1024,"K":4096,"ms":0.3769,"bitstream_GBps":5.51}
+{"bench":"gemv","backend":"hip:AMD Instinct MI300X VF gfx942:sramecc+:xnack-","shape":"gate/up_proj","N":14336,"K":4096,"ms":0.6444,"bitstream_GBps":45.11}
+{"bench":"gemm_ws","backend":"hip:AMD Instinct MI300X VF gfx942:sramecc+:xnack-","shape":"gate/up_proj","N":14336,"K":4096,"B":4,"ms":7.2238}
+{"bench":"gemm_ws","backend":"hip:AMD Instinct MI300X VF gfx942:sramecc+:xnack-","shape":"gate/up_proj","N":14336,"K":4096,"B":8,"ms":7.2541}
+{"bench":"gemv","backend":"hip:AMD Instinct MI300X VF gfx942:sramecc+:xnack-","shape":"down_proj","N":4096,"K":14336,"ms":0.8705,"bitstream_GBps":33.39}
+{"bench":"gemv_layer","backend":"hip:AMD Instinct MI300X VF gfx942:sramecc+:xnack-","ms_per_layer":3.6864,"ms_per_token_32_layers":117.963}
+{"bench":"attn","backend":"hip:AMD Instinct MI300X VF gfx942:sramecc+:xnack-","H":8,"G":4,"T":131,"us":6627.53}
+{"bench":"attn","backend":"hip:AMD Instinct MI300X VF gfx942:sramecc+:xnack-","H":8,"G":4,"T":259,"us":13209.96}
+{"bench":"attn","backend":"hip:AMD Instinct MI300X VF gfx942:sramecc+:xnack-","H":8,"G":4,"T":511,"us":26174.06}
+{"bench":"int8_linear","backend":"hip:AMD Instinct MI300X VF gfx942:sramecc+:xnack-","M":1,"N":4096,"K":4096,"ms":0.6114}
+{"bench":"int8_linear","backend":"hip:AMD Instinct MI300X VF gfx942:sramecc+:xnack-","M":16,"N":4096,"K":4096,"ms":0.6263}
+{"bench":"int8_linear","backend":"hip:AMD Instinct MI300X VF gfx942:sramecc+:xnack-","M":2048,"N":4096,"K":4096,"ms":0.9103}

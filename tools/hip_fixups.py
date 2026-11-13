@@ -15,13 +15,43 @@ FIXES = {
         ("      const __nv_fp8_e4m3 v(x_hat);\n      static_cast<uint8_t*>(out8)[i] = v.__x;",
          "      static_cast<uint8_t*>(out8)[i] = hqn::f2e4m3_rn(x_hat);"),
     ],
+    # Opt-in MI300X tuning (default = faithful upstream launch configuration):
+    #  HQ_HIP_GEMV_BT=64|128|256  block size of rice_fused_gemv (upstream 256).  Same
+    #      arithmetic per output row; smaller blocks give more blocks for small N.
+    #  HQ_HIP_WS_SPLIT=1  rice_fused_gemm_ws with 128 threads and the consumer in warp 2,
+    #      so producer (wave 0) and consumer (wave 1) are different wavefronts on wave64
+    #      (upstream's 64-thread block is ONE wavefront on MI300X: no overlap at all).
+    "fused_decode_gemv.hip": [
+        ("    int batch,\n    int streams_per_row)\n{", "    int batch,\n    int streams_per_row,\n    int cw)\n{"),
+        ("ALL", "warp_id == 1", "warp_id == cw"),
+        ("    constexpr int BT = 256;\n    const int streams_per_row = in_features / sps;\n    const int rows_per_block  = BT / streams_per_row;",
+         "    const char* bt_env = getenv(\"HQ_HIP_GEMV_BT\");\n    const int BT = bt_env ? atoi(bt_env) : 256;\n"
+         "    const int streams_per_row = in_features / sps;\n    const int rows_per_block  = BT / streams_per_row;"),
+        ("    rice_fused_gemv_kernel<BT><<<grid, BT, smem, stream>>>(\n        words, word_count, offsets, ks,\n        num_streams, sps, alpha,\n"
+         "        reinterpret_cast<const hq_bf16_t*>(x_rot),\n        reinterpret_cast<const hq_bf16_t*>(sigma),\n        reinterpret_cast<hq_bf16_t*>(y_out),\n"
+         "        out_features, in_features, streams_per_row);",
+         "#define HQ_GEMV_LAUNCH(B_) rice_fused_gemv_kernel<B_><<<grid, B_, smem, stream>>>(words, word_count, offsets, ks, num_streams, sps, alpha, \\\n"
+         "        reinterpret_cast<const hq_bf16_t*>(x_rot), reinterpret_cast<const hq_bf16_t*>(sigma), reinterpret_cast<hq_bf16_t*>(y_out), \\\n"
+         "        out_features, in_features, streams_per_row)\n"
+         "    if (BT == 64) HQ_GEMV_LAUNCH(64); else if (BT == 128) HQ_GEMV_LAUNCH(128); else HQ_GEMV_LAUNCH(256);\n#undef HQ_GEMV_LAUNCH"),
+        ("    rice_fused_gemm_ws_kernel<<<grid, WS_BLOCK_THREADS, 0, stream>>>(",
+         "    const bool split = getenv(\"HQ_HIP_WS_SPLIT\") != nullptr;\n    rice_fused_gemm_ws_kernel<<<grid, split ? 128 : WS_BLOCK_THREADS, 0, stream>>>("),
+        ("        out_features, in_features, batch, streams_per_row);", "        out_features, in_features, batch, streams_per_row, split ? 2 : 1);"),
+        ('#include "metalrice_device_hip.hpp"', '#include "metalrice_device_hip.hpp"\n#include <cstdlib>'),
+    ],
 }
 
 
 def main():
     for fn in sorted(os.listdir(GEN)):
         src = open(os.path.join(GEN, fn)).read()
-        for old, new in FIXES.get(fn, []):
+        for fx in FIXES.get(fn, []):
+            if fx[0] == "ALL":
+                _, old, new = fx
+                if src.count(old) < 1:
+                    sys.exit(f"{fn}: fix applies 0 times: {old[:60]!r}")
+                src = src.replace(old, new); continue
+            old, new = fx
             n = src.count(old)
             if n != 1:
                 sys.exit(f"{fn}: fix applies {n} times: {old[:60]!r}")

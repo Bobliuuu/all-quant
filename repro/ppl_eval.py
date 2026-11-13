@@ -22,7 +22,7 @@ sys.path.insert(0, UP)
 import torch
 import torch.nn.functional as F
 
-SEQ = 2048
+SEQ = int(os.environ.get("HQ_SEQ", "2048"))   # Table 12 (Qwen) uses 4096
 NWIN = 141
 
 
@@ -116,6 +116,9 @@ def build(model, cfg: str, info: dict):
 
     if kind == "w_real":              # w_real:<mma bf16|int8|fp8>:<bps>[:<hadamard>]
         from hyperquant.quant_utils import lattice_alpha
+        if os.environ.get("HQ_ROCM_EXT") == "1":   # ROCm: metalrice_ext built from the HIP ports
+            sys.path.insert(0, os.path.join(HERE, "hip_ext"))
+            import rocm_ext; rocm_ext.install(); info["kernels"] = "hip port (repro/hip_ext)"
         from integrations.llama.rice_linear import convert_linears
         mma, bps = parts[1], float(parts[2])
         H = int(parts[3]) if len(parts) > 3 else None

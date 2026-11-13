@@ -47,6 +47,7 @@
 #include "hq_hip_compat.hpp"
 #include <stdint.h>
 #include "metalrice_device_hip.hpp"
+#include <cstdlib>
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Kernel 1: fused GEMV (batch = 1)
@@ -148,7 +149,8 @@ __global__ void rice_fused_gemm_ws_kernel(
     int out_features,
     int in_features,
     int batch,
-    int streams_per_row)
+    int streams_per_row,
+    int cw)
 {
     // Shared memory:
     //   smem_w[2][WS_TILE_ROWS][WS_SPS] – double-buffered decoded weight tile (float32)
@@ -165,7 +167,7 @@ __global__ void rice_fused_gemm_ws_kernel(
     const int blk_batch = blockIdx.y * WS_TILE_BATCH;
 
     // Initialise accumulators (consumer warp = threads 32–63).
-    if (warp_id == 1) {
+    if (warp_id == cw) {
         // lane maps to one (b, r) pair: r = lane % WS_TILE_ROWS, b = lane / WS_TILE_ROWS
         const int r = lane % WS_TILE_ROWS;
         const int b = lane / WS_TILE_ROWS;
@@ -246,7 +248,7 @@ __global__ void rice_fused_gemm_ws_kernel(
         }
 
         // Consumer: load x tile, then accumulate partial GEMM on current stage.
-        if (warp_id == 1) {
+        if (warp_id == cw) {
             // Load smem_x[b][j] = x_rot[blk_batch+b, base_x+j].
             // Consumer warp has 32 lanes; each loads WS_SPS/32 = 16 elements per batch row.
             for (int b = 0; b < WS_TILE_BATCH; ++b) {
@@ -263,7 +265,7 @@ __global__ void rice_fused_gemm_ws_kernel(
 
         // Consumer accumulation: thread lane → (b, r) pair.
         // lane 0..31: r = lane%WS_TILE_ROWS (0..3), b = lane/WS_TILE_ROWS (0..7).
-        if (warp_id == 1) {
+        if (warp_id == cw) {
             const int r = lane % WS_TILE_ROWS;
             const int b = lane / WS_TILE_ROWS;
             float s = 0.0f;
@@ -280,7 +282,7 @@ __global__ void rice_fused_gemm_ws_kernel(
     }
 
     // Write outputs (consumer warp).
-    if (warp_id == 1) {
+    if (warp_id == cw) {
         const int r = lane % WS_TILE_ROWS;
         const int b = lane / WS_TILE_ROWS;
         const int global_row   = blk_row   + r;
@@ -306,20 +308,19 @@ void launch_rice_fused_gemv(
     int out_features, int in_features,
     hipStream_t stream)
 {
-    constexpr int BT = 256;
+    const char* bt_env = getenv("HQ_HIP_GEMV_BT");
+    const int BT = bt_env ? atoi(bt_env) : 256;
     const int streams_per_row = in_features / sps;
     const int rows_per_block  = BT / streams_per_row;
     const int grid = (out_features + rows_per_block - 1) / rows_per_block;
     const size_t smem = static_cast<size_t>(in_features) * 2
                       + static_cast<size_t>(BT) * 4;
 
-    rice_fused_gemv_kernel<BT><<<grid, BT, smem, stream>>>(
-        words, word_count, offsets, ks,
-        num_streams, sps, alpha,
-        reinterpret_cast<const hq_bf16_t*>(x_rot),
-        reinterpret_cast<const hq_bf16_t*>(sigma),
-        reinterpret_cast<hq_bf16_t*>(y_out),
-        out_features, in_features, streams_per_row);
+#define HQ_GEMV_LAUNCH(B_) rice_fused_gemv_kernel<B_><<<grid, B_, smem, stream>>>(words, word_count, offsets, ks, num_streams, sps, alpha, \
+        reinterpret_cast<const hq_bf16_t*>(x_rot), reinterpret_cast<const hq_bf16_t*>(sigma), reinterpret_cast<hq_bf16_t*>(y_out), \
+        out_features, in_features, streams_per_row)
+    if (BT == 64) HQ_GEMV_LAUNCH(64); else if (BT == 128) HQ_GEMV_LAUNCH(128); else HQ_GEMV_LAUNCH(256);
+#undef HQ_GEMV_LAUNCH
 }
 
 void launch_rice_fused_gemm_ws(
@@ -337,11 +338,12 @@ void launch_rice_fused_gemm_ws(
         (out_features + WS_TILE_ROWS  - 1) / WS_TILE_ROWS,
         (batch         + WS_TILE_BATCH - 1) / WS_TILE_BATCH);
 
-    rice_fused_gemm_ws_kernel<<<grid, WS_BLOCK_THREADS, 0, stream>>>(
+    const bool split = getenv("HQ_HIP_WS_SPLIT") != nullptr;
+    rice_fused_gemm_ws_kernel<<<grid, split ? 128 : WS_BLOCK_THREADS, 0, stream>>>(
         words, word_count, offsets, ks,
         num_streams, sps, alpha,
         reinterpret_cast<const hq_bf16_t*>(x_rot),
         reinterpret_cast<const hq_bf16_t*>(sigma),
         reinterpret_cast<hq_bf16_t*>(y_out),
-        out_features, in_features, batch, streams_per_row);
+        out_features, in_features, batch, streams_per_row, split ? 2 : 1);
 }

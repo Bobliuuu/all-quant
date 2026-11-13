@@ -3,5 +3,5 @@
 set -e
 cd "$(dirname "$0")/.."
 rsync -az --delete -e "ssh -o ForwardAgent=no -o BatchMode=yes" \
-  --exclude .git --exclude build --exclude 'results' --exclude 'repro' --exclude '__pycache__' \
+  --exclude .git --exclude build --exclude 'results' --exclude '__pycache__' \
   ./ amddroplet:/root/hq-port/src/

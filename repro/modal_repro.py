@@ -46,6 +46,15 @@ def _sha256(p):
 
 
 @app.function(volumes=VOLS, timeout=3600, cpu=4)
+def download_qwen():
+    from huggingface_hub import snapshot_download
+    snapshot_download("Qwen/Qwen2.5-7B-Instruct-1M", local_dir="/models/qwen25-7b-instruct-1m",
+                      allow_patterns=["*.json", "*.safetensors", "merges.txt", "vocab.json"])
+    models.commit()
+    return sorted(os.listdir("/models/qwen25-7b-instruct-1m"))
+
+
+@app.function(volumes=VOLS, timeout=3600, cpu=4)
 def download():
     from huggingface_hub import snapshot_download
     exp = json.load(open("/work/repro/model_hashes.json"))["files"]
@@ -76,7 +85,7 @@ def _run(cmd, log):
 
 
 @app.function(gpu="H100!", volumes=VOLS, timeout=6 * 3600)
-def ppl(configs: str, tag: str, nwin: int = 141, env: str = ""):
+def ppl(configs: str, tag: str, nwin: int = 141, env: str = "", model: str = MODEL_DIR):
     os.makedirs("/results/ppl", exist_ok=True)
     os.makedirs("/root/.cache/hyperquant", exist_ok=True)
     # persist the SNR<->bps calibration cache across runs (seeded once, shared)
@@ -88,8 +97,8 @@ def ppl(configs: str, tag: str, nwin: int = 141, env: str = ""):
     log = f"/results/ppl/{tag}.log"
     _run("nvidia-smi --query-gpu=name,driver_version --format=csv,noheader", log)
     for e in env.split(";"):  # several env settings -> sequential runs in one container
-        rc = _run(f"cd /work/upstream && {e} python /work/repro/ppl_eval.py --model {MODEL_DIR} "
-                  f"--configs '{configs}' --out {out} --nwin {nwin} --tok-cache /models/wt2_tokens.pt", log)
+        rc = _run(f"cd /work/upstream && {e} python /work/repro/ppl_eval.py --model {model} "
+                  f"--configs '{configs}' --out {out} --nwin {nwin} --tok-cache /models/wt2_tokens_{os.path.basename(model)}.pt", log)
     if os.path.exists("/root/.cache/hyperquant/lattice_bps_calibration.json") and not os.path.exists(cal):
         subprocess.run(f"cp /root/.cache/hyperquant/lattice_bps_calibration.json {cal}", shell=True)
     models.commit(); results.commit()
@@ -112,10 +121,10 @@ def throughput(configs: str, tag: str, extra: str = ""):
 
 
 @app.local_entrypoint()
-def main(configs: str = "bf16", tag: str = "test", nwin: int = 141, mode: str = "ppl", extra: str = "", env: str = ""):
+def main(configs: str = "bf16", tag: str = "test", nwin: int = 141, mode: str = "ppl", extra: str = "", env: str = "", model: str = MODEL_DIR):
     os.makedirs(os.path.join(ROOT, "results", "repro"), exist_ok=True)
     if mode == "ppl":
-        res = ppl.remote(configs, tag, nwin, env)
+        res = ppl.remote(configs, tag, nwin, env, model)
     else:
         res = throughput.remote(configs, tag, extra)
     sub = "ppl" if mode == "ppl" else "tput"
