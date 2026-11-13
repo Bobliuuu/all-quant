@@ -128,9 +128,9 @@ video:
   max_mb: 22
   render_crf: 18
   concurrency: 4
-  poster_at: 40
+  poster_at: 150
   music: true
-  voice: {engine: openai, voice: alloy, model: gpt-4o-mini-tts}
+  voice: {engine: openai, voice: alloy, model: gpt-4o-mini-tts, tempo: 1.25}
   scenes:
     - type: title
       title: UltraQuant
@@ -143,7 +143,7 @@ video:
         - "Speculative decoding verifies K draft tokens per step"
         - "A straightforward kernel reads the whole KV cache K times"
         - "Decode is memory bound, so extra traffic is extra time"
-      say: "Speculative decoding asks the model to verify K draft tokens in one step. A straightforward kernel handles each of those K queries separately, so every one of them reads the entire KV cache again. Decode is memory bound, so reading the cache K times costs close to K times the time."
+      say: "Speculative decoding verifies K draft tokens in one step. A straightforward kernel handles each of the K queries separately, so each one reads the entire KV cache again. Decode is memory bound, so that costs close to K times the time."
     - type: passes
       heading: "The idea: fuse the K queries into one pass"
       k_number: k_max
@@ -159,7 +159,7 @@ video:
       gif_end: 21
       gif_speed: 1.5
       gif_width: 900
-      say: "The idea is to fuse them. All K queries, and the group of query heads that share a key value head, are stacked into one tile. Each page of the cache is then read once, and all K outputs come out together. On the left, K passes. On the right, a single pass."
+      say: "The idea is to fuse them. All K queries, and the query heads that share a key value head, are stacked into one tile. Each page of the cache is read once, and all K outputs come out together. On the left, K passes. On the right, one."
     - type: bits
       heading: "The format: FP4 E2M1 with a UE8M0 scale per 32"
       cells: 32
@@ -175,7 +175,7 @@ video:
     - type: architecture
       diagram: flow
       heading: "Inside the kernel: one tile, one pass"
-      say: "Inside the kernel, the queries and the query group form one tile. The FP4 pages are expanded to bf16 in registers, each query gets its own causal mask, and split KV partial results are merged with a log sum exp reduction."
+      say: "Inside the kernel, the queries form one tile. FP4 pages are expanded to bf16 in registers, each query gets its own causal mask, and split KV partial results are merged with a log sum exp reduction."
     - type: cards
       heading: "Three vendors, one op, one layout"
       cards:
@@ -183,7 +183,7 @@ video:
         - {title: NVIDIA, sub: "CUDA · mma.sync, wgmma, tcgen05", lines: ["A100, H100, L40S, B300, RTX PRO 6000", "{{ n.cuda_launches }} vector-check launches, {{ n.cuda_fails }} failures"]}
         - {title: Intel, sub: "SYCL · ESIMD and XMX · Arc B390", lines: ["XMX joint_matrix and ESIMD paths", "{{ n.sycl_runs }} vector runs, {{ n.sycl_fails }} failures"]}
       footer: "Same cache layout, checked against the same CPU reference vectors; a pure permute of the upstream vLLM / SGLang layout"
-      say: "The same operation runs on three vendors. AMD uses a Triton kernel on MI300X. NVIDIA uses native CUDA, with mma sync and tcgen05 on B300, across five GPUs. Intel uses SYCL, with XMX and ESIMD, on an Arc B390. All three read the same cache layout, which is a pure permute of the upstream layout, and all are checked against the same CPU reference vectors: {{ n.cuda_launches }} CUDA launches and {{ n.sycl_runs }} SYCL runs, with zero failures."
+      say: "The same operation runs on three vendors: a Triton kernel on AMD MI300X, native CUDA on five NVIDIA GPUs, and SYCL with XMX and ESIMD on an Intel Arc B390. All three read the same cache layout, a pure permute of the upstream one, and are checked against the same CPU reference vectors: {{ n.cuda_launches }} CUDA launches and {{ n.sycl_runs }} SYCL runs, with zero failures."
     - type: chart
       chart: speed_per_k
       gif: assets/speed_per_k.gif
@@ -191,7 +191,7 @@ video:
       gif_end: 10
       gif_width: 900
       gif_fps: 10
-      say: "Here is the time for one attention layer, batch eight, thirty two thousand tokens of context. Going from one speculative token to eight costs little. On MI300X it goes from {{ n.mi_k1.numtext }} to {{ n.mi_k8.numtext }} milliseconds. On H100, from {{ n.h100_k1.numtext }} to {{ n.h100_k8.numtext }}. On B300, from {{ n.b300_k1.numtext }} to {{ n.b300_k8.numtext }}."
+      say: "Time for one attention layer, batch eight, thirty two thousand tokens of context. Going from one speculative token to eight costs little. On MI300X it goes from {{ n.mi_k1.numtext }} to {{ n.mi_k8.numtext }} milliseconds. On H100, from {{ n.h100_k1.numtext }} to {{ n.h100_k8.numtext }}. On B300, from {{ n.b300_k1.numtext }} to {{ n.b300_k8.numtext }}."
     - type: chart
       chart: fused_vs_k
       say: "Against running the same kernel K times, the fused kernel at K equals eight is {{ n.gain_mi.numtext }} times faster on MI300X, {{ n.gain_h100.numtext }} times on H100, and {{ n.gain_b300.numtext }} times on B300. Across all six GPUs, the gain at K equals eight runs from {{ n.gain_min.numtext }} to {{ n.gain_max.numtext }} times. At K equals one there is nothing to fuse."
@@ -202,7 +202,7 @@ video:
       gif_end: 12
       gif_width: 900
       gif_fps: 10
-      say: "How does it compare with other KV cache schemes? We ported TurboQuant, NVFP4, FP8, KIVI, QServe, KVQuant, SpectralQuant, and the Planar, Iso and Rotor quantisers to the same MI300X harness. Speed is on the horizontal axis, and the perplexity increase on Qwen three eight B is on the vertical, so lower left is better. UltraQuant is faster and more accurate than TurboQuant, SpectralQuant and the three bit rotation methods. But it is not the most accurate."
+      say: "How does it compare with other schemes? We ported TurboQuant, NVFP4, FP8, KIVI, QServe, KVQuant, SpectralQuant, and the Planar, Iso and Rotor quantisers to the same MI300X harness. Speed is horizontal, perplexity increase on Qwen three eight B is vertical, so lower left is better. UltraQuant beats TurboQuant, SpectralQuant and the three bit rotation methods on both. But it is not the most accurate."
     - type: results
       heading: "Accuracy: UltraQuant is not the leader"
       items:
@@ -212,13 +212,13 @@ video:
         - {label: "KIVI-4 (80 B)", number: ppl_kivi}
         - {label: "QServe-int4 (same 68 B)", number: ppl_qserve}
         - {label: "MXFP4 (same 68 B)", number: ppl_mxfp4}
-      say: "On accuracy, UltraQuant is not the leader. QServe int four at the same sixty eight bytes, NVFP4, FP8 and KIVI four all beat it. NVFP4 costs four more bytes per vector and cuts the perplexity increase on Qwen three from {{ n.ppl_uq.numtext }} to {{ n.ppl_nvfp4.numtext }}. FP8 is also faster at K equals one, {{ n.fp8_ms1.numtext }} against {{ n.uq_ms1.numtext }}."
+      say: "On accuracy, UltraQuant is not the leader. QServe int four at the same sixty eight bytes, NVFP4, FP8 and KIVI four all beat it. NVFP4, for four more bytes, cuts the Qwen three perplexity increase from {{ n.ppl_uq.numtext }} to {{ n.ppl_nvfp4.numtext }}. FP8 is also faster at K equals one."
     - type: chart
       chart: b300_vs_fi
       say: "On B300, a vendor kernel is faster. FlashInfer's NVFP4 decode, which also shares the read across queries, takes {{ n.fi_k1.numtext }} milliseconds at K equals one, against {{ n.ours_k1.numtext }} for ours. That is {{ n.fi_ratio_1.numtext }} to {{ n.fi_ratio_8.numtext }} times faster. We do not beat vendor tuned kernels there."
     - type: chart
       chart: kv_capacity
-      say: "Does it matter in a real server? We ran vLLM's own native four bit backend, not our kernel, with Qwen three eight B on MI300X. KV capacity rises from {{ n.cap_bf16.numtext }} million tokens to {{ n.cap_fp4.numtext }} million, which is {{ n.cap_ratio.numtext }} times, because vLLM keeps four layers at full precision."
+      say: "In a real server? We ran vLLM's own native four bit backend, not our kernel, with Qwen three eight B on MI300X. KV capacity rises from {{ n.cap_bf16.numtext }} million tokens to {{ n.cap_fp4.numtext }} million, which is {{ n.cap_ratio.numtext }} times, because vLLM keeps four layers at full precision."
     - type: table
       table: serving_tbl
       heading: "Serving: what it costs"
@@ -227,7 +227,7 @@ video:
       gif_end: 9
       gif_width: 900
       gif_fps: 8
-      say: "The costs are real. Question answering F one drops from {{ n.f1_bf16.numtext }} to {{ n.f1_fp4.numtext }}. Greedy output diverges from bf sixteen after a median of {{ n.drift_fp4.numtext }} tokens, earlier than fp8 at {{ n.drift_fp8.numtext }}. Plain decode is slower, {{ n.plain_fp4.numtext }} tokens per second against {{ n.plain_bf16.numtext }}. In an oversubscribed agent test, FP4 serves {{ n.agent_fp4.numtext }} tokens per second against {{ n.agent_bf16.numtext }}, with a median time to first token of {{ n.ttft_fp4.numtext }} seconds against {{ n.ttft_bf16.numtext }}."
+      say: "The costs are real. Question answering F one drops from {{ n.f1_bf16.numtext }} to {{ n.f1_fp4.numtext }}. Greedy output diverges from bf sixteen after a median of {{ n.drift_fp4.numtext }} tokens, earlier than fp8 at {{ n.drift_fp8.numtext }}. Plain decode is slower: {{ n.plain_fp4.numtext }} tokens per second against {{ n.plain_bf16.numtext }}. In an oversubscribed agent test FP4 wins, {{ n.agent_fp4.numtext }} against {{ n.agent_bf16.numtext }} tokens per second."
     - type: caveats
       heading: "Honest caveats"
       bullets:
@@ -235,7 +235,7 @@ video:
         - "Serving used vLLM's native backend, not our kernel; single runs on a shared GPU"
         - "MI300X and Arc decode FP4 in software, far below peak bandwidth"
         - "On B300, vendor NVFP4 kernels are faster"
-      say: "Honest caveats. Most kernel numbers are synthetic microbenchmarks. The serving results come from vLLM's native backend, not our kernel, as single runs on a shared GPU. MI300X and Arc have no native FP4 matrix instructions, so FP4 is decoded in software and the kernel reaches only a fraction of memory bandwidth. And on B300, vendor NVFP4 kernels are faster."
+      say: "Honest caveats. Most kernel numbers are synthetic microbenchmarks. The serving results come from vLLM's native backend, not our kernel, as single runs on a shared GPU. MI300X and Arc have no native FP4 matrix instructions, so FP4 is decoded in software. And on B300, vendor NVFP4 kernels are faster."
     - type: idea
       heading: "Is it the best? No. Here is where it wins."
       bullets:
@@ -333,7 +333,7 @@ charts:
     fmt: "{:.2f}"
   - id: ports_scatter
     type: scatter
-    title: "Speed against accuracy on MI300X: real fused kernels"
+    title: "Speed vs accuracy on MI300X: real fused kernels"
     subtitle: "K=8 verify, B8, ctx 32k, cold cache; perplexity increase on Qwen3-8B (WikiText-2, single run)"
     better: lower
     file: results/derived/readme_data.json
@@ -357,7 +357,7 @@ charts:
     group_labels: {ours: UltraQuant, accurate: "more accurate than UltraQuant", other: "other methods"}
   - id: b300_vs_fi
     type: gbar
-    title: "B300: FlashInfer NVFP4 is faster than our CUDA port (ms)"
+    title: "B300: FlashInfer NVFP4 is faster (ms)"
     subtitle: "B8, ctx 32768, Hq64/Hkv8/D128; FlashInfer trtllm-gen with fp8 queries"
     better: lower
     file: results/derived/readme_data.json
@@ -368,7 +368,7 @@ charts:
     fmt: "{:.3f}"
   - id: kv_capacity
     type: bar
-    title: "KV-cache capacity on MI300X, vLLM, Qwen3-8B (millions of tokens)"
+    title: "KV capacity, vLLM + Qwen3-8B on MI300X"
     subtitle: "vLLM's native ultraquant_4bit backend keeps 4 layers at bf16, hence below 4x"
     better: higher
     items:
@@ -382,7 +382,7 @@ diagrams:
     nodes:
       - {id: q, label: "K queries + GQA group", sub: "q0..qK-1, all heads that share a KV head", col: 0, row: 0, kind: io}
       - {id: tile, label: "One tile, M = K x group", sub: "stacked into one matrix multiply", col: 1, row: 0, kind: accent}
-      - {id: pages, label: "FP4 KV pages (68 B / vector)", sub: "paged cache, each page read once", col: 1, row: 1, kind: store}
+      - {id: pages, label: "FP4 KV pages (68 B)", sub: "paged cache, each page read once", col: 1, row: 1, kind: store}
       - {id: dq, label: "FP4 to bf16 in registers", sub: "UE8M0 scale per 32 channels", col: 2, row: 0}
       - {id: mask, label: "Per-query causal mask", sub: "query j sees seq_len - K + j + 1 positions", col: 3, row: 0}
       - {id: red, label: "Split-KV + LSE reduce", sub: "partial results merged", col: 3, row: 1}

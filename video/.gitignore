@@ -1,3 +1,6 @@
 .work/
 __pycache__/
 video/.render/
+.render/
+.render.log
+.render_log.txt
