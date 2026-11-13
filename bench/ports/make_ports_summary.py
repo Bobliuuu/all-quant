@@ -30,7 +30,7 @@ NOTES = '''
 '''
 rows = []
 PORTS = {'fp8','nvfp4','mxfp4','kivi4','qserve_int4'}
-NOTE = dict(fp8='per-tensor e4m3fnuz scale; fused K-query', nvfp4='E4M3/16 + tensor scale; fused', mxfp4='OCP floor-exp UE8M0/32; same kernel as UltraQuant', kivi4='per-channel K / per-token V + 128-token bf16 residual; fused', qserve_int4='per-token asym int4 + SmoothAttention; straightforward K-query')
+NOTE = dict(fp8='per-tensor e4m3fnuz scale; fused K-query', nvfp4='E4M3/16 + tensor scale; fused', mxfp4='OCP floor-exp UE8M0/32; same kernel as UltraQuant', kivi4='per-channel K / per-token V + 128-token bf16 residual; fused', qserve_int4='per-token asym int4 + SmoothAttention; straightforward K-query', kvquant='dense nuq4, pre-RoPE K + in-kernel RoPE; K=4/8 run with num_warps=4 (K=1/2: 2 warps)')
 def f2(x): return "-" if x is None else f"{x:.3f}"
 def add(name, bpv, ms, cos, dq, note):
     g = lambda K: ms.get(str(K), ms.get(K)) if ms else None

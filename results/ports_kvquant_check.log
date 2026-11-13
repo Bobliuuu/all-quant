@@ -1,3 +1,5 @@
 K 1 rel_err_vs_own_dequant 0.00870935432612896
 K 2 rel_err_vs_own_dequant 0.005278637632727623
 Terminated
+K 4 rel_err_vs_own_dequant 0.006114044226706028
+K 8 rel_err_vs_own_dequant 0.00528140552341938

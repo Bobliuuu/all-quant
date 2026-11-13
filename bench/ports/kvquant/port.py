@@ -57,6 +57,8 @@ class Port:
         return kd, core.dequant_v(vc, vs, vz, self.cb_v)[0]
     def decode(self, q, nsplit=None):
         B, K, HQ, D = q.shape; q = q.contiguous(); sm = D ** -0.5
+        os.environ.setdefault("UQ_STAGES", "1")
+        if K >= 4: os.environ["UQ_WARPS"] = "4"   # num_warps=2 at BLOCK_M>=32 crashes (HIP error 700); 8 warps is 5x slower
         T = (self.kc, self.vc, self.cb_k, self.cb_v, self.sc, self.zp, self.vsc, self.vzp, self.cos, self.sin)
         run = lambda ns: run_split_reduce(_split_kernel, q, T, self.bt, self.sl, sm, 1.0, ns, self.hkv)
         if nsplit is None: nsplit = self.tuner.pick(K, run)

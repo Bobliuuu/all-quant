@@ -10,6 +10,7 @@ B8, ctx 32768, Hq64/Hkv8/D128, page 64, cold-cache timing (shared harness bench/
 | fp8 (port) | 128 | 0.294 | 0.291 | 0.421 | 0.510 | 1825 (47%) | 0.998 | 0.008 / 0.032 | 0.998 / 0.997 | per-tensor e4m3fnuz scale; fused K-query |
 | iso3 | 52 | 0.790 | 0.763 | 0.964 | 1.584 | 276 (7%) | 0.916 | - / - | - / - |  |
 | kivi4 (port) | 80 | 0.540 | 0.533 | 0.634 | 0.784 | 621 (16%) | 0.993 | 0.010 / 0.026 | 0.996 / 0.998 | per-channel K / per-token V + 128-token bf16 residual; fused |
+| kvquant | 66 | 0.822 | 0.780 | 1.618 | 1.644 | 337 (9%) | 0.949 | 0.220 / 1.064 | 0.811 / 0.864 | dense nuq4, pre-RoPE K + in-kernel RoPE; K=4/8 run with num_warps=4 (K=1/2: 2 warps) |
 | mxfp4 (port) | 68 | 0.389 | 0.387 | 0.478 | 0.538 | 734 (19%) | 0.962 | 0.190 / 0.482 | 0.943 / 0.923 | OCP floor-exp UE8M0/32; same kernel as UltraQuant |
 | nvfp4 (port) | 72 | 0.411 | 0.400 | 0.495 | 0.536 | 735 (19%) | 0.981 | 0.056 / 0.081 | 0.989 / 0.979 | E4M3/16 + tensor scale; fused |
 | planar3 | 52 | 0.777 | 0.769 | 0.965 | 1.575 | 281 (7%) | 0.896 | - / - | - / - |  |

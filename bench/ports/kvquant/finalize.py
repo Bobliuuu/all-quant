@@ -13,7 +13,7 @@ for f in ("ports_kvquant_run.log", "ports_kvquant_check.log"):
     fp = os.path.join(R, f)
     if os.path.exists(fp):
         for k, e in re.findall(r"K (\d) rel_err_vs_own_dequant ([0-9.e-]+)", open(fp).read()): d["rel_err_vs_own_dequant"][k] = float(e)
-k48 = os.path.join(R, "ports_kvquant_k48.json")
+k48 = os.path.join(R, "kvquant_k48.json")
 if os.path.exists(k48):
     e = json.load(open(k48))
     for key in ("ms_per_call", "ms_per_call_hot", "gbs", "attn_cos", "attn_relerr"): d[key].update(e.get(key, {}))
