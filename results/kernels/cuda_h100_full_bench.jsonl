@@ -1,0 +1,25 @@
+{"bench":"copy","backend":"cuda:NVIDIA H100 80GB HBM3 sm_90","bytes":1073741824,"gbps_rw":3032.6}
+{"bench":"decode","backend":"cuda:NVIDIA H100 80GB HBM3 sm_90","variant":"symbols(z)","N":14336,"K":4096,"sps":512,"alpha":7.100,"k":2,"bits_per_sym":3.9603,"ms":1.1138,"Gsym_s":52.72,"bitstream_GBps":26.10,"out_GBps":52.72}
+{"bench":"decode","backend":"cuda:NVIDIA H100 80GB HBM3 sm_90","variant":"2-kernel bf16","N":14336,"K":4096,"sps":512,"alpha":7.100,"k":2,"bits_per_sym":3.9603,"ms":1.4150,"Gsym_s":41.50,"bitstream_GBps":20.54,"out_GBps":82.99}
+{"bench":"decode","backend":"cuda:NVIDIA H100 80GB HBM3 sm_90","variant":"fused bf16","N":14336,"K":4096,"sps":512,"alpha":7.100,"k":2,"bits_per_sym":3.9603,"ms":1.1769,"Gsym_s":49.90,"bitstream_GBps":24.70,"out_GBps":99.79}
+{"bench":"decode","backend":"cuda:NVIDIA H100 80GB HBM3 sm_90","variant":"fused coop bf16","N":14336,"K":4096,"sps":512,"alpha":7.100,"k":2,"bits_per_sym":3.9603,"ms":1.1715,"Gsym_s":50.13,"bitstream_GBps":24.81,"out_GBps":100.25}
+{"bench":"decode","backend":"cuda:NVIDIA H100 80GB HBM3 sm_90","variant":"fused fp8","N":14336,"K":4096,"sps":512,"alpha":7.100,"k":2,"bits_per_sym":3.9603,"ms":1.1197,"Gsym_s":52.44,"bitstream_GBps":25.96,"out_GBps":52.44}
+{"bench":"decode","backend":"cuda:NVIDIA H100 80GB HBM3 sm_90","variant":"fused int8","N":14336,"K":4096,"sps":512,"alpha":7.100,"k":2,"bits_per_sym":3.9603,"ms":1.1229,"Gsym_s":52.29,"bitstream_GBps":25.89,"out_GBps":52.29}
+{"bench":"decode","backend":"cuda:NVIDIA H100 80GB HBM3 sm_90","variant":"launcher bf16","N":14336,"K":4096,"sps":512,"alpha":7.100,"k":2,"bits_per_sym":3.9603,"ms":1.1725,"Gsym_s":50.08,"bitstream_GBps":24.79,"out_GBps":100.16}
+{"bench":"rht","backend":"cuda:NVIDIA H100 80GB HBM3 sm_90","rows":2048,"K":4096,"H":256,"ms":0.0133,"GBps_rw":2523.8}
+{"bench":"rht","backend":"cuda:NVIDIA H100 80GB HBM3 sm_90","rows":2048,"K":4096,"H":1024,"ms":0.0146,"GBps_rw":2291.3}
+{"bench":"gemv","backend":"cuda:NVIDIA H100 80GB HBM3 sm_90","shape":"q/o_proj","N":4096,"K":4096,"ms":0.1939,"bitstream_GBps":42.84}
+{"bench":"gemm_ws","backend":"cuda:NVIDIA H100 80GB HBM3 sm_90","shape":"q/o_proj","N":4096,"K":4096,"B":4,"ms":1.1098}
+{"bench":"gemm_ws","backend":"cuda:NVIDIA H100 80GB HBM3 sm_90","shape":"q/o_proj","N":4096,"K":4096,"B":8,"ms":1.1126}
+{"bench":"gemv","backend":"cuda:NVIDIA H100 80GB HBM3 sm_90","shape":"k/v_proj","N":1024,"K":4096,"ms":0.1935,"bitstream_GBps":10.73}
+{"bench":"gemv","backend":"cuda:NVIDIA H100 80GB HBM3 sm_90","shape":"gate/up_proj","N":14336,"K":4096,"ms":0.4298,"bitstream_GBps":67.63}
+{"bench":"gemm_ws","backend":"cuda:NVIDIA H100 80GB HBM3 sm_90","shape":"gate/up_proj","N":14336,"K":4096,"B":4,"ms":3.9539}
+{"bench":"gemm_ws","backend":"cuda:NVIDIA H100 80GB HBM3 sm_90","shape":"gate/up_proj","N":14336,"K":4096,"B":8,"ms":3.9643}
+{"bench":"gemv","backend":"cuda:NVIDIA H100 80GB HBM3 sm_90","shape":"down_proj","N":4096,"K":14336,"ms":0.4544,"bitstream_GBps":63.97}
+{"bench":"gemv_layer","backend":"cuda:NVIDIA H100 80GB HBM3 sm_90","ms_per_layer":2.0888,"ms_per_token_32_layers":66.843}
+{"bench":"attn","backend":"cuda:NVIDIA H100 80GB HBM3 sm_90","H":8,"G":4,"T":131,"us":4392.23}
+{"bench":"attn","backend":"cuda:NVIDIA H100 80GB HBM3 sm_90","H":8,"G":4,"T":259,"us":8768.02}
+{"bench":"attn","backend":"cuda:NVIDIA H100 80GB HBM3 sm_90","H":8,"G":4,"T":511,"us":17377.28}
+{"bench":"int8_linear","backend":"cuda:NVIDIA H100 80GB HBM3 sm_90","M":1,"N":4096,"K":4096,"ms":0.3606}
+{"bench":"int8_linear","backend":"cuda:NVIDIA H100 80GB HBM3 sm_90","M":16,"N":4096,"K":4096,"ms":0.3607}
+{"bench":"int8_linear","backend":"cuda:NVIDIA H100 80GB HBM3 sm_90","M":2048,"N":4096,"K":4096,"ms":0.5051}

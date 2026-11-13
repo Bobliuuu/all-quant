@@ -67,17 +67,19 @@ SYCL_ENV = ("export PATH=/opt/dpcpp/bin:$PATH; export LD_LIBRARY_PATH=/opt/dpcpp
 def run_sycl(bench: bool = True, quick: bool = False):
     log = []
     sh(SYCL_ENV + "clang++ --version | head -2; sycl-ls; nvidia-smi -L", log)
-    flags = ("-fsycl -O3 -std=c++17 -fsycl-targets=nvptx64-nvidia-cuda,spir64_x86_64 "
-             "-Xsycl-target-backend=nvptx64-nvidia-cuda --cuda-gpu-arch=sm_90 -Icommon -Isycl")
-    for t in ("test", "bench"):
-        sh(SYCL_ENV + f"cd /work && mkdir -p build && clang++ {flags} sycl/backend_sycl.cpp common/{t}_main.cpp -o build/{t}_sycl 2>&1 | grep -v -i warning | tail -30", log)
+    common = "-fsycl -O3 -std=c++17 -ffp-contract=fast -foffload-fp32-prec-div -foffload-fp32-prec-sqrt -w -Icommon -Isycl"
+    tgt = {"nvidia": "-fsycl-targets=nvptx64-nvidia-cuda -Xsycl-target-backend=nvptx64-nvidia-cuda --cuda-gpu-arch=sm_90",
+           "cpu": "-fsycl-targets=spir64_x86_64"}
+    for dev, tf in tgt.items():  # separate binaries: the combined nvptx+spir64_x86_64 compile crashed llvm-spirv
+        for t in ("test", "bench"):
+            sh(SYCL_ENV + f"cd /work && mkdir -p build && clang++ {common} {tf} sycl/backend_sycl.cpp common/{t}_main.cpp -o build/{t}_sycl_{dev} 2>&1 | grep -v -i warning | tail -20", log)
     out = {}
     for sel, tag in (("cuda:gpu", "nvidia"), ("opencl:cpu", "cpu")):
-        sh(SYCL_ENV + f"cd /work && ONEAPI_DEVICE_SELECTOR={sel} ./build/test_sycl vectors --json build/test_sycl_{tag}.json", log)
+        sh(SYCL_ENV + f"cd /work && ONEAPI_DEVICE_SELECTOR={sel} ./build/test_sycl_{tag} vectors --json build/test_sycl_{tag}.json | tail -25", log)
         try: out[f"test_json_{tag}"] = open(f"/work/build/test_sycl_{tag}.json").read()
         except Exception: pass
     if bench:
-        sh(SYCL_ENV + f"cd /work && ONEAPI_DEVICE_SELECTOR=cuda:gpu ./build/bench_sycl build/bench_sycl.jsonl {'--quick' if quick else ''}", log)
+        sh(SYCL_ENV + f"cd /work && ONEAPI_DEVICE_SELECTOR=cuda:gpu ./build/bench_sycl_nvidia build/bench_sycl.jsonl {'--quick' if quick else ''}", log)
         try: out["bench_jsonl"] = open("/work/build/bench_sycl.jsonl").read()
         except Exception: pass
     out["log"] = "\n".join(log)

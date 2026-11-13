@@ -1,0 +1,136 @@
+$ nvidia-smi --query-gpu=name,driver_version,clocks.max.sm,clocks.max.mem --format=csv; nvcc --version | tail -2
+name, driver_version, clocks.max.sm [MHz], clocks.max.memory [MHz]
+NVIDIA H100 80GB HBM3, 610.57.04, 1980 MHz, 2619 MHz
+Cuda compilation tools, release 12.8, V12.8.93
+Build cuda_12.8.r12.8/compiler.35583870_0
+
+$ cd /work && mkdir -p build/obj && for f in cuda/backend_cuda.cu upstream/cuda/stage2_cuda_encoder.cu upstream/cuda/stage2_cuda_decoder.cu upstream/cuda/stage3_cuda_decoder.cu upstream/integrations/llama/fused_decode_gemv.cu upstream/integrations/llama/rice_fused_attention.cu; do nvcc -O3 -std=c++17 -arch=sm_90a -Iupstream/cuda -Iupstream/integrations/llama -Icommon -Icuda -c $f -o build/obj/$(basename $f).o & done; for t in test bench; do g++ -O2 -std=c++17 -Icommon -c common/${t}_main.cpp -o build/obj/${t}_main.o & done; wait; for t in test bench; do nvcc -arch=sm_90a build/obj/*.cu.o build/obj/${t}_main.o -o build/${t}_cuda -lcublasLt -lcublas; done 2>&1 | grep -v -i warning | tail -40
+upstream/integrations/llama/rice_fused_attention.cu(229): warning #177-D: variable "base_tok" was declared but never referenced
+              const int base_tok = n_complete;
+                        ^
+
+Remark: The warnings can be suppressed with "-diag-suppress <warning-number>"
+
+upstream/integrations/llama/rice_fused_attention.cu(229): warning #177-D: variable "base_tok" was declared but never referenced
+              const int base_tok = n_complete;
+                        ^
+
+Remark: The warnings can be suppressed with "-diag-suppress <warning-number>"
+
+
+$ cd /work && ./build/test_cuda vectors --json build/test_cuda.json
+backend: cuda:NVIDIA H100 80GB HBM3 sm_90
+attn_h4g7_t128                               FAIL  max|err| 0.339 (max|ref| 0.339), q-head rows off: 12/28
+attn_h8g4_p2only                             PASS  max|err| 2.38e-07 (max|ref| 2.28), q-head rows off: 0/32
+attn_h8g4_t300p3                             PASS  max|err| 5.96e-08 (max|ref| 0.187), q-head rows off: 0/32
+attn_h8g4_t508p3                             PASS  max|err| 6.71e-08 (max|ref| 0.17), q-head rows off: 0/32
+attn_h8g4_t64                                PASS  max|err| 8.94e-08 (max|ref| 0.398), q-head rows off: 0/32
+codec_a10_k2_s512.encode(cache)              PASS  words 0/36911 offs 0 ks 0 total_bits 1181138/1181138
+codec_a10_k2_s512.encode(recompute)          PASS  words 0/36911 offs 0 ks 0 total_bits 1181138/1181138
+codec_a10_k2_s512.decode.z                   PASS  0/262144 mismatches
+codec_a10_k2_s512.decode_to_bf16(2-kernel)   PASS  0/262144 not bit-exact, max 0 ulp (allowed 0)
+codec_a10_k2_s512.decode_fused_bf16          PASS  0/262144 not bit-exact, max 0 ulp (allowed 0)
+codec_a10_k2_s512.decode_fused_coop_bf16     PASS  0/262144 not bit-exact, max 0 ulp (allowed 0)
+codec_a10_k2_s512.decode_fused_fp8           PASS  0/262144 mismatches
+codec_a10_k2_s512.decode_fused_int8          PASS  0/262144 mismatches
+codec_a10_k2_s512.launch_fused_decode_bf16   PASS  0/262144 not bit-exact, max 0 ulp (allowed 0)
+codec_a10_k2_s512.decode_interleaved_bf16    PASS  0/262144 not bit-exact, max 0 ulp (allowed 0)
+codec_a10_k2_s512.stage3_decode.z            PASS  0/262144 mismatches
+codec_a13_k0_s256.encode(cache)              PASS  words 0/23161 offs 0 ks 0 total_bits 741149/741149
+codec_a13_k0_s256.encode(recompute)          PASS  words 0/23161 offs 0 ks 0 total_bits 741149/741149
+codec_a13_k0_s256.decode.z                   PASS  0/65536 mismatches
+codec_a13_k0_s256.decode_to_bf16(2-kernel)   PASS  0/65536 not bit-exact, max 0 ulp (allowed 0)
+codec_a13_k0_s256.decode_fused_bf16          PASS  0/65536 not bit-exact, max 0 ulp (allowed 0)
+codec_a13_k0_s256.decode_fused_coop_bf16     PASS  0/65536 not bit-exact, max 0 ulp (allowed 0)
+codec_a13_k0_s256.decode_fused_fp8           PASS  0/65536 mismatches
+codec_a13_k0_s256.decode_fused_int8          PASS  0/65536 mismatches
+codec_a13_k0_s256.launch_fused_decode_bf16   PASS  0/65536 not bit-exact, max 0 ulp (allowed 0)
+codec_a13_k0_s256.decode_interleaved_bf16    PASS  0/65536 not bit-exact, max 0 ulp (allowed 0)
+codec_a13_k0_s256.stage3_decode.z            FAIL  326/65536 mismatches
+codec_a13_k2_s512.encode(cache)              PASS  words 0/42728 offs 0 ks 0 total_bits 1367281/1367281
+codec_a13_k2_s512.encode(recompute)          PASS  words 0/42728 offs 0 ks 0 total_bits 1367281/1367281
+codec_a13_k2_s512.decode.z                   PASS  0/262144 mismatches
+codec_a13_k2_s512.decode_to_bf16(2-kernel)   PASS  0/262144 not bit-exact, max 0 ulp (allowed 0)
+codec_a13_k2_s512.decode_fused_bf16          PASS  0/262144 not bit-exact, max 0 ulp (allowed 0)
+codec_a13_k2_s512.decode_fused_coop_bf16     PASS  0/262144 not bit-exact, max 0 ulp (allowed 0)
+codec_a13_k2_s512.decode_fused_fp8           PASS  0/262144 mismatches
+codec_a13_k2_s512.decode_fused_int8          PASS  0/262144 mismatches
+codec_a13_k2_s512.launch_fused_decode_bf16   PASS  0/262144 not bit-exact, max 0 ulp (allowed 0)
+codec_a13_k2_s512.decode_interleaved_bf16    PASS  0/262144 not bit-exact, max 0 ulp (allowed 0)
+codec_a13_k2_s512.stage3_decode.z            PASS  0/262144 mismatches
+codec_a20_k3_s64.encode(cache)               PASS  words 0/11311 offs 0 ks 0 total_bits 361926/361926
+codec_a20_k3_s64.encode(recompute)           PASS  words 0/11311 offs 0 ks 0 total_bits 361926/361926
+codec_a20_k3_s64.decode.z                    PASS  0/65536 mismatches
+codec_a20_k3_s64.decode_to_bf16(2-kernel)    PASS  0/65536 not bit-exact, max 0 ulp (allowed 0)
+codec_a20_k3_s64.decode_fused_bf16           PASS  0/65536 not bit-exact, max 0 ulp (allowed 0)
+codec_a20_k3_s64.decode_fused_coop_bf16      PASS  0/65536 not bit-exact, max 0 ulp (allowed 0)
+codec_a20_k3_s64.decode_fused_fp8            PASS  0/65536 mismatches
+codec_a20_k3_s64.decode_fused_int8           PASS  0/65536 mismatches
+codec_a20_k3_s64.launch_fused_decode_bf16    PASS  0/65536 not bit-exact, max 0 ulp (allowed 0)
+codec_a20_k3_s64.decode_interleaved_bf16     PASS  0/65536 not bit-exact, max 0 ulp (allowed 0)
+codec_a20_k3_s64.stage3_decode.z             PASS  0/65536 mismatches
+codec_a6_k1_s512.encode(cache)               PASS  words 0/16128 offs 0 ks 0 total_bits 516088/516088
+codec_a6_k1_s512.encode(recompute)           PASS  words 0/16128 offs 0 ks 0 total_bits 516088/516088
+codec_a6_k1_s512.decode.z                    PASS  0/131072 mismatches
+codec_a6_k1_s512.decode_to_bf16(2-kernel)    PASS  0/131072 not bit-exact, max 0 ulp (allowed 0)
+codec_a6_k1_s512.decode_fused_bf16           PASS  0/131072 not bit-exact, max 0 ulp (allowed 0)
+codec_a6_k1_s512.decode_fused_coop_bf16      PASS  0/131072 not bit-exact, max 0 ulp (allowed 0)
+codec_a6_k1_s512.decode_fused_fp8            PASS  0/131072 mismatches
+codec_a6_k1_s512.decode_fused_int8           PASS  0/131072 mismatches
+codec_a6_k1_s512.launch_fused_decode_bf16    PASS  0/131072 not bit-exact, max 0 ulp (allowed 0)
+codec_a6_k1_s512.decode_interleaved_bf16     PASS  0/131072 not bit-exact, max 0 ulp (allowed 0)
+codec_a6_k1_s512.stage3_decode.z             PASS  0/131072 mismatches
+codec_heavy_a13_k2.encode(cache)             PASS  words 0/21630 offs 0 ks 0 total_bits 692146/692146
+codec_heavy_a13_k2.encode(recompute)         PASS  words 0/21630 offs 0 ks 0 total_bits 692146/692146
+codec_heavy_a13_k2.decode.z                  PASS  0/131072 mismatches
+codec_heavy_a13_k2.decode_to_bf16(2-kernel)  PASS  0/131072 not bit-exact, max 0 ulp (allowed 0)
+codec_heavy_a13_k2.decode_fused_bf16         PASS  0/131072 not bit-exact, max 0 ulp (allowed 0)
+codec_heavy_a13_k2.decode_fused_coop_bf16    PASS  0/131072 not bit-exact, max 0 ulp (allowed 0)
+codec_heavy_a13_k2.decode_fused_fp8          PASS  0/131072 mismatches
+codec_heavy_a13_k2.decode_fused_int8         PASS  0/131072 mismatches
+codec_heavy_a13_k2.launch_fused_decode_bf16  PASS  0/131072 not bit-exact, max 0 ulp (allowed 0)
+codec_heavy_a13_k2.decode_interleaved_bf16   PASS  0/131072 not bit-exact, max 0 ulp (allowed 0)
+codec_heavy_a13_k2.stage3_decode.z           PASS  0/131072 mismatches
+gemmws_b11                                   PASS  0/1100 not bit-exact, max 0 ulp (allowed 1)
+gemmws_b3                                    PASS  0/780 not bit-exact, max 0 ulp (allowed 1)
+gemv_n130_k2048_s128                         PASS  0/130 not bit-exact, max 0 ulp (allowed 1)
+gemv_n260_k4096                              PASS  0/260 not bit-exact, max 0 ulp (allowed 1)
+lattice_int8.rowmax_cast.x8                  PASS  0/5120 mismatches
+lattice_int8.rowmax_cast.deq                 PASS  0/5 mismatches
+lattice_int8.decode_int8(W)                  PASS  0/98304 mismatches
+lattice_int8.int8_gemm_tn                    PASS  0/480 mismatches
+lattice_int8.dequant                         PASS  0/480 not bit-exact, max 0 ulp (allowed 0)
+lattice_int8.fp8_rowmax_cast.x               PASS  0/5120 mismatches
+lattice_int8.fp8_rowmax_cast.scale           PASS  0/5 mismatches
+rht_1024                                     PASS  0/24576 not bit-exact, max 0 ulp (allowed 0)
+rht_2048                                     PASS  0/24576 not bit-exact, max 0 ulp (allowed 1)
+rht_256                                      PASS  0/24576 not bit-exact, max 0 ulp (allowed 0)
+rht_512                                      PASS  0/24576 not bit-exact, max 0 ulp (allowed 1)
+SUMMARY cuda:NVIDIA H100 80GB HBM3 sm_90: 84 pass, 2 fail
+
+$ cd /work && ./build/bench_cuda build/bench_cuda.jsonl 
+{"bench":"copy","backend":"cuda:NVIDIA H100 80GB HBM3 sm_90","bytes":1073741824,"gbps_rw":3032.6}
+{"bench":"decode","backend":"cuda:NVIDIA H100 80GB HBM3 sm_90","variant":"symbols(z)","N":14336,"K":4096,"sps":512,"alpha":7.100,"k":2,"bits_per_sym":3.9603,"ms":1.1138,"Gsym_s":52.72,"bitstream_GBps":26.10,"out_GBps":52.72}
+{"bench":"decode","backend":"cuda:NVIDIA H100 80GB HBM3 sm_90","variant":"2-kernel bf16","N":14336,"K":4096,"sps":512,"alpha":7.100,"k":2,"bits_per_sym":3.9603,"ms":1.4150,"Gsym_s":41.50,"bitstream_GBps":20.54,"out_GBps":82.99}
+{"bench":"decode","backend":"cuda:NVIDIA H100 80GB HBM3 sm_90","variant":"fused bf16","N":14336,"K":4096,"sps":512,"alpha":7.100,"k":2,"bits_per_sym":3.9603,"ms":1.1769,"Gsym_s":49.90,"bitstream_GBps":24.70,"out_GBps":99.79}
+{"bench":"decode","backend":"cuda:NVIDIA H100 80GB HBM3 sm_90","variant":"fused coop bf16","N":14336,"K":4096,"sps":512,"alpha":7.100,"k":2,"bits_per_sym":3.9603,"ms":1.1715,"Gsym_s":50.13,"bitstream_GBps":24.81,"out_GBps":100.25}
+{"bench":"decode","backend":"cuda:NVIDIA H100 80GB HBM3 sm_90","variant":"fused fp8","N":14336,"K":4096,"sps":512,"alpha":7.100,"k":2,"bits_per_sym":3.9603,"ms":1.1197,"Gsym_s":52.44,"bitstream_GBps":25.96,"out_GBps":52.44}
+{"bench":"decode","backend":"cuda:NVIDIA H100 80GB HBM3 sm_90","variant":"fused int8","N":14336,"K":4096,"sps":512,"alpha":7.100,"k":2,"bits_per_sym":3.9603,"ms":1.1229,"Gsym_s":52.29,"bitstream_GBps":25.89,"out_GBps":52.29}
+{"bench":"decode","backend":"cuda:NVIDIA H100 80GB HBM3 sm_90","variant":"launcher bf16","N":14336,"K":4096,"sps":512,"alpha":7.100,"k":2,"bits_per_sym":3.9603,"ms":1.1725,"Gsym_s":50.08,"bitstream_GBps":24.79,"out_GBps":100.16}
+{"bench":"rht","backend":"cuda:NVIDIA H100 80GB HBM3 sm_90","rows":2048,"K":4096,"H":256,"ms":0.0133,"GBps_rw":2523.8}
+{"bench":"rht","backend":"cuda:NVIDIA H100 80GB HBM3 sm_90","rows":2048,"K":4096,"H":1024,"ms":0.0146,"GBps_rw":2291.3}
+{"bench":"gemv","backend":"cuda:NVIDIA H100 80GB HBM3 sm_90","shape":"q/o_proj","N":4096,"K":4096,"ms":0.1939,"bitstream_GBps":42.84}
+{"bench":"gemm_ws","backend":"cuda:NVIDIA H100 80GB HBM3 sm_90","shape":"q/o_proj","N":4096,"K":4096,"B":4,"ms":1.1098}
+{"bench":"gemm_ws","backend":"cuda:NVIDIA H100 80GB HBM3 sm_90","shape":"q/o_proj","N":4096,"K":4096,"B":8,"ms":1.1126}
+{"bench":"gemv","backend":"cuda:NVIDIA H100 80GB HBM3 sm_90","shape":"k/v_proj","N":1024,"K":4096,"ms":0.1935,"bitstream_GBps":10.73}
+{"bench":"gemv","backend":"cuda:NVIDIA H100 80GB HBM3 sm_90","shape":"gate/up_proj","N":14336,"K":4096,"ms":0.4298,"bitstream_GBps":67.63}
+{"bench":"gemm_ws","backend":"cuda:NVIDIA H100 80GB HBM3 sm_90","shape":"gate/up_proj","N":14336,"K":4096,"B":4,"ms":3.9539}
+{"bench":"gemm_ws","backend":"cuda:NVIDIA H100 80GB HBM3 sm_90","shape":"gate/up_proj","N":14336,"K":4096,"B":8,"ms":3.9643}
+{"bench":"gemv","backend":"cuda:NVIDIA H100 80GB HBM3 sm_90","shape":"down_proj","N":4096,"K":14336,"ms":0.4544,"bitstream_GBps":63.97}
+{"bench":"gemv_layer","backend":"cuda:NVIDIA H100 80GB HBM3 sm_90","ms_per_layer":2.0888,"ms_per_token_32_layers":66.843}
+{"bench":"attn","backend":"cuda:NVIDIA H100 80GB HBM3 sm_90","H":8,"G":4,"T":131,"us":4392.23}
+{"bench":"attn","backend":"cuda:NVIDIA H100 80GB HBM3 sm_90","H":8,"G":4,"T":259,"us":8768.02}
+{"bench":"attn","backend":"cuda:NVIDIA H100 80GB HBM3 sm_90","H":8,"G":4,"T":511,"us":17377.28}
+{"bench":"int8_linear","backend":"cuda:NVIDIA H100 80GB HBM3 sm_90","M":1,"N":4096,"K":4096,"ms":0.3606}
+{"bench":"int8_linear","backend":"cuda:NVIDIA H100 80GB HBM3 sm_90","M":16,"N":4096,"K":4096,"ms":0.3607}
+{"bench":"int8_linear","backend":"cuda:NVIDIA H100 80GB HBM3 sm_90","M":2048,"N":4096,"K":4096,"ms":0.5051}

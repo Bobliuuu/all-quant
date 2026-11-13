@@ -10,10 +10,19 @@ Ours: eager PyTorch, batch 1.
 Configs: bf16 | w (RiceLinear mma=bf16, fused GEMV) | w_int8 (LatticeLinear) |
          kv (RiceQuantizedCache, decode-full path) | kvf (kv + upstream fused Rice attention) |
          wkv | wkvf
-Compat shims (transformers 4.57; upstream code itself is untouched):
+Compat shims (upstream code itself is untouched):
   * rice_attention's patched forward reads module.num_heads / num_key_value_heads, which
-    LlamaAttention no longer has: we set them from the config.
+    LlamaAttention (transformers 4.57) no longer has: we set them from the config.
   * it returns (out, None, cache); LlamaDecoderLayer expects 2 values: we wrap it.
+  * install_rice_attention_hooks binds make_rice_attn_forward(...) (a closure WITHOUT a
+    self parameter) via types.MethodType, so every call fails with "multiple values for
+    argument 'hidden_states'" in any transformers version (upstream bug).  We install the
+    same closure unbound.
+  * build_rice_kv_cache only discovers attention layers whose k_proj is an nn.Linear, so
+    it finds 0 layers after convert_linears (upstream: W++KV cannot be composed as
+    shipped).  We build an empty cache template BEFORE weight conversion and deep-copy it.
+  * memory: LatticeLinear allocates with raw cudaMalloc (invisible to the torch
+    allocator), so we also report device-level used memory minus the CUDA context.
 """
 from __future__ import annotations
 import argparse, json, os, sys, time, statistics
@@ -28,8 +37,15 @@ def sync():
     torch.cuda.synchronize()
 
 
+def dev_used():
+    free, total = torch.cuda.mem_get_info()
+    return (total - free) / GiB
+
+
 def make(model_path, cfg, bps):
     from transformers import AutoModelForCausalLM
+    torch.cuda.empty_cache()
+    base_used = dev_used()
     m = AutoModelForCausalLM.from_pretrained(model_path, dtype=torch.bfloat16, device_map="cuda",
                                              attn_implementation="sdpa").eval()
     info = {}
@@ -37,36 +53,44 @@ def make(model_path, cfg, bps):
     from hyperquant.quant_utils import lattice_alpha
     torch.manual_seed(42)
     snr = calibrate_lattice_bps_to_snr(["e8int"], [bps])["e8int"][bps]["snr_db"]
+    kv = "kv" in cfg
+    kcfg = template = None
+    if kv:
+        from hyperquant.kv_quant import KVQuantConfig
+        from integrations.llama.lattice_kv_cache import build_rice_kv_cache
+        kcfg = KVQuantConfig(lattice="e8int", snr_db=snr, rotation_kind="qjl")
+        template = build_rice_kv_cache(m, kcfg)   # before any weight conversion (see shims)
     if cfg.startswith("w"):
         from integrations.llama.rice_linear import convert_linears
         mma = "int8" if cfg == "w_int8" else "bf16"
         st = convert_linears(m, skip=("lm_head",), alpha=lattice_alpha(snr, "e8int"), mma=mma)
         info.update(compression_x=st["compression_x"], weight_GiB=st["compressed_bytes"] / GiB)
     torch.cuda.empty_cache()
-    info["resident_GiB"] = torch.cuda.memory_allocated() / GiB
-    kv = "kv" in cfg
+    info["resident_GiB"] = torch.cuda.memory_allocated() / GiB          # torch allocator
+    info["resident_dev_GiB"] = dev_used() - base_used                    # device-level, minus context
     fused = cfg.endswith("kvf")
-    kcfg = None
-    if kv:
-        from hyperquant.kv_quant import KVQuantConfig
-        kcfg = KVQuantConfig(lattice="e8int", snr_db=snr, rotation_kind="qjl")
-    return m, info, kcfg, fused
+    return m, info, template, fused
 
 
-def new_cache(m, kcfg, fused):
-    if kcfg is None:
+def new_cache(m, template, fused):
+    if template is None:
         from transformers import DynamicCache
         return DynamicCache()
-    from integrations.llama.lattice_kv_cache import build_rice_kv_cache
-    c = build_rice_kv_cache(m, kcfg)
+    import copy
+    c = copy.deepcopy(template)
     if fused:
         from integrations.llama import rice_attention as ra
-        ra.install_rice_attention_hooks(m, c)
-        for mod, _orig in ra._HANDLES:
+        ra._HANDLES.clear()
+        idx = 0
+        for _n, mod in m.named_modules():
+            if not (hasattr(mod, "q_proj") and hasattr(mod, "k_proj") and hasattr(mod, "head_dim")):
+                continue
             mod.num_heads = m.config.num_attention_heads
             mod.num_key_value_heads = m.config.num_key_value_heads
-            f = mod.forward
+            ra._HANDLES.append((mod, mod.forward))
+            f = ra.make_rice_attn_forward(mod, c, idx)          # unbound (see shims)
             mod.forward = (lambda f: (lambda *a, **k: f(*a, **k)[:2]))(f)
+            idx += 1
     return c
 
 
@@ -90,6 +114,12 @@ def run(model_path, cfg, bps, P, N, reps):
             ra.remove_rice_attention_hooks()
     info["prefill_s"] = statistics.median(ts)
     info["prefill_tok_s"] = 2048 / info["prefill_s"]
+    if kcfg is not None:   # same forward with no cache attached (the paper's KV prefill ~ bf16)
+        ts2 = []
+        for r in range(reps + 1):
+            sync(); t0 = time.perf_counter(); m(ids, use_cache=False); sync()
+            if r: ts2.append(time.perf_counter() - t0)
+        info["prefill_nocache_tok_s"] = 2048 / statistics.median(ts2)
     torch.cuda.reset_peak_memory_stats()
     # decode
     c = new_cache(m, kcfg, fused)

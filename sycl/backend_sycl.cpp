@@ -89,7 +89,7 @@ struct EncDev {
         if (use_smem) {
           for (u32 i = lid; i < block_words; i += bd) sw[i] = 0u;
           sycl::group_barrier(it.get_group());
-          if (active) emit(&sw[0], O[s] - gs, [](u32* d, u32 p) { or_bit<sycl::access::address_space::local_space, sycl::memory_scope::work_group>(d, p); });
+          if (active) emit(&sw[0], O[s] - gs, [](u32* d, u32 p) { or_bit<sycl::access::address_space::generic_space, sycl::memory_scope::work_group>(d, p); });
           sycl::group_barrier(it.get_group());
           const u32 wb = gs >> 5, sh = gs & 31u;
           for (u32 i = lid; i < block_words; i += bd) {
@@ -102,7 +102,7 @@ struct EncDev {
           return;
         }
         if (!active) return;
-        emit(Wp, O[s], [](u32* d, u32 p) { or_bit<sycl::access::address_space::global_space, sycl::memory_scope::device>(d, p); });
+        emit(Wp, O[s], [](u32* d, u32 p) { or_bit<sycl::access::address_space::generic_space, sycl::memory_scope::device>(d, p); });
       });
     });
     Q().wait();
@@ -179,11 +179,18 @@ struct DecDev {
         const int s = wbase + lane;
         if (!warp_ok || s >= ns_) return;
         const u32 kk = K[s]; const int bw = s * S / 8;
-        BitReader br = use_smem ? BitReader(&sm[wib * CAP], region, O[s] - (u32)start_word * 32u) : BitReader(W, wc_, O[s]);
-        for (int w8 = 0; w8 < S / 8; ++w8) {
-          u8 zz[8]; read8(br, kk, zz);
-          const int g = bw + w8; if (g < n) inverse_word<0>(zz, alpha, out + (size_t)g * 8);
-        }
+        auto run = [&](BitReader& br) {
+          for (int w8 = 0; w8 < S / 8; ++w8) {
+            u8 zz[8]; read8(br, kk, zz);
+            const int g = bw + w8; if (g < n) inverse_word<0>(zz, alpha, out + (size_t)g * 8);
+          }
+        };
+        // two explicit branches: a ternary mixing a local and a global pointer made the
+        // SPIR-V backend emit an illegal local->global addrspacecast
+        if (use_smem) {
+          const u32* lp = sm.get_multi_ptr<sycl::access::decorated::no>().get() + wib * CAP;
+          BitReader br(lp, region, O[s] - (u32)start_word * 32u); run(br);
+        } else { BitReader br(W, wc_, O[s]); run(br); }
       });
     });
   }
