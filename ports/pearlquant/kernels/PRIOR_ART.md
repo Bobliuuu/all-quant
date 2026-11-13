@@ -15,7 +15,7 @@
   (our own implementation, our own leader order by norm).
 - **TurboQuant** (Zandieh et al., arXiv:2504.19874): random rotation + Lloyd-Max scalar codebook.
   Our `turboquant_mse` baseline is a re-implementation of its MSE variant, not the authors' code.
-- **UltraQuant** (same user, ~/code/ultraquant-more): FP4 KV verify kernel on three vendors.
+- **UltraQuant FP4 KV verify kernel** (AllQuant repo root, same user): FP4 KV verify kernel on three vendors.
   We followed its structure (shared vectors, porting log, results parsed from files) but share no code.
 
 We found no public CUDA, HIP or SYCL decode-attention kernel for a ball-truncated (probable

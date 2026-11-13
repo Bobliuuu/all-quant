@@ -2,12 +2,12 @@
 # Every number in the README and the video narration is read from results/*.json (some through results/derived/readme_data.json,
 # produced by tools/readme_data.py from the same results files). Nothing here is hand-typed except labels and configuration.
 project:
-  name: UltraQuant
+  name: AllQuant
   emoji: "⚡"
   tagline: "Quantized-inference kernels on AMD, NVIDIA and Intel GPUs: a fused FP4 KV-cache verify kernel, plus reproductions and three-vendor ports of HyperQuant and PearlQuant"
-  repo: Bobliuuu/ultraquant-more
+  repo: Bobliuuu/all-quant
 hero:
-  title: UltraQuant (uqmt)
+  title: AllQuant
   subtitle: "quantization kernels, reproduced and ported across three GPU vendors"
   chips: [AMD HIP + Triton, NVIDIA CUDA, Intel SYCL, FP4 KV verify, HyperQuant, PearlQuant]
 theme: {accent: "#27c8e8", accent2: "#ff6b6b", accent3: "#f2c14e", good: "#3ddc97"}
@@ -514,7 +514,7 @@ sections:
     id: install
     body: |
       ```bash
-      pip install git+https://github.com/Bobliuuu/ultraquant-more   # or: pip install -e .
+      pip install git+https://github.com/Bobliuuu/all-quant   # or: pip install -e .
       ```
 
       Importing needs only PyTorch (quantise / dequantise / reference / cache builder run on CPU); the kernel needs a GPU and Triton (ROCm 7 + Triton 3.9 and B300 tested). CUDA and SYCL builds: [cuda/README.md](cuda/README.md), [sycl/README.md](sycl/README.md).

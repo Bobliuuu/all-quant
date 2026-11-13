@@ -2,7 +2,7 @@
 
 Upstream: github.com/moonmath-ai/HyperQuant @ 227f3f6 (vendored unmodified in `upstream/`).
 Reference: the upstream CUDA kernels, driven unmodified by `cuda/backend_cuda.cu`.
-Method (same as ~/code/ultraquant-more): one CPU reference (`ref/hq_ref.hpp`) that mirrors the
+Method (same as the UltraQuant kernel at the AllQuant repo root): one CPU reference (`ref/hq_ref.hpp`) that mirrors the
 CUDA arithmetic order, one set of shared vectors (`vectors/*.hqv`, made by `ref/gen_vectors.cpp`),
 one test driver and one bench driver (`common/test_main.cpp`, `common/bench_main.cpp`) compiled
 against each backend through the same interface (`common/backend.hpp`).  Every number in the

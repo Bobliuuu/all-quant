@@ -1,8 +1,8 @@
 <div align="center">
 
-<img src="assets/hero.svg" alt="UltraQuant (uqmt)" width="100%">
+<img src="assets/hero.svg" alt="AllQuant" width="100%">
 
-# ⚡ UltraQuant (uqmt)
+# ⚡ AllQuant
 
 **Quantized-inference kernels on AMD, NVIDIA and Intel GPUs: a fused FP4 KV-cache verify kernel, plus reproductions and three-vendor ports of HyperQuant and PearlQuant**
 
@@ -244,7 +244,7 @@ Speculative K=4/8 runs exist but are noisy and are not used here. Full table and
 ## 🚀 Install and use
 
 ```bash
-pip install git+https://github.com/Bobliuuu/ultraquant-more   # or: pip install -e .
+pip install git+https://github.com/Bobliuuu/all-quant   # or: pip install -e .
 ```
 
 Importing needs only PyTorch (quantise / dequantise / reference / cache builder run on CPU); the kernel needs a GPU and Triton (ROCm 7 + Triton 3.9 and B300 tested). CUDA and SYCL builds: [cuda/README.md](cuda/README.md), [sycl/README.md](sycl/README.md).

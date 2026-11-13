@@ -6,7 +6,7 @@ Rebuild: `video/build.sh` (needs ffmpeg, python3 with numpy/matplotlib/pillow, m
 ## README hero text (embeddable)
 
 ```markdown
-<p align="center"><a href="https://github.com/Bobliuuu/ultraquant-more/blob/main/video/ultraquant_explainer.mp4"><img src="video/poster.png" width="720" alt="UltraQuant explainer video"></a></p>
+<p align="center"><a href="https://github.com/Bobliuuu/all-quant/blob/main/video/ultraquant_explainer.mp4"><img src="video/poster.png" width="720" alt="UltraQuant explainer video"></a></p>
 
 **UltraQuant: 4-bit KV caching for context-heavy agents.** FP4 (E2M1) values with UE8M0 group scales
 (32 elements per scale): 68 bytes per head-token (fp16: 256, fp8: 128). Our contribution is a fused multi-token
@@ -14,7 +14,7 @@ Rebuild: `video/build.sh` (needs ffmpeg, python3 with numpy/matplotlib/pillow, m
 tokens, instead of K independent passes. The same op runs on AMD (Triton, MI300X), NVIDIA (CUDA: B300, H100, A100,
 L40S, RTX PRO 6000) and Intel (SYCL/XMX, Arc B390). At K=8, B=8, ctx 32768, fusing beats K independent passes by
 2.5x to 6.8x depending on backend (4.1x MI300X Triton, 3.3x B300 CUDA, 5.6x H100 CUDA, 3.1x Arc SYCL/XMX).
-[Watch the 3.9-minute explainer](https://github.com/Bobliuuu/ultraquant-more/blob/main/video/ultraquant_explainer.mp4).
+[Watch the 3.9-minute explainer](https://github.com/Bobliuuu/all-quant/blob/main/video/ultraquant_explainer.mp4).
 ```
 
 ## How it works (5 bullets for the README)

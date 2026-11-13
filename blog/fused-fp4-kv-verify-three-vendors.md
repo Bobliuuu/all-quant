@@ -257,7 +257,7 @@ The capacity gain and the oversubscribed-agent gain are real: bf16 KV holds 185k
 ## Try it
 
 ```bash
-pip install git+https://github.com/Bobliuuu/ultraquant-more
+pip install git+https://github.com/Bobliuuu/all-quant
 ```
 
 ```python

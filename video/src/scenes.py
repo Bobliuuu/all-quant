@@ -474,7 +474,7 @@ def s_caveats(g, t, cues, T):
     cs = [0.4, 4, 8, 12, 16, 19]
     for j, it in enumerate(items):
         g.text(8, 80 - j * 8.5, "- " + it, 21, FG, alpha=pr(t, cues[min(j // 2, len(cues) - 1)] + (j % 2) * 3.5, 1))
-    g.text(96, 15, "arXiv 2606.20474  |  github.com/Bobliuuu/ultraquant-more", 24, MUTED, "center", alpha=pr(t, cues[-1], 1))
+    g.text(96, 15, "arXiv 2606.20474  |  github.com/Bobliuuu/all-quant", 24, MUTED, "center", alpha=pr(t, cues[-1], 1))
 
 SCENES = [("title", s_title), ("vendors", s_vendors), ("memory", s_memory), ("pack", s_pack), ("kquery", s_kquery),
           ("results", s_results), ("position", s_position), ("quality", s_quality), ("ports", s_ports), ("step", s_step), ("realworld", s_realworld), ("caveats", s_caveats)]

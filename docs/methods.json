@@ -21,11 +21,11 @@
    ]
   },
   {
-   "name": "uqmt (this repo)",
+   "name": "AllQuant / uqmt (this repo)",
    "bits": "4.25 (FP4+UE8M0/32)",
-   "repo_url": "https://github.com/Bobliuuu/ultraquant-more",
+   "repo_url": "https://github.com/Bobliuuu/all-quant",
    "repo_head_commit_2026_11_11": null,
-   "install_command": "pip install -e ~/ultraquant-more (pyproject.toml, untracked at time of writing)",
+   "install_command": "pip install -e ~/all-quant (pyproject.toml, untracked at time of writing)",
    "runs_on_rocm": "yes: MI300X gfx942 (Triton, in-register dequant)",
    "runs_on_cuda": "yes: B300 (Triton)",
    "entry_points_kv_quant_dequant": "uqmt.attn.quantize_fp4 / dequantize_fp4 / fused K-query decode (see attn.py)",

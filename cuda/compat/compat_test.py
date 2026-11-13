@@ -1,4 +1,4 @@
-"""Bit-compat probe: upstream vLLM UltraQuant vs ultraquant-more layout/quantiser/decode.
+"""Bit-compat probe: upstream vLLM UltraQuant vs AllQuant layout/quantiser/decode.
 Run inside the Modal image (see cuda/modal/modal_compat.py). Prints + writes JSON."""
 import sys, os, json, math, importlib
 import torch

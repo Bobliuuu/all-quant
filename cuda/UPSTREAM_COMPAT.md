@@ -1,4 +1,4 @@
-# Upstream UltraQuant (vLLM / SGLang) vs ultraquant-more: format and bit-compatibility
+# Upstream UltraQuant (vLLM / SGLang) vs AllQuant: format and bit-compatibility
 
 Sources (read 2026-11-11): vLLM `main` @ `3ea131ca2c` (PR #57057 "UltraQuant 4-bit KV cache backend", plus #61649, #61168 CPU),
 files `vllm/v1/attention/ops/ultraquant/{format,reference,triton_store,triton_dequant,triton_unified_attention}.py` and

@@ -2,7 +2,7 @@
 
 Supersedes placeholder item `20261113-pearlquant-style-e8-kv-codec-blackwell-kernel`.
 From: pearlquant-repro (local repo `~/code/pearlquant-repro`, to be merged under
-`ports/pearlquant/` of Bobliuuu/ultraquant-more). Not pushed.
+`ports/pearlquant/` of Bobliuuu/all-quant). Not pushed.
 
 ## What it is
 Fused split-KV decode attention over an E8 "probable points" (ball) codebook KV cache:
