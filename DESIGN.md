@@ -50,8 +50,8 @@ Leader tables are per layer-independent constants (b=25: 460 leaders, 14.7 KB).
 
 ## 3. Why the ball codebook (and not Voronoi) is the main variant
 
-On iid Gaussian data (results/rd_gaussian.json) the ball codebook wastes about 0.05 to 0.1 bits
-per value less than the Voronoi code at the same rate, it allows any integer number of bits per
+On iid Gaussian data (results/rd_gaussian.json) the ball codebook wastes fewer bits
+per value than the Voronoi code at every matched rate, it allows any integer number of bits per
 group (fractional bpv in 1/8 steps, which is how 3.2/2.3/2.1 averages come out), and it matches
 Pearl's "probable lattice points" sentence literally. Decode cost is similar: Voronoi needs a
 base-q unpack, a matrix product and a full E8 nearest-point (two D8 roundings); the ball needs a

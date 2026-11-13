@@ -11,46 +11,44 @@ float64 attention over the *decoded* cache.
 1. **Decoder on the CPU first.** `tests/test_decode_cpu.cpp` decodes all 2^16 indices at
    b = 16 and 200k random indices at b = 25 and 30 with the shared header and compares with
    the Python `unrank`. 0 mismatches for v1 (branchy), v2 (branch-free) and v3 (SoA + radix).
-2. **v1 kernel (CUDA, H100, Modal).** 96/96 on the first run. Slow: B=8, T=32k, GQA-4,
-   b=25/24 took 6.4 ms vs 0.73 ms for the same skeleton reading bf16. Per-codeword cost was
-   the problem, not bytes.
-3. **v1 on HIP (MI300X).** Same source through hipcc, no edits: 96/96. 6.7 ms.
-4. **v1 on SYCL (Arc B390).** Built with DPC++ (`kernels/sycl/build.bat`). First runs failed
+Timings below are B=8, T=32768, Hq=32, Hkv=8, b=25/24, us per call; each is read from the
+file cited next to it (`results/kernels/history/`, `results/kernels/`).
+
+2. **v1 kernel (branchy decode, fp32 smem tile, tables in smem), CUDA on H100 (Modal).** 96/96 on
+   the first run. Slow: 6388 us vs 733 us for the same skeleton reading bf16
+   (`history/cuda_h100_v1.jsonl`). Per-codeword cost, not bytes, was the problem.
+3. **HIP (MI300X).** Same source through hipcc, no edits: 96/96.
+4. **SYCL (Arc B390).** Built with DPC++ (`kernels/sycl/build.bat`). First runs failed
    nondeterministically: (a) the default SYCL queue is out-of-order, so the reduce kernel
-   could run before the split kernel. Fixed with `property::queue::in_order()`. (b) After that
+   could run before the split kernel; fixed with `property::queue::in_order()`. (b) After that
    fix, the v1 serial softmax (one work-item per head loops over 32 tokens) still gave wrong
-   results on the Arc iGPU for bf16/fp8 and for pq with nsplit > 1, while the identical CUDA
-   and HIP code passed. We did not root-cause it; the v3 rewrite (parallel softmax over
-   (head, token), same barriers pattern as CUDA) passes 96/96 on Arc. Treat this as an open
-   question, not a known compiler bug.
-5. **v2 branch-free decode** (prefix-count compare instead of a data-dependent loop with
-   division): 6.7 -> 6.2 ms on MI300X. Small.
-6. **v3 SoA tables + radix bucket lookup** instead of binary search over 32-byte rows: small
-   gain while the tables lived in LDS. Moving the tables to global memory (L1/L2 resident)
-   took MI300X from 6.19 ms to 2.69 ms: the 22 KB of tables in LDS limited occupancy to one
-   128-thread block per CU. (`PQ_TAB_SMEM=1` still selects LDS tables:
-   `results/kernels/hip_mi300x_bench_tabsmem.jsonl`.)
-7. **v4 compact smem tile**: decoded lattice coordinates are stored as exact int8 (2x in
-   [-31, 31]) plus one f32 scale per token, bf16/fp8 tiles stay in their storage type and are
-   converted on read. LDS per block dropped from ~21 KB to ~9 KB. MI300X 2.69 -> 1.59 ms.
-8. **ND specialization**: the leader tables at b <= 25 have at most 5 distinct |values|, so the
-   compare loop runs 5 instead of 8 times and the values fit in 32 bits. 1.59 -> 1.41 ms.
-   Same change on CUDA and SYCL; all three backends 96/96 after it.
+   results on the Arc iGPU for bf16/fp8 and for pq with nsplit > 1, while the same CUDA and HIP
+   code passed. We did not root-cause it; the v3 rewrite (softmax parallel over (head, token))
+   passes 96/96 on Arc. Treat it as an open question, not a known compiler bug.
+5. **v2 branch-free decode** (prefix-count compare instead of a data-dependent loop with a
+   division): first MI300X timing 6704 us (`history/hip_mi300x_v2_branchfree.jsonl`).
+6. **v3 SoA tables + radix bucket lookup** instead of a binary search over 32-byte rows: 6198 us
+   with the tables in LDS (`history/hip_mi300x_v3_soa_lds_tables.jsonl`). Moving the tables to
+   global memory (L1/L2 resident) gave 2688 us (`history/hip_mi300x_v3_tables_lds_vs_global.jsonl`):
+   22 KB of tables in LDS had limited occupancy to one 128-thread block per CU.
+   `PQ_TAB_SMEM=1` still selects LDS tables (`hip_mi300x_bench_tabsmem.jsonl`).
+7. **v4 compact tile**: decoded lattice coordinates stored as exact int8 (2x in [-31, 31]) plus
+   one f32 scale per token; bf16/fp8 tiles stay in their storage type and are converted on read.
+   LDS per block dropped from ~21 KB to ~9 KB.
+8. **ND specialization**: leader tables at b <= 25 have at most 5 distinct |values|, so the
+   compare loop runs 5 instead of 8 times and the values fit in 32 bits. Final MI300X timing in
+   `hip_mi300x_bench.jsonl` (see the README kernel table). Same change on CUDA and SYCL; every
+   backend 96/96 after it.
 
-## Where it ends up (B=8, T=32768, Hq=32, Hkv=8, D=128, b = 25/24 = 3.19 bpv)
+## Where it ends up
 
-| GPU | pq (ours) | bf16, same skeleton | fp8, same skeleton | vendor bf16 |
-|---|---|---|---|---|
-| MI300X (HIP) | 1.41 ms | 0.95 ms | 1.25 ms | not measured (no ROCm torch on the shared box) |
-| H100 (CUDA) | 1.86 ms | 0.53 ms | 1.07 ms | torch SDPA 0.36 ms |
-| B200 (CUDA, same code, sm_100a, no tcgen05) | 1.67 ms | 0.52 ms | 1.06 ms | torch SDPA 0.22 ms |
-| H100 (SYCL, DPC++ CUDA backend) | 2.17 ms | 0.67 ms | 2.46 ms | |
-| Arc B390 (SYCL), B=4 | 10.1 ms | 6.09 ms | 7.41 ms | not measured |
+Final timings per device are in the README kernel table and `results/SUMMARY.md`, both generated
+from `results/kernels/*bench*.jsonl` by `tools/make_tables.py`.
 
 The pq kernel reads 5x fewer bytes than bf16 (102 vs 512 bytes per token and KV head) but is
 ALU-bound on codeword decode at GQA-4: each decoded group of 8 serves only 4 query heads.
 The fp8 column is our skeleton with a software e4m3 decode; it is not a tuned FP8 kernel.
-On H100 the gap is largest because INT32 throughput is half the FP32 rate there.
+On H100/B200 the gap to bf16 is larger than on MI300X; INT32 issue rate is half the FP32 rate on those parts.
 
 Bench data are random bytes (every b-bit index is a valid codeword), random-mantissa bf16 and random fp8
 values, so the Arc numbers are not inflated by the iGPU's data-dependent compression (the
