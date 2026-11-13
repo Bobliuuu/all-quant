@@ -83,7 +83,7 @@ per task, greedy decoding, cache quantized for prefill and every generated token
 At 8k tokens this check does not separate the configurations (everything that ran scores 1.00).
 The 2.3/2.1-bpv and uncentered pq configs did not finish within the run's time limit: in our
 pseudo-quantization harness every generated token re-runs the Python codec for 36 layers, which
-made each pq configuration take ~40 min. Treat this as a smoke test, not a RULER result.
+made each pq configuration take most of a 50-minute run. Treat this as a smoke test, not a RULER result.
 
 ## 3. Kernels
 
