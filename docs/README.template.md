@@ -80,6 +80,11 @@ per task, greedy decoding, cache quantized for prefill and every generated token
 
 {{TABLE_NIAH}}
 
+At 8k tokens this check does not separate the configurations (everything that ran scores 1.00).
+The 2.3/2.1-bpv and uncentered pq configs did not finish within the run's time limit: in our
+pseudo-quantization harness every generated token re-runs the Python codec for 36 layers, which
+made each pq configuration take ~40 min. Treat this as a smoke test, not a RULER result.
+
 ## 3. Kernels
 
 One source for CUDA and HIP (`kernels/cuda/pq_attn.cuh`), one SYCL port (`kernels/sycl/pq_sycl.cpp`),
@@ -93,6 +98,12 @@ and un-rotated once in the reduce kernel. A cached vector costs exactly 2·b + 2
 4 split counts each, relative L2 error < 1e-4 against float64 attention over the decoded cache):
 
 {{TABLE_CHECK}}
+
+Source revisions: the MI300X rows (correctness and speed) use the final source. The NVIDIA and
+Intel rows were measured one revision earlier, before the last change (V accumulation without a
+32-entry register array, which cut VGPRs from 143 to 52 on MI300X and sped up the MQA shapes there).
+That change was not re-run on NVIDIA (NVIDIA work was handed off, see
+[docs/CUDA_HANDOFF.md](docs/CUDA_HANDOFF.md)) and is pending on Intel.
 
 **Speed**, us per call, B=8, 32k context, Qwen3-8B-like GQA (Hq=32, Hkv=8, D=128), pq at 3.19 bpv:
 

@@ -112,6 +112,11 @@ per task, greedy decoding, cache quantized for prefill and every generated token
 | nvfp4 | 1.00 | 1.00 |
 | tq-mse-3-kc | 1.00 | 1.00 |
 
+At 8k tokens this check does not separate the configurations (everything that ran scores 1.00).
+The 2.3/2.1-bpv and uncentered pq configs did not finish within the run's time limit: in our
+pseudo-quantization harness every generated token re-runs the Python codec for 36 layers, which
+made each pq configuration take ~40 min. Treat this as a smoke test, not a RULER result.
+
 ## 3. Kernels
 
 One source for CUDA and HIP (`kernels/cuda/pq_attn.cuh`), one SYCL port (`kernels/sycl/pq_sycl.cpp`),
@@ -133,11 +138,17 @@ and un-rotated once in the reduce kernel. A cached vector costs exactly 2·b + 2
 | SYCL | Intel(R) Xeon(R) Platinum 8462Y+ | 96/96 | 1.1e-06 |
 | SYCL | NVIDIA H100 80GB HBM3 | 96/96 | 1.1e-06 |
 
+Source revisions: the MI300X rows (correctness and speed) use the final source. The NVIDIA and
+Intel rows were measured one revision earlier, before the last change (V accumulation without a
+32-entry register array, which cut VGPRs from 143 to 52 on MI300X and sped up the MQA shapes there).
+That change was not re-run on NVIDIA (NVIDIA work was handed off, see
+[docs/CUDA_HANDOFF.md](docs/CUDA_HANDOFF.md)) and is pending on Intel.
+
 **Speed**, us per call, B=8, 32k context, Qwen3-8B-like GQA (Hq=32, Hkv=8, D=128), pq at 3.19 bpv:
 
 | GPU / backend | pq-repro (102 B/token/head) | bf16, same skeleton (512 B) | fp8, same skeleton (264 B) | vendor bf16 |
 |---|---|---|---|---|
-| MI300X / HIP | 1412 | 953 | 1246 | not measured |
+| MI300X / HIP | 1441 | 952 | 972 | not measured |
 | H100 / CUDA | 1862 | 532 | 1070 | 357 (torch SDPA) |
 | B200 / CUDA (no tensor cores) | 1672 | 522 | 1062 | 221 (torch SDPA) |
 | H100 / SYCL (DPC++ CUDA backend) | 2165 | 665 | 2456 | not measured |
@@ -157,7 +168,7 @@ T=32k; >1 means pq is slower):
 
 | GPU / backend | pq / fp8, B=1 | pq / fp8, B=8 | pq / bf16, B=1 | pq / bf16, B=8 |
 |---|---|---|---|---|
-| MI300X / HIP | 1.36x | 1.13x | 1.86x | 1.48x |
+| MI300X / HIP | 1.33x | 1.48x | 1.82x | 1.51x |
 | H100 / CUDA | 1.66x | 1.74x | 2.83x | 3.50x |
 | B200 / CUDA | 1.56x | 1.57x | 2.87x | 3.20x |
 | H100 / SYCL | 0.81x | 0.88x | 2.59x | 3.26x |

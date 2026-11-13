@@ -91,13 +91,13 @@ bytes/token/KV-head: pq 2*bK+2 + 2*bV+2 (102 B at 25/24), bf16 512 B, fp8 264 B.
 | NVIDIA H100 80GB HBM3 (CUDA) | 8 | 32768 | 32 | 8 | 16/16 | 1774 | 536 | 1070 | 360 (torch SDPA) |
 | NVIDIA H100 80GB HBM3 (CUDA) | 8 | 32768 | 32 | 8 | 18/17 | 1778 | 536 | 1070 | 360 (torch SDPA) |
 | NVIDIA H100 80GB HBM3 (CUDA) | 8 | 32768 | 32 | 8 | 25/24 | 1862 | 536 | 1070 | 360 (torch SDPA) |
-| AMD Instinct MI300X VF (HIP) | 1 | 32768 | 32 | 8 | 25/24 | 286 | 154 | 210 |  |
-| AMD Instinct MI300X VF (HIP) | 8 | 32768 | 32 | 8 | 25/24 | 1412 | 955 | 1246 |  |
-| AMD Instinct MI300X VF (HIP) | 8 | 32768 | 32 | 8 | 18/17 | 1286 | 955 | 1246 |  |
-| AMD Instinct MI300X VF (HIP) | 8 | 32768 | 32 | 8 | 16/16 | 1273 | 955 | 1246 |  |
-| AMD Instinct MI300X VF (HIP) | 32 | 8192 | 32 | 8 | 25/24 | 1384 | 924 | 1211 |  |
-| AMD Instinct MI300X VF (HIP) | 8 | 32768 | 32 | 1 | 25/24 | 1080 | 771 | 1692 |  |
-| AMD Instinct MI300X VF (HIP) | 8 | 131072 | 16 | 1 | 25/24 | 2701 | 1852 | 3349 |  |
+| AMD Instinct MI300X VF (HIP) | 1 | 32768 | 32 | 8 | 25/24 | 278 | 153 | 209 |  |
+| AMD Instinct MI300X VF (HIP) | 8 | 32768 | 32 | 8 | 25/24 | 1441 | 952 | 965 |  |
+| AMD Instinct MI300X VF (HIP) | 8 | 32768 | 32 | 8 | 18/17 | 1341 | 952 | 965 |  |
+| AMD Instinct MI300X VF (HIP) | 8 | 32768 | 32 | 8 | 16/16 | 1324 | 952 | 965 |  |
+| AMD Instinct MI300X VF (HIP) | 32 | 8192 | 32 | 8 | 25/24 | 1395 | 915 | 953 |  |
+| AMD Instinct MI300X VF (HIP) | 8 | 32768 | 32 | 1 | 25/24 | 1041 | 706 | 1588 |  |
+| AMD Instinct MI300X VF (HIP) | 8 | 131072 | 16 | 1 | 25/24 | 2064 | 1387 | 2600 |  |
 | Intel(R) Arc(TM) B390 GPU (SYCL) | 1 | 32768 | 32 | 8 | 25/24 | 2624 | 1597 | 1979 |  |
 | Intel(R) Arc(TM) B390 GPU (SYCL) | 4 | 32768 | 32 | 8 | 25/24 | 10098 | 6085 | 7408 |  |
 | Intel(R) Arc(TM) B390 GPU (SYCL) | 4 | 32768 | 32 | 8 | 16/16 | 9277 | 6085 | 7408 |  |
