@@ -1,6 +1,7 @@
 # UltraQuant (uqmt): fused K-query FP4 KV-cache verify attention, on AMD, NVIDIA and Intel
 
-<p align="center"><a href="video/ultraquant_explainer.mp4"><img src="video/poster.png" width="720" alt="UltraQuant explainer video"></a></p>
+<p align="center"><a href="video/ultraquant_explainer.mp4"><img src="video/preview.gif" width="720" alt="UltraQuant explainer video (animated preview; click for the full video)"></a></p>
+<p align="center"><b><a href="video/ultraquant_explainer.mp4">Watch the 4.7-minute explainer video</a></b> (<a href="video/ultraquant_explainer.srt">subtitles</a>)</p>
 
 This repo implements one operation: **decode / speculative-verify attention over a 4-bit paged KV cache in the UltraQuant format** (FP4 e2m1 values, one UE8M0 power-of-two scale per 32 channels: 68 bytes per head per token for K or V at head_dim 128, **3.76x smaller than fp16, 1.88x smaller than fp8**), where **all K speculative queries and the GQA group share a single pass over the KV pages**.
 
