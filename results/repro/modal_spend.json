@@ -1,0 +1,5 @@
+{"billed_hq_apps_through_2026-11-13T18:00Z_usd": 8.00,
+ "source": "modal billing report --for today --resolution h (complete hours only): hq-repro 7.45, hq-kernels 0.55",
+ "upper_bound_usd": 10.0,
+ "upper_bound_basis": "22 hq-* apps, 2.25 app-hours total wall clock x $3.95/h H100 (includes image builds and CPU-only downloads) + ~$1 CPU/memory",
+ "cap_usd": 60}

@@ -160,17 +160,21 @@ def main():
     qb = q.get("bf16")
     md.append("\n## Table 12 (Qwen2.5-7B-Instruct-1M, KV only, WikiText-2, ctx 4096, 72 windows)\n")
     md.append(f"Our bf16 baseline: {f(qb and qb['ppl'], 4)} (paper: 7.25).\n")
-    md.append("| bits | correction | window | paper W2 Δ% | ours PPL | ours Δ% | ours eff. bps | ours KV× = 16/bps |\n|---|---|---|---|---|---|---|---|")
+    md.append("| bits | correction | window | paper W2 Δ% | ours PPL | ours Δ% | ours eff. bps | ours KV× = 16/bps | unprotected hook path PPL |\n|---|---|---|---|---|---|---|---|---|")
     js["t12"] = []
     for (b_, rot, w), pd in P12.items():
-        cfg = f"kv:{b_}:{rot}:0" if w == "-" else f"kvres:{b_}:{rot}"
+        cfg = f"kvres:{b_}:{rot}:0:0" if w == "-" else f"kvres:{b_}:{rot}"
         d = q.get(cfg)
         o = d and d["ppl"]; dp = (100 * (o / qb["ppl"] - 1)) if (o and qb) else None
         bps = d and d.get("measured_bps")
-        md.append(f"| {b_} | {rot} | {w} | +{pd} | {f(o)} | {f(dp, 1) if dp is not None else '-'} | {f(bps, 2) if bps else '-'} | {f(16 / bps, 1) if bps else '-'} |")
-        js["t12"].append(dict(bits=b_, rot=rot, window=w, paper_dpct=pd, ours=o, ours_dpct=dp, bps=bps))
-    md.append("\nNote: for the no-window rows `measured_bps` excludes the fp16 norm (+0.125 b/scalar); the windowed rows count the "
-              "bf16 window and protected K at 16 bits, as the paper's effective bps does.\n")
+        hk = q.get(f"kv:{b_}:{rot}:0") if w == "-" else None
+        md.append(f"| {b_} | {rot} | {w} | +{pd} | {f(o)} | {f(dp, 1) if dp is not None else '-'} | {f(bps, 2) if bps else '-'} | "
+                  f"{f(16 / bps, 1) if bps else '-'} | {f(hk and hk['ppl'], 0) if hk else ''} |")
+        js["t12"].append(dict(bits=b_, rot=rot, window=w, paper_dpct=pd, ours=o, ours_dpct=dp, bps=bps, hook_unprotected=hk and hk["ppl"]))
+    md.append("\nAll our Table 12 rows use `install_kv_residual_quant` (pre-RoPE, symmetric K=V, first and last block's K kept "
+              "in bf16 and counted at 16 bits; window W=32 or W=0 for '-').  Without that K protection (the plain "
+              "`install_kv_cache_quant_path` hooks, last column) Qwen2.5-7B-1M collapses even at 4 bps.  `eff. bps` counts the "
+              "window and the protected K at 16 bits, but not the fp16 norm.\n")
 
     # ---------------- end-to-end on MI300X with the ported kernels
     md.append("\n## End-to-end PPL on MI300X (ROCm torch 2.8 + HIP port) vs H100 (CUDA)\n")
