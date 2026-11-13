@@ -67,6 +67,7 @@ FP8 reference PPL 16.95. Pearl's FP8 noise floor is ~0.04 (nondeterminism); our 
 | cuda | NVIDIA B200 | 96/96 | 1.1e-06 |
 | cuda | NVIDIA H100 | 96/96 | 1.1e-06 |
 | hip | AMD MI300X | 96/96 | 1.1e-06 |
+| sycl | Intel(R) Arc(TM) 140V GPU (16GB) | 96/96 | 1.1e-06 |
 | sycl | Intel(R) Arc(TM) B390 GPU | 96/96 | 1.1e-06 |
 | sycl | Intel(R) Xeon(R) Platinum 8462Y+ | 96/96 | 1.1e-06 |
 | sycl | NVIDIA H100 80GB HBM3 | 96/96 | 1.1e-06 |
@@ -98,6 +99,10 @@ bytes/token/KV-head: pq 2*bK+2 + 2*bV+2 (102 B at 25/24), bf16 512 B, fp8 264 B.
 | AMD Instinct MI300X VF (HIP) | 32 | 8192 | 32 | 8 | 25/24 | 1395 | 915 | 953 |  |
 | AMD Instinct MI300X VF (HIP) | 8 | 32768 | 32 | 1 | 25/24 | 1041 | 706 | 1588 |  |
 | AMD Instinct MI300X VF (HIP) | 8 | 131072 | 16 | 1 | 25/24 | 2064 | 1387 | 2600 |  |
+| Intel(R) Arc(TM) 140V GPU (16GB) (SYCL) | 1 | 32768 | 32 | 8 | 25/24 | 5056 | 2835 | 4168 |  |
+| Intel(R) Arc(TM) 140V GPU (16GB) (SYCL) | 4 | 32768 | 32 | 8 | 25/24 | 19874 | 10107 | 14741 |  |
+| Intel(R) Arc(TM) 140V GPU (16GB) (SYCL) | 4 | 32768 | 32 | 8 | 16/16 | 17723 | 10107 | 14741 |  |
+| Intel(R) Arc(TM) 140V GPU (16GB) (SYCL) | 4 | 32768 | 32 | 1 | 25/24 | 9925 | 7309 | 16810 |  |
 | Intel(R) Arc(TM) B390 GPU (SYCL) | 1 | 32768 | 32 | 8 | 25/24 | 2624 | 1597 | 1979 |  |
 | Intel(R) Arc(TM) B390 GPU (SYCL) | 4 | 32768 | 32 | 8 | 25/24 | 10098 | 6085 | 7408 |  |
 | Intel(R) Arc(TM) B390 GPU (SYCL) | 4 | 32768 | 32 | 8 | 16/16 | 9277 | 6085 | 7408 |  |

@@ -53,7 +53,7 @@ On H100/B200 the gap to bf16 is larger than on MI300X; INT32 issue rate is half 
 Bench data are random bytes (every b-bit index is a valid codeword), random-mantissa bf16 and random fp8
 values, so the Arc numbers are not inflated by the iGPU's data-dependent compression (the
 ultraquant notes saw ~110 GB/s on random data vs 430+ GB/s on uniform data on this box).
-Correctness on 6 device/backend pairs: CUDA H100, CUDA B200, HIP MI300X, SYCL Arc B390,
+Correctness on 7 device/backend pairs: CUDA H100, CUDA B200, HIP MI300X, SYCL Arc B390, SYCL Arc 140V (final source),
 SYCL H100 (CUDA backend), SYCL Xeon CPU (OpenCL): 96/96 each.
 
 ## What was not done

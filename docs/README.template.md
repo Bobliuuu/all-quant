@@ -99,11 +99,12 @@ and un-rotated once in the reduce kernel. A cached vector costs exactly 2·b + 2
 
 {{TABLE_CHECK}}
 
-Source revisions: the MI300X rows (correctness and speed) use the final source. The NVIDIA and
-Intel rows were measured one revision earlier, before the last change (V accumulation without a
+Source revisions: the MI300X and Arc 140V rows (correctness and speed) use the final source. The
+NVIDIA and Arc B390 rows were measured one revision earlier, before the last change (V accumulation without a
 32-entry register array, which cut VGPRs from 143 to 52 on MI300X and sped up the MQA shapes there).
 That change was not re-run on NVIDIA (NVIDIA work was handed off, see
-[docs/CUDA_HANDOFF.md](docs/CUDA_HANDOFF.md)) and is pending on Intel.
+[docs/CUDA_HANDOFF.md](docs/CUDA_HANDOFF.md)); the B390 box was unreachable at the end, so the
+final Intel run is on the second box (Arc 140V, Lunar Lake).
 
 **Speed**, us per call, B=8, 32k context, Qwen3-8B-like GQA (Hq=32, Hkv=8, D=128), pq at 3.19 bpv:
 
@@ -150,4 +151,4 @@ python tools/make_tables.py                                   # README.md + resu
 - KL uses 4 PG-19 books x 16k tokens; NIAH is our own small generator, not RULER.
 - The kernels are correct on every backend we ran but slower than bf16; no tensor cores, no
   paged KV, no vLLM integration; serving results (TTFT, throughput) were not attempted.
-- Intel numbers are from one Arc B390 iGPU (Xe3, shared system memory), not a datacenter part.
+- Intel numbers are from two laptop iGPUs (Arc B390 Xe3, Arc 140V Xe2; shared system memory), not datacenter parts.

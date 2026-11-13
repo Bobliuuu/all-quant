@@ -126,7 +126,7 @@ per 32-token tile the block copies the packed codes to shared memory, each threa
 and the query (rotated once per call) is dotted against them; V is accumulated in the rotated domain
 and un-rotated once in the reduce kernel. A cached vector costs exactly 2·b + 2 bytes.
 
-**Correctness**: 576/576 checks pass across all device/backend pairs (8 cases x {pq, bf16, fp8} x
+**Correctness**: 672/672 checks pass across all device/backend pairs (8 cases x {pq, bf16, fp8} x
 4 split counts each, relative L2 error < 1e-4 against float64 attention over the decoded cache):
 
 | backend | device | checks passed | worst pq rel. L2 error |
@@ -134,15 +134,17 @@ and un-rotated once in the reduce kernel. A cached vector costs exactly 2·b + 2
 | CUDA | NVIDIA B200 | 96/96 | 1.1e-06 |
 | CUDA | NVIDIA H100 | 96/96 | 1.1e-06 |
 | HIP | AMD MI300X | 96/96 | 1.1e-06 |
+| SYCL | Intel(R) Arc(TM) 140V GPU (16GB) | 96/96 | 1.1e-06 |
 | SYCL | Intel(R) Arc(TM) B390 GPU | 96/96 | 1.1e-06 |
 | SYCL | Intel(R) Xeon(R) Platinum 8462Y+ | 96/96 | 1.1e-06 |
 | SYCL | NVIDIA H100 80GB HBM3 | 96/96 | 1.1e-06 |
 
-Source revisions: the MI300X rows (correctness and speed) use the final source. The NVIDIA and
-Intel rows were measured one revision earlier, before the last change (V accumulation without a
+Source revisions: the MI300X and Arc 140V rows (correctness and speed) use the final source. The
+NVIDIA and Arc B390 rows were measured one revision earlier, before the last change (V accumulation without a
 32-entry register array, which cut VGPRs from 143 to 52 on MI300X and sped up the MQA shapes there).
 That change was not re-run on NVIDIA (NVIDIA work was handed off, see
-[docs/CUDA_HANDOFF.md](docs/CUDA_HANDOFF.md)) and is pending on Intel.
+[docs/CUDA_HANDOFF.md](docs/CUDA_HANDOFF.md)); the B390 box was unreachable at the end, so the
+final Intel run is on the second box (Arc 140V, Lunar Lake).
 
 **Speed**, us per call, B=8, 32k context, Qwen3-8B-like GQA (Hq=32, Hkv=8, D=128), pq at 3.19 bpv:
 
@@ -152,7 +154,8 @@ That change was not re-run on NVIDIA (NVIDIA work was handed off, see
 | H100 / CUDA | 1862 | 532 | 1070 | 357 (torch SDPA) |
 | B200 / CUDA (no tensor cores) | 1672 | 522 | 1062 | 221 (torch SDPA) |
 | H100 / SYCL (DPC++ CUDA backend) | 2165 | 665 | 2456 | not measured |
-| Arc B390 / SYCL (B=4) | 10098 | 6095 | 7408 | not measured |
+| Arc B390 iGPU / SYCL (B=4) | 10098 | 6095 | 7408 | not measured |
+| Arc 140V iGPU / SYCL (B=4) | 19874 | 9903 | 14546 | not measured |
 
 The pq cache is 5x smaller than bf16, but the kernel is **slower** than bf16 everywhere: it is
 bound by codeword decode (integer ALU), not by memory. At GQA-4 each decoded group serves only 4 query
@@ -200,4 +203,4 @@ python tools/make_tables.py                                   # README.md + resu
 - KL uses 4 PG-19 books x 16k tokens; NIAH is our own small generator, not RULER.
 - The kernels are correct on every backend we ran but slower than bf16; no tensor cores, no
   paged KV, no vLLM integration; serving results (TTFT, throughput) were not attempted.
-- Intel numbers are from one Arc B390 iGPU (Xe3, shared system memory), not a datacenter part.
+- Intel numbers are from two laptop iGPUs (Arc B390 Xe3, Arc 140V Xe2; shared system memory), not datacenter parts.

@@ -126,11 +126,11 @@ def table_kernel():
         except KeyError:
             pass
     s4 = (4, 32768, 32, 8)
-    try:
-        L.append(f"| Arc B390 / SYCL (B=4) | {kus('sycl_arcb390_bench', 'pq', *s4, 25)} | {kus('sycl_arcb390_bench', 'bf16', *s4)} | "
-                 f"{kus('sycl_arcb390_bench', 'fp8', *s4)} | not measured |")
-    except KeyError:
-        pass
+    for f, lab in [("sycl_arcb390_bench", "Arc B390 iGPU / SYCL (B=4)"), ("sycl_arc140v_bench", "Arc 140V iGPU / SYCL (B=4)")]:
+        try:
+            L.append(f"| {lab} | {kus(f, 'pq', *s4, 25)} | {kus(f, 'bf16', *s4)} | {kus(f, 'fp8', *s4)} | not measured |")
+        except KeyError:
+            pass
     return "\n".join(L)
 
 
