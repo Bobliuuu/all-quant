@@ -1,0 +1,875 @@
+{
+ "bf16": 7.15974535343328,
+ "weights": [
+  {
+   "lattice": "e8int",
+   "bps": 3,
+   "paper": 8.744,
+   "tile128": 8.855786648077903,
+   "tile1024": 8.754007211328044
+  },
+  {
+   "lattice": "e8int",
+   "bps": 4,
+   "paper": 7.434,
+   "tile128": 7.41400149349142,
+   "tile1024": 7.437112796477234
+  },
+  {
+   "lattice": "e8int",
+   "bps": 5,
+   "paper": 7.236,
+   "tile128": 7.262464706245576,
+   "tile1024": 7.255608698032093
+  },
+  {
+   "lattice": "d4int",
+   "bps": 3,
+   "paper": 8.835,
+   "tile128": 8.922867405028732,
+   "tile1024": 8.96498875600285
+  },
+  {
+   "lattice": "d4int",
+   "bps": 4,
+   "paper": 7.435,
+   "tile128": 7.4760590194713705,
+   "tile1024": 7.489934658022298
+  },
+  {
+   "lattice": "d4int",
+   "bps": 5,
+   "paper": 7.227,
+   "tile128": 7.220923492298974,
+   "tile1024": 7.22692772486259
+  },
+  {
+   "lattice": "a2int",
+   "bps": 3,
+   "paper": 8.973,
+   "tile128": 9.025318954249025,
+   "tile1024": 9.226851837690761
+  },
+  {
+   "lattice": "a2int",
+   "bps": 4,
+   "paper": 7.466,
+   "tile128": 7.489510411242524,
+   "tile1024": 7.47134715594261
+  },
+  {
+   "lattice": "a2int",
+   "bps": 5,
+   "paper": 7.249,
+   "tile128": 7.252457972827179,
+   "tile1024": 7.25192862980719
+  },
+  {
+   "lattice": "z1int",
+   "bps": 3,
+   "paper": 9.318,
+   "tile128": 9.167775014873119,
+   "tile1024": 8.914486172677918
+  },
+  {
+   "lattice": "z1int",
+   "bps": 4,
+   "paper": 7.527,
+   "tile128": 7.490958685024365,
+   "tile1024": 7.475663064724871
+  },
+  {
+   "lattice": "z1int",
+   "bps": 5,
+   "paper": 7.252,
+   "tile128": 7.220815642655578,
+   "tile1024": 7.266413239557598
+  }
+ ],
+ "higgs": [
+  {
+   "bps": 3,
+   "paper": 9.527,
+   "ours": 9.526482787695365
+  },
+  {
+   "bps": 3.5,
+   "paper": 8.14,
+   "ours": 8.139995458884796
+  },
+  {
+   "bps": 4,
+   "paper": 7.618,
+   "ours": 7.617459222351069
+  },
+  {
+   "bps": 4.5,
+   "paper": 7.427,
+   "ours": 7.427197378329648
+  },
+  {
+   "bps": 5,
+   "paper": 7.288,
+   "ours": 7.288357806816824
+  }
+ ],
+ "real": [
+  {
+   "config": "w_real:bf16:3",
+   "ppl": 8.838528523632005,
+   "bits": 3.08648511996636
+  },
+  {
+   "config": "w_real:bf16:4",
+   "ppl": 7.402004632502071,
+   "bits": 4.088255029458266
+  },
+  {
+   "config": "w_real:bf16:5",
+   "ppl": 7.201081084327638,
+   "bits": 5.087250966292161
+  },
+  {
+   "config": "w_real:int8:4",
+   "ppl": 7.524004744575985,
+   "bits": 4.088735080682314
+  },
+  {
+   "config": "w_real:fp8:4",
+   "ppl": 7.558877478046733,
+   "bits": 4.088735080682314
+  }
+ ],
+ "kv": [
+  {
+   "variant": "none",
+   "paper2": 10.089,
+   "ours2": 10.025506313414251,
+   "ours3": 7.413173427484674,
+   "ours4": 7.217033944870277
+  },
+  {
+   "variant": "dither",
+   "paper2": 9.622,
+   "ours2": 9.652425929298545,
+   "ours3": 7.417673568793882,
+   "ours4": 7.2160434593106535
+  },
+  {
+   "variant": "signs",
+   "paper2": 9.896,
+   "ours2": 9.902891190814904,
+   "ours3": 7.412012906799789,
+   "ours4": 7.2125562222970245
+  },
+  {
+   "variant": "signs+dith",
+   "paper2": 9.706,
+   "ours2": 9.692122174570526,
+   "ours3": 7.427327104931179,
+   "ours4": 7.2204641504440445
+  },
+  {
+   "variant": "qjl",
+   "paper2": 9.557,
+   "ours2": 9.543712089256132,
+   "ours3": 7.437468188671671,
+   "ours4": 7.212732386641129
+  },
+  {
+   "variant": "qjl+dith",
+   "paper2": 9.685,
+   "ours2": 9.708629775342306,
+   "ours3": 7.43006066897388,
+   "ours4": 7.217148999146921
+  }
+ ],
+ "t7": [
+  {
+   "cast": "fp8",
+   "path": "w",
+   "paper": 7.535,
+   "ours1024": 7.52992638100764,
+   "ours128": 7.485484733251348
+  },
+  {
+   "cast": "fp8",
+   "path": "wkv",
+   "paper": 7.644,
+   "ours1024": 7.6448865077546975,
+   "ours128": 7.596320382294719
+  },
+  {
+   "cast": "int8",
+   "path": "w",
+   "paper": 7.433,
+   "ours1024": 7.4363616179052086,
+   "ours128": 7.413977122724358
+  },
+  {
+   "cast": "int8",
+   "path": "wkv",
+   "paper": 7.503,
+   "ours1024": 7.50758002700047,
+   "ours128": 7.482263878933699
+  }
+ ],
+ "t10": [
+  {
+   "config": "bf16",
+   "paper": [
+    16505,
+    51.8,
+    14.96
+   ],
+   "ours": {
+    "prefill_tok_s": 31200.0706510967,
+    "decode_tok_s": 75.60130482678167,
+    "resident_GiB": 14.95752763748169,
+    "kv_compression_x": null
+   }
+  },
+  {
+   "config": "w",
+   "paper": [
+    3915,
+    7.8,
+    5.29
+   ],
+   "ours": {
+    "prefill_tok_s": 4748.6446068675305,
+    "decode_tok_s": 10.797020198214277,
+    "resident_GiB": 5.322525501251221,
+    "kv_compression_x": null
+   }
+  },
+  {
+   "config": "w_int8",
+   "paper": [
+    null,
+    null,
+    null
+   ],
+   "ours": {
+    "prefill_tok_s": 8407.733633736967,
+    "decode_tok_s": 5.8555423724835265,
+    "resident_GiB": 2.1007161140441895,
+    "kv_compression_x": null
+   }
+  },
+  {
+   "config": "kv",
+   "paper": [
+    16261,
+    10.8,
+    14.99
+   ],
+   "ours": {
+    "prefill_tok_s": 259.29296362601013,
+    "decode_tok_s": 23.11181665532857,
+    "resident_GiB": 15.100218772888184,
+    "kv_compression_x": 3.785894502823047
+   }
+  },
+  {
+   "config": "kvf",
+   "paper": [
+    16261,
+    10.8,
+    14.99
+   ],
+   "ours": {
+    "prefill_tok_s": 259.6992808221364,
+    "decode_tok_s": 3.0605570594007547,
+    "resident_GiB": 15.100218772888184,
+    "kv_compression_x": 3.7858460277748165
+   }
+  },
+  {
+   "config": "wkv",
+   "paper": [
+    4655,
+    5.4,
+    5.69
+   ],
+   "ours": {
+    "prefill_tok_s": 245.8596466886116,
+    "decode_tok_s": 7.927580865043976,
+    "resident_GiB": 7.93273401260376,
+    "kv_compression_x": 3.7856611575907753
+   }
+  },
+  {
+   "config": "wkvf",
+   "paper": [
+    4655,
+    5.4,
+    5.69
+   ],
+   "ours": {
+    "prefill_tok_s": 245.39392502355915,
+    "decode_tok_s": 2.429257694823211,
+    "resident_GiB": 7.93273401260376,
+    "kv_compression_x": 3.7853827591288907
+   }
+  }
+ ],
+ "t12": [
+  {
+   "bits": "4",
+   "rot": "none",
+   "window": "-",
+   "paper_dpct": 0.8,
+   "ours": 7.314590496580763,
+   "ours_dpct": 0.9370089922864144,
+   "bps": 4.313704317642583,
+   "hook_unprotected": 10318.233926086808
+  },
+  {
+   "bits": "4",
+   "rot": "qjl",
+   "window": "-",
+   "paper_dpct": 1.4,
+   "ours": 7.365174462103505,
+   "ours_dpct": 1.6350377042452457,
+   "bps": 4.439169223109881,
+   "hook_unprotected": 4597.904190355182
+  },
+  {
+   "bits": "4",
+   "rot": "none",
+   "window": "32",
+   "paper_dpct": 0.1,
+   "ours": 7.255768512301734,
+   "ours_dpct": 0.12530050923573732,
+   "bps": 4.404835619172821,
+   "hook_unprotected": null
+  },
+  {
+   "bits": "4",
+   "rot": "qjl",
+   "window": "32",
+   "paper_dpct": 0.2,
+   "ours": 7.2699836587475914,
+   "ours_dpct": 0.32146109612067875,
+   "bps": 4.5294949450725985,
+   "hook_unprotected": null
+  },
+  {
+   "bits": "3",
+   "rot": "none",
+   "window": "-",
+   "paper_dpct": 5.5,
+   "ours": 7.634614634558804,
+   "ours_dpct": 5.353152221075241,
+   "bps": 3.3555843367699594,
+   "hook_unprotected": 377100.7147991327
+  },
+  {
+   "bits": "3",
+   "rot": "qjl",
+   "window": "-",
+   "paper_dpct": 4.8,
+   "ours": 7.594717708099312,
+   "ours_dpct": 4.802598307402461,
+   "bps": 3.473223212337683,
+   "hook_unprotected": 9773.56742451538
+  },
+  {
+   "bits": "3",
+   "rot": "none",
+   "window": "32",
+   "paper_dpct": 1.8,
+   "ours": 7.376681241739375,
+   "ours_dpct": 1.7938244360685696,
+   "bps": 3.454127653395676,
+   "hook_unprotected": null
+  },
+  {
+   "bits": "3",
+   "rot": "qjl",
+   "window": "32",
+   "paper_dpct": 1.6,
+   "ours": 7.336240586017448,
+   "ours_dpct": 1.235767381177233,
+   "bps": 3.5710215759565243,
+   "hook_unprotected": null
+  },
+  {
+   "bits": "2",
+   "rot": "none",
+   "window": "-",
+   "paper_dpct": 42.0,
+   "ours": 10.268058796485999,
+   "ours_dpct": 41.69311919221115,
+   "bps": 2.41257771802327,
+   "hook_unprotected": 1283864.8838916821
+  },
+  {
+   "bits": "2",
+   "rot": "qjl",
+   "window": "-",
+   "paper_dpct": 44.0,
+   "ours": 11.17856322516945,
+   "ours_dpct": 54.25754009157644,
+   "bps": 2.5081742942806273,
+   "hook_unprotected": 18802.705831830623
+  },
+  {
+   "bits": "2",
+   "rot": "none",
+   "window": "32",
+   "paper_dpct": 7.4,
+   "ours": 7.778151073477267,
+   "ours_dpct": 7.333869915744029,
+   "bps": 2.517889359056772,
+   "hook_unprotected": null
+  },
+  {
+   "bits": "2",
+   "rot": "qjl",
+   "window": "32",
+   "paper_dpct": 14.7,
+   "ours": 8.214506922440115,
+   "ours_dpct": 13.355321734706237,
+   "bps": 2.6134923953269165,
+   "hook_unprotected": null
+  },
+  {
+   "bits": "1.7",
+   "rot": "none",
+   "window": "32",
+   "paper_dpct": 26.9,
+   "ours": 9.217130860467297,
+   "ours_dpct": 27.190937207074573,
+   "bps": 2.240695274811024,
+   "hook_unprotected": null
+  }
+ ],
+ "rocm_e2e": [
+  {
+   "config": "bf16",
+   "h100": 7.15974535343328,
+   "mi300x": 7.160355292709197
+  },
+  {
+   "config": "kv:2:qjl:0",
+   "h100": 9.543712089256132,
+   "mi300x": 9.536735147016488
+  },
+  {
+   "config": "w_pseudo:e8int:4:1024",
+   "h100": 7.437112796477234,
+   "mi300x": 7.43826588338886
+  },
+  {
+   "config": "w_real:bf16:4",
+   "h100": 7.402004632502071,
+   "mi300x": 7.4018709300677825
+  }
+ ],
+ "kernel_tests": [
+  {
+   "backend": "cuda:NVIDIA H100 80GB HBM3 sm_90",
+   "file": "results/kernels/cuda_h100_full_test.json",
+   "passed": 84,
+   "failed": 2,
+   "failing": [
+    "attn_h4g7_t128",
+    "codec_a13_k0_s256.stage3_decode.z"
+   ]
+  },
+  {
+   "backend": "cuda:NVIDIA H100 80GB HBM3 sm_90",
+   "file": "results/kernels/cuda_h100_test.json",
+   "passed": 84,
+   "failed": 2,
+   "failing": [
+    "attn_h4g7_t128",
+    "codec_a13_k0_s256.stage3_decode.z"
+   ]
+  },
+  {
+   "backend": "hip:AMD Instinct MI300X VF gfx942:sramecc+:xnack-",
+   "file": "results/kernels/hip_mi300x_test.json",
+   "passed": 84,
+   "failed": 2,
+   "failing": [
+    "attn_h4g7_t128",
+    "codec_a13_k0_s256.stage3_decode.z"
+   ]
+  },
+  {
+   "backend": "hip:AMD Instinct MI300X VF gfx942:sramecc+:xnack-",
+   "file": "results/kernels/hip_mi300x_tuned_bt128_test.json",
+   "passed": 84,
+   "failed": 2,
+   "failing": [
+    "attn_h4g7_t128",
+    "codec_a13_k0_s256.stage3_decode.z"
+   ]
+  },
+  {
+   "backend": "hip:AMD Instinct MI300X VF gfx942:sramecc+:xnack-",
+   "file": "results/kernels/hip_mi300x_tuned_bt64_test.json",
+   "passed": 84,
+   "failed": 2,
+   "failing": [
+    "attn_h4g7_t128",
+    "codec_a13_k0_s256.stage3_decode.z"
+   ]
+  },
+  {
+   "backend": "sycl:Intel(R) oneAPI Unified Runtime over Level-Zero V2:Intel(R) Arc(TM) B390 GPU sg{16/32/} rht_sg=32",
+   "file": "results/kernels/sycl_arcb390_test.json",
+   "passed": 84,
+   "failed": 2,
+   "failing": [
+    "attn_h4g7_t128",
+    "codec_a13_k0_s256.stage3_decode.z"
+   ]
+  },
+  {
+   "backend": "sycl:Intel(R) OpenCL:Intel(R) Xeon(R) Platinum 8481C CPU @ 2.70GHz sg{4/8/16/32/64/} rht_sg=32",
+   "file": "results/kernels/sycl_h100_test_cpu.json",
+   "passed": 84,
+   "failed": 2,
+   "failing": [
+    "attn_h4g7_t128",
+    "codec_a13_k0_s256.stage3_decode.z"
+   ]
+  },
+  {
+   "backend": "sycl:NVIDIA CUDA BACKEND:NVIDIA H100 80GB HBM3 sg{32/} rht_sg=32",
+   "file": "results/kernels/sycl_h100_test_nvidia.json",
+   "passed": 84,
+   "failed": 2,
+   "failing": [
+    "attn_h4g7_t128",
+    "codec_a13_k0_s256.stage3_decode.z"
+   ]
+  }
+ ],
+ "kernel_bench": [
+  {
+   "bench": "copy",
+   "case": "",
+   "metric": "gbps_rw",
+   "H100 CUDA (upstream)": 3032.6,
+   "MI300X HIP (port)": 4018.1,
+   "MI300X HIP tuned (BT64, WS split)": 4019.6,
+   "H100 SYCL (port, DPC++ CUDA)": 3012.2,
+   "Arc B390 SYCL (port)": 86.6
+  },
+  {
+   "bench": "decode",
+   "case": "2-kernel bf16",
+   "metric": "ms",
+   "H100 CUDA (upstream)": 1.415,
+   "MI300X HIP (port)": 1.1396,
+   "MI300X HIP tuned (BT64, WS split)": 1.1523,
+   "H100 SYCL (port, DPC++ CUDA)": 1.3769,
+   "Arc B390 SYCL (port)": 8.9636
+  },
+  {
+   "bench": "decode",
+   "case": "fused bf16",
+   "metric": "ms",
+   "H100 CUDA (upstream)": 1.1769,
+   "MI300X HIP (port)": 1.0333,
+   "MI300X HIP tuned (BT64, WS split)": 1.032,
+   "H100 SYCL (port, DPC++ CUDA)": 1.1874,
+   "Arc B390 SYCL (port)": 6.5469
+  },
+  {
+   "bench": "decode",
+   "case": "fused coop bf16",
+   "metric": "ms",
+   "H100 CUDA (upstream)": 1.1715,
+   "MI300X HIP (port)": 1.2604,
+   "MI300X HIP tuned (BT64, WS split)": 1.2595,
+   "H100 SYCL (port, DPC++ CUDA)": 1.2267,
+   "Arc B390 SYCL (port)": 12.7545
+  },
+  {
+   "bench": "decode",
+   "case": "fused fp8",
+   "metric": "ms",
+   "H100 CUDA (upstream)": 1.1197,
+   "MI300X HIP (port)": 1.0566,
+   "MI300X HIP tuned (BT64, WS split)": 1.0275,
+   "H100 SYCL (port, DPC++ CUDA)": 1.2075,
+   "Arc B390 SYCL (port)": 6.4273
+  },
+  {
+   "bench": "decode",
+   "case": "fused int8",
+   "metric": "ms",
+   "H100 CUDA (upstream)": 1.1229,
+   "MI300X HIP (port)": 0.6593,
+   "MI300X HIP tuned (BT64, WS split)": 0.6659,
+   "H100 SYCL (port, DPC++ CUDA)": 1.2031,
+   "Arc B390 SYCL (port)": 4.5218
+  },
+  {
+   "bench": "decode",
+   "case": "launcher bf16",
+   "metric": "ms",
+   "H100 CUDA (upstream)": 1.1725,
+   "MI300X HIP (port)": 1.029,
+   "MI300X HIP tuned (BT64, WS split)": 1.0335,
+   "H100 SYCL (port, DPC++ CUDA)": 1.1892,
+   "Arc B390 SYCL (port)": 6.5941
+  },
+  {
+   "bench": "decode",
+   "case": "symbols(z)",
+   "metric": "ms",
+   "H100 CUDA (upstream)": 1.1138,
+   "MI300X HIP (port)": 1.0215,
+   "MI300X HIP tuned (BT64, WS split)": 1.0261,
+   "H100 SYCL (port, DPC++ CUDA)": 1.0812,
+   "Arc B390 SYCL (port)": 7.5675
+  },
+  {
+   "bench": "decode",
+   "case": "2-kernel bf16",
+   "metric": "bitstream_GBps",
+   "H100 CUDA (upstream)": 20.54,
+   "MI300X HIP (port)": 25.51,
+   "MI300X HIP tuned (BT64, WS split)": 25.23,
+   "H100 SYCL (port, DPC++ CUDA)": 21.11,
+   "Arc B390 SYCL (port)": 3.24
+  },
+  {
+   "bench": "decode",
+   "case": "fused bf16",
+   "metric": "bitstream_GBps",
+   "H100 CUDA (upstream)": 24.7,
+   "MI300X HIP (port)": 28.13,
+   "MI300X HIP tuned (BT64, WS split)": 28.17,
+   "H100 SYCL (port, DPC++ CUDA)": 24.48,
+   "Arc B390 SYCL (port)": 4.44
+  },
+  {
+   "bench": "decode",
+   "case": "fused coop bf16",
+   "metric": "bitstream_GBps",
+   "H100 CUDA (upstream)": 24.81,
+   "MI300X HIP (port)": 23.06,
+   "MI300X HIP tuned (BT64, WS split)": 23.08,
+   "H100 SYCL (port, DPC++ CUDA)": 23.7,
+   "Arc B390 SYCL (port)": 2.28
+  },
+  {
+   "bench": "decode",
+   "case": "fused fp8",
+   "metric": "bitstream_GBps",
+   "H100 CUDA (upstream)": 25.96,
+   "MI300X HIP (port)": 27.51,
+   "MI300X HIP tuned (BT64, WS split)": 28.29,
+   "H100 SYCL (port, DPC++ CUDA)": 24.07,
+   "Arc B390 SYCL (port)": 4.52
+  },
+  {
+   "bench": "decode",
+   "case": "fused int8",
+   "metric": "bitstream_GBps",
+   "H100 CUDA (upstream)": 25.89,
+   "MI300X HIP (port)": 44.09,
+   "MI300X HIP tuned (BT64, WS split)": 43.65,
+   "H100 SYCL (port, DPC++ CUDA)": 24.16,
+   "Arc B390 SYCL (port)": 6.43
+  },
+  {
+   "bench": "decode",
+   "case": "launcher bf16",
+   "metric": "bitstream_GBps",
+   "H100 CUDA (upstream)": 24.79,
+   "MI300X HIP (port)": 28.25,
+   "MI300X HIP tuned (BT64, WS split)": 28.13,
+   "H100 SYCL (port, DPC++ CUDA)": 24.44,
+   "Arc B390 SYCL (port)": 4.41
+  },
+  {
+   "bench": "decode",
+   "case": "symbols(z)",
+   "metric": "bitstream_GBps",
+   "H100 CUDA (upstream)": 26.1,
+   "MI300X HIP (port)": 28.46,
+   "MI300X HIP tuned (BT64, WS split)": 28.33,
+   "H100 SYCL (port, DPC++ CUDA)": 26.88,
+   "Arc B390 SYCL (port)": 3.84
+  },
+  {
+   "bench": "rht",
+   "case": "256",
+   "metric": "ms",
+   "H100 CUDA (upstream)": 0.0133,
+   "MI300X HIP (port)": 0.0108,
+   "MI300X HIP tuned (BT64, WS split)": 0.0108,
+   "H100 SYCL (port, DPC++ CUDA)": 0.0149,
+   "Arc B390 SYCL (port)": 0.2035
+  },
+  {
+   "bench": "rht",
+   "case": "1024",
+   "metric": "ms",
+   "H100 CUDA (upstream)": 0.0146,
+   "MI300X HIP (port)": 0.0136,
+   "MI300X HIP tuned (BT64, WS split)": 0.0135,
+   "H100 SYCL (port, DPC++ CUDA)": 0.0166,
+   "Arc B390 SYCL (port)": 0.2
+  },
+  {
+   "bench": "gemv",
+   "case": "down_proj",
+   "metric": "ms",
+   "H100 CUDA (upstream)": 0.4544,
+   "MI300X HIP (port)": 0.5055,
+   "MI300X HIP tuned (BT64, WS split)": 1.4942,
+   "H100 SYCL (port, DPC++ CUDA)": 0.5056,
+   "Arc B390 SYCL (port)": 4.3109
+  },
+  {
+   "bench": "gemv",
+   "case": "gate/up_proj",
+   "metric": "ms",
+   "H100 CUDA (upstream)": 0.4298,
+   "MI300X HIP (port)": 0.5108,
+   "MI300X HIP tuned (BT64, WS split)": 0.6039,
+   "H100 SYCL (port, DPC++ CUDA)": 0.4819,
+   "Arc B390 SYCL (port)": 3.4928
+  },
+  {
+   "bench": "gemv",
+   "case": "k/v_proj",
+   "metric": "ms",
+   "H100 CUDA (upstream)": 0.1935,
+   "MI300X HIP (port)": 0.4279,
+   "MI300X HIP tuned (BT64, WS split)": 0.3789,
+   "H100 SYCL (port, DPC++ CUDA)": 0.2296,
+   "Arc B390 SYCL (port)": 0.3637
+  },
+  {
+   "bench": "gemv",
+   "case": "q/o_proj",
+   "metric": "ms",
+   "H100 CUDA (upstream)": 0.1939,
+   "MI300X HIP (port)": 0.4312,
+   "MI300X HIP tuned (BT64, WS split)": 0.3842,
+   "H100 SYCL (port, DPC++ CUDA)": 0.2307,
+   "Arc B390 SYCL (port)": 1.6139
+  },
+  {
+   "bench": "gemv_layer",
+   "case": "",
+   "metric": "ms_per_token_32_layers",
+   "H100 CUDA (upstream)": 66.843,
+   "MI300X HIP (port)": 103.848,
+   "MI300X HIP tuned (BT64, WS split)": 135.302,
+   "H100 SYCL (port, DPC++ CUDA)": 76.477,
+   "Arc B390 SYCL (port)": 488.053
+  },
+  {
+   "bench": "gemm_ws",
+   "case": "gate/up_proj 4",
+   "metric": "ms",
+   "H100 CUDA (upstream)": 3.9539,
+   "MI300X HIP (port)": 7.7152,
+   "MI300X HIP tuned (BT64, WS split)": 7.2126,
+   "H100 SYCL (port, DPC++ CUDA)": 4.3014,
+   "Arc B390 SYCL (port)": 109.6318
+  },
+  {
+   "bench": "gemm_ws",
+   "case": "gate/up_proj 8",
+   "metric": "ms",
+   "H100 CUDA (upstream)": 3.9643,
+   "MI300X HIP (port)": 7.9435,
+   "MI300X HIP tuned (BT64, WS split)": 7.2548,
+   "H100 SYCL (port, DPC++ CUDA)": 4.3254,
+   "Arc B390 SYCL (port)": 110.5654
+  },
+  {
+   "bench": "gemm_ws",
+   "case": "q/o_proj 4",
+   "metric": "ms",
+   "H100 CUDA (upstream)": 1.1098,
+   "MI300X HIP (port)": 2.5643,
+   "MI300X HIP tuned (BT64, WS split)": 2.3949,
+   "H100 SYCL (port, DPC++ CUDA)": 1.2175,
+   "Arc B390 SYCL (port)": 31.915
+  },
+  {
+   "bench": "gemm_ws",
+   "case": "q/o_proj 8",
+   "metric": "ms",
+   "H100 CUDA (upstream)": 1.1126,
+   "MI300X HIP (port)": 2.6373,
+   "MI300X HIP tuned (BT64, WS split)": 2.4027,
+   "H100 SYCL (port, DPC++ CUDA)": 1.2204,
+   "Arc B390 SYCL (port)": 31.985
+  },
+  {
+   "bench": "attn",
+   "case": "8 131",
+   "metric": "us",
+   "H100 CUDA (upstream)": 4392.23,
+   "MI300X HIP (port)": 6628.75,
+   "MI300X HIP tuned (BT64, WS split)": 6627.81,
+   "H100 SYCL (port, DPC++ CUDA)": 4707.31,
+   "Arc B390 SYCL (port)": 6269.78
+  },
+  {
+   "bench": "attn",
+   "case": "8 259",
+   "metric": "us",
+   "H100 CUDA (upstream)": 8768.02,
+   "MI300X HIP (port)": 13213.3,
+   "MI300X HIP tuned (BT64, WS split)": 13211.09,
+   "H100 SYCL (port, DPC++ CUDA)": 9396.32,
+   "Arc B390 SYCL (port)": 12495.55
+  },
+  {
+   "bench": "attn",
+   "case": "8 511",
+   "metric": "us",
+   "H100 CUDA (upstream)": 17377.28,
+   "MI300X HIP (port)": 26181.69,
+   "MI300X HIP tuned (BT64, WS split)": 26178.35,
+   "H100 SYCL (port, DPC++ CUDA)": 18620.43,
+   "Arc B390 SYCL (port)": 24753.68
+  },
+  {
+   "bench": "int8_linear",
+   "case": "1",
+   "metric": "ms",
+   "H100 CUDA (upstream)": 0.3606,
+   "MI300X HIP (port)": 0.6424,
+   "MI300X HIP tuned (BT64, WS split)": 0.6468,
+   "H100 SYCL (port, DPC++ CUDA)": 0.676,
+   "Arc B390 SYCL (port)": 4.1966
+  },
+  {
+   "bench": "int8_linear",
+   "case": "16",
+   "metric": "ms",
+   "H100 CUDA (upstream)": 0.3607,
+   "MI300X HIP (port)": 0.6317,
+   "MI300X HIP tuned (BT64, WS split)": 0.6292,
+   "H100 SYCL (port, DPC++ CUDA)": 0.6791,
+   "Arc B390 SYCL (port)": 1.8715
+  },
+  {
+   "bench": "int8_linear",
+   "case": "2048",
+   "metric": "ms",
+   "H100 CUDA (upstream)": 0.5051,
+   "MI300X HIP (port)": 0.9107,
+   "MI300X HIP tuned (BT64, WS split)": 0.9102,
+   "H100 SYCL (port, DPC++ CUDA)": 39.2464,
+   "Arc B390 SYCL (port)": 71.5464
+  }
+ ]
+}
