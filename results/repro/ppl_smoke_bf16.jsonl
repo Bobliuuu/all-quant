@@ -1,0 +1,1 @@
+{"config": "bf16", "n_tokens": 289077, "nwin": 141, "seq": 2048, "torch": "2.8.0+cu128", "gpu": "NVIDIA H100 80GB HBM3", "transformers": "4.57.1", "ppl": 7.216634649491231, "build_s": 0.024541854858398438, "eval_s": 12.960190057754517, "ok": true}

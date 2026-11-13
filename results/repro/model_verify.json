@@ -1,0 +1,13 @@
+{
+ "model_used": "NousResearch/Meta-Llama-3.1-8B-Instruct",
+ "reference": "meta-llama/Llama-3.1-8B-Instruct @ 0e9e39f249a16976918f6564b8830bc894c89659 (gated; HF account was refused access, 403)",
+ "method": "sha256 (LFS) or git-blob sha1 of each downloaded file vs the gated repo's metadata (repro/model_hashes.json), computed in the Modal container",
+ "match": {
+  "config.json": true, "generation_config.json": true,
+  "model-00001-of-00004.safetensors": true, "model-00002-of-00004.safetensors": true,
+  "model-00003-of-00004.safetensors": true, "model-00004-of-00004.safetensors": true,
+  "model.safetensors.index.json": true, "special_tokens_map.json": true,
+  "tokenizer.json": true, "tokenizer_config.json": false
+ },
+ "note": "Weights, config and tokenizer.json are byte-identical to the gated repo. tokenizer_config.json differs (mirror's chat-template/metadata); the BPE model itself (tokenizer.json) is identical."
+}
