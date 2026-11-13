@@ -19,6 +19,8 @@ from functools import lru_cache
 
 import torch
 
+from .e8 import _w, _wf
+
 from . import ball as B
 from . import voronoi as Vo
 from .rotation import RHT
@@ -101,11 +103,11 @@ class E8KVCodec:
     def encode(self, x: torch.Tensor):
         """x (..., D) -> (idx (..., D/8) int64, scale (...,) fp16)."""
         shp = x.shape
-        z = self.rot.fwd(x.reshape(-1, self.D).double())
+        z = self.rot.fwd(_w(x.reshape(-1, self.D)))
         rms = z.pow(2).mean(-1).sqrt().clamp(min=1e-30)
         best_err = None
         for m in self.mults.tolist():
-            s = (rms / (self.alpha * m)).to(self.scale_dtype).double().clamp(min=1e-30)
+            s = _w((rms / (self.alpha * m)).to(self.scale_dtype)).clamp(min=1e-30)
             u = (z / s[:, None]).reshape(-1, 8)
             q, idx = _quant_groups(u, self.kind, self.param, True)
             err = ((q.reshape(z.shape) * s[:, None] - z) ** 2).sum(-1)
@@ -123,10 +125,10 @@ class E8KVCodec:
         shp = idx.shape
         flat = idx.reshape(-1)
         if self.kind == "ball":
-            y = B.unrank(flat, B.ball_tables(self.param)).double() / 2
+            y = _w(B.unrank(flat, B.ball_tables(self.param))) / 2
         else:
             y = Vo.decode_coords(Vo.unpack(flat, self.param), self.param)
-        z = y.reshape(-1, self.D) * scale.reshape(-1, 1).double()
+        z = y.reshape(-1, self.D) * _w(scale.reshape(-1, 1))
         return self.rot.inv(z).to(dtype).reshape(*shp[:-1], self.D)
 
     def quant_dequant(self, x: torch.Tensor) -> torch.Tensor:

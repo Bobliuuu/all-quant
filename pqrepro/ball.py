@@ -29,7 +29,7 @@ from functools import lru_cache
 import numpy as np
 import torch
 
-from .e8 import nearest_e8
+from .e8 import _w, _wf, nearest_e8
 
 FACT = [math.factorial(i) for i in range(9)]
 
@@ -229,18 +229,18 @@ def quantize(u: torch.Tensor, T: BallTables, return_idx=False):
     Nearest E8 point; if it falls outside the codebook (overload), shrink the
     input radially until its nearest point is a codeword (approximate projection).
     """
-    y = nearest_e8(u.double())
+    y = nearest_e8(_w(u))
     y2 = torch.round(2 * y).long()
     idx = rank(y2, T)
     bad = idx < 0
     # start the radial shrink at the codebook's outer radius, then step down 3%
     rmax = math.sqrt(T.norm2[-1] / 4.0)
-    g0 = (rmax / u.double().norm(dim=-1).clamp(min=1e-30)).clamp(max=1.0)
+    g0 = (rmax / _w(u).norm(dim=-1).clamp(min=1e-30)).clamp(max=1.0)
     k = 0
     while bad.any():
         g = g0[bad][:, None] * (0.97 ** k)
         k += 1
-        ub = u[bad].double() * g
+        ub = _w(u[bad]) * g
         yb = nearest_e8(ub)
         y2b = torch.round(2 * yb).long()
         ib = rank(y2b, T)

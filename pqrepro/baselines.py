@@ -67,9 +67,9 @@ def turboquant_mse(x, bits=3, D=128, norm_bits=16):
     """TurboQuant (MSE variant, our re-implementation): random rotation, per-vector
     norm (fp16), Lloyd-Max scalar codebook for N(0,1) on each rotated coordinate."""
     rot = RHT(D, seed=0x7A7A)
-    z = rot.fwd(x.reshape(-1, D).double())
-    r = z.pow(2).mean(-1, keepdim=True).sqrt().half().double().clamp(min=1e-30)
-    c = lloyd_max(bits).to(x.device)
+    z = rot.fwd(x.reshape(-1, D).to(torch.float64 if x.device.type == 'cpu' else torch.float32))
+    r = z.pow(2).mean(-1, keepdim=True).sqrt().half().to(z.dtype).clamp(min=1e-30)
+    c = lloyd_max(bits).to(z)
     b = (c[1:] + c[:-1]) / 2
     q = c[torch.bucketize(z / r, b)] * r
     return rot.inv(q).to(x.dtype).reshape(x.shape), bits + norm_bits / D

@@ -10,6 +10,10 @@
 #pragma once
 #include <stdint.h>
 
+#ifndef PQ_DECODE
+#define PQ_DECODE pq_ball_decode2
+#endif
+
 #ifndef PQ_DEV
 #define PQ_DEV inline
 #endif
@@ -75,6 +79,135 @@ PQ_DEV void pq_ball_decode(uint32_t idx, const uint32_t* tab, int L, int out[8])
   }
 }
 
+// Branch-free variant (v2), same output as pq_ball_decode. Block k at position pos
+// spans [M*C_{k-1}/n, M*C_k/n) with C the prefix counts, so the chosen distinct value
+// is v = #{k : M*C_k <= rr*n}: 8 multiply-compares, no division, no data-dependent
+// loop, no warp divergence. Prefix counts of the 4-bit count nibbles = cnt * 0x11111111
+// (every prefix is <= 8, so nibbles never carry).
+PQ_DEV void pq_ball_decode2(uint32_t idx, const uint32_t* tab, int L, int out[8]) {
+  const uint32_t* r = tab + pq_find_leader(tab, L, idx) * 8;
+  const uint32_t local = idx - r[0];
+  const uint32_t meta = r[3];
+  const uint32_t shift = meta & 255u;
+  const uint32_t s = local & ((1u << shift) - 1u);
+  uint32_t rr = local >> shift;
+  uint32_t M = r[1];
+  uint32_t cnt = r[2];
+  const uint64_t dv = (uint64_t)r[4] | ((uint64_t)r[5] << 32);
+#pragma unroll
+  for (int pos = 0; pos < 8; ++pos) {
+    const uint32_t n = 8 - pos;
+    const uint32_t C = cnt * 0x11111111u;
+    const uint32_t rn = rr * n;
+    uint32_t v = 0;
+#pragma unroll
+    for (int k = 0; k < 8; ++k) v += (M * ((C >> (4 * k)) & 15u) <= rn) ? 1u : 0u;
+    const uint32_t cv = (cnt >> (4 * v)) & 15u;
+    const uint32_t Cprev = v ? ((C >> (4 * (v - 1))) & 15u) : 0u;
+    rr -= (M * Cprev) / n;
+    M = (M * cv) / n;
+    cnt -= 1u << (4 * v);
+    out[pos] = (int)((dv >> (5 * v)) & 31u);
+  }
+  if ((meta >> 8) & 1u) {
+    int part = 0;
+#pragma unroll
+    for (int pos = 0; pos < 7; ++pos) {
+      out[pos] = ((s >> pos) & 1u) ? -out[pos] : out[pos];
+      part += out[pos];
+    }
+    out[7] = (((part + out[7]) & 3) != 0) ? -out[7] : out[7];
+  } else {
+    uint32_t j = 0;
+#pragma unroll
+    for (int pos = 0; pos < 8; ++pos) {
+      const bool nz = out[pos] != 0;
+      out[pos] = (nz && ((s >> j) & 1u)) ? -out[pos] : out[pos];
+      j += nz ? 1u : 0u;
+    }
+  }
+}
+
+// v3: same math as v2, structure-of-arrays tables (no smem bank conflicts on the
+// 32-byte rows) and a radix bucket table instead of the binary search:
+//   l = radix[idx >> rsh]; then step forward while off[l+1] <= idx (usually 0-1 steps).
+struct PQTab {
+  const uint32_t* off; const uint32_t* nperm; const uint32_t* dc; const uint32_t* meta;
+  const uint32_t* dvlo; const uint32_t* dvhi; const uint16_t* radix; int rsh; int L;
+};
+#define PQ_RADIX_BITS 10
+// words needed for one SoA table + its radix (u16 x 2^R)
+PQ_DEV int pq_tab_words(int L) { return 6 * L + (1 << (PQ_RADIX_BITS - 1)); }
+
+// fill SoA arrays at dst (u32 words) from the 8-u32-row table; radix computed on the fly
+// (caller distributes i over threads, then syncs). Entry i < L: rows; radix entries below.
+PQ_DEV void pq_tab_fill_row(uint32_t* dst, const uint32_t* rows, int L, int i) {
+  const uint32_t* r = rows + i * 8;
+  dst[i] = r[0]; dst[L + i] = r[1]; dst[2 * L + i] = r[2]; dst[3 * L + i] = r[3]; dst[4 * L + i] = r[4]; dst[5 * L + i] = r[5];
+}
+PQ_DEV void pq_tab_fill_radix(uint32_t* dst, const uint32_t* rows, int L, int b, int j) {
+  // bucket j covers [j << rsh, (j+1) << rsh): store the leader containing j << rsh
+  const int R = b < PQ_RADIX_BITS ? b : PQ_RADIX_BITS;
+  if (j >= (1 << R)) return;
+  const uint32_t start = (uint32_t)j << (b - R);
+  int lo = 0, hi = L - 1;
+  while (lo < hi) { int mid = (lo + hi + 1) >> 1; if (rows[mid * 8] <= start) lo = mid; else hi = mid - 1; }
+  ((uint16_t*)(dst + 6 * L))[j] = (uint16_t)lo;
+}
+PQ_DEV PQTab pq_tab_view(const uint32_t* base, int L, int b) {
+  PQTab t;
+  t.off = base; t.nperm = base + L; t.dc = base + 2 * L; t.meta = base + 3 * L; t.dvlo = base + 4 * L; t.dvhi = base + 5 * L;
+  t.radix = (const uint16_t*)(base + 6 * L);
+  const int R = b < PQ_RADIX_BITS ? b : PQ_RADIX_BITS;
+  t.rsh = b - R; t.L = L;
+  return t;
+}
+
+PQ_DEV void pq_ball_decode3(uint32_t idx, const PQTab& T, int out[8]) {
+  int l = T.radix[idx >> T.rsh];
+  while (l + 1 < T.L && T.off[l + 1] <= idx) ++l;
+  const uint32_t local = idx - T.off[l];
+  const uint32_t meta = T.meta[l];
+  const uint32_t shift = meta & 255u;
+  const uint32_t s = local & ((1u << shift) - 1u);
+  uint32_t rr = local >> shift;
+  uint32_t M = T.nperm[l];
+  uint32_t cnt = T.dc[l];
+  const uint64_t dv = (uint64_t)T.dvlo[l] | ((uint64_t)T.dvhi[l] << 32);
+#pragma unroll
+  for (int pos = 0; pos < 8; ++pos) {
+    const uint32_t n = 8 - pos;
+    const uint32_t C = cnt * 0x11111111u;
+    const uint32_t rn = rr * n;
+    uint32_t v = 0;
+#pragma unroll
+    for (int k = 0; k < 8; ++k) v += (M * ((C >> (4 * k)) & 15u) <= rn) ? 1u : 0u;
+    const uint32_t cv = (cnt >> (4 * v)) & 15u;
+    const uint32_t Cprev = v ? ((C >> (4 * (v - 1))) & 15u) : 0u;
+    rr -= (M * Cprev) / n;
+    M = (M * cv) / n;
+    cnt -= 1u << (4 * v);
+    out[pos] = (int)((dv >> (5 * v)) & 31u);
+  }
+  if ((meta >> 8) & 1u) {
+    int part = 0;
+#pragma unroll
+    for (int pos = 0; pos < 7; ++pos) {
+      out[pos] = ((s >> pos) & 1u) ? -out[pos] : out[pos];
+      part += out[pos];
+    }
+    out[7] = (((part + out[7]) & 3) != 0) ? -out[7] : out[7];
+  } else {
+    uint32_t j = 0;
+#pragma unroll
+    for (int pos = 0; pos < 8; ++pos) {
+      const bool nz = out[pos] != 0;
+      out[pos] = (nz && ((s >> j) & 1u)) ? -out[pos] : out[pos];
+      j += nz ? 1u : 0u;
+    }
+  }
+}
+
 // extract the g-th b-bit index from an LSB-first bitstream given as u32 words
 PQ_DEV uint32_t pq_get_bits(const uint32_t* w, uint32_t bitpos, int b) {
   const uint32_t wi = bitpos >> 5, sh = bitpos & 31u;
@@ -83,22 +216,12 @@ PQ_DEV uint32_t pq_get_bits(const uint32_t* w, uint32_t bitpos, int b) {
 }
 
 PQ_DEV float pq_half_to_float(uint16_t h) {
-  const uint32_t sgn = (uint32_t)(h & 0x8000u) << 16;
-  uint32_t e = (h >> 10) & 31u, m = h & 1023u;
-  uint32_t bits;
-  if (e == 0) {
-    if (m == 0) bits = sgn;
-    else {  // subnormal
-      int ee = -1;
-      do { m <<= 1; ++ee; } while ((m & 1024u) == 0);
-      m &= 1023u;
-      bits = sgn | ((uint32_t)(127 - 15 - ee) << 23) | (m << 13);
-    }
-  } else if (e == 31) bits = sgn | 0x7F800000u | (m << 13);
-  else bits = sgn | ((e + 112u) << 23) | (m << 13);
+  // finite halves only (our scales are finite): shift into float position, rescale by 2^112
+  const uint32_t bits = ((uint32_t)(h & 0x7FFFu)) << 13;
   float f;
   __builtin_memcpy(&f, &bits, 4);
-  return f;
+  f *= 5.192296858534828e+33f;  // 2^112
+  return (h & 0x8000u) ? -f : f;
 }
 
 PQ_DEV float pq_bf16_to_float(uint16_t h) {

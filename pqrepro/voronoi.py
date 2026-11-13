@@ -15,7 +15,7 @@ import math
 
 import torch
 
-from .e8 import GEN, GEN_INV, nearest_e8
+from .e8 import _w, _wf, GEN, GEN_INV, nearest_e8
 
 
 def bits_for_q(q: int) -> int:
@@ -23,12 +23,12 @@ def bits_for_q(q: int) -> int:
 
 
 def encode_coords(y: torch.Tensor, q: int) -> torch.Tensor:
-    c = torch.round(y.double() @ GEN_INV.to(y.device)).long()
+    c = torch.round(_w(y) @ GEN_INV.to(_w(y))).long()
     return torch.remainder(c, q)
 
 
 def decode_coords(c: torch.Tensor, q: int) -> torch.Tensor:
-    yp = c.double() @ GEN.to(c.device)
+    yp = _w(c) @ GEN.to(_w(c) if c.is_floating_point() else _wf(c.device))
     return yp - q * nearest_e8(yp / q)
 
 
@@ -48,16 +48,16 @@ def unpack(idx: torch.Tensor, q: int) -> torch.Tensor:
 
 
 def quantize(u: torch.Tensor, q: int, return_idx=False):
-    y = nearest_e8(u.double())
+    y = nearest_e8(_w(u))
     c = encode_coords(y, q)
     yh = decode_coords(c, q)
     bad = (yh - y).abs().amax(-1) > 1e-6
     # start at radius q (covering radius of qE8), then step down 3%
-    g0 = (q / u.double().norm(dim=-1).clamp(min=1e-30)).clamp(max=1.0)
+    g0 = (q / _w(u).norm(dim=-1).clamp(min=1e-30)).clamp(max=1.0)
     k = 0
     while bad.any():
         sel = torch.nonzero(bad).squeeze(1)
-        yb = nearest_e8(u[sel].double() * (g0[sel][:, None] * 0.97 ** k))
+        yb = nearest_e8(_w(u[sel]) * (g0[sel][:, None] * 0.97 ** k))
         k += 1
         cb = encode_coords(yb, q)
         ok = (decode_coords(cb, q) - yb).abs().amax(-1) <= 1e-6

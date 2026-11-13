@@ -60,3 +60,13 @@ CONFIGS = {
     # bit-split ablation at ~3.2: V gets the extra bit instead of K
     "pq-3.2-vk": (_pq("ball", 24), _pq("ball", 25)),
 }
+
+# Our addition (not from Pearl): K mean-centering. Subtracting one per-(layer, head)
+# vector mu from every key changes every logit of a query by the same q.mu, so the
+# softmax is unchanged: the decode kernel never needs mu. mu = mean of the first
+# 256 prefill keys (computed once, online). "-kvc" also centers V (o += mu_v at the end).
+for _n in ["pq-3.2", "pq-2.3", "pq-2.1", "vor-3.2", "vor-2.3", "vor-2.1", "tq-mse-3", "tq-mse-2", "nvfp4"]:
+    CONFIGS[_n + "-kc"] = CONFIGS[_n] + ({"kcenter": 256},)
+for _n in ["pq-3.2", "pq-2.3", "pq-2.1"]:
+    CONFIGS[_n + "-kvc"] = CONFIGS[_n] + ({"kcenter": 256, "vcenter": 256},)
+

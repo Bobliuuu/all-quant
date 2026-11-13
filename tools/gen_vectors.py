@@ -63,7 +63,7 @@ def pack_bits(idx, bits):
     """idx (N,) ints < 2^bits -> LSB-first bitstream bytes (+8 slack)."""
     n = idx.shape[0]
     nbits = n * bits
-    out = np.zeros((nbits + 7) // 8 + 8, dtype=np.uint8)
+    out = np.zeros(((nbits + 7) // 8 + 8 + 15) // 16 * 16, dtype=np.uint8)  # 8 slack bytes, 16-byte stride
     pos = np.arange(n, dtype=np.int64) * bits
     for j in range(bits):
         bit = ((idx >> j) & 1).astype(np.uint8)
@@ -146,3 +146,6 @@ if __name__ == "__main__":
         gen_case(root, *c)
     with open(os.path.join(root, "cases.txt"), "w") as f:
         f.write("\n".join(c[0] for c in CASES) + "\n")
+    os.makedirs(os.path.join(root, "tables"), exist_ok=True)
+    for b in range(12, 31):
+        leader_table(b).tofile(os.path.join(root, "tables", f"ball_{b}.u32"))

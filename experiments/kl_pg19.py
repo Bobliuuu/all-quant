@@ -29,15 +29,28 @@ def make_cache_cls():
     from transformers import DynamicCache
 
     class QuantCache(DynamicCache):
-        def __init__(self, qk, qv, *a, **kw):
+        def __init__(self, qk, qv, opts=None, *a, **kw):
             super().__init__(*a, **kw)
             self.qk, self.qv = qk, qv
+            self.opts = opts or {}
+            self.mu = {}
             self.bits = []
             self.relerr = []  # (layer, relMSE_K, relMSE_V)
 
         def update(self, key_states, value_states, layer_idx, cache_kwargs=None):
-            k, bk = self.qk(key_states)
-            v, bv = self.qv(value_states)
+            kin, vin = key_states, value_states
+            for nm, x in (("k", kin), ("v", vin)):
+                n = self.opts.get(nm + "center")
+                if n and (nm, layer_idx) not in self.mu:
+                    self.mu[(nm, layer_idx)] = x[:, :, :n].float().mean(2, keepdim=True).to(x.dtype)
+            muk = self.mu.get(("k", layer_idx))
+            muv = self.mu.get(("v", layer_idx))
+            k, bk = self.qk(kin - muk if muk is not None else kin)
+            v, bv = self.qv(vin - muv if muv is not None else vin)
+            if muk is not None:
+                k = k + muk
+            if muv is not None:
+                v = v + muv
             self.bits.append((bk + bv) / 2)
             ek = ((k.float() - key_states.float()) ** 2).sum() / (key_states.float() ** 2).sum()
             ev = ((v.float() - value_states.float()) ** 2).sum() / (value_states.float() ** 2).sum()
@@ -62,8 +75,7 @@ def load_pg19(tok, nseq, ctx, path):
 
 @torch.no_grad()
 def hidden(model, ids, Cache, cfg):
-    qk, qv = CONFIGS[cfg]
-    cache = Cache(qk, qv)
+    cache = Cache(*CONFIGS[cfg])
     h = model.model(input_ids=ids[None].cuda(), past_key_values=cache, use_cache=True).last_hidden_state[0]
     bits = sum(cache.bits) / len(cache.bits)
     rel = cache.relerr

@@ -13,6 +13,15 @@ from __future__ import annotations
 
 import torch
 
+
+def _wf(device):
+    """working float dtype: float64 on CPU (reference), float32 on GPUs (fp64 is slow there)."""
+    return torch.float64 if torch.device(device).type == "cpu" else torch.float32
+
+
+def _w(t):
+    return t.to(_wf(t.device))
+
 # Conway & Sloane generator for E8 (rows = basis vectors, det 1).
 GEN = torch.tensor(
     [
@@ -55,8 +64,8 @@ def nearest_e8(x: torch.Tensor) -> torch.Tensor:
 
 def to_coords(y: torch.Tensor) -> torch.Tensor:
     """E8 point -> integer coordinates c with y = c @ GEN."""
-    return torch.round(y.double() @ GEN_INV.to(y.device)).long()
+    return torch.round(_w(y) @ GEN_INV.to(_w(y))).long()
 
 
 def from_coords(c: torch.Tensor) -> torch.Tensor:
-    return c.double() @ GEN.to(c.device)
+    return _w(c) @ GEN.to(_w(c) if c.is_floating_point() else _wf(c.device))
