@@ -163,6 +163,9 @@ PQ_DEV PQTab pq_tab_view(const uint32_t* base, int L, int b) {
   return t;
 }
 
+// ND = upper bound on distinct |values| per leader (5 for b <= 25, 7 for b <= 30);
+// with ND <= 6 the values of the reachable slots live in the low 30 bits of dv.
+template <int ND = 8>
 PQ_DEV void pq_ball_decode3(uint32_t idx, const PQTab& T, int out[8]) {
   int l = T.radix[idx >> T.rsh];
   while (l + 1 < T.L && T.off[l + 1] <= idx) ++l;
@@ -173,7 +176,8 @@ PQ_DEV void pq_ball_decode3(uint32_t idx, const PQTab& T, int out[8]) {
   uint32_t rr = local >> shift;
   uint32_t M = T.nperm[l];
   uint32_t cnt = T.dc[l];
-  const uint64_t dv = (uint64_t)T.dvlo[l] | ((uint64_t)T.dvhi[l] << 32);
+  const uint32_t dvlo = T.dvlo[l];
+  const uint64_t dv = (ND <= 6) ? (uint64_t)dvlo : ((uint64_t)dvlo | ((uint64_t)T.dvhi[l] << 32));
 #pragma unroll
   for (int pos = 0; pos < 8; ++pos) {
     const uint32_t n = 8 - pos;
@@ -181,13 +185,13 @@ PQ_DEV void pq_ball_decode3(uint32_t idx, const PQTab& T, int out[8]) {
     const uint32_t rn = rr * n;
     uint32_t v = 0;
 #pragma unroll
-    for (int k = 0; k < 8; ++k) v += (M * ((C >> (4 * k)) & 15u) <= rn) ? 1u : 0u;
+    for (int k = 0; k < ND; ++k) v += (M * ((C >> (4 * k)) & 15u) <= rn) ? 1u : 0u;
     const uint32_t cv = (cnt >> (4 * v)) & 15u;
     const uint32_t Cprev = v ? ((C >> (4 * (v - 1))) & 15u) : 0u;
     rr -= (M * Cprev) / n;
     M = (M * cv) / n;
     cnt -= 1u << (4 * v);
-    out[pos] = (int)((dv >> (5 * v)) & 31u);
+    out[pos] = (ND <= 6) ? (int)((dvlo >> (5 * v)) & 31u) : (int)((dv >> (5 * v)) & 31u);
   }
   if ((meta >> 8) & 1u) {
     int part = 0;
@@ -206,6 +210,13 @@ PQ_DEV void pq_ball_decode3(uint32_t idx, const PQTab& T, int out[8]) {
       j += nz ? 1u : 0u;
     }
   }
+}
+
+// max distinct |values| over a row table (host side, to pick ND)
+inline int pq_max_nd(const uint32_t* rows, int L) {
+  int m = 0;
+  for (int i = 0; i < L; ++i) { const int nd = (rows[i * 8 + 3] >> 16) & 255; m = nd > m ? nd : m; }
+  return m;
 }
 
 // extract the g-th b-bit index from an LSB-first bitstream given as u32 words

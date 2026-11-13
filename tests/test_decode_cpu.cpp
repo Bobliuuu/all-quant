@@ -20,7 +20,7 @@ int main(int, char** argv) {
   PQTab TV = pq_tab_view(soa.data(), L, b);
   for (size_t i = 0; i < idx.size(); ++i) {
     int y[8], y2[8], y3[8]; pq_ball_decode(idx[i], tab.data(), L, y); pq_ball_decode2(idx[i], tab.data(), L, y2);
-    pq_ball_decode3(idx[i], TV, y3);
+    if (pq_max_nd(tab.data(), L) <= 5) pq_ball_decode3<5>(idx[i], TV, y3); else pq_ball_decode3<8>(idx[i], TV, y3);
     for (int j = 0; j < 8; ++j) if (y[j] != pts[i * 8 + j] || y2[j] != y[j] || y3[j] != y[j]) { if (bad < 5) printf("mismatch idx %u\n", idx[i]); ++bad; break; }
   }
   // fp16/e4m3 helpers spot checks

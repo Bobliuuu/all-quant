@@ -56,26 +56,32 @@ template <class T> T* up(const std::vector<T>& v) {
 
 static size_t g_smem_max = 64 * 1024;
 
-template <int FMT, int G> void launch_g(PQArgs a) {
-  const int tabL = (FMT == FMT_PQ) ? (pq_tab_words(a.kL) + pq_tab_words(a.vL)) : 0;
-  size_t sm = pq_smem_bytes(G, tabL);
-  static const bool force_global = getenv("PQ_TAB_GLOBAL") && atoi(getenv("PQ_TAB_GLOBAL"));
-  if (sm > g_smem_max || force_global) { a.tab_smem = 0; sm = pq_smem_bytes(G, 0); } else a.tab_smem = (FMT == FMT_PQ);
-  CK(cudaFuncSetAttribute((const void*)pq_attn_split<FMT, G>, cudaFuncAttributeMaxDynamicSharedMemorySize, (int)sm));
+template <int FMT, int G, int ND> void launch_g(PQArgs a) {
+  // leader tables: global memory (L1/L2-resident) by default; PQ_TAB_SMEM=1 copies them to smem
+  // (higher LDS use -> lower occupancy; measured slower on MI300X, see PORTING_LOG.md)
+  static const bool want_smem = getenv("PQ_TAB_SMEM") && atoi(getenv("PQ_TAB_SMEM"));
+  const int tabW = (FMT == FMT_PQ) ? (pq_tab_words(a.kL) + pq_tab_words(a.vL)) : 0;
+  size_t sm = pq_smem_bytes<FMT>(G, tabW);
+  if (sm > g_smem_max || !want_smem || FMT != FMT_PQ) { a.tab_smem = 0; sm = pq_smem_bytes<FMT>(G, 0); } else a.tab_smem = 1;
+  CK(cudaFuncSetAttribute((const void*)pq_attn_split<FMT, G, ND>, cudaFuncAttributeMaxDynamicSharedMemorySize, (int)sm));
   dim3 grid(a.nsplit, a.Hkv, a.B);
-  pq_attn_split<FMT, G><<<grid, PQ_NT, sm>>>(a);
+  pq_attn_split<FMT, G, ND><<<grid, PQ_NT, sm>>>(a);
   pq_reduce<FMT><<<a.B * a.Hq, PQ_NT>>>(a);
 }
-template <int FMT> void launch(PQArgs a) {
+static int g_nd = 8;  // max distinct values over the K and V leader tables (set by the caller)
+template <int FMT, int ND> void launch_nd(PQArgs a) {
   const int G = a.Hq / a.Hkv;
   switch (G) {
-    case 1: launch_g<FMT, 1>(a); break;
-    case 4: launch_g<FMT, 4>(a); break;
-    case 8: launch_g<FMT, 8>(a); break;
-    case 16: launch_g<FMT, 16>(a); break;
-    case 32: launch_g<FMT, 32>(a); break;
+    case 1: launch_g<FMT, 1, ND>(a); break;
+    case 4: launch_g<FMT, 4, ND>(a); break;
+    case 8: launch_g<FMT, 8, ND>(a); break;
+    case 16: launch_g<FMT, 16, ND>(a); break;
+    case 32: launch_g<FMT, 32, ND>(a); break;
     default: fprintf(stderr, "unsupported G=%d\n", G); exit(4);
   }
+}
+template <int FMT> void launch(PQArgs a) {
+  if (FMT == FMT_PQ && g_nd <= 5) launch_nd<FMT, 5>(a); else launch_nd<FMT, 8>(a);
 }
 void run(int fmt, PQArgs a) {
   if (fmt == FMT_PQ) launch<FMT_PQ>(a); else if (fmt == FMT_BF16) launch<FMT_BF16>(a); else launch<FMT_FP8>(a);
@@ -101,7 +107,9 @@ int check(const std::string& dir) {
     a.q = up(rd<float>(d + "q.f32"));
     a.kc = up(rd<uint8_t>(d + "k_codes.u8")); a.vc = up(rd<uint8_t>(d + "v_codes.u8"));
     a.ks = up(rd<uint16_t>(d + "k_scale.f16")); a.vs = up(rd<uint16_t>(d + "v_scale.f16"));
-    a.ktab = up(pq_build_soa(rd<uint32_t>(d + "k_tab.u32"), bK)); a.vtab = up(pq_build_soa(rd<uint32_t>(d + "v_tab.u32"), bV));
+    { auto kr = rd<uint32_t>(d + "k_tab.u32"), vr = rd<uint32_t>(d + "v_tab.u32");
+      const int nk = pq_max_nd(kr.data(), kL), nv = pq_max_nd(vr.data(), vL); g_nd = nk > nv ? nk : nv;
+      a.ktab = up(pq_build_soa(kr, bK)); a.vtab = up(pq_build_soa(vr, bV)); }
     a.kb = up(rd<uint16_t>(d + "k_bf16.u16")); a.vb = up(rd<uint16_t>(d + "v_bf16.u16"));
     a.k8 = up(rd<uint8_t>(d + "k_fp8.u8")); a.v8 = up(rd<uint8_t>(d + "v_fp8.u8"));
     a.k8s = up(rd<float>(d + "k_fp8s.f32")); a.v8s = up(rd<float>(d + "v_fp8s.f32"));
@@ -147,6 +155,7 @@ int bench(int argc, char** argv) {
   auto kt = rd<uint32_t>(tdir + "/ball_" + std::to_string(bK) + ".u32");
   auto vt = rd<uint32_t>(tdir + "/ball_" + std::to_string(bV) + ".u32");
   a.kL = kt.size() / 8; a.vL = vt.size() / 8;
+  { const int nk = pq_max_nd(kt.data(), a.kL), nv = pq_max_nd(vt.data(), a.vL); g_nd = nk > nv ? nk : nv; }
   a.ktab = up(pq_build_soa(kt, bK)); a.vtab = up(pq_build_soa(vt, bV));
   a.k_stream = ((long)T * 2 * bK + 8 + 15) / 16 * 16; a.v_stream = ((long)T * 2 * bV + 8 + 15) / 16 * 16;
   const size_t nbh = (size_t)B * Hkv;
@@ -168,7 +177,9 @@ int bench(int argc, char** argv) {
   CK(cudaMalloc(&a.out, no * 4));
   CK(cudaMalloc(&a.part_o, no * 1024 * 4)); CK(cudaMalloc(&a.part_ml, (size_t)B * Hq * 1024 * 2 * 4));
   const char* fn[3] = {"pq", "bf16", "fp8"};
+  const char* only = getenv("PQ_FMT");  // optional: bench only "pq", "bf16" or "fp8"
   for (int fmt = 0; fmt < 3; ++fmt) {
+    if (only && strcmp(only, fn[fmt])) continue;
     double kv_bytes;
     if (fmt == FMT_PQ) kv_bytes = (double)nbh * T * (2.0 * bK + 2 + 2.0 * bV + 2);
     else if (fmt == FMT_BF16) kv_bytes = (double)nbh * T * D * 2 * 2;

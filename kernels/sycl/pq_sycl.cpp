@@ -1,14 +1,16 @@
-// SYCL port of the pq-repro fused decode attention (kernels/cuda/pq_attn.cuh).
+// SYCL port of the pq-repro fused decode attention (kernels/cuda/pq_attn.cuh, v4).
 // Same algorithm, same cache layout, same test vectors. Plain SYCL 2020 (no
 // sub-group or joint_matrix extensions), so it runs on Intel GPUs, on NVIDIA/AMD
 // through the DPC++ CUDA/HIP backends, and on CPU devices.
 //   build: clang++ -fsycl -O3 -std=c++17 [-fsycl-targets=...] pq_sycl.cpp -o pq_sycl
 //   pq_sycl check <vectors_dir>
 //   pq_sycl bench <tables_dir> B T Hq Hkv bK bV [nsplit] [iters]
+//   env: PQ_FMT=pq|bf16|fp8 (bench one format), PQ_TAB_SMEM=1 (leader tables in local memory)
 #include <sycl/sycl.hpp>
 #include <chrono>
 #include <cmath>
 #include <cstdio>
+#include <cstdlib>
 #include <cstring>
 #include <fstream>
 #include <random>
@@ -17,19 +19,21 @@
 #define PQ_DEV inline
 #include "../common/pq_ball_decode.h"
 
-constexpr int D = 128, TT = 32, NT = 128, KSTR = D + 1;
+constexpr int D = 128, TT = 32, NT = 128;
 enum { FMT_PQ = 0, FMT_BF16 = 1, FMT_FP8 = 2 };
+template <int FMT> struct TileCfg { static constexpr int RW = (FMT == FMT_BF16) ? 65 : 33; };
 
 struct PQArgs {
   const float* q;
-  const uint8_t* kc; const uint16_t* ks; const uint32_t* ktab; int bK; int kL; long k_stream;
-  const uint8_t* vc; const uint16_t* vs; const uint32_t* vtab; int bV; int vL; long v_stream;
+  const uint8_t* kc; const uint16_t* ks; const uint32_t* ktab; int bK; int kL; long long k_stream;
+  const uint8_t* vc; const uint16_t* vs; const uint32_t* vtab; int bV; int vL; long long v_stream;
   const uint16_t* kb; const uint16_t* vb;
   const uint8_t* k8; const uint8_t* v8; const float* k8s; const float* v8s;
   const float* signs;
   float* part_o; float* part_ml; float* out;
   int B, Hq, Hkv, T, nsplit, tokens_per_split, tab_smem;
 };
+typedef long long i64;
 
 static inline void bar(sycl::nd_item<1>& it) { sycl::group_barrier(it.get_group()); }
 
@@ -48,57 +52,86 @@ static inline void fwht128(float* x, sycl::nd_item<1>& it) {
   bar(it);
 }
 
-static inline void pq_tile(const uint8_t* stream, const uint16_t* sc, int t0, int n, int b, const PQTab& tab,
-                           uint32_t* wbuf, float* tile, sycl::nd_item<1>& it) {
+static inline uint32_t pack4(int a, int b, int c, int d) {
+  return (uint32_t)(a & 255) | ((uint32_t)(b & 255) << 8) | ((uint32_t)(c & 255) << 16) | ((uint32_t)(d & 255) << 24);
+}
+
+template <int FMT, int ND>
+static inline void load_tile(const PQArgs& a, bool isK, int bh, int t0, int n, uint32_t* wbuf, const PQTab& tab,
+                             uint32_t* tile32, float* tsc, sycl::nd_item<1>& it) {
   const int tid = it.get_local_id(0);
-  const long byte0 = (long)t0 * 2 * b;
-  const int nw = (n * 2 * b + 3) / 4 + 2;
-  const uint32_t* src = (const uint32_t*)(stream + byte0);
-  for (int i = tid; i < nw; i += NT) wbuf[i] = src[i];
-  bar(it);
-  for (int gi = tid; gi < n * 16; gi += NT) {
-    const int t = gi >> 4, g = gi & 15;
-    const uint32_t idx = pq_get_bits(wbuf, (uint32_t)gi * b, b);
-    int y[8];
-    pq_ball_decode3(idx, tab, y);
-    const float s = 0.5f * pq_half_to_float(sc[t0 + t]);
-    float* dst = tile + t * KSTR + g * 8;
-    for (int j = 0; j < 8; ++j) dst[j] = s * (float)y[j];
+  constexpr int RW = TileCfg<FMT>::RW;
+  if constexpr (FMT == FMT_PQ) {
+    const int b = isK ? a.bK : a.bV;
+    const uint8_t* stream = (isK ? a.kc : a.vc) + (i64)bh * (isK ? a.k_stream : a.v_stream);
+    const uint16_t* sc = (isK ? a.ks : a.vs) + (i64)bh * a.T;
+    const i64 byte0 = (i64)t0 * 2 * b;
+    const int nw = (n * 2 * b + 3) / 4 + 2;
+    const uint32_t* src = (const uint32_t*)(stream + byte0);
+    for (int i = tid; i < nw; i += NT) wbuf[i] = src[i];
+    if (tid < n) tsc[tid] = 0.5f * pq_half_to_float(sc[t0 + tid]);
+    bar(it);
+    for (int gi = tid; gi < n * 16; gi += NT) {
+      const int t = gi >> 4, g = gi & 15;
+      const uint32_t idx = pq_get_bits(wbuf, (uint32_t)gi * b, b);
+      int y[8];
+      pq_ball_decode3<ND>(idx, tab, y);
+      uint32_t* dst = tile32 + t * RW + g * 2;
+      dst[0] = pack4(y[0], y[1], y[2], y[3]);
+      dst[1] = pack4(y[4], y[5], y[6], y[7]);
+    }
+  } else if constexpr (FMT == FMT_BF16) {
+    const uint32_t* p2 = (const uint32_t*)((isK ? a.kb : a.vb) + ((i64)bh * a.T + t0) * D);
+    for (int i = tid; i < n * D / 2; i += NT) tile32[(i >> 6) * RW + (i & 63)] = p2[i];
+    if (tid < n) tsc[tid] = 1.f;
+  } else {
+    const uint32_t* p4 = (const uint32_t*)((isK ? a.k8 : a.v8) + ((i64)bh * a.T + t0) * D);
+    for (int i = tid; i < n * D / 4; i += NT) tile32[(i >> 5) * RW + (i & 31)] = p4[i];
+    if (tid < n) tsc[tid] = (isK ? a.k8s : a.v8s)[(i64)bh * a.T + t0 + tid];
   }
   bar(it);
 }
 
 template <int FMT>
-static inline void load_tile(const PQArgs& a, bool isK, int bh, int t0, int n, uint32_t* wbuf, const PQTab& tab,
-                             float* tile, sycl::nd_item<1>& it) {
-  const int tid = it.get_local_id(0);
-  if constexpr (FMT == FMT_PQ) {
-    if (isK) pq_tile(a.kc + (long)bh * a.k_stream, a.ks + (long)bh * a.T, t0, n, a.bK, tab, wbuf, tile, it);
-    else pq_tile(a.vc + (long)bh * a.v_stream, a.vs + (long)bh * a.T, t0, n, a.bV, tab, wbuf, tile, it);
-  } else if constexpr (FMT == FMT_BF16) {
-    const uint32_t* p2 = (const uint32_t*)((isK ? a.kb : a.vb) + ((long)bh * a.T + t0) * D);
-    for (int i = tid; i < n * D / 2; i += NT) {
-      const uint32_t w = p2[i];
-      const int e = 2 * i, t = e / D, d = e % D;
-      tile[t * KSTR + d] = pq_bf16_to_float((uint16_t)(w & 0xFFFF));
-      tile[t * KSTR + d + 1] = pq_bf16_to_float((uint16_t)(w >> 16));
-    }
-    bar(it);
+static inline float tile_elem(const uint32_t* tile32, int t, int d) {
+  constexpr int RW = TileCfg<FMT>::RW;
+  if constexpr (FMT == FMT_BF16) {
+    const uint32_t w = tile32[t * RW + (d >> 1)];
+    return pq_bf16_to_float((uint16_t)((d & 1) ? (w >> 16) : (w & 0xFFFF)));
   } else {
-    const uint32_t* p4 = (const uint32_t*)((isK ? a.k8 : a.v8) + ((long)bh * a.T + t0) * D);
-    const float* s = (isK ? a.k8s : a.v8s) + (long)bh * a.T + t0;
-    for (int i = tid; i < n * D / 4; i += NT) {
-      const uint32_t w = p4[i];
-      const int e = 4 * i, t = e / D, d = e % D;
-      const float st = s[t];
-      for (int j = 0; j < 4; ++j) tile[t * KSTR + d + j] = st * pq_e4m3_to_float((uint8_t)(w >> (8 * j)));
-    }
-    bar(it);
+    const uint32_t w = tile32[t * RW + (d >> 2)];
+    const uint8_t byte = (uint8_t)(w >> (8 * (d & 3)));
+    if constexpr (FMT == FMT_PQ) return (float)(int8_t)byte;
+    else return pq_e4m3_to_float(byte);
   }
 }
 
-static size_t smem_floats(int G, int tab_words) {
-  return G * D + TT * KSTR + G * TT + 3 * G + (TT * 16 + 4) + tab_words;  // u32 regions counted as 4-byte slots
+template <int FMT>
+static inline float tile_dot(const uint32_t* tile32, int t, const float* qr) {
+  constexpr int RW = TileCfg<FMT>::RW;
+  const uint32_t* row = tile32 + t * RW;
+  float acc = 0.f;
+  if constexpr (FMT == FMT_BF16) {
+    for (int w = 0; w < 64; ++w) {
+      const uint32_t x = row[w];
+      acc += qr[2 * w] * pq_bf16_to_float((uint16_t)(x & 0xFFFF)) + qr[2 * w + 1] * pq_bf16_to_float((uint16_t)(x >> 16));
+    }
+  } else {
+    for (int w = 0; w < 32; ++w) {
+      const uint32_t x = row[w];
+      for (int j = 0; j < 4; ++j) {
+        const uint8_t byte = (uint8_t)(x >> (8 * j));
+        const float v = (FMT == FMT_PQ) ? (float)(int8_t)byte : pq_e4m3_to_float(byte);
+        acc += qr[4 * w + j] * v;
+      }
+    }
+  }
+  return acc;
+}
+
+template <int FMT>
+static size_t smem_words(int G, int tab_words) {
+  return G * D + G * TT + TT + 3 * G + TT * TileCfg<FMT>::RW + (TT * 16 + 4) + tab_words;
 }
 static std::vector<uint32_t> build_soa(const std::vector<uint32_t>& rows, int b) {
   const int L = (int)rows.size() / 8;
@@ -108,23 +141,25 @@ static std::vector<uint32_t> build_soa(const std::vector<uint32_t>& rows, int b)
   return o;
 }
 
-template <int FMT, int G> struct SplitK;
+template <int FMT, int G, int ND> struct SplitK;
 template <int FMT> struct ReduceK;
 
-template <int FMT, int G>
-void launch_split(sycl::queue& Q, PQArgs a, size_t slm_floats) {
+template <int FMT, int G, int ND>
+void launch_split(sycl::queue& Q, PQArgs a, size_t slm_words) {
   Q.submit([&](sycl::handler& h) {
-    sycl::local_accessor<float, 1> lm(sycl::range<1>(slm_floats), h);
+    sycl::local_accessor<float, 1> lm(sycl::range<1>(slm_words), h);
     const size_t ngroups = (size_t)a.nsplit * a.Hkv * a.B;
-    h.parallel_for<SplitK<FMT, G>>(sycl::nd_range<1>(ngroups * NT, NT), [=](sycl::nd_item<1> it) {
+    h.parallel_for<SplitK<FMT, G, ND>>(sycl::nd_range<1>(ngroups * NT, NT), [=](sycl::nd_item<1> it) {
+      constexpr int RW = TileCfg<FMT>::RW;
       float* smem = lm.get_multi_ptr<sycl::access::decorated::no>().get();
       float* qs = smem;
-      float* tile = qs + G * D;
-      float* sc = tile + TT * KSTR;
-      float* mrow = sc + G * TT;
+      float* sc = qs + G * D;
+      float* tsc = sc + G * TT;
+      float* mrow = tsc + TT;
       float* lrow = mrow + G;
       float* alpha = lrow + G;
-      uint32_t* wbuf = (uint32_t*)(alpha + G);
+      uint32_t* tile32 = (uint32_t*)(alpha + G);
+      uint32_t* wbuf = tile32 + TT * RW;
       uint32_t* ktab_s = wbuf + (TT * 16 + 4);
       uint32_t* vtab_s = ktab_s + pq_tab_words(a.kL);
       const int gid = it.get_group(0);
@@ -145,7 +180,7 @@ void launch_split(sycl::queue& Q, PQArgs a, size_t slm_floats) {
       const PQTab ktab = pq_tab_view(kt, a.kL, a.bK);
       const PQTab vtab = pq_tab_view(vt, a.vL, a.bV);
       for (int g = 0; g < G; ++g) {
-        const float* qp = a.q + ((long)b * a.Hq + hh * G + g) * D;
+        const float* qp = a.q + ((i64)b * a.Hq + hh * G + g) * D;
         qs[g * D + tid] = qp[tid] * (FMT == FMT_PQ ? a.signs[tid] : 1.f);
         if (FMT == FMT_PQ) fwht128(qs + g * D, it);
         bar(it);
@@ -155,23 +190,15 @@ void launch_split(sycl::queue& Q, PQArgs a, size_t slm_floats) {
       float acc[G];
       for (int g = 0; g < G; ++g) acc[g] = 0.f;
       bar(it);
+      constexpr int NJ = (G * TT + NT - 1) / NT;
       for (int t0 = tbeg; t0 < tend; t0 += TT) {
         const int n = sycl::min(TT, tend - t0);
-        load_tile<FMT>(a, true, bh, t0, n, wbuf, ktab, tile, it);
+        load_tile<FMT, ND>(a, true, bh, t0, n, wbuf, ktab, tile32, tsc, it);
         for (int i = tid; i < G * TT; i += NT) {
           const int g = i / TT, t = i % TT;
-          float s = -1e30f;
-          if (t < n) {
-            const float* kr = tile + t * KSTR;
-            const float* qr = qs + g * D;
-            float a2 = 0.f;
-            for (int d = 0; d < D; ++d) a2 += qr[d] * kr[d];
-            s = a2;
-          }
-          sc[i] = s;
+          sc[i] = (t < n) ? tsc[t] * tile_dot<FMT>(tile32, t, qs + g * D) : -1e30f;
         }
         bar(it);
-        constexpr int NJ = (G * TT + NT - 1) / NT;
         float pv[NJ];
         for (int j = 0; j < NJ; ++j) {
           const int ii = tid + j * NT;
@@ -199,17 +226,19 @@ void launch_split(sycl::queue& Q, PQArgs a, size_t slm_floats) {
           alpha[tid] = al;
         }
         bar(it);
-        load_tile<FMT>(a, false, bh, t0, n, wbuf, vtab, tile, it);
+        load_tile<FMT, ND>(a, false, bh, t0, n, wbuf, vtab, tile32, tsc, it);
+        float vv[TT];
+        for (int t = 0; t < TT; ++t) vv[t] = (t < n) ? tsc[t] * tile_elem<FMT>(tile32, t, tid) : 0.f;
         for (int g = 0; g < G; ++g) {
           float s = acc[g] * alpha[g];
           const float* pr = sc + g * TT;
-          for (int t = 0; t < n; ++t) s += pr[t] * tile[t * KSTR + tid];
+          for (int t = 0; t < TT; ++t) s += pr[t] * vv[t];
           acc[g] = s;
         }
         bar(it);
       }
       for (int g = 0; g < G; ++g) {
-        const long pi = ((long)b * a.Hq + hh * G + g) * a.nsplit + split;
+        const i64 pi = ((i64)b * a.Hq + hh * G + g) * a.nsplit + split;
         a.part_o[pi * D + tid] = acc[g];
         if (tid == 0) { a.part_ml[pi * 2] = mrow[g]; a.part_ml[pi * 2 + 1] = lrow[g]; }
       }
@@ -217,14 +246,14 @@ void launch_split(sycl::queue& Q, PQArgs a, size_t slm_floats) {
   });
   Q.submit([&](sycl::handler& h) {
     sycl::local_accessor<float, 1> xs(sycl::range<1>(D), h);
-    h.parallel_for<ReduceK<FMT * 100 + G>>(sycl::nd_range<1>((size_t)a.B * a.Hq * NT, NT), [=](sycl::nd_item<1> it) {
+    h.parallel_for<ReduceK<FMT * 1000 + G * 10 + ND>>(sycl::nd_range<1>((size_t)a.B * a.Hq * NT, NT), [=](sycl::nd_item<1> it) {
       float* x = xs.get_multi_ptr<sycl::access::decorated::no>().get();
       const int bh = it.get_group(0), tid = it.get_local_id(0);
       float M = -1e30f;
-      for (int s = 0; s < a.nsplit; ++s) M = sycl::fmax(M, a.part_ml[((long)bh * a.nsplit + s) * 2]);
+      for (int s = 0; s < a.nsplit; ++s) M = sycl::fmax(M, a.part_ml[((i64)bh * a.nsplit + s) * 2]);
       float num = 0.f, den = 0.f;
       for (int s = 0; s < a.nsplit; ++s) {
-        const long pi = (long)bh * a.nsplit + s;
+        const i64 pi = (i64)bh * a.nsplit + s;
         const float l = a.part_ml[pi * 2 + 1];
         if (l == 0.f) continue;
         const float w = sycl::exp(a.part_ml[pi * 2] - M);
@@ -234,26 +263,31 @@ void launch_split(sycl::queue& Q, PQArgs a, size_t slm_floats) {
       x[tid] = num / den;
       bar(it);
       if (FMT == FMT_PQ) { fwht128(x, it); x[tid] *= a.signs[tid]; }
-      a.out[(long)bh * D + tid] = x[tid];
+      a.out[(i64)bh * D + tid] = x[tid];
     });
   });
 }
 
 static size_t g_slm_max = 64 * 1024;
+static int g_nd = 8;
 
-template <int FMT> void launch(sycl::queue& Q, PQArgs a) {
+template <int FMT, int ND> void launch_nd(sycl::queue& Q, PQArgs a) {
   const int G = a.Hq / a.Hkv;
-  int tabL = FMT == FMT_PQ ? pq_tab_words(a.kL) + pq_tab_words(a.vL) : 0;
-  size_t fl = smem_floats(G, tabL);
-  if (fl * 4 > g_slm_max) { a.tab_smem = 0; fl = smem_floats(G, 0); } else a.tab_smem = (FMT == FMT_PQ);
+  static const bool want_smem = std::getenv("PQ_TAB_SMEM") && atoi(std::getenv("PQ_TAB_SMEM"));
+  const int tabW = FMT == FMT_PQ ? pq_tab_words(a.kL) + pq_tab_words(a.vL) : 0;
+  size_t w = smem_words<FMT>(G, tabW);
+  if (w * 4 > g_slm_max || !want_smem || FMT != FMT_PQ) { a.tab_smem = 0; w = smem_words<FMT>(G, 0); } else a.tab_smem = 1;
   switch (G) {
-    case 1: launch_split<FMT, 1>(Q, a, fl); break;
-    case 4: launch_split<FMT, 4>(Q, a, fl); break;
-    case 8: launch_split<FMT, 8>(Q, a, fl); break;
-    case 16: launch_split<FMT, 16>(Q, a, fl); break;
-    case 32: launch_split<FMT, 32>(Q, a, fl); break;
+    case 1: launch_split<FMT, 1, ND>(Q, a, w); break;
+    case 4: launch_split<FMT, 4, ND>(Q, a, w); break;
+    case 8: launch_split<FMT, 8, ND>(Q, a, w); break;
+    case 16: launch_split<FMT, 16, ND>(Q, a, w); break;
+    case 32: launch_split<FMT, 32, ND>(Q, a, w); break;
     default: fprintf(stderr, "unsupported G=%d\n", G); exit(4);
   }
+}
+template <int FMT> void launch(sycl::queue& Q, PQArgs a) {
+  if (FMT == FMT_PQ && g_nd <= 5) launch_nd<FMT, 5>(Q, a); else launch_nd<FMT, 8>(Q, a);
 }
 static void run(sycl::queue& Q, int fmt, const PQArgs& a) {
   if (fmt == FMT_PQ) launch<FMT_PQ>(Q, a); else if (fmt == FMT_BF16) launch<FMT_BF16>(Q, a); else launch<FMT_FP8>(Q, a);
@@ -286,14 +320,16 @@ int check(sycl::queue& Q, const std::string& dir) {
   while (cf >> name) {
     const std::string d = dir + "/" + name + "/";
     std::ifstream mf(d + "meta.txt");
-    int B, Hq, Hkv, T, DD, bK, bV, kL, vL; long ksb, vsb;
+    int B, Hq, Hkv, T, DD, bK, bV, kL, vL; long long ksb, vsb;
     mf >> B >> Hq >> Hkv >> T >> DD >> bK >> bV >> ksb >> vsb >> kL >> vL;
     PQArgs a{};
     a.B = B; a.Hq = Hq; a.Hkv = Hkv; a.T = T; a.bK = bK; a.bV = bV; a.kL = kL; a.vL = vL; a.k_stream = ksb; a.v_stream = vsb;
     a.q = up(Q, rd<float>(d + "q.f32"));
     a.kc = up(Q, rd<uint8_t>(d + "k_codes.u8")); a.vc = up(Q, rd<uint8_t>(d + "v_codes.u8"));
     a.ks = up(Q, rd<uint16_t>(d + "k_scale.f16")); a.vs = up(Q, rd<uint16_t>(d + "v_scale.f16"));
-    a.ktab = up(Q, build_soa(rd<uint32_t>(d + "k_tab.u32"), bK)); a.vtab = up(Q, build_soa(rd<uint32_t>(d + "v_tab.u32"), bV));
+    { auto kr = rd<uint32_t>(d + "k_tab.u32"), vr = rd<uint32_t>(d + "v_tab.u32");
+      const int nk = pq_max_nd(kr.data(), kL), nv = pq_max_nd(vr.data(), vL); g_nd = nk > nv ? nk : nv;
+      a.ktab = up(Q, build_soa(kr, bK)); a.vtab = up(Q, build_soa(vr, bV)); }
     a.kb = up(Q, rd<uint16_t>(d + "k_bf16.u16")); a.vb = up(Q, rd<uint16_t>(d + "v_bf16.u16"));
     a.k8 = up(Q, rd<uint8_t>(d + "k_fp8.u8")); a.v8 = up(Q, rd<uint8_t>(d + "v_fp8.u8"));
     a.k8s = up(Q, rd<float>(d + "k_fp8s.f32")); a.v8s = up(Q, rd<float>(d + "v_fp8s.f32"));
@@ -339,8 +375,9 @@ int bench(sycl::queue& Q, int argc, char** argv) {
   auto kt = rd<uint32_t>(tdir + "/ball_" + std::to_string(bK) + ".u32");
   auto vt = rd<uint32_t>(tdir + "/ball_" + std::to_string(bV) + ".u32");
   a.kL = kt.size() / 8; a.vL = vt.size() / 8;
+  { const int nk = pq_max_nd(kt.data(), a.kL), nv = pq_max_nd(vt.data(), a.vL); g_nd = nk > nv ? nk : nv; }
   a.ktab = up(Q, build_soa(kt, bK)); a.vtab = up(Q, build_soa(vt, bV));
-  a.k_stream = ((long)T * 2 * bK + 8 + 15) / 16 * 16; a.v_stream = ((long)T * 2 * bV + 8 + 15) / 16 * 16;
+  a.k_stream = ((long long)T * 2 * bK + 8 + 15) / 16 * 16; a.v_stream = ((long long)T * 2 * bV + 8 + 15) / 16 * 16;
   const size_t nbh = (size_t)B * Hkv;
   std::vector<uint8_t> kc(nbh * a.k_stream), vc(nbh * a.v_stream);
   for (auto& x : kc) x = rng() & 255; for (auto& x : vc) x = rng() & 255;
