@@ -21,7 +21,7 @@
 <a id="video"></a>
 This repo collects quantized-inference kernels that run on all three GPU vendors, each checked against one CPU reference:
 the original **UltraQuant FP4 KV-cache verify kernel** (below), and **reproductions plus CUDA → HIP/SYCL ports of recent quantization papers**
-under [`ports/`](ports) ([HyperQuant](ports/hyperquant), and PearlQuant in progress). See [Ports](#ports).
+under [`ports/`](ports) ([HyperQuant](ports/hyperquant) and [PearlQuant](ports/pearlquant)). See [Ports](#ports).
 
 The core kernel implements one operation: **decode / speculative-verify attention over a 4-bit paged KV cache in the UltraQuant format**
 (FP4 e2m1 values, one UE8M0 power-of-two scale per 32 channels: 68 bytes per head per token for K or V at head_dim 128,
@@ -82,7 +82,7 @@ and checks every backend against the same shared test vectors. Every number live
 | port | what | status |
 |---|---|---|
 | [ports/hyperquant](ports/hyperquant) | [HyperQuant](https://arxiv.org/abs/2606.23406) (RHT + E8 lattice + Rice coding, weights and KV): H100 reproduction of the PPL tables; every upstream kernel ported to HIP and SYCL | reproduced (quality tables; Table 10 throughput does not reproduce as stated); HIP and SYCL ports pass the shared checks; 7 upstream bugs documented. Tables: [results/derived/tables.md](ports/hyperquant/results/derived/tables.md), log: [PORTING_LOG.md](ports/hyperquant/PORTING_LOG.md) |
-| ports/pearlquant | PearlQuant-style E8 lattice KV codec (Pearl Research did not publish code; rebuilt from the blog and NestQuant) with fused decode attention on CUDA, HIP and SYCL | in progress |
+| [ports/pearlquant](ports/pearlquant) | PearlQuant-style E8 lattice KV codec: Pearl Research published no code, so this is our reconstruction from the blog and NestQuant (every choice vs what Pearl disclosed: [DESIGN.md](ports/pearlquant/DESIGN.md)), with fused decode attention on CUDA, HIP and SYCL | rate-distortion shape on a Gaussian source reproduces; model quality (Qwen3-8B, not Pearl's GLM-5.3) is about 2x worse KL than Pearl reports at each rate; the attention kernel passes the shared checks on 7 targets but is decode-ALU-bound and slower than bf16 attention. Results: [README](ports/pearlquant/README.md), log: [PORTING_LOG.md](ports/pearlquant/kernels/PORTING_LOG.md) |
 
 <a id="how-it-works"></a>
 
@@ -320,7 +320,7 @@ python3 ~/video-readme-maker/vrm.py all README.spec.yml        # README.md, asse
 | `uqmt/` | Triton kernel, quantisers, reference, cache builder, vLLM adapter |
 | `cuda/` | native CUDA port (mma.sync, wgmma, tcgen05), reference vectors, prior-art notes |
 | `sycl/` | SYCL port (ESIMD and XMX), baselines notes |
-| `ports/` | paper reproductions and three-vendor kernel ports: hyperquant/ (and pearlquant/), each with its own README, results and porting log |
+| `ports/` | paper reproductions and three-vendor kernel ports: hyperquant/ and pearlquant/, each with its own README, results and porting log |
 | `bench/` | benchmarks, ported comparison methods (bench/ports), serving harness (bench/realworld) |
 | `results/` | every result file and log; results/derived is produced by tools/readme_data.py |
 | `blog/` | the write-up, with charts rendered by blog/make_charts.py |
