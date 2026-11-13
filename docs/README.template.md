@@ -104,6 +104,19 @@ heads; Pearl's GLM-5.3 uses MLA, where one decoded latent serves every head, and
 tensor cores. We did not reach their "about as fast as NVFP4" result. The optimization history (mostly occupancy: leader tables moved out of
 shared memory, compact int8 tile) is in [kernels/PORTING_LOG.md](kernels/PORTING_LOG.md).
 
+**Against Pearl's published kernel claims.** Pearl reports that on 8xB200 at light load FP8 is
+about 8% faster than PearlQuant-3.2 and that PearlQuant decodes about as fast as NVFP4 (hardware-native
+on Blackwell). Their kernel is not public, so we can only compare ratios against our own skeleton
+reading other formats (time of pq divided by time of the other format, same shape, Hq=32, Hkv=8,
+T=32k; >1 means pq is slower):
+
+{{TABLE_RATIO}}
+
+On the native backends (HIP, CUDA) our pq kernel is slower than our FP8 path and well behind our
+bf16 path, while Pearl's is within about 8% of FP8 (their number). Only under SYCL on H100, where our
+software FP8 decode is itself slow, does pq beat FP8. Our FP8 path itself is a CUDA-core software decode, not a tuned
+FP8 kernel, so the gap to a production FP8 kernel is larger than this table shows.
+
 ## Reproduce
 
 ```

@@ -134,6 +134,23 @@ def table_kernel():
     return "\n".join(L)
 
 
+def table_ratio():
+    """pq time / fp8 time and pq / bf16 at B=1 (light load) and B=8, same kernel skeleton."""
+    L = ["| GPU / backend | pq / fp8, B=1 | pq / fp8, B=8 | pq / bf16, B=1 | pq / bf16, B=8 |", "|---|---|---|---|---|"]
+    for file, lab in [("hip_mi300x_bench", "MI300X / HIP"), ("cuda_h100_bench", "H100 / CUDA"), ("cuda_b200_bench", "B200 / CUDA"),
+                      ("sycl_cudabackend_h100_bench", "H100 / SYCL")]:
+        try:
+            r = []
+            for other in ("fp8", "bf16"):
+                for B in (1, 8):
+                    sh = (B, 32768, 32, 8)
+                    r.append(float(kus(file, "pq", *sh, 25)) / float(kus(file, other, *sh)))
+            L.append(f"| {lab} | {r[0]:.2f}x | {r[1]:.2f}x | {r[2]:.2f}x | {r[3]:.2f}x |")
+        except KeyError:
+            pass
+    return "\n".join(L)
+
+
 def render(tmpl):
     def sub(m):
         tok = m.group(1)
@@ -145,6 +162,8 @@ def render(tmpl):
             return table_check()
         if tok == "TABLE_KERNEL":
             return table_kernel()
+        if tok == "TABLE_RATIO":
+            return table_ratio()
         if tok == "checks":
             return checks()
         if tok == "klref_ppl":

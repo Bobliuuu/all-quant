@@ -143,6 +143,24 @@ heads; Pearl's GLM-5.3 uses MLA, where one decoded latent serves every head, and
 tensor cores. We did not reach their "about as fast as NVFP4" result. The optimization history (mostly occupancy: leader tables moved out of
 shared memory, compact int8 tile) is in [kernels/PORTING_LOG.md](kernels/PORTING_LOG.md).
 
+**Against Pearl's published kernel claims.** Pearl reports that on 8xB200 at light load FP8 is
+about 8% faster than PearlQuant-3.2 and that PearlQuant decodes about as fast as NVFP4 (hardware-native
+on Blackwell). Their kernel is not public, so we can only compare ratios against our own skeleton
+reading other formats (time of pq divided by time of the other format, same shape, Hq=32, Hkv=8,
+T=32k; >1 means pq is slower):
+
+| GPU / backend | pq / fp8, B=1 | pq / fp8, B=8 | pq / bf16, B=1 | pq / bf16, B=8 |
+|---|---|---|---|---|
+| MI300X / HIP | 1.36x | 1.13x | 1.86x | 1.48x |
+| H100 / CUDA | 1.66x | 1.74x | 2.83x | 3.50x |
+| B200 / CUDA | 1.56x | 1.57x | 2.87x | 3.20x |
+| H100 / SYCL | 0.81x | 0.88x | 2.59x | 3.26x |
+
+On the native backends (HIP, CUDA) our pq kernel is slower than our FP8 path and well behind our
+bf16 path, while Pearl's is within about 8% of FP8 (their number). Only under SYCL on H100, where our
+software FP8 decode is itself slow, does pq beat FP8. Our FP8 path itself is a CUDA-core software decode, not a tuned
+FP8 kernel, so the gap to a production FP8 kernel is larger than this table shows.
+
 ## Reproduce
 
 ```
