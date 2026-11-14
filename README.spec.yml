@@ -4,7 +4,7 @@
 project:
   name: AllQuant
   emoji: "⚡"
-  tagline: "Quantized-inference kernels on AMD, NVIDIA and Intel GPUs: a fused FP4 KV-cache verify kernel, plus reproductions and three-vendor ports of HyperQuant and PearlQuant"
+  tagline: "Quantized-inference kernels on AMD, NVIDIA and Intel GPUs: a fused FP4 KV-cache verify kernel, plus reproductions and three-vendor ports of HyperQuant, UltraQuant, and PearlQuant"
   repo: Bobliuuu/all-quant
 hero:
   title: AllQuant
@@ -25,6 +25,8 @@ nav:
   - {emoji: "🎬", label: Video, anchor: video}
   - {emoji: "📊", label: Results, anchor: results}
   - {emoji: "🔁", label: Ports, anchor: ports}
+  - {emoji: "🧪", label: HyperQuant, anchor: hyperquant}
+  - {emoji: "💎", label: PearlQuant, anchor: pearlquant}
   - {emoji: "🧩", label: How it works, anchor: how-it-works}
   - {emoji: "🖥️", label: Three vendors, anchor: three-vendors}
   - {emoji: "⚖️", label: Where we stand, anchor: where-we-stand}
@@ -35,6 +37,36 @@ nav:
   - {emoji: "🗺️", label: Repo map, anchor: repo-map}
 
 numbers:
+  # ports (tools/ports_data.py -> results/derived/ports_data.json)
+  hq_bf16: {file: results/derived/ports_data.json, path: hyperquant.bf16_ours, fmt: "{:.4f}"}
+  hq_bf16_paper: {file: results/derived/ports_data.json, path: hyperquant.bf16_paper, fmt: "{:.4f}"}
+  hq_e8_dmax: {file: results/derived/ports_data.json, path: hyperquant.max_abs_delta_e8, fmt: "{:.2f}"}
+  hq_kv3: {file: results/derived/ports_data.json, path: hyperquant.kv3_delta, fmt: "{:.2f}"}
+  hq_checks: {file: results/derived/ports_data.json, path: hyperquant.checks_passed, fmt: "{:g}"}
+  hq_checks_total: {file: results/derived/ports_data.json, path: hyperquant.checks_total, fmt: "{:g}"}
+  hq_backends: {file: results/derived/ports_data.json, path: hyperquant.backends, fmt: "{:g}"}
+  hq_e2e_mi: {file: results/derived/ports_data.json, path: hyperquant.e2e_mi300x, fmt: "{:.4f}"}
+  hq_e2e_h100: {file: results/derived/ports_data.json, path: hyperquant.e2e_h100, fmt: "{:.4f}"}
+  hq_t10_bf16: {file: results/derived/ports_data.json, path: hyperquant.t10_bf16_decode, fmt: "{:.1f}", unit: " tok/s"}
+  hq_t10_w: {file: results/derived/ports_data.json, path: hyperquant.t10_w_decode, fmt: "{:.1f}", unit: " tok/s"}
+  hq_dec_min: {file: results/derived/ports_data.json, path: hyperquant.decode_ratio_min, fmt: "{:.2f}", unit: "x"}
+  hq_dec_max: {file: results/derived/ports_data.json, path: hyperquant.decode_ratio_max, fmt: "{:.2f}", unit: "x"}
+  pq_rd_pearl: {file: results/derived/ports_data.json, path: pearlquant.rd_pearl_275, fmt: "{:.2f}"}
+  pq_rd_ours: {file: results/derived/ports_data.json, path: pearlquant.rd_ours_275, fmt: "{:.2f}"}
+  pq_rd_noside: {file: results/derived/ports_data.json, path: pearlquant.rd_ours_275_noside, fmt: "{:.2f}"}
+  pq_kl_ours: {file: results/derived/ports_data.json, path: pearlquant.kl_ours_32, fmt: "{:.3f}"}
+  pq_kl_pearl: {file: results/derived/ports_data.json, path: pearlquant.kl_pearl_32, fmt: "{:.3f}"}
+  pq_kl_nvfp4: {file: results/derived/ports_data.json, path: pearlquant.kl_nvfp4, fmt: "{:.3f}"}
+  pq_klr_min: {file: results/derived/ports_data.json, path: pearlquant.kl_ratio_min, fmt: "{:.1f}", unit: "x"}
+  pq_klr_max: {file: results/derived/ports_data.json, path: pearlquant.kl_ratio_max, fmt: "{:.1f}", unit: "x"}
+  pq_checks: {file: results/derived/ports_data.json, path: pearlquant.checks_passed, fmt: "{:g}"}
+  pq_checks_total: {file: results/derived/ports_data.json, path: pearlquant.checks_total, fmt: "{:g}"}
+  pq_targets: {file: results/derived/ports_data.json, path: pearlquant.targets, fmt: "{:g}"}
+  pq_slow_min: {file: results/derived/ports_data.json, path: pearlquant.pq_over_bf16_min, fmt: "{:.1f}", unit: "x"}
+  pq_slow_max: {file: results/derived/ports_data.json, path: pearlquant.pq_over_bf16_max, fmt: "{:.1f}", unit: "x"}
+  pq_bytes: {file: results/derived/ports_data.json, path: pearlquant.bytes_pq, fmt: "{:g}", unit: " B"}
+  pq_bytes_bf16: {file: results/derived/ports_data.json, path: pearlquant.bytes_bf16, fmt: "{:g}", unit: " B"}
+  pq_bytes_fp8: {file: results/derived/ports_data.json, path: pearlquant.bytes_fp8, fmt: "{:g}", unit: " B"}
   k_max: {file: results/mi300x_b8_c32k_tuned.json, path: 3.K}
   # format
   bytes_uq: {file: results/derived/readme_data.json, path: format.uq_bytes}
@@ -124,7 +156,7 @@ intro: |
 
 video:
   url: ""   # paste the GitHub user-attachments URL here after dragging the mp4 into a GitHub issue/PR; re-run `vrm.py readme README.spec.yml`
-  caption: "Explainer video (with voice-over and subtitles): the problem, the idea, the numbers, and where UltraQuant does not win"
+  caption: "Explainer video (captioned, no voice-over): the problem, the idea, the numbers, and where each model does not win"
   mp4: video/ultraquant_explainer.mp4
   gif: video/preview.gif
   srt: video/ultraquant_explainer.srt
@@ -139,10 +171,10 @@ video:
   voice: {engine: openai, voice: alloy, model: gpt-4o-mini-tts, tempo: 1.25}
   scenes:
     - type: title
-      title: UltraQuant
-      subtitle: One pass over a 4-bit KV cache, for speculative decoding
-      chips: [AMD, NVIDIA, Intel, FP4 KV cache]
-      say: "UltraQuant: one pass over a four bit KV cache, for speculative decoding, on AMD, NVIDIA and Intel GPUs. This is a short tour of what it does, what we measured, and where it does not win."
+      title: AllQuant
+      subtitle: Quantized-inference kernels on AMD, NVIDIA and Intel
+      chips: [UltraQuant FP4 KV, HyperQuant, PearlQuant, AMD, NVIDIA, Intel]
+      say: "AllQuant: quantized inference kernels that run on AMD, NVIDIA and Intel GPUs. First, UltraQuant: one pass over a four bit KV cache, for speculative decoding. Then two papers we reproduced and ported to all three vendors, HyperQuant and PearlQuant. Along the way, what we measured, and where each one does not win."
     - type: problem
       heading: The problem
       bullets:
@@ -234,6 +266,30 @@ video:
       gif_width: 900
       gif_fps: 8
       say: "The costs are real. Question answering F one drops from {{ n.f1_bf16.numtext }} to {{ n.f1_fp4.numtext }}. Greedy output diverges from bf sixteen after a median of {{ n.drift_fp4.numtext }} tokens, earlier than fp8 at {{ n.drift_fp8.numtext }}. Plain decode is slower: {{ n.plain_fp4.numtext }} tokens per second against {{ n.plain_bf16.numtext }}. In an oversubscribed agent test FP4 wins, {{ n.agent_fp4.numtext }} against {{ n.agent_bf16.numtext }} tokens per second."
+    - type: results
+      heading: "Port 1: HyperQuant, reproduced then ported"
+      items:
+        - {label: "bf16 perplexity, ours (paper {{ n.hq_bf16_paper.text }})", number: hq_bf16}
+        - {label: "Largest gap to the paper on the E8 rows", number: hq_e8_dmax}
+        - {label: "Shared kernel checks passed, of {{ n.hq_checks_total.text }}, on every backend", number: hq_checks}
+        - {label: "4-bps Rice weights perplexity on MI300X (H100: {{ n.hq_e2e_h100.text }})", number: hq_e2e_mi}
+      say: "We also reproduce and port other papers. First, HyperQuant: a Hadamard rotation, the E8 lattice and Rice coding, for weights and the KV cache. On an H100 its perplexity tables reproduce: our bf16 baseline is {{ n.hq_bf16.numtext }} against the paper's {{ n.hq_bf16_paper.numtext }}, and every E8 row lands within {{ n.hq_e8_dmax.numtext }}. We then ported every CUDA kernel to HIP and SYCL. All {{ n.hq_backends.numtext }} backends pass the same {{ n.hq_checks.numtext }} of {{ n.hq_checks_total.numtext }} shared checks; the two failures are upstream bugs, and every port reproduces them."
+    - type: table
+      table: hq_kernel_tbl
+      heading: "HyperQuant kernels across vendors"
+      say: "Speed is mixed. On MI300X the stand alone Rice decoders run at {{ n.hq_dec_min.numtext }} to {{ n.hq_dec_max.numtext }} times the H100 time, but the fused matrix and attention kernels are one and a half to two and a half times slower. These kernels are latency bound. And the paper's throughput table does not reproduce: Rice weights decode at {{ n.hq_t10_w.numtext }} tokens per second, against {{ n.hq_t10_bf16.numtext }} for bf16."
+    - type: results
+      heading: "Port 2: a PearlQuant-style E8 KV codec"
+      items:
+        - {label: "Wasted bits at 2.75 bpv, ours (Pearl {{ n.pq_rd_pearl.text }})", number: pq_rd_ours}
+        - {label: "KL from FP8 at 3.2 bpv, ours (Pearl {{ n.pq_kl_pearl.text }}, on another model)", number: pq_kl_ours}
+        - {label: "Kernel checks passed, of {{ n.pq_checks_total.text }}, on {{ n.pq_targets.text }} targets", number: pq_checks}
+        - {label: "Decode attention time vs bf16, worst case", number: pq_slow_max}
+      say: "Second, PearlQuant: an E8 lattice KV cache codec from Pearl Research. They published no code, so this is our own reconstruction. The rate distortion shape reproduces: {{ n.pq_rd_noside.numtext }} wasted bits at two point seven five bits per value, against Pearl's {{ n.pq_rd_pearl.numtext }}. On Qwen three eight B, our KL divergence is about {{ n.pq_klr_min.numtext }} to {{ n.pq_klr_max.numtext }} times what Pearl reports on their own model."
+    - type: table
+      table: pq_kernel_tbl
+      heading: "PearlQuant-style kernel: correct everywhere, not fast"
+      say: "Our fused decode attention passes all {{ n.pq_checks.numtext }} shared checks on {{ n.pq_targets.numtext }} targets, across CUDA, HIP and SYCL. But it is ALU bound: {{ n.pq_slow_min.numtext }} to {{ n.pq_slow_max.numtext }} times slower than bf16 attention, while storing a fifth of the bytes."
     - type: caveats
       heading: "Honest caveats"
       bullets:
@@ -241,7 +297,8 @@ video:
         - "Serving used vLLM's native backend, not our kernel; single runs on a shared GPU"
         - "MI300X and Arc decode FP4 in software, far below peak bandwidth"
         - "On B300, vendor NVFP4 kernels are faster"
-      say: "Honest caveats. Most kernel numbers are synthetic microbenchmarks. The serving results come from vLLM's native backend, not our kernel, as single runs on a shared GPU. MI300X and Arc have no native FP4 matrix instructions, so FP4 is decoded in software. And on B300, vendor NVFP4 kernels are faster."
+        - "Ports: HyperQuant throughput does not reproduce; our PearlQuant codec is a reconstruction and slower than bf16"
+      say: "Honest caveats. Most kernel numbers are synthetic microbenchmarks. The serving results come from vLLM's native backend, not our kernel, as single runs on a shared GPU. MI300X and Arc have no native FP4 matrix instructions, so FP4 is decoded in software. And on B300, vendor NVFP4 kernels are faster. For the ports, HyperQuant's throughput claims do not reproduce, and our PearlQuant style codec is a reconstruction that is slower than bf16 attention."
     - type: idea
       heading: "Is it the best? No. Here is where it wins."
       bullets:
@@ -251,8 +308,8 @@ video:
         - "Exact UltraQuant layout, byte-compatible with upstream"
       say: "So, is it the best? No. Here is where it wins. One validated implementation across AMD, NVIDIA and Intel. A fused K query pass that is {{ n.gain_min.numtext }} to {{ n.gain_max.numtext }} times faster than the same kernel with KV sharing off. And {{ n.vs_fp16.numtext }} times more KV tokens per gigabyte. In the public sources we checked, we found no public CUDA or SYCL port of this layout with fused K query verify."
     - type: end
-      title: UltraQuant
-      subtitle: "Code, results and the blog post are in the repo"
+      title: AllQuant
+      subtitle: "Code, results, ports and the blog post are in the repo"
       say: "The code, the results, and the blog post are all in the repo."
 
 tables:
@@ -313,6 +370,57 @@ tables:
       - {key: esimd_ms, title: UltraQuant ESIMD, align: right, fmt: "{:.2f}"}
       - {key: xmx_ms, title: UltraQuant XMX (earlier), align: right, fmt: "{:.2f}"}
       - {key: esimd_pct, title: "ESIMD, % of random-read ceiling", align: right, fmt: "{:.0f}", unit: "%"}
+  - id: hq_repro_tbl
+    title: "HyperQuant reproduction: Llama-3.1-8B, WikiText-2 perplexity (H100)"
+    file: results/derived/ports_data.json
+    rows_path: hyperquant.repro
+    columns:
+      - {key: config, title: Configuration}
+      - {key: paper, title: Paper, align: right, fmt: "{:.3f}"}
+      - {key: ours, title: Ours, align: right, fmt: "{:.3f}"}
+      - {key: delta, title: Difference, align: right, fmt: "{:+.3f}"}
+  - id: hq_kernel_tbl
+    title: "HyperQuant kernels on every backend, ms (GEMV: ms per token over 32 layers; attention: ms per layer at T=511; GEMM: warp-specialised, q/o projection, 8 rows). Same bitstreams, Llama-3.1-8B shapes, about 4 bps; lower is better"
+    file: results/derived/ports_data.json
+    rows_path: hyperquant.kernels
+    columns:
+      - {key: bench, title: Kernel}
+      - {key: h100_cuda, title: "H100 CUDA (upstream)", align: right, fmt: "{:,.2f}"}
+      - {key: mi300x_hip, title: "MI300X HIP", align: right, fmt: "{:,.2f}"}
+      - {key: mi300x_sycl, title: "MI300X SYCL", align: right, fmt: "{:,.2f}"}
+      - {key: h100_sycl, title: "H100 SYCL", align: right, fmt: "{:,.2f}"}
+      - {key: arc_b390_sycl, title: "Arc B390 SYCL", align: right, fmt: "{:,.2f}"}
+      - {key: mi300x_over_h100, title: "MI300X HIP / H100", align: right, fmt: "{:.2f}", unit: "x"}
+  - id: pq_kl_tbl
+    title: "KL divergence from an FP8 KV cache: Qwen3-8B, PG-19, 4 books x 16384 tokens (lower is better)"
+    file: results/derived/ports_data.json
+    rows_path: pearlquant.kl
+    columns:
+      - {key: config, title: KV format}
+      - {key: bpv, title: Bits per value, align: right, fmt: "{:.3f}"}
+      - {key: kl, title: KL from FP8, align: right, fmt: "{:.4f}"}
+      - {key: ppl, title: PPL, align: right, fmt: "{:.2f}"}
+      - {key: pearl_kl, title: "Pearl's KL (GLM-5.3)", align: right, fmt: "{:.3f}"}
+  - id: pq_rd_tbl
+    title: "Rate-distortion on an iid Gaussian: wasted bits R - R*(D), lower is better"
+    file: results/derived/ports_data.json
+    rows_path: pearlquant.rd
+    columns:
+      - {key: point, title: Codec}
+      - {key: pearl, title: "Pearl (blog Fig. 5)", align: right, fmt: "{:.2f}"}
+      - {key: ours_with_scale, title: "Ours, fp16 scale counted", align: right, fmt: "{:.3f}"}
+      - {key: ours_no_side, title: "Ours, no side info", align: right, fmt: "{:.3f}"}
+  - id: pq_kernel_tbl
+    title: "E8 fused decode attention: us per call, B=8, ctx 32768, Hq32/Hkv8, 25/24 bits per group of 8 (lower is better)"
+    file: results/derived/ports_data.json
+    rows_path: pearlquant.kernels
+    columns:
+      - {key: device, title: GPU (backend)}
+      - {key: pq_us, title: E8 (ours), align: right, fmt: "{:.0f}"}
+      - {key: fp8_us, title: fp8 (same kernel skeleton), align: right, fmt: "{:.0f}"}
+      - {key: bf16_us, title: bf16 (same kernel skeleton), align: right, fmt: "{:.0f}"}
+      - {key: vendor_bf16_us, title: torch SDPA bf16, align: right, fmt: "{:.0f}"}
+      - {key: pq_over_bf16, title: E8 / bf16, align: right, fmt: "{:.1f}", unit: "x"}
 
 charts:
   - id: speed_per_k
@@ -431,6 +539,68 @@ sections:
       |---|---|---|
       | [ports/hyperquant](ports/hyperquant) | [HyperQuant](https://arxiv.org/abs/2606.23406) (RHT + E8 lattice + Rice coding, weights and KV): H100 reproduction of the PPL tables; every upstream kernel ported to HIP and SYCL | reproduced (quality tables; Table 10 throughput does not reproduce as stated); HIP and SYCL ports pass the shared checks; 7 upstream bugs documented. Tables: [results/derived/tables.md](ports/hyperquant/results/derived/tables.md), log: [PORTING_LOG.md](ports/hyperquant/PORTING_LOG.md) |
       | [ports/pearlquant](ports/pearlquant) | PearlQuant-style E8 lattice KV codec: Pearl Research published no code, so this is our reconstruction from the blog and NestQuant (every choice vs what Pearl disclosed: [DESIGN.md](ports/pearlquant/DESIGN.md)), with fused decode attention on CUDA, HIP and SYCL | rate-distortion shape on a Gaussian source reproduces; model quality (Qwen3-8B, not Pearl's GLM-5.3) is about 2x worse KL than Pearl reports at each rate; the attention kernel passes the shared checks on 7 targets but is decode-ALU-bound and slower than bf16 attention. Results: [README](ports/pearlquant/README.md), log: [PORTING_LOG.md](ports/pearlquant/kernels/PORTING_LOG.md) |
+  - title: "HyperQuant: reproduced, then ported"
+    emoji: "🧪"
+    id: hyperquant
+    body: |
+      [HyperQuant](https://arxiv.org/abs/2606.23406) quantizes weights and the KV cache with a random Hadamard rotation, the E8 lattice and Rice entropy coding.
+      We ran the official code ([github.com/moonmath-ai/HyperQuant](https://github.com/moonmath-ai/HyperQuant) @ 227f3f6, vendored unmodified) on an H100 to reproduce the paper,
+      then ported every CUDA kernel to **HIP (MI300X)** and **SYCL (Arc B390; also MI300X via AdaptiveCpp, H100 via DPC++ and a Xeon CPU)**.
+    highlights:
+      - {label: "bf16 PPL, ours (paper {{ n.hq_bf16_paper }})", number: hq_bf16}
+      - {label: "Largest E8 gap to the paper (PPL)", number: hq_e8_dmax}
+      - {label: "Shared checks passed (of {{ n.hq_checks_total }}) on {{ n.hq_backends }} backends", number: hq_checks}
+      - {label: "4-bps Rice weights PPL, MI300X (H100: {{ n.hq_e2e_h100 }})", number: hq_e2e_mi}
+    tables: [hq_repro_tbl]
+    details:
+      - summary: "Kernel timings on every backend (MI300X vs H100, Arc B390)"
+        tables: [hq_kernel_tbl]
+        body: |
+          The stand-alone Rice decoders on MI300X run at {{ n.hq_dec_min }} to {{ n.hq_dec_max }} of the H100 time; the fused GEMV, the warp-specialised GEMM and the fused attention are 1.5x to 2.4x slower.
+          All Rice kernels are latency-bound (serial per-thread bit decoding: 20-45 GB/s of bitstream on GPUs with 3-4 TB/s of copy bandwidth), so the port tracks latency, not bandwidth.
+          Full table, including the RHT, GEMV per projection and int8 linear rows: [results/derived/tables.md](ports/hyperquant/results/derived/tables.md#kernel-microbenchmarks-same-bitstreams-on-every-gpu-llama-31-8b-shapes-4-bps-sps-512).
+    after: |
+      **What reproduces.** With the paper's PPL protocol (empty rows dropped, then `"\n\n"`-joined) the bf16 baseline matches to the third decimal, every E8 row lands within {{ n.hq_e8_dmax }} PPL,
+      and the paper's "KV sweet spot" (+0.25 PPL at 3 bps) comes out at +{{ n.hq_kv3 }}. The E8 weight rows match with the code's default Hadamard size (1024), not the paper's stated tile of 128; D4/A2/Z at 3 bps differ more (up to 0.4).
+
+      **What does not.** Table 10 (throughput) does not reproduce as stated and is protocol-sensitive: Rice weights decode at {{ n.hq_t10_w }} against {{ n.hq_t10_bf16 }} for bf16 on H100,
+      which agrees with the paper's own conclusion that neither path is a throughput win. The fused Rice attention cannot run as shipped, weights and KV do not compose, and the default `mma="int8"` path uses more GPU memory than bf16.
+
+      **The ports.** Every backend passes the same {{ n.hq_checks }} of {{ n.hq_checks_total }} checks on the shared vectors (bit-exact bitstreams, symbols, bf16/fp8/int8 outputs, GEMV); the same two fail everywhere,
+      and both are upstream bugs the ports reproduce faithfully. End to end, Rice weights at 4 bps give PPL {{ n.hq_e2e_mi }} on MI300X with the HIP kernels against {{ n.hq_e2e_h100 }} on H100, from identical stored bits.
+      Details: [ports/hyperquant/README.md](ports/hyperquant/README.md), porting notes and upstream bugs: [PORTING_LOG.md](ports/hyperquant/PORTING_LOG.md).
+  - title: "PearlQuant-style E8 KV codec"
+    emoji: "💎"
+    id: pearlquant
+    body: |
+      Pearl Research described **PearlQuant**, an E8-lattice KV-cache quantizer with a fused Blackwell decode kernel, in a [blog post](https://pearlresearch.ai/research/blog/pearlquant), without code or a format spec.
+      This port is our own reconstruction: random Hadamard rotation, an fp16 scale per vector, and a codebook of the most probable E8 points with leader indexing,
+      plus a fused split-KV decode attention kernel that decodes codewords on chip, in **CUDA and HIP (one source)** and **SYCL**. It is not Pearl's code, and it runs Qwen3-8B, not their GLM-5.3;
+      every choice we made where the blog is silent is listed in [DESIGN.md](ports/pearlquant/DESIGN.md).
+    highlights:
+      - {label: "Wasted bits at 2.75 bpv, ours (Pearl {{ n.pq_rd_pearl }})", number: pq_rd_ours}
+      - {label: "KL from FP8 at 3.2 bpv, ours (Pearl {{ n.pq_kl_pearl }}, other model)", number: pq_kl_ours}
+      - {label: "Kernel checks passed (of {{ n.pq_checks_total }}) on {{ n.pq_targets }} targets", number: pq_checks}
+      - {label: "Decode time vs bf16 attention (worst case)", number: pq_slow_max}
+    tables: [pq_kl_tbl]
+    images:
+      - {src: ports/pearlquant/results/figures/rd_vs_pearl.png, alt: "wasted bits versus rate: Pearl's Fig. 5 against our re-run", width: "70%"}
+    details:
+      - summary: "Rate-distortion and kernel timing tables"
+        tables: [pq_rd_tbl, pq_kernel_tbl]
+        body: |
+          The cache costs {{ n.pq_bytes }} per token per KV head at 25/24 bits, against {{ n.pq_bytes_fp8 }} for fp8 and {{ n.pq_bytes_bf16 }} for bf16. The kernel uses CUDA-core FMAs, no tensor cores;
+          "same kernel skeleton" rows run the identical split-KV kernel on fp8 or bf16 pages. More shapes (B=1, B=32, Hkv=1, Arc 140V, B390): [results/SUMMARY.md](ports/pearlquant/results/SUMMARY.md).
+    after: |
+      **What reproduces.** The shape of Pearl's rate-distortion figure: at 2.75 bpv our codec wastes {{ n.pq_rd_noside }} bits with no side information (Pearl: {{ n.pq_rd_pearl }}), {{ n.pq_rd_ours }} with the fp16 scale counted,
+      and both beat TurboQuant-MSE and NVFP4. Needle-in-a-haystack at 8k tokens is 1.00 for every format tested, including ours.
+
+      **What does not.** On Qwen3-8B our KL from an FP8 cache is {{ n.pq_klr_min }} to {{ n.pq_klr_max }} Pearl's numbers at each rate (different model, so not like for like),
+      and at 3.2 bpv ({{ n.pq_kl_ours }}) it is still behind NVFP4 at 4.5 bpv ({{ n.pq_kl_nvfp4 }}). K mean-centering, which is exactly softmax-invariant, is what makes the low rates usable.
+
+      **The kernel.** All {{ n.pq_checks }} shared checks pass on {{ n.pq_targets }} targets (B200, H100, MI300X, Arc 140V, Arc B390, a Xeon, H100 through SYCL). Decode is ALU-bound:
+      {{ n.pq_slow_min }} to {{ n.pq_slow_max }} slower than bf16 attention in the same skeleton, at a fifth of the bytes. A tensor-core decode path is the open item.
+      Details: [ports/pearlquant/README.md](ports/pearlquant/README.md), porting notes: [kernels/PORTING_LOG.md](ports/pearlquant/kernels/PORTING_LOG.md).
   - title: How it works
     emoji: "🧩"
     id: how-it-works
@@ -564,6 +734,7 @@ sections:
       Regenerate this README, the charts, the animated GIFs and the explainer video from `results/`:
       ```bash
       python3 tools/readme_data.py                                   # results/*.json -> results/derived/readme_data.json
+      python3 tools/ports_data.py                                    # ports/*/results -> results/derived/ports_data.json
       python3 ~/video-readme-maker/vrm.py all README.spec.yml        # README.md, assets/, video/ (mp4, srt, poster, preview.gif)
       ```
 
@@ -573,6 +744,7 @@ caveats:
   - "**Mostly synthetic and microbenchmark data.** Real-model numbers cover Mistral-7B-v0.1 (kernel/whole-step, MI300X) and Mistral-7B / Qwen3-8B (accuracy); perplexity and cosine come from single runs on small samples (8 to 16 windows); task accuracy (SWE-bench-style, RULER) is not measured. Many methods in the accuracy table are our own simulations of the published schemes."
   - "**The FP4 serving test used vLLM's native `ultraquant_4bit` backend on Qwen3-8B, not our kernel**, as single runs on a shared GPU; it supports the capacity claim, not a speed claim for uqmt."
   - "The whole-step results are a decode loop of our own over HF modules, not a served vLLM run; wall-clock steps are launch-bound, so tokens/s are projections from GPU kernel time. Draft acceptance was measured only at B=1 with a prompt-lookup drafter."
+  - "**Ports.** HyperQuant's Table 10 throughput does not reproduce as stated, and two of its 86 kernel checks fail on every backend because of upstream bugs. The PearlQuant port is our reconstruction from a blog post, evaluated on Qwen3-8B rather than Pearl's model, and its kernel is slower than bf16 attention."
   - "SemKV and StarKV were not benchmarked (no public code found). K=1 gains nothing from fusion. The fp8-MFMA score path (`UQ_FP8K=1`) is experimental, head_dim 128 only, and slower on MI300X."
 
 repo_map:
@@ -584,6 +756,7 @@ repo_map:
   - {path: results/, desc: "every result file and log; results/derived is produced by tools/readme_data.py"}
   - {path: blog/, desc: "the write-up, with charts rendered by blog/make_charts.py"}
   - {path: docs/, desc: "detailed result tables (RESULTS_DETAIL.md), related work, scale rule, use cases"}
+  - {path: tools/ports_data.py, desc: "collects the ports' generated results (results/derived/ports_data.json) for the README and video"}
   - {path: tools/readme_data.py, desc: "derives the README/video data from results/"}
   - {path: README.spec.yml, desc: "spec for video-readme-maker: README, charts, GIFs and the explainer video"}
   - {path: video/, desc: "ultraquant_explainer.mp4, .srt, poster.png, preview.gif (generated)"}
