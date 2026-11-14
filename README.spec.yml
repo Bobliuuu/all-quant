@@ -195,7 +195,7 @@ video:
       gif: assets/fused_passes.gif
       gif_start: 1.0
       gif_end: 21
-      gif_speed: 1.5
+      gif_speed: 1.0
       gif_width: 900
       say: "The idea is to fuse them. All K queries, and the query heads that share a key value head, are stacked into one tile. Each page of the cache is read once, and all K outputs come out together. On the left, K passes. On the right, one."
     - type: bits
@@ -225,6 +225,7 @@ video:
     - type: chart
       chart: speed_per_k
       gif: assets/speed_per_k.gif
+      gif_speed: 0.75
       gif_start: 0.4
       gif_end: 10
       gif_width: 900
@@ -236,6 +237,7 @@ video:
     - type: chart
       chart: ports_scatter
       gif: assets/ports_scatter.gif
+      gif_speed: 0.75
       gif_start: 0.4
       gif_end: 12
       gif_width: 900
@@ -261,6 +263,7 @@ video:
       table: serving_tbl
       heading: "Serving: what it costs"
       gif: assets/serving_costs.gif
+      gif_speed: 0.75
       gif_start: 0.4
       gif_end: 9
       gif_width: 900
@@ -736,6 +739,7 @@ sections:
       python3 tools/readme_data.py                                   # results/*.json -> results/derived/readme_data.json
       python3 tools/ports_data.py                                    # ports/*/results -> results/derived/ports_data.json
       python3 ~/video-readme-maker/vrm.py all README.spec.yml        # README.md, assets/, video/ (mp4, srt, poster, preview.gif)
+      python3 tools/make_preview_gif.py                              # video/preview.gif as a readable slideshow (2.5 s per scene)
       ```
 
 caveats:
@@ -756,6 +760,7 @@ repo_map:
   - {path: results/, desc: "every result file and log; results/derived is produced by tools/readme_data.py"}
   - {path: blog/, desc: "the write-up, with charts rendered by blog/make_charts.py"}
   - {path: docs/, desc: "detailed result tables (RESULTS_DETAIL.md), related work, scale rule, use cases"}
+  - {path: tools/make_preview_gif.py, desc: "rebuilds video/preview.gif as a slideshow, one frame per scene, after the video render"}
   - {path: tools/ports_data.py, desc: "collects the ports' generated results (results/derived/ports_data.json) for the README and video"}
   - {path: tools/readme_data.py, desc: "derives the README/video data from results/"}
   - {path: README.spec.yml, desc: "spec for video-readme-maker: README, charts, GIFs and the explainer video"}

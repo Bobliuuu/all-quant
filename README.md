@@ -427,6 +427,7 @@ Regenerate this README, the charts, the animated GIFs and the explainer video fr
 python3 tools/readme_data.py                                   # results/*.json -> results/derived/readme_data.json
 python3 tools/ports_data.py                                    # ports/*/results -> results/derived/ports_data.json
 python3 ~/video-readme-maker/vrm.py all README.spec.yml        # README.md, assets/, video/ (mp4, srt, poster, preview.gif)
+python3 tools/make_preview_gif.py                              # video/preview.gif as a readable slideshow (2.5 s per scene)
 ```
 
 <a id="caveats"></a>
@@ -455,6 +456,7 @@ python3 ~/video-readme-maker/vrm.py all README.spec.yml        # README.md, asse
 | `results/` | every result file and log; results/derived is produced by tools/readme_data.py |
 | `blog/` | the write-up, with charts rendered by blog/make_charts.py |
 | `docs/` | detailed result tables (RESULTS_DETAIL.md), related work, scale rule, use cases |
+| `tools/make_preview_gif.py` | rebuilds video/preview.gif as a slideshow, one frame per scene, after the video render |
 | `tools/ports_data.py` | collects the ports' generated results (results/derived/ports_data.json) for the README and video |
 | `tools/readme_data.py` | derives the README/video data from results/ |
 | `README.spec.yml` | spec for video-readme-maker: README, charts, GIFs and the explainer video |
