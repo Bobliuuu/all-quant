@@ -4,7 +4,7 @@
 project:
   name: AllQuant
   emoji: "⚡"
-  tagline: "Quantized-inference kernels on AMD, NVIDIA and Intel GPUs: a fused FP4 KV-cache verify kernel, plus reproductions and three-vendor ports of HyperQuant and PearlQuant"
+  tagline: "Quantized-inference kernels on AMD, NVIDIA and Intel GPUs: a fused FP4 KV-cache verify kernel, plus reproductions and three-vendor ports of HyperQuant, UltraQuant, and PearlQuant"
   repo: Bobliuuu/all-quant
 hero:
   title: AllQuant
@@ -156,7 +156,7 @@ intro: |
 
 video:
   url: ""   # paste the GitHub user-attachments URL here after dragging the mp4 into a GitHub issue/PR; re-run `vrm.py readme README.spec.yml`
-  caption: "Explainer video (captioned, no voice-over): the problem, the idea, the numbers, and where each method does not win"
+  caption: "Explainer video (captioned, no voice-over): the problem, the idea, the numbers, and where each model does not win"
   mp4: video/ultraquant_explainer.mp4
   gif: video/preview.gif
   srt: video/ultraquant_explainer.srt
