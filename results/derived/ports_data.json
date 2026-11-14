@@ -68,7 +68,7 @@
   "decode_ratio_max": 1.0758856167306872,
   "kernels": [
    {
-    "bench": "Rice decode, fused bf16 (ms)",
+    "bench": "Decode, bf16",
     "h100_cuda": 1.1769,
     "mi300x_hip": 1.0333,
     "mi300x_sycl": 1.0153,
@@ -77,7 +77,7 @@
     "mi300x_over_h100": 0.8779845356444899
    },
    {
-    "bench": "Rice decode, fused int8 (ms)",
+    "bench": "Decode, int8",
     "h100_cuda": 1.1229,
     "mi300x_hip": 0.6593,
     "mi300x_sycl": 0.6598,
@@ -86,7 +86,7 @@
     "mi300x_over_h100": 0.5871404399323181
    },
    {
-    "bench": "fused GEMV, 32 layers (ms/token)",
+    "bench": "GEMV",
     "h100_cuda": 66.843,
     "mi300x_hip": 103.848,
     "mi300x_sycl": 104.817,
@@ -95,7 +95,7 @@
     "mi300x_over_h100": 1.5536106996992953
    },
    {
-    "bench": "warp-specialised GEMM, q/o x8 (ms)",
+    "bench": "GEMM",
     "h100_cuda": 1.1126,
     "mi300x_hip": 2.6373,
     "mi300x_sycl": 3.1071,
@@ -104,12 +104,12 @@
     "mi300x_over_h100": 2.3703936724788783
    },
    {
-    "bench": "fused Rice attention, T=511 (us/layer)",
-    "h100_cuda": 17377.28,
-    "mi300x_hip": 26181.69,
-    "mi300x_sycl": 29815.0,
-    "h100_sycl": 18620.43,
-    "arc_b390_sycl": 24753.68,
+    "bench": "Attention",
+    "h100_cuda": 17.37728,
+    "mi300x_hip": 26.18169,
+    "mi300x_sycl": 29.815,
+    "h100_sycl": 18.62043,
+    "arc_b390_sycl": 24.75368,
     "mi300x_over_h100": 1.5066621473556276
    }
   ]

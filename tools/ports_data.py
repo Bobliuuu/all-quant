@@ -64,14 +64,15 @@ def hyperquant():
     H, M, MS, HS, A = ("H100 CUDA (upstream)", "MI300X HIP (port)", "MI300X SYCL (port, AdaptiveCpp HIP)",
                        "H100 SYCL (port, DPC++ CUDA)", "Arc B390 SYCL (port)")
     kb = {(r["bench"], r["case"]): r for r in d["kernel_bench"] if r["metric"] not in ("bitstream_GBps", "gbps_rw")}  # time metrics only
-    pick = [("decode", "fused bf16", "Rice decode, fused bf16 (ms)"), ("decode", "fused int8", "Rice decode, fused int8 (ms)"),
-            ("gemv_layer", "", "fused GEMV, 32 layers (ms/token)"), ("gemm_ws", "q/o_proj 8", "warp-specialised GEMM, q/o x8 (ms)"),
-            ("attn", "8 511", "fused Rice attention, T=511 (us/layer)")]
+    # (bench, case, label, scale to ms); labels short enough for one table row in the video
+    pick = [("decode", "fused bf16", "Decode, bf16", 1), ("decode", "fused int8", "Decode, int8", 1),
+            ("gemv_layer", "", "GEMV", 1), ("gemm_ws", "q/o_proj 8", "GEMM", 1),
+            ("attn", "8 511", "Attention", 1e-3)]
     kernels = []
-    for b, c, lab in pick:
+    for b, c, lab, s in pick:
         r = kb[(b, c)]
-        kernels.append({"bench": lab, "h100_cuda": r[H], "mi300x_hip": r[M], "mi300x_sycl": r[MS], "h100_sycl": r[HS],
-                        "arc_b390_sycl": r[A], "mi300x_over_h100": r[M] / r[H]})
+        kernels.append({"bench": lab, "h100_cuda": r[H] * s, "mi300x_hip": r[M] * s, "mi300x_sycl": r[MS] * s, "h100_sycl": r[HS] * s,
+                        "arc_b390_sycl": r[A] * s, "mi300x_over_h100": r[M] / r[H]})
     decode_ratios = [kb[("decode", c)][M] / kb[("decode", c)][H] for c in
                      ("2-kernel bf16", "fused bf16", "fused coop bf16", "fused fp8", "fused int8", "launcher bf16", "symbols(z)")]
     e2e = next(r for r in d["rocm_e2e"] if r["config"].startswith("w_real"))

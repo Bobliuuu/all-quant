@@ -1,7 +1,7 @@
-# UltraQuant explainer video: README hand-off
+# AllQuant explainer video: README hand-off
 
-Video: `video/ultraquant_explainer.mp4` (1080p, 30 fps, burned-in captions; subtitles also in `video/ultraquant_explainer.srt`). Poster: `video/poster.png`. Preview: `video/preview.gif`.
-Rebuild: `video/build.sh` (needs ffmpeg, python3 with numpy/matplotlib/pillow, macOS `say`). Scenes are code in `video/src/scenes.py`; narration in `video/script.md`; every chart reads `results/*.json`.
+Video: `video/ultraquant_explainer.mp4` (1080p, 24 fps, no voice-over, burned-in captions and background music; subtitles also in `video/ultraquant_explainer.srt`). Poster: `video/poster.png`. Preview: `video/preview.gif`.
+Rebuild: `python3 tools/ports_data.py && python3 ~/video-readme-maker/vrm.py video README.spec.yml --silent` ([video-readme-maker](https://github.com/Bobliuuu/video-readme-maker); needs ffmpeg, node and Chrome). Scenes and caption text are in `README.spec.yml` (`video.scenes`); every number is read from `results/`. The older `video/build.sh` pipeline is kept but does not produce this video.
 
 ## README hero text (embeddable)
 
@@ -14,7 +14,7 @@ Rebuild: `video/build.sh` (needs ffmpeg, python3 with numpy/matplotlib/pillow, m
 tokens, instead of K independent passes. The same op runs on AMD (Triton, MI300X), NVIDIA (CUDA: B300, H100, A100,
 L40S, RTX PRO 6000) and Intel (SYCL/XMX, Arc B390). At K=8, B=8, ctx 32768, fusing beats K independent passes by
 2.5x to 6.8x depending on backend (4.1x MI300X Triton, 3.3x B300 CUDA, 5.6x H100 CUDA, 3.1x Arc SYCL/XMX).
-[Watch the 3.9-minute explainer](https://github.com/Bobliuuu/all-quant/blob/main/video/ultraquant_explainer.mp4).
+[Watch the 6.8-minute explainer](https://github.com/Bobliuuu/all-quant/blob/main/video/ultraquant_explainer.mp4).
 ```
 
 ## How it works (5 bullets for the README)

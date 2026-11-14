@@ -156,7 +156,7 @@ intro: |
 
 video:
   url: ""   # paste the GitHub user-attachments URL here after dragging the mp4 into a GitHub issue/PR; re-run `vrm.py readme README.spec.yml`
-  caption: "Explainer video (with voice-over and subtitles): the problem, the idea, the numbers, and where each method does not win"
+  caption: "Explainer video (captioned, no voice-over): the problem, the idea, the numbers, and where each method does not win"
   mp4: video/ultraquant_explainer.mp4
   gif: video/preview.gif
   srt: video/ultraquant_explainer.srt
@@ -380,7 +380,7 @@ tables:
       - {key: ours, title: Ours, align: right, fmt: "{:.3f}"}
       - {key: delta, title: Difference, align: right, fmt: "{:+.3f}"}
   - id: hq_kernel_tbl
-    title: "HyperQuant kernels on every backend (same bitstreams, Llama-3.1-8B shapes, about 4 bps; lower is better)"
+    title: "HyperQuant kernels on every backend, ms (GEMV: ms per token over 32 layers; attention: ms per layer at T=511; GEMM: warp-specialised, q/o projection, 8 rows). Same bitstreams, Llama-3.1-8B shapes, about 4 bps; lower is better"
     file: results/derived/ports_data.json
     rows_path: hyperquant.kernels
     columns:

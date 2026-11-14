@@ -4,7 +4,7 @@
 
 # ⚡ AllQuant
 
-**Quantized-inference kernels on AMD, NVIDIA and Intel GPUs: a fused FP4 KV-cache verify kernel, plus reproductions and three-vendor ports of HyperQuant, UltraQuant, and PearlQuant**
+**Quantized-inference kernels on AMD, NVIDIA and Intel GPUs: a fused FP4 KV-cache verify kernel, plus reproductions and three-vendor ports of HyperQuant and PearlQuant**
 
 ![AMD: Triton · MI300X](https://img.shields.io/badge/AMD-Triton%20%C2%B7%20MI300X-ed1c24?logo=amd&logoColor=white) ![NVIDIA: CUDA · A100 to B300](https://img.shields.io/badge/NVIDIA-CUDA%20%C2%B7%20A100%20to%20B300-76b900?logo=nvidia&logoColor=white) ![Intel: SYCL · Arc B390](https://img.shields.io/badge/Intel-SYCL%20%C2%B7%20Arc%20B390-0071c5?logo=intel&logoColor=white) ![KV cache: FP4 E2M1 + UE8M0/32](https://img.shields.io/badge/KV%20cache-FP4%20E2M1%20%2B%20UE8M0%2F32-27c8e8) ![fused vs no KV sharing: up to 5.6x](https://img.shields.io/badge/fused%20vs%20no%20KV%20sharing-up%20to%205.6x-3ddc97) [![license: MIT](https://img.shields.io/badge/license-MIT-f2c14e)](LICENSE) ![python: 3.9+](https://img.shields.io/badge/python-3.9%2B-3776ab?logo=python&logoColor=white)
 
@@ -14,7 +14,7 @@
 
 ---
 
-**Explainer video (with voice-over and subtitles): the problem, the idea, the numbers, and where each method does not win**
+**Explainer video (captioned, no voice-over): the problem, the idea, the numbers, and where each method does not win**
 
 [![Explainer video preview (click for the mp4)](video/preview.gif)](video/ultraquant_explainer.mp4)
 
@@ -118,15 +118,15 @@ The stand-alone Rice decoders on MI300X run at 0.59x to 1.08x of the H100 time; 
 All Rice kernels are latency-bound (serial per-thread bit decoding: 20-45 GB/s of bitstream on GPUs with 3-4 TB/s of copy bandwidth), so the port tracks latency, not bandwidth.
 Full table, including the RHT, GEMV per projection and int8 linear rows: [results/derived/tables.md](ports/hyperquant/results/derived/tables.md#kernel-microbenchmarks-same-bitstreams-on-every-gpu-llama-31-8b-shapes-4-bps-sps-512).
 
-**HyperQuant kernels on every backend (same bitstreams, Llama-3.1-8B shapes, about 4 bps; lower is better)**
+**HyperQuant kernels on every backend, ms (GEMV: ms per token over 32 layers; attention: ms per layer at T=511; GEMM: warp-specialised, q/o projection, 8 rows). Same bitstreams, Llama-3.1-8B shapes, about 4 bps; lower is better**
 
 | Kernel | H100 CUDA (upstream) | MI300X HIP | MI300X SYCL | H100 SYCL | Arc B390 SYCL | MI300X HIP / H100 |
 | :--- | ---: | ---: | ---: | ---: | ---: | ---: |
-| Rice decode, fused bf16 (ms) | 1.18 | 1.03 | 1.02 | 1.19 | 6.55 | 0.88x |
-| Rice decode, fused int8 (ms) | 1.12 | 0.66 | 0.66 | 1.20 | 4.52 | 0.59x |
-| fused GEMV, 32 layers (ms/token) | 66.84 | 103.85 | 104.82 | 76.48 | 488.05 | 1.55x |
-| warp-specialised GEMM, q/o x8 (ms) | 1.11 | 2.64 | 3.11 | 1.22 | 31.98 | 2.37x |
-| fused Rice attention, T=511 (us/layer) | 17,377.28 | 26,181.69 | 29,815.00 | 18,620.43 | 24,753.68 | 1.51x |
+| Decode, bf16 | 1.18 | 1.03 | 1.02 | 1.19 | 6.55 | 0.88x |
+| Decode, int8 | 1.12 | 0.66 | 0.66 | 1.20 | 4.52 | 0.59x |
+| GEMV | 66.84 | 103.85 | 104.82 | 76.48 | 488.05 | 1.55x |
+| GEMM | 1.11 | 2.64 | 3.11 | 1.22 | 31.98 | 2.37x |
+| Attention | 17.38 | 26.18 | 29.82 | 18.62 | 24.75 | 1.51x |
 
 <sub>Source: `results/derived/ports_data.json`</sub>
 
@@ -399,8 +399,6 @@ plus `uqmt.quant` (paper scale rule, Hadamard, NVFP4 quantiser variants), `uqmt.
 
 <details>
 <summary>Porting effort, related work</summary>
-
-
 
 **Porting effort.** The CUDA port took about 2.5 hours of agent time (~1.5 kLOC) and SYCL a similar overnight session, against 15 commits over two weeks, a HIP library, a 1,834-line Triton file and custom HSACO/MFMA loaders for TurboQuant-on-AMD in amd-experiments
 ([cuda/PORTING_LOG.md](cuda/PORTING_LOG.md), [sycl/PORTING_LOG.md](sycl/PORTING_LOG.md)). Not like-for-like: TurboQuant also needs rotations, Lloyd-Max codebooks and bit-plane packing, and the UltraQuant ports are one op without engine integration.

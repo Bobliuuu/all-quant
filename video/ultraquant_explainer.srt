@@ -1,300 +1,404 @@
 1
-00:00:00,400 --> 00:00:06,379
-UltraQuant: one pass over a four bit KV cache, for speculative decoding, on AMD, NVIDIA and
+00:00:00,400 --> 00:00:05,184
+AllQuant: quantized inference kernels that run on AMD, NVIDIA and Intel GPUs.
 
 2
-00:00:06,379 --> 00:00:07,102
-Intel GPUs.
+00:00:05,184 --> 00:00:10,092
+First, UltraQuant: one pass over a four bit KV cache, for speculative decoding.
 
 3
-00:00:07,102 --> 00:00:12,490
-This is a short tour of what it does, what we measured, and where it does not win.
+00:00:10,092 --> 00:00:15,621
+Then two papers we reproduced and ported to all three vendors, HyperQuant and PearlQuant.
 
 4
-00:00:13,490 --> 00:00:16,619
-Speculative decoding verifies K draft tokens in one step.
+00:00:15,621 --> 00:00:19,659
+Along the way, what we measured, and where each one does not win.
 
 5
-00:00:16,619 --> 00:00:21,834
-A straightforward kernel handles each of the K queries separately, so each one reads the entire
+00:00:20,660 --> 00:00:24,407
+Speculative decoding verifies K draft tokens in one step.
 
 6
-00:00:21,834 --> 00:00:22,657
-KV cache again.
+00:00:24,407 --> 00:00:30,652
+A straightforward kernel handles each of the K queries separately, so each one reads the entire
 
 7
-00:00:22,657 --> 00:00:26,171
-Decode is memory bound, so that costs close to K times the time.
+00:00:30,652 --> 00:00:31,638
+KV cache again.
 
 8
-00:00:27,170 --> 00:00:28,782
-The idea is to fuse them.
+00:00:31,638 --> 00:00:35,845
+Decode is memory bound, so that costs close to K times the time.
 
 9
-00:00:28,782 --> 00:00:34,586
-All K queries, and the query heads that share a key value head, are stacked into one tile.
+00:00:36,850 --> 00:00:38,799
+The idea is to fuse them.
 
 10
-00:00:34,586 --> 00:00:39,293
-Each page of the cache is read once, and all K outputs come out together.
+00:00:38,799 --> 00:00:45,817
+All K queries, and the query heads that share a key value head, are stacked into one tile.
 
 11
-00:00:39,293 --> 00:00:40,712
-On the left, K passes.
+00:00:45,817 --> 00:00:51,509
+Each page of the cache is read once, and all K outputs come out together.
 
 12
-00:00:40,712 --> 00:00:41,873
-On the right, one.
+00:00:51,509 --> 00:00:53,224
+On the left, K passes.
 
 13
-00:00:42,870 --> 00:00:44,947
-The cache is stored in four bits.
+00:00:53,224 --> 00:00:54,628
+On the right, one.
 
 14
-00:00:44,947 --> 00:00:50,801
-Each value is an FP4 E2M1 float, and every thirty two values share one eight bit power of two
+00:00:55,630 --> 00:00:57,988
+The cache is stored in four bits.
 
 15
-00:00:50,801 --> 00:00:52,060
-scale, called UE8M0.
+00:00:57,988 --> 00:01:04,633
+Each value is an FP4 E2M1 float, and every thirty two values share one eight bit power of two
 
 16
-00:00:52,060 --> 00:00:57,852
-At head dimension one twenty eight that is 68 bytes per head per token, against 256 for half
+00:01:04,633 --> 00:01:06,062
+scale, called UE8M0.
 
 17
-00:00:57,852 --> 00:00:59,488
-precision and 128 for fp8.
+00:01:06,062 --> 00:01:12,636
+At head dimension one twenty eight that is 68 bytes per head per token, against 256 for half
 
 18
-00:00:59,488 --> 00:01:02,447
-That is 3.76 times smaller than half precision.
+00:01:12,636 --> 00:01:14,494
+precision and 128 for fp8.
 
 19
-00:01:03,450 --> 00:01:06,179
-Inside the kernel, the queries form one tile.
+00:01:14,494 --> 00:01:17,852
+That is 3.76 times smaller than half precision.
 
 20
-00:01:06,179 --> 00:01:11,879
-FP4 pages are expanded to bf16 in registers, each query gets its own causal mask, and split KV
+00:01:18,850 --> 00:01:21,927
+Inside the kernel, the queries form one tile.
 
 21
-00:01:11,879 --> 00:01:15,275
-partial results are merged with a log sum exp reduction.
+00:01:21,927 --> 00:01:28,354
+FP4 pages are expanded to bf16 in registers, each query gets its own causal mask, and split KV
 
 22
-00:01:16,280 --> 00:01:22,826
-The same operation runs on three vendors: a Triton kernel on AMD MI300X, native CUDA on five
+00:01:28,354 --> 00:01:32,183
+partial results are merged with a log sum exp reduction.
 
 23
-00:01:22,826 --> 00:01:27,238
-NVIDIA GPUs, and SYCL with XMX and ESIMD on an Intel Arc B390.
+00:01:33,180 --> 00:01:39,512
+The same operation runs on three vendors: a Triton kernel on AMD MI300X, native CUDA on five
 
 24
-00:01:27,238 --> 00:01:33,571
-All three read the same cache layout, a pure permute of the upstream one, and are checked
+00:01:39,512 --> 00:01:43,780
+NVIDIA GPUs, and SYCL with XMX and ESIMD on an Intel Arc B390.
 
 25
-00:01:33,571 --> 00:01:39,761
-against the same CPU reference vectors: 8,228 CUDA launches and 36 SYCL runs, with zero
+00:01:43,780 --> 00:01:49,906
+All three read the same cache layout, a pure permute of the upstream one, and are checked
 
 26
-00:01:39,761 --> 00:01:40,402
-failures.
+00:01:49,906 --> 00:01:55,894
+against the same CPU reference vectors: 8,228 CUDA launches and 36 SYCL runs, with zero
 
 27
-00:01:41,400 --> 00:01:47,920
-Time for one attention layer, batch eight, thirty two thousand tokens of context.
+00:01:55,894 --> 00:01:56,513
+failures.
 
 28
-00:01:47,920 --> 00:01:52,348
-Going from one speculative token to eight costs little.
+00:01:57,510 --> 00:02:02,907
+Time for one attention layer, batch eight, thirty two thousand tokens of context.
 
 29
-00:01:52,348 --> 00:01:56,292
-On MI300X it goes from 0.36 to 0.54 milliseconds.
+00:02:02,907 --> 00:02:06,572
+Going from one speculative token to eight costs little.
 
 30
-00:01:56,292 --> 00:01:58,466
-On H100, from 0.16 to 0.22.
+00:02:06,572 --> 00:02:09,838
+On MI300X it goes from 0.36 to 0.54 milliseconds.
 
 31
-00:01:58,466 --> 00:02:00,639
-On B300, from 0.14 to 0.31.
+00:02:09,838 --> 00:02:11,637
+On H100, from 0.16 to 0.22.
 
 32
-00:02:01,640 --> 00:02:08,528
-Against running the same kernel K times, the fused kernel at K equals eight is 4.1 times faster
+00:02:11,637 --> 00:02:13,436
+On B300, from 0.14 to 0.31.
 
 33
-00:02:08,528 --> 00:02:12,298
-on MI300X, 5.6 times on H100, and 3.3 times on B300.
+00:02:14,440 --> 00:02:21,459
+Against the same kernel with KV sharing off, the fused kernel at K equals eight is 4.1 times
 
 34
-00:02:12,298 --> 00:02:17,735
-Across all six GPUs, the gain at K equals eight runs from 2.5 to 5.6 times.
+00:02:21,459 --> 00:02:25,960
+faster on MI300X, 5.6 times on H100, and 3.3 times on B300.
 
 35
-00:02:17,735 --> 00:02:20,708
-At K equals one there is nothing to fuse.
+00:02:25,960 --> 00:02:31,682
+Across all six GPUs, the gain at K equals eight runs from 2.5 to 5.6 times.
 
 36
-00:02:21,710 --> 00:02:24,128
-How does it compare with other schemes?
+00:02:31,682 --> 00:02:34,810
+At K equals one there is nothing to fuse.
 
 37
-00:02:24,128 --> 00:02:30,019
-We ported TurboQuant, NVFP4, FP8, KIVI, QServe, KVQuant, SpectralQuant, and the Planar, Iso and
+00:02:35,810 --> 00:02:38,150
+How does it compare with other schemes?
 
 38
-00:02:30,019 --> 00:02:32,747
-Rotor quantisers to the same MI300X harness.
+00:02:38,150 --> 00:02:43,851
+We ported TurboQuant, NVFP4, FP8, KIVI, QServe, KVQuant, SpectralQuant, and the Planar, Iso and
 
 39
-00:02:32,747 --> 00:02:38,452
-Speed is horizontal, perplexity increase on Qwen three eight B is vertical, so lower left is
+00:02:43,851 --> 00:02:46,492
+Rotor quantisers to the same MI300X harness.
 
 40
-00:02:38,452 --> 00:02:38,886
-better.
+00:02:46,492 --> 00:02:52,013
+Speed is horizontal, perplexity increase on Qwen three eight B is vertical, so lower left is
 
 41
-00:02:38,886 --> 00:02:44,218
-UltraQuant beats TurboQuant, SpectralQuant and the three bit rotation methods on both.
+00:02:52,013 --> 00:02:52,433
+better.
 
 42
-00:02:44,218 --> 00:02:46,203
-But it is not the most accurate.
+00:02:52,433 --> 00:02:57,593
+UltraQuant beats TurboQuant, SpectralQuant and the three bit rotation methods on both.
 
 43
-00:02:47,200 --> 00:02:50,277
-On accuracy, UltraQuant is not the leader.
+00:02:57,593 --> 00:02:59,514
+But it is not the most accurate.
 
 44
-00:02:50,277 --> 00:02:56,431
-QServe int four at the same sixty eight bytes, NVFP4, FP8 and KIVI four all beat it.
+00:03:00,510 --> 00:03:03,446
+On accuracy, UltraQuant is not the leader.
 
 45
-00:02:56,431 --> 00:03:02,878
-NVFP4, for four more bytes, cuts the Qwen three perplexity increase from 0.562 to 0.081.
+00:03:03,446 --> 00:03:09,319
+QServe int four at the same sixty eight bytes, NVFP4, FP8 and KIVI four all beat it.
 
 46
-00:03:02,878 --> 00:03:05,443
-FP8 is also faster at K equals one.
+00:03:09,319 --> 00:03:15,471
+NVFP4, for four more bytes, cuts the Qwen three perplexity increase from 0.562 to 0.081.
 
 47
-00:03:06,440 --> 00:03:08,934
-On B300, a vendor kernel is faster.
+00:03:15,471 --> 00:03:17,917
+FP8 is also faster at K equals one.
 
 48
-00:03:08,934 --> 00:03:15,631
-FlashInfer's NVFP4 decode, which also shares the read across queries, takes 0.066 milliseconds
+00:03:18,920 --> 00:03:21,235
+On B300, a vendor kernel is faster.
 
 49
-00:03:15,631 --> 00:03:18,481
-at K equals one, against 0.139 for ours.
+00:03:21,235 --> 00:03:27,452
+FlashInfer's NVFP4 decode, which also shares the read across queries, takes 0.066 milliseconds
 
 50
-00:03:18,481 --> 00:03:20,761
-That is 2.1 to 3.3 times faster.
+00:03:27,452 --> 00:03:30,097
+at K equals one, against 0.139 for ours.
 
 51
-00:03:20,761 --> 00:03:23,753
-We do not beat vendor tuned kernels there.
+00:03:30,097 --> 00:03:32,809
+That is 1.8 to 3.3 times faster across K.
 
 52
-00:03:24,750 --> 00:03:25,903
-In a real server?
+00:03:32,809 --> 00:03:35,587
+We do not beat vendor tuned kernels there.
 
 53
-00:03:25,903 --> 00:03:32,209
-We ran vLLM's own native four bit backend, not our kernel, with Qwen three eight B on MI300X.
+00:03:36,590 --> 00:03:37,749
+In a real server?
 
 54
-00:03:32,209 --> 00:03:38,516
-KV capacity rises from 1.09 million tokens to 3.16 million, which is 2.89 times, because vLLM
+00:03:37,749 --> 00:03:44,090
+We ran vLLM's own native four bit backend, not our kernel, with Qwen three eight B on MI300X.
 
 55
-00:03:38,516 --> 00:03:40,957
-keeps four layers at full precision.
+00:03:44,090 --> 00:03:50,432
+KV capacity rises from 1.09 million tokens to 3.16 million, which is 2.89 times, because vLLM
 
 56
-00:03:41,960 --> 00:03:43,543
-The costs are real.
+00:03:50,432 --> 00:03:52,886
+keeps four layers at full precision.
 
 57
-00:03:43,543 --> 00:03:47,791
-Question answering F one drops from 0.655 to 0.618.
+00:03:53,890 --> 00:03:55,159
+The costs are real.
 
 58
-00:03:47,791 --> 00:03:55,371
-Greedy output diverges from bf sixteen after a median of 10 tokens, earlier than fp8 at 24.
+00:03:55,159 --> 00:03:58,564
+Question answering F one drops from 0.655 to 0.618.
 
 59
-00:03:55,371 --> 00:04:00,286
-Plain decode is slower: 767 tokens per second against 1052.
+00:03:58,564 --> 00:04:04,640
+Greedy output diverges from bf sixteen after a median of 10 tokens, earlier than fp8 at 24.
 
 60
-00:04:00,286 --> 00:04:06,451
-In an oversubscribed agent test FP4 wins, 59 against 48 tokens per second.
+00:04:04,640 --> 00:04:08,579
+Plain decode is slower: 767 tokens per second against 1052.
 
 61
-00:04:07,450 --> 00:04:08,492
-Honest caveats.
+00:04:08,579 --> 00:04:13,520
+In an oversubscribed agent test FP4 wins, 59 against 48 tokens per second.
 
 62
-00:04:08,492 --> 00:04:11,966
-Most kernel numbers are synthetic microbenchmarks.
+00:04:14,520 --> 00:04:17,168
+We also reproduce and port other papers.
 
 63
-00:04:11,966 --> 00:04:18,566
-The serving results come from vLLM's native backend, not our kernel, as single runs on a shared
+00:04:17,168 --> 00:04:23,390
+First, HyperQuant: a Hadamard rotation, the E8 lattice and Rice coding, for weights and the KV
 
 64
-00:04:18,566 --> 00:04:18,844
-GPU.
+00:04:23,390 --> 00:04:23,788
+cache.
 
 65
-00:04:18,844 --> 00:04:24,750
-MI300X and Arc have no native FP4 matrix instructions, so FP4 is decoded in software.
+00:04:23,788 --> 00:04:29,812
+On an H100 its perplexity tables reproduce: our bf16 baseline is 7.1597 against the paper's
 
 66
-00:04:24,750 --> 00:04:27,876
-And on B300, vendor NVFP4 kernels are faster.
+00:04:29,812 --> 00:04:32,658
+7.1606, and every E8 row lands within 0.02.
 
 67
-00:04:28,880 --> 00:04:30,188
-So, is it the best?
+00:04:32,658 --> 00:04:35,902
+We then ported every CUDA kernel to HIP and SYCL.
 
 68
-00:04:30,188 --> 00:04:30,394
-No.
+00:04:35,902 --> 00:04:41,992
+All 6 backends pass the same 84 of 86 shared checks; the two failures are upstream bugs, and
 
 69
-00:04:30,394 --> 00:04:31,908
-Here is where it wins.
+00:04:41,992 --> 00:04:43,779
+every port reproduces them.
 
 70
-00:04:31,908 --> 00:04:35,900
-One validated implementation across AMD, NVIDIA and Intel.
+00:04:44,780 --> 00:04:45,806
+Speed is mixed.
 
 71
-00:04:35,900 --> 00:04:40,650
-A fused K query pass that is 2.5 to 5.6 times faster than K launches.
+00:04:45,806 --> 00:04:52,238
+On MI300X the stand alone Rice decoders run at 0.59 to 1.08 times the H100 time, but the fused
 
 72
-00:04:40,650 --> 00:04:43,609
-And 3.76 times more KV tokens per gigabyte.
+00:04:52,238 --> 00:04:57,644
+matrix and attention kernels are one and a half to two and a half times slower.
 
 73
-00:04:43,609 --> 00:04:49,804
-In the public sources we checked, we found no public CUDA or SYCL port of this layout with
+00:04:57,644 --> 00:04:59,834
+These kernels are latency bound.
 
 74
-00:04:49,804 --> 00:04:51,249
-fused K query verify.
+00:04:59,834 --> 00:05:06,061
+And the paper's throughput table does not reproduce: Rice weights decode at 10.8 tokens per
 
 75
-00:04:52,250 --> 00:04:56,527
+00:05:06,061 --> 00:05:08,113
+second, against 75.6 for bf16.
+
+76
+00:05:09,110 --> 00:05:13,629
+Second, PearlQuant: an E8 lattice KV cache codec from Pearl Research.
+
+77
+00:05:13,629 --> 00:05:17,427
+They published no code, so this is our own reconstruction.
+
+78
+00:05:17,427 --> 00:05:23,517
+The rate distortion shape reproduces: 0.38 wasted bits at two point seven five bits per value
+
+79
+00:05:23,517 --> 00:05:24,892
+against Pearl's 0.39.
+
+80
+00:05:24,892 --> 00:05:31,048
+On Qwen three eight B, our KL divergence is about 1.7 to 2.2 times what Pearl reports on their
+
+81
+00:05:31,048 --> 00:05:31,703
+own model.
+
+82
+00:05:32,700 --> 00:05:39,376
+Our fused decode attention passes all 96 shared checks on 7 targets, across CUDA, HIP and SYCL.
+
+83
+00:05:39,376 --> 00:05:45,982
+But it is ALU bound: 1.5 to 3.5 times slower than bf16 attention, while storing a fifth of the
+
+84
+00:05:45,982 --> 00:05:46,404
+bytes.
+
+85
+00:05:47,400 --> 00:05:48,303
+Honest caveats.
+
+86
+00:05:48,303 --> 00:05:51,313
+Most kernel numbers are synthetic microbenchmarks.
+
+87
+00:05:51,313 --> 00:05:57,031
+The serving results come from vLLM's native backend, not our kernel, as single runs on a shared
+
+88
+00:05:57,031 --> 00:05:57,272
+GPU.
+
+89
+00:05:57,272 --> 00:06:02,389
+MI300X and Arc have no native FP4 matrix instructions, so FP4 is decoded in software.
+
+90
+00:06:02,389 --> 00:06:05,098
+And on B300, vendor NVFP4 kernels are faster.
+
+91
+00:06:05,098 --> 00:06:10,756
+For the ports, HyperQuant's throughput claims do not reproduce, and our PearlQuant style codec
+
+92
+00:06:10,756 --> 00:06:14,067
+is a reconstruction that is slower than bf16 attention.
+
+93
+00:06:15,070 --> 00:06:16,457
+So, is it the best?
+
+94
+00:06:16,457 --> 00:06:16,676
+No.
+
+95
+00:06:16,676 --> 00:06:18,283
+Here is where it wins.
+
+96
+00:06:18,283 --> 00:06:22,518
+One validated implementation across AMD, NVIDIA and Intel.
+
+97
+00:06:22,518 --> 00:06:29,381
+A fused K query pass that is 2.5 to 5.6 times faster than the same kernel with KV sharing off.
+
+98
+00:06:29,381 --> 00:06:32,521
+And 3.76 times more KV tokens per gigabyte.
+
+99
+00:06:32,521 --> 00:06:39,092
+In the public sources we checked, we found no public CUDA or SYCL port of this layout with
+
+100
+00:06:39,092 --> 00:06:40,626
+fused K query verify.
+
+101
+00:06:41,630 --> 00:06:46,445
 The code, the results, and the blog post are all in the repo.
 
