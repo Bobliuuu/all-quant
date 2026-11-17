@@ -1,0 +1,23 @@
+{
+ "gpu": "NVIDIA H100 80GB HBM3",
+ "rows": [
+  {
+   "mode": "load",
+   "us": 563.5650157928467,
+   "gweights_per_s": 30700.10294315293,
+   "instr_per_weight": 1.0897057922556996
+  },
+  {
+   "mode": "load+dequant",
+   "us": 1871.1860179901123,
+   "gweights_per_s": 9246.276871277598,
+   "instr_per_weight": 3.6181135894730683
+  },
+  {
+   "mode": "load+dequant+mma.sync(x in regs)",
+   "us": 2156.6219329833984,
+   "gweights_per_s": 8022.502106368583,
+   "instr_per_weight": 4.170030690729618
+  }
+ ]
+}

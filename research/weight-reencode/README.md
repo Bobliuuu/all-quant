@@ -57,7 +57,15 @@ folder.
      - We measured BitNet b1.58 2B4T at 42.19% zeros, which matches the paper.
      - Qwen3-8B has 0.00% exact zeros and 1.6% of weights below 0.01 RMS. Getting zeros from a dense model takes
        pruning, and 50% magnitude pruning costs PPL (section 7).
-5. **Recommendation for magninference** (details in section 10):
+5. **Follow-ups** (section 11):
+   - **B200:** decode-free cuBLASLt NVFP4 (W4A4) runs one Qwen3-8B layer in 34.2 µs at batch 1. That is 1.40×
+     our int4, 1.84× Marlin and 2.14× bf16. MXFP4 through torch's API runs in 49.0 µs.
+   - **H100:** a wgmma-fed int4 pipeline is estimated at about 1.5× at batch 1. Removing the loop overhead takes
+     int4 from 7.9 to about 4 instr/weight, under the 5.3 budget.
+   - **gpt-oss on RTX PRO:** a 3-bit LUT re-encode of a gpt-oss MoE layer is 1.20× faster than moe-mxfp4 at T=1,
+     but RTN-regridding MXFP4 changes the layer output by 39%. It needs a calibrated re-encode, which is
+     budgeted.
+6. **Recommendation for magninference** (details in section 10):
    - Keep fixed-rate, register-decoded LUT/affine codes: MXFP4/NVFP4 or int4 on datacenter Hopper and Blackwell.
    - Spend bits on quality (NF4-style LUT, GPTQ), not on cleverer encodings.
    - On RTX PRO 6000-class parts, adopt 3-bit and 2-bit LUT codes and QTIP-style trellis codes. They pay by 1.2
@@ -486,7 +494,8 @@ A codec stops paying when I > R·b / (8·BW), the **ALU budget per weight**:
 1. **H100 and B200 (Magni's datacenter targets): do not adopt new weight encodings for batch-1 decode.**
    - The W4A16 mma path is issue-bound at about 2 to 2.4 TB/s, and Marlin is too.
    - **Bigger lever on Blackwell:** use the native block-scaled FP4 MMA, so the decode leaves the ALU entirely.
-     Plan for NVFP4/MXFP4 weights with FP8/FP4 activations, or a tcgen05 path.
+     Measured with cuBLASLt NVFP4 W4A4: 1.40× our int4 loop at batch 1 and 2.5× at B=16 (section 11). Next, gate
+     W4A4 (NVFP4 activations) on quality, or use W4A8 tcgen05.
    - **Bigger lever on Hopper:** a wgmma-fed dequant pipeline, with weights decoded once into smem per warpgroup.
      It cuts the per-weight overhead that dominates our I_eff (about 6.4 of int4's 7.9 instructions are
      loop overhead; the dequant itself is 1.5).
@@ -510,6 +519,92 @@ A codec stops paying when I > R·b / (8·BW), the **ALU budget per weight**:
 4. **One cheap win to file:** E8M0 scales have H0 1.66 bits. Storing per-tensor delta-coded scales is 0.2 bpw
    that a fixed 4-bit code could drop, but only at real decode cost.
 
+## 11. Follow-ups: native FP4 on B200, Hopper loop overhead, 3-bit gpt-oss experts (`modal_extra.py`)
+
+**B200, decode-free native block-scaled FP4.**
+- **Setup:**
+  - NVFP4 runs through `torch._scaled_mm`. MXFP4 runs through `torch.nn.functional.scaled_mm` with
+    BlockWise1x32 and the 32_4_4 swizzle. Both are torch 2.15 + cuBLASLt with tcgen05 block-scaled MMA, W4A4.
+  - The decoder-layer GEMVs and the timing method are the same as in section 8, with ≥ 400 MB of weight copies
+    per graph. rel. L2 error vs the dequantized reference is 0.0017.
+  - Scales are uniform for timing (the scale bytes are still read).
+  - The activations are FP4, so this is W4A4, not W4A16. Activation quantization is not timed: one small kernel
+    per GEMV, or fused into the previous op.
+
+| path (B200, one Qwen3-8B layer) | bpw | B=1 µs | B=4 | B=16 | x cuBLAS bf16 (B=1) | x our int4 (B=1) | gate_up B=1 GB/s |
+|---|---|---|---|---|---|---|---|
+| cuBLAS bf16 | 16 | 73.1 | 75.0 | 73.6 | 1.00 | | 5674 |
+| cuBLASLt FP8 rowwise W8A8 | 8 | 69.8 | 63.6 | 63.8 | 1.05 | | 3379 |
+| our int4 W4A16 (mma.sync loop) | 4.25 | 48.0 | 50.5 | 84.9 | 1.52 | 1.00 | 2393 |
+| vLLM Marlin W4A16 | 4.125 | 63.1 | 63.2 | 67.0 | 1.16 | 0.76 | 2371 |
+| cuBLASLt MXFP4 W4A4 | 4.25 | 49.0 | 45.7 | 47.3 | 1.49 | 0.98 | 2849 |
+| **cuBLASLt NVFP4 W4A4** | 4.5 | **34.2** | 34.7 | 34.6 | **2.14** | **1.40** | 4427 |
+
+- **Taking the decode off the ALU pays on B200.** NVFP4 runs at 1.40× our int4 loop and 1.84× Marlin. It is flat
+  from batch 1 to 16, while int4 falls to 0.87× cuBLAS at B=16.
+- **It still reaches only about 4.4 TB/s of 8** on the largest GEMV, so B200 batch-1 GEMV stays latency/occupancy
+  bound even without decode.
+- **MXFP4 through torch's new API is no faster than our int4.** It is probably a different cuBLASLt heuristic.
+  Use NVFP4 or a CUTLASS/FlashInfer MXFP4 kernel.
+- **W4A4 quality was not measured here.** NVFP4 activations add error on top of the weights.
+
+**H100: what the int4 loop's 7.9 instr/weight are made of** (`kernels/wq_micro.cu`, L2-resident weights, all
+132 SMs):
+
+| loop content | lane-instr / weight |
+|---|---|
+| 16-B weight load only | 1.09 |
+| + int4 dequant (LOP3, HSUB2, HFMA2) | 3.62 |
+| + 4 × mma.sync with activations in registers | 4.17 |
+| full `k_fixed<int4>` (+ activation-fragment LDGs, param LDGs, addressing, reduction) | 7.9 |
+
+- **What a wgmma pipeline removes:** wgmma takes A from registers and B from shared memory via a descriptor, and
+  uses TMA for weights. That drops the activation LDGs and addressing (about 3.7 instr/weight) and most of the
+  mma issue (about 0.55).
+- **What it keeps:** the dequant, about 2.5. The micro-benchmark measures 2.5, not the 1.5 counted statically.
+- **Estimate:** I ≈ 3.6 to 4.2, below the 5.3 budget. So H100 int4 would become bandwidth-bound: gate_up
+  ≈ 17 µs vs 27.2 µs now, **about 1.5× at batch 1**.
+- **Caveat:** this is an estimate from the micro-benchmark, not a measured wgmma kernel.
+- **The same logic says the next byte saving only pays after that rewrite.** Once I is about 4, a 3-bit LUT
+  (about +2.2 instr) becomes ALU-bound again at 4.1 budget, while 2-bit int-style codes might just fit.
+
+**RTX PRO 6000: 3-bit LUT re-encode of one gpt-oss-120b MoE layer (layer 28, real weights).**
+- **Setup:**
+  - Every expert's MXFP4 weights are dequantized and re-encoded with RTN.
+  - The layer output is compared with the MXFP4 layer on 256 random hidden states through the real router.
+  - Timing cycles 8 (T=1) or 3 (T=16) routing variants so that nothing is L2-resident.
+
+| encoding of the experts | bpw | layer-output rel. L2 vs MXFP4 | cosine |
+|---|---|---|---|
+| NF3 g64 (absmax) | 3.25 | 0.391 | 0.930 |
+| int4 g64 | 4.5 | 0.243 | 0.971 |
+| NF4 g64 | 4.25 | 0.149 | 0.989 |
+
+| kernel (RTX PRO 6000) | T=1 µs (4 experts) | T=16 µs (46 experts) |
+|---|---|---|
+| magni moe-mxfp4 (fused, incl. swiglu + combine) | 39.8 | 395.9 |
+| ours, NF3 lut3p, the active experts' gate_up + down as 2 stacked GEMVs | 33.1 (1.20×) | 451.5 (0.88×) |
+| ours, int4 g64, same stacking | 38.4 | 485.0 |
+
+- **The stacked GEMVs carry exactly the routed layer's bytes,** but they exclude swiglu, combine and routing
+  (a few µs). The down projection uses a synthetic input.
+- **Speed: the 3-bit re-encode pays at T=1, by about 1.2× of GEMV time.** At T=16 it loses, because the fused
+  grouped kernel batches tokens per expert, while ours runs every expert at B=16.
+- **Quality: the RTN re-encode is not acceptable.**
+  - MXFP4 → NF3 changes the layer output by 39% (cosine 0.93).
+  - Even MXFP4 → NF4 at the same bpw changes it by 15%. MXFP4 is gpt-oss's trained format, so any regridding is a
+    lossy second quantization.
+  - A usable 3-bit gpt-oss needs a calibrated re-encode (GPTQ/LDLQ from routed activations) and a GSM8K gate.
+    That is budgeted below.
+
+**Needs budget (not run):**
+
+| item | what | estimate |
+|---|---|---|
+| Full QTIP 2-bit on Qwen3-8B | Hessians (C4, ~0.3 h), LDLQ + L=16 bitshift trellis (16× our L=12 Viterbi states: ~3.5 A100-h), QTIP fine-tune (2 to 4 H100-h), PPL + tasks (0.5 h) | ~$25-35 |
+| gpt-oss-120b 3-bit experts, GSM8K-gated | per-expert Hessians from routed tokens + GPTQ/LDLQ re-encode of 36 x 128 experts (~2-3 H100-h), GSM8K-250 + MMLU subset on a fake-quant model (1 B200/H200, 1-2 h), our lut3p kernel in the moe path | ~$20-25 |
+| wgmma int4 / NF4 GEMV on H100 | write and validate the kernel; ~1 H100-h of tuning | ~$5 |
+
 ## Files
 
 - `codecs.py`: all codecs (fake-quant reference implementations), including the percentile codec, Bennett,
@@ -524,4 +619,4 @@ A codec stops paying when I > R·b / (8·BW), the **ALU budget per weight**:
 - `modal_kernels.py`, `roofline.py`, `summarize.py`: kernel benchmark, item 9 model, tables.
 - `results/`: raw JSON and logs, and `TABLES.md` with every row.
 
-Spend: about $29 of the $35 cap (Modal list prices, estimated from app wall clock).
+Spend: about $33.5 of the $35 cap (Modal list prices, estimated from app wall clock).
