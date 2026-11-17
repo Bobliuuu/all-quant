@@ -1,0 +1,86 @@
+{
+ "gpu": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+ "rows": [
+  {
+   "T": 1,
+   "codec": "magni_moe_mxfp4",
+   "unique_experts": 4.0,
+   "us": 39.846498519182205,
+   "us_min": 39.79799896478653,
+   "us_max": 39.96799886226654,
+   "bytes_per_call": 52876800.0,
+   "variants": 8
+  },
+  {
+   "T": 1,
+   "codec": "ours_lut3p_nf3_stacked_gemvs",
+   "unique_experts": 4.0,
+   "us": 33.132001757621765,
+   "us_min": 33.002499490976334,
+   "us_max": 33.24349969625473,
+   "bytes_per_call": 43545600.0,
+   "variants": 8,
+   "note": "gate_up and down of the active experts as two stacked GEMVs (bytes-identical to the routed layer; excludes swiglu/combine; down input is synthetic)"
+  },
+  {
+   "T": 1,
+   "codec": "ours_int4_stacked_gemvs",
+   "unique_experts": 4.0,
+   "us": 38.39600086212158,
+   "us_min": 38.36499899625778,
+   "us_max": 38.52799907326698,
+   "bytes_per_call": 55987200.0,
+   "variants": 8,
+   "note": "gate_up and down of the active experts as two stacked GEMVs (bytes-identical to the routed layer; excludes swiglu/combine; down input is synthetic)"
+  },
+  {
+   "T": 16,
+   "codec": "magni_moe_mxfp4",
+   "unique_experts": 46.333333333333336,
+   "us": 395.8953675769624,
+   "us_min": 395.6637609572638,
+   "us_max": 396.05231512160526,
+   "bytes_per_call": 612489600.0,
+   "variants": 3
+  },
+  {
+   "T": 16,
+   "codec": "ours_lut3p_nf3_stacked_gemvs",
+   "unique_experts": 46.333333333333336,
+   "us": 451.5276106577071,
+   "us_min": 448.0462149968223,
+   "us_max": 476.03810022747706,
+   "bytes_per_call": 504403200.0,
+   "variants": 3,
+   "note": "gate_up and down of the active experts as two stacked GEMVs (bytes-identical to the routed layer; excludes swiglu/combine; down input is synthetic)"
+  },
+  {
+   "T": 16,
+   "codec": "ours_int4_stacked_gemvs",
+   "unique_experts": 46.333333333333336,
+   "us": 484.9544101291233,
+   "us_min": 484.8502931140718,
+   "us_max": 485.9372699071491,
+   "bytes_per_call": 648518400.0,
+   "variants": 3,
+   "note": "gate_up and down of the active experts as two stacked GEMVs (bytes-identical to the routed layer; excludes swiglu/combine; down input is synthetic)"
+  }
+ ],
+ "err": {
+  "nf3_g64": {
+   "bpw": 3.25,
+   "rel_l2_vs_mxfp4_layer": 0.39054009318351746,
+   "cos": 0.9298540949821472
+  },
+  "nf4_g64": {
+   "bpw": 4.25,
+   "rel_l2_vs_mxfp4_layer": 0.1494075208902359,
+   "cos": 0.9887757301330566
+  },
+  "int4_g64": {
+   "bpw": 4.5,
+   "rel_l2_vs_mxfp4_layer": 0.24252921342849731,
+   "cos": 0.9708841443061829
+  }
+ }
+}

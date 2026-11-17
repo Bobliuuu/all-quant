@@ -1,0 +1,29 @@
+{
+ "prune50:bf16": {
+  "cfg": "prune50:bf16",
+  "bpw": 9.0,
+  "bpw_note": "8 bits (bf16 at half density) + 1 bit/weight bitmap",
+  "rel_mse": 0.06799352093397679,
+  "quant_s": 3.4857337474823,
+  "ppl": 49.60727072687887,
+  "total_s": 15.631300926208496
+ },
+ "prune24:bf16": {
+  "cfg": "prune24:bf16",
+  "bpw": 9.0,
+  "bpw_note": "8 bits (bf16 at half density) + 1 bit/weight 2:4 index (2 bits per kept value)",
+  "rel_mse": 0.1274009411963684,
+  "quant_s": 4.56033730506897,
+  "ppl": 265.7406742750246,
+  "total_s": 16.305301666259766
+ },
+ "prune50:nf4_g64": {
+  "cfg": "prune50:nf4_g64",
+  "bpw": 3.125,
+  "bpw_note": "NF4 g64 values at half density (2.125) + 1 bit/weight bitmap",
+  "rel_mse": 0.07428289848834488,
+  "quant_s": 4.252101182937622,
+  "ppl": 56.15565492560285,
+  "total_s": 16.003949403762817
+ }
+}

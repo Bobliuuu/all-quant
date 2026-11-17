@@ -1,0 +1,83 @@
+{
+ "bf16": {
+  "cfg": "bf16",
+  "bpw": 16.0,
+  "quant_s": 1.6704223155975342,
+  "ppl": 9.354822020555929,
+  "tasks": {
+   "arc_challenge": {
+    "acc": 0.5639931740614335,
+    "stderr": 0.014491225699230916
+   },
+   "hellaswag": {
+    "acc": 0.638,
+    "stderr": 0.0152048409129195
+   },
+   "winogrande": {
+    "acc": 0.6787687450670876,
+    "stderr": 0.01312359932455831
+   },
+   "piqa": {
+    "acc": 0.769,
+    "stderr": 0.013334797216936435
+   }
+  },
+  "total_s": 135.89342832565308
+ },
+ "gptq:int4_g128": {
+  "cfg": "gptq:int4_g128",
+  "bpw": 4.25,
+  "rel_mse": 0.015185521024217344,
+  "quant_s": 569.2196977138519,
+  "ppl": 9.703093091924128,
+  "tasks": {
+   "arc_challenge": {
+    "acc": 0.5563139931740614,
+    "stderr": 0.014518421825670444
+   },
+   "hellaswag": {
+    "acc": 0.63,
+    "stderr": 0.01527525231651936
+   },
+   "winogrande": {
+    "acc": 0.6740331491712708,
+    "stderr": 0.013173782636922196
+   },
+   "piqa": {
+    "acc": 0.776,
+    "stderr": 0.013190830072364457
+   }
+  },
+  "total_s": 687.0466237068176
+ },
+ "gptq:lloyd4_t_g128": {
+  "cfg": "gptq:lloyd4_t_g128",
+  "ppl": null,
+  "tasks": "skipped (budget): std-normalized variants fail at RTN; int3 moved to g4b"
+ },
+ "gptq:icdf4_gauss_g128": {
+  "cfg": "gptq:icdf4_gauss_g128",
+  "ppl": null,
+  "tasks": "skipped (budget): std-normalized variants fail at RTN; int3 moved to g4b"
+ },
+ "gptq:int3_g128": {
+  "cfg": "gptq:int3_g128",
+  "ppl": null,
+  "tasks": "skipped (budget): std-normalized variants fail at RTN; int3 moved to g4b"
+ },
+ "gptq:lloyd3_t_g128": {
+  "cfg": "gptq:lloyd3_t_g128",
+  "ppl": null,
+  "tasks": "skipped (budget): std-normalized variants fail at RTN; int3 moved to g4b"
+ },
+ "gptq:icdf3_gauss_g128": {
+  "cfg": "gptq:icdf3_gauss_g128",
+  "ppl": null,
+  "tasks": "skipped (budget): std-normalized variants fail at RTN; int3 moved to g4b"
+ },
+ "gptq:cbrt3_t_g128": {
+  "cfg": "gptq:cbrt3_t_g128",
+  "ppl": null,
+  "tasks": "skipped (budget): std-normalized variants fail at RTN; int3 moved to g4b"
+ }
+}

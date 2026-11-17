@@ -1,0 +1,2529 @@
+{
+ "tensors": [
+  {
+   "name": "model.layers.0.mlp.down_proj.weight",
+   "shape": [
+    2560,
+    6912
+   ],
+   "zero_frac": 0.38788220286369324,
+   "p_plus": 0.30611830949783325,
+   "p_minus": 0.3059994876384735,
+   "H_ternary": 1.5755370318367978,
+   "bitmap_sign_bpw": 1.6121177971363068
+  },
+  {
+   "name": "model.layers.0.mlp.gate_proj.weight",
+   "shape": [
+    6912,
+    2560
+   ],
+   "zero_frac": 0.3893330991268158,
+   "p_plus": 0.30701377987861633,
+   "p_minus": 0.30365312099456787,
+   "H_ternary": 1.575021384891825,
+   "bitmap_sign_bpw": 1.6106669008731842
+  },
+  {
+   "name": "model.layers.0.mlp.up_proj.weight",
+   "shape": [
+    6912,
+    2560
+   ],
+   "zero_frac": 0.3854394853115082,
+   "p_plus": 0.30726882815361023,
+   "p_minus": 0.3072916865348816,
+   "H_ternary": 1.5763538490638735,
+   "bitmap_sign_bpw": 1.6145605146884918
+  },
+  {
+   "name": "model.layers.0.self_attn.k_proj.weight",
+   "shape": [
+    640,
+    2560
+   ],
+   "zero_frac": 0.45842283964157104,
+   "p_plus": 0.27081117033958435,
+   "p_minus": 0.2707659900188446,
+   "H_ternary": 1.536583534293435,
+   "bitmap_sign_bpw": 1.541577160358429
+  },
+  {
+   "name": "model.layers.0.self_attn.o_proj.weight",
+   "shape": [
+    2560,
+    2560
+   ],
+   "zero_frac": 0.4780525267124176,
+   "p_plus": 0.2607693374156952,
+   "p_minus": 0.2611781358718872,
+   "H_ternary": 1.5205569275402078,
+   "bitmap_sign_bpw": 1.5219474732875824
+  },
+  {
+   "name": "model.layers.0.self_attn.q_proj.weight",
+   "shape": [
+    2560,
+    2560
+   ],
+   "zero_frac": 0.5083364844322205,
+   "p_plus": 0.24605286121368408,
+   "p_minus": 0.24561065435409546,
+   "H_ternary": 1.491462693502377,
+   "bitmap_sign_bpw": 1.4916635155677795
+  },
+  {
+   "name": "model.layers.0.self_attn.v_proj.weight",
+   "shape": [
+    640,
+    2560
+   ],
+   "zero_frac": 0.4172045886516571,
+   "p_plus": 0.2915191650390625,
+   "p_minus": 0.2912762463092804,
+   "H_ternary": 1.5629243580576566,
+   "bitmap_sign_bpw": 1.582795411348343
+  },
+  {
+   "name": "model.layers.1.mlp.down_proj.weight",
+   "shape": [
+    2560,
+    6912
+   ],
+   "zero_frac": 0.5910897254943848,
+   "p_plus": 0.2044350504875183,
+   "p_minus": 0.20447522401809692,
+   "H_ternary": 1.3848349932192459,
+   "bitmap_sign_bpw": 1.4089102745056152
+  },
+  {
+   "name": "model.layers.1.mlp.gate_proj.weight",
+   "shape": [
+    6912,
+    2560
+   ],
+   "zero_frac": 0.5991618037223816,
+   "p_plus": 0.20048166811466217,
+   "p_minus": 0.20035652816295624,
+   "H_ternary": 1.3722769647679716,
+   "bitmap_sign_bpw": 1.4008381962776184
+  },
+  {
+   "name": "model.layers.1.mlp.up_proj.weight",
+   "shape": [
+    6912,
+    2560
+   ],
+   "zero_frac": 0.5997674465179443,
+   "p_plus": 0.2000330537557602,
+   "p_minus": 0.20019949972629547,
+   "H_ternary": 1.3713189705346465,
+   "bitmap_sign_bpw": 1.4002325534820557
+  },
+  {
+   "name": "model.layers.1.self_attn.k_proj.weight",
+   "shape": [
+    640,
+    2560
+   ],
+   "zero_frac": 0.420166015625,
+   "p_plus": 0.2898596227169037,
+   "p_minus": 0.2899743616580963,
+   "H_ternary": 1.5613650888484591,
+   "bitmap_sign_bpw": 1.579833984375
+  },
+  {
+   "name": "model.layers.1.self_attn.o_proj.weight",
+   "shape": [
+    2560,
+    2560
+   ],
+   "zero_frac": 0.44643861055374146,
+   "p_plus": 0.2768658399581909,
+   "p_minus": 0.2766955494880676,
+   "H_ternary": 1.5452677752794963,
+   "bitmap_sign_bpw": 1.5535613894462585
+  },
+  {
+   "name": "model.layers.1.self_attn.q_proj.weight",
+   "shape": [
+    2560,
+    2560
+   ],
+   "zero_frac": 0.43798646330833435,
+   "p_plus": 0.28118011355400085,
+   "p_minus": 0.2808334231376648,
+   "H_ternary": 1.550888474151518,
+   "bitmap_sign_bpw": 1.5620135366916656
+  },
+  {
+   "name": "model.layers.1.self_attn.v_proj.weight",
+   "shape": [
+    640,
+    2560
+   ],
+   "zero_frac": 0.40637266635894775,
+   "p_plus": 0.29698240756988525,
+   "p_minus": 0.296644926071167,
+   "H_ternary": 1.5681837119781497,
+   "bitmap_sign_bpw": 1.5936273336410522
+  },
+  {
+   "name": "model.layers.10.mlp.down_proj.weight",
+   "shape": [
+    2560,
+    6912
+   ],
+   "zero_frac": 0.4228373169898987,
+   "p_plus": 0.28853923082351685,
+   "p_minus": 0.2886234521865845,
+   "H_ternary": 1.5599139802852446,
+   "bitmap_sign_bpw": 1.5771626830101013
+  },
+  {
+   "name": "model.layers.10.mlp.gate_proj.weight",
+   "shape": [
+    6912,
+    2560
+   ],
+   "zero_frac": 0.4283800423145294,
+   "p_plus": 0.28585952520370483,
+   "p_minus": 0.28576043248176575,
+   "H_ternary": 1.5567685409609149,
+   "bitmap_sign_bpw": 1.5716199576854706
+  },
+  {
+   "name": "model.layers.10.mlp.up_proj.weight",
+   "shape": [
+    6912,
+    2560
+   ],
+   "zero_frac": 0.3854791820049286,
+   "p_plus": 0.3072245419025421,
+   "p_minus": 0.3072962760925293,
+   "H_ternary": 1.5763408600321824,
+   "bitmap_sign_bpw": 1.6145208179950714
+  },
+  {
+   "name": "model.layers.10.self_attn.k_proj.weight",
+   "shape": [
+    640,
+    2560
+   ],
+   "zero_frac": 0.5226788520812988,
+   "p_plus": 0.23890747129917145,
+   "p_minus": 0.23841367661952972,
+   "H_ternary": 1.4758362265115705,
+   "bitmap_sign_bpw": 1.4773211479187012
+  },
+  {
+   "name": "model.layers.10.self_attn.o_proj.weight",
+   "shape": [
+    2560,
+    2560
+   ],
+   "zero_frac": 0.3726748526096344,
+   "p_plus": 0.3133283853530884,
+   "p_minus": 0.3139967620372772,
+   "H_ternary": 1.5800284298991665,
+   "bitmap_sign_bpw": 1.6273251473903656
+  },
+  {
+   "name": "model.layers.10.self_attn.q_proj.weight",
+   "shape": [
+    2560,
+    2560
+   ],
+   "zero_frac": 0.5087413191795349,
+   "p_plus": 0.2454688996076584,
+   "p_minus": 0.2457897812128067,
+   "H_ternary": 1.4910380438343156,
+   "bitmap_sign_bpw": 1.491258680820465
+  },
+  {
+   "name": "model.layers.10.self_attn.v_proj.weight",
+   "shape": [
+    640,
+    2560
+   ],
+   "zero_frac": 0.4176367223262787,
+   "p_plus": 0.29123228788375854,
+   "p_minus": 0.29113098978996277,
+   "H_ternary": 1.562700120521367,
+   "bitmap_sign_bpw": 1.5823632776737213
+  },
+  {
+   "name": "model.layers.11.mlp.down_proj.weight",
+   "shape": [
+    2560,
+    6912
+   ],
+   "zero_frac": 0.38549894094467163,
+   "p_plus": 0.3071439862251282,
+   "p_minus": 0.3073570728302002,
+   "H_ternary": 1.5763343466342778,
+   "bitmap_sign_bpw": 1.6145010590553284
+  },
+  {
+   "name": "model.layers.11.mlp.gate_proj.weight",
+   "shape": [
+    6912,
+    2560
+   ],
+   "zero_frac": 0.4169759750366211,
+   "p_plus": 0.2913099527359009,
+   "p_minus": 0.291714072227478,
+   "H_ternary": 1.5630424422192246,
+   "bitmap_sign_bpw": 1.583024024963379
+  },
+  {
+   "name": "model.layers.11.mlp.up_proj.weight",
+   "shape": [
+    6912,
+    2560
+   ],
+   "zero_frac": 0.3975561559200287,
+   "p_plus": 0.3012939989566803,
+   "p_minus": 0.301149845123291,
+   "H_ternary": 1.5719468935811887,
+   "bitmap_sign_bpw": 1.6024438440799713
+  },
+  {
+   "name": "model.layers.11.self_attn.k_proj.weight",
+   "shape": [
+    640,
+    2560
+   ],
+   "zero_frac": 0.4702685475349426,
+   "p_plus": 0.26488402485847473,
+   "p_minus": 0.26484742760658264,
+   "H_ternary": 1.5271793781483902,
+   "bitmap_sign_bpw": 1.5297314524650574
+  },
+  {
+   "name": "model.layers.11.self_attn.o_proj.weight",
+   "shape": [
+    2560,
+    2560
+   ],
+   "zero_frac": 0.3559103310108185,
+   "p_plus": 0.32187485694885254,
+   "p_minus": 0.322214812040329,
+   "H_ternary": 1.583325544554886,
+   "bitmap_sign_bpw": 1.6440896689891815
+  },
+  {
+   "name": "model.layers.11.self_attn.q_proj.weight",
+   "shape": [
+    2560,
+    2560
+   ],
+   "zero_frac": 0.505605161190033,
+   "p_plus": 0.24721145629882812,
+   "p_minus": 0.24718338251113892,
+   "H_ternary": 1.4943041830604509,
+   "bitmap_sign_bpw": 1.494394838809967
+  },
+  {
+   "name": "model.layers.11.self_attn.v_proj.weight",
+   "shape": [
+    640,
+    2560
+   ],
+   "zero_frac": 0.3983843922615051,
+   "p_plus": 0.3003771901130676,
+   "p_minus": 0.30123841762542725,
+   "H_ternary": 1.5716123941656248,
+   "bitmap_sign_bpw": 1.6016156077384949
+  },
+  {
+   "name": "model.layers.12.mlp.down_proj.weight",
+   "shape": [
+    2560,
+    6912
+   ],
+   "zero_frac": 0.4214812219142914,
+   "p_plus": 0.2892022728919983,
+   "p_minus": 0.2893165051937103,
+   "H_ternary": 1.5606559131129563,
+   "bitmap_sign_bpw": 1.5785187780857086
+  },
+  {
+   "name": "model.layers.12.mlp.gate_proj.weight",
+   "shape": [
+    6912,
+    2560
+   ],
+   "zero_frac": 0.42998006939888,
+   "p_plus": 0.28475838899612427,
+   "p_minus": 0.2852615416049957,
+   "H_ternary": 1.555826541953505,
+   "bitmap_sign_bpw": 1.57001993060112
+  },
+  {
+   "name": "model.layers.12.mlp.up_proj.weight",
+   "shape": [
+    6912,
+    2560
+   ],
+   "zero_frac": 0.40686431527137756,
+   "p_plus": 0.29663825035095215,
+   "p_minus": 0.2964974343776703,
+   "H_ternary": 1.5679602657297975,
+   "bitmap_sign_bpw": 1.5931356847286224
+  },
+  {
+   "name": "model.layers.12.self_attn.k_proj.weight",
+   "shape": [
+    640,
+    2560
+   ],
+   "zero_frac": 0.5107580423355103,
+   "p_plus": 0.24499450623989105,
+   "p_minus": 0.2442474514245987,
+   "H_ternary": 1.4889071670423875,
+   "bitmap_sign_bpw": 1.4892419576644897
+  },
+  {
+   "name": "model.layers.12.self_attn.o_proj.weight",
+   "shape": [
+    2560,
+    2560
+   ],
+   "zero_frac": 0.4117633104324341,
+   "p_plus": 0.2940406799316406,
+   "p_minus": 0.2941960096359253,
+   "H_ternary": 1.5656537594418092,
+   "bitmap_sign_bpw": 1.588236689567566
+  },
+  {
+   "name": "model.layers.12.self_attn.q_proj.weight",
+   "shape": [
+    2560,
+    2560
+   ],
+   "zero_frac": 0.46790221333503723,
+   "p_plus": 0.26588165760040283,
+   "p_minus": 0.26621612906455994,
+   "H_ternary": 1.5291228650241002,
+   "bitmap_sign_bpw": 1.5320977866649628
+  },
+  {
+   "name": "model.layers.12.self_attn.v_proj.weight",
+   "shape": [
+    640,
+    2560
+   ],
+   "zero_frac": 0.40807923674583435,
+   "p_plus": 0.29553282260894775,
+   "p_minus": 0.2963879406452179,
+   "H_ternary": 1.567400758428332,
+   "bitmap_sign_bpw": 1.5919207632541656
+  },
+  {
+   "name": "model.layers.13.mlp.down_proj.weight",
+   "shape": [
+    2560,
+    6912
+   ],
+   "zero_frac": 0.4143560826778412,
+   "p_plus": 0.2928970754146576,
+   "p_minus": 0.2927468419075012,
+   "H_ternary": 1.5643751736409954,
+   "bitmap_sign_bpw": 1.5856439173221588
+  },
+  {
+   "name": "model.layers.13.mlp.gate_proj.weight",
+   "shape": [
+    6912,
+    2560
+   ],
+   "zero_frac": 0.426158607006073,
+   "p_plus": 0.28683894872665405,
+   "p_minus": 0.28700244426727295,
+   "H_ternary": 1.5580509280242656,
+   "bitmap_sign_bpw": 1.573841392993927
+  },
+  {
+   "name": "model.layers.13.mlp.up_proj.weight",
+   "shape": [
+    6912,
+    2560
+   ],
+   "zero_frac": 0.378101646900177,
+   "p_plus": 0.31110841035842896,
+   "p_minus": 0.31078994274139404,
+   "H_ternary": 1.578588469225716,
+   "bitmap_sign_bpw": 1.621898353099823
+  },
+  {
+   "name": "model.layers.13.self_attn.k_proj.weight",
+   "shape": [
+    640,
+    2560
+   ],
+   "zero_frac": 0.4679211378097534,
+   "p_plus": 0.26610657572746277,
+   "p_minus": 0.2659722864627838,
+   "H_ternary": 1.5291075769172613,
+   "bitmap_sign_bpw": 1.5320788621902466
+  },
+  {
+   "name": "model.layers.13.self_attn.o_proj.weight",
+   "shape": [
+    2560,
+    2560
+   ],
+   "zero_frac": 0.42808714509010315,
+   "p_plus": 0.2860110402107239,
+   "p_minus": 0.285901814699173,
+   "H_ternary": 1.5569392892163818,
+   "bitmap_sign_bpw": 1.5719128549098969
+  },
+  {
+   "name": "model.layers.13.self_attn.q_proj.weight",
+   "shape": [
+    2560,
+    2560
+   ],
+   "zero_frac": 0.4538101255893707,
+   "p_plus": 0.27293336391448975,
+   "p_minus": 0.2732565104961395,
+   "H_ternary": 1.5400249578624494,
+   "bitmap_sign_bpw": 1.5461898744106293
+  },
+  {
+   "name": "model.layers.13.self_attn.v_proj.weight",
+   "shape": [
+    640,
+    2560
+   ],
+   "zero_frac": 0.41414061188697815,
+   "p_plus": 0.29348206520080566,
+   "p_minus": 0.2923773229122162,
+   "H_ternary": 1.5644814786949977,
+   "bitmap_sign_bpw": 1.5858593881130219
+  },
+  {
+   "name": "model.layers.14.mlp.down_proj.weight",
+   "shape": [
+    2560,
+    6912
+   ],
+   "zero_frac": 0.44000324606895447,
+   "p_plus": 0.279941588640213,
+   "p_minus": 0.2800551652908325,
+   "H_ternary": 1.5495853878888792,
+   "bitmap_sign_bpw": 1.5599967539310455
+  },
+  {
+   "name": "model.layers.14.mlp.gate_proj.weight",
+   "shape": [
+    6912,
+    2560
+   ],
+   "zero_frac": 0.4380995035171509,
+   "p_plus": 0.2806675136089325,
+   "p_minus": 0.2812329828739166,
+   "H_ternary": 1.5508158029424641,
+   "bitmap_sign_bpw": 1.5619004964828491
+  },
+  {
+   "name": "model.layers.14.mlp.up_proj.weight",
+   "shape": [
+    6912,
+    2560
+   ],
+   "zero_frac": 0.4090528190135956,
+   "p_plus": 0.2954614758491516,
+   "p_minus": 0.2954857051372528,
+   "H_ternary": 1.5669476168304022,
+   "bitmap_sign_bpw": 1.5909471809864044
+  },
+  {
+   "name": "model.layers.14.self_attn.k_proj.weight",
+   "shape": [
+    640,
+    2560
+   ],
+   "zero_frac": 0.5397491455078125,
+   "p_plus": 0.22976195812225342,
+   "p_minus": 0.23048889636993408,
+   "H_ternary": 1.4556863114094785,
+   "bitmap_sign_bpw": 1.4602508544921875
+  },
+  {
+   "name": "model.layers.14.self_attn.o_proj.weight",
+   "shape": [
+    2560,
+    2560
+   ],
+   "zero_frac": 0.38603225350379944,
+   "p_plus": 0.30707457661628723,
+   "p_minus": 0.30689316987991333,
+   "H_ternary": 1.5761589360509938,
+   "bitmap_sign_bpw": 1.6139677464962006
+  },
+  {
+   "name": "model.layers.14.self_attn.q_proj.weight",
+   "shape": [
+    2560,
+    2560
+   ],
+   "zero_frac": 0.4995138645172119,
+   "p_plus": 0.25025099515914917,
+   "p_minus": 0.2502351403236389,
+   "H_ternary": 1.5004854532227507,
+   "bitmap_sign_bpw": 1.500486135482788
+  },
+  {
+   "name": "model.layers.14.self_attn.v_proj.weight",
+   "shape": [
+    640,
+    2560
+   ],
+   "zero_frac": 0.33618468046188354,
+   "p_plus": 0.33224305510520935,
+   "p_minus": 0.3315722644329071,
+   "H_ternary": 1.5849356580632923,
+   "bitmap_sign_bpw": 1.6638153195381165
+  },
+  {
+   "name": "model.layers.15.mlp.down_proj.weight",
+   "shape": [
+    2560,
+    6912
+   ],
+   "zero_frac": 0.42326128482818604,
+   "p_plus": 0.28840410709381104,
+   "p_minus": 0.28833460807800293,
+   "H_ternary": 1.5596797927180577,
+   "bitmap_sign_bpw": 1.576738715171814
+  },
+  {
+   "name": "model.layers.15.mlp.gate_proj.weight",
+   "shape": [
+    6912,
+    2560
+   ],
+   "zero_frac": 0.441427618265152,
+   "p_plus": 0.2783297598361969,
+   "p_minus": 0.2802426218986511,
+   "H_ternary": 1.5486459140366757,
+   "bitmap_sign_bpw": 1.558572381734848
+  },
+  {
+   "name": "model.layers.15.mlp.up_proj.weight",
+   "shape": [
+    6912,
+    2560
+   ],
+   "zero_frac": 0.4173525869846344,
+   "p_plus": 0.2912003695964813,
+   "p_minus": 0.2914470434188843,
+   "H_ternary": 1.562847662351251,
+   "bitmap_sign_bpw": 1.5826474130153656
+  },
+  {
+   "name": "model.layers.15.self_attn.k_proj.weight",
+   "shape": [
+    640,
+    2560
+   ],
+   "zero_frac": 0.3780163526535034,
+   "p_plus": 0.3105902075767517,
+   "p_minus": 0.3113934397697449,
+   "H_ternary": 1.5786118774043956,
+   "bitmap_sign_bpw": 1.6219836473464966
+  },
+  {
+   "name": "model.layers.15.self_attn.o_proj.weight",
+   "shape": [
+    2560,
+    2560
+   ],
+   "zero_frac": 0.3516789376735687,
+   "p_plus": 0.32406294345855713,
+   "p_minus": 0.32425811886787415,
+   "H_ternary": 1.5838795777637342,
+   "bitmap_sign_bpw": 1.6483210623264313
+  },
+  {
+   "name": "model.layers.15.self_attn.q_proj.weight",
+   "shape": [
+    2560,
+    2560
+   ],
+   "zero_frac": 0.4459141492843628,
+   "p_plus": 0.2771437168121338,
+   "p_minus": 0.2769421339035034,
+   "H_ternary": 1.5456286878696774,
+   "bitmap_sign_bpw": 1.5540858507156372
+  },
+  {
+   "name": "model.layers.15.self_attn.v_proj.weight",
+   "shape": [
+    640,
+    2560
+   ],
+   "zero_frac": 0.2994232177734375,
+   "p_plus": 0.35017091035842896,
+   "p_minus": 0.35040587186813354,
+   "H_ternary": 1.5811614272279382,
+   "bitmap_sign_bpw": 1.7005767822265625
+  },
+  {
+   "name": "model.layers.16.mlp.down_proj.weight",
+   "shape": [
+    2560,
+    6912
+   ],
+   "zero_frac": 0.4349389970302582,
+   "p_plus": 0.28270021080970764,
+   "p_minus": 0.2823607921600342,
+   "H_ternary": 1.5528124878108225,
+   "bitmap_sign_bpw": 1.5650610029697418
+  },
+  {
+   "name": "model.layers.16.mlp.gate_proj.weight",
+   "shape": [
+    6912,
+    2560
+   ],
+   "zero_frac": 0.39303532242774963,
+   "p_plus": 0.30292391777038574,
+   "p_minus": 0.3040407598018646,
+   "H_ternary": 1.5736936340468208,
+   "bitmap_sign_bpw": 1.6069646775722504
+  },
+  {
+   "name": "model.layers.16.mlp.up_proj.weight",
+   "shape": [
+    6912,
+    2560
+   ],
+   "zero_frac": 0.40966278314590454,
+   "p_plus": 0.2951231300830841,
+   "p_minus": 0.29521408677101135,
+   "H_ternary": 1.566660266824622,
+   "bitmap_sign_bpw": 1.5903372168540955
+  },
+  {
+   "name": "model.layers.16.self_attn.k_proj.weight",
+   "shape": [
+    640,
+    2560
+   ],
+   "zero_frac": 0.4433215260505676,
+   "p_plus": 0.2779949903488159,
+   "p_minus": 0.27868348360061646,
+   "H_ternary": 1.547388736143208,
+   "bitmap_sign_bpw": 1.5566784739494324
+  },
+  {
+   "name": "model.layers.16.self_attn.o_proj.weight",
+   "shape": [
+    2560,
+    2560
+   ],
+   "zero_frac": 0.4263150095939636,
+   "p_plus": 0.286894828081131,
+   "p_minus": 0.2867901623249054,
+   "H_ternary": 1.5579616107305636,
+   "bitmap_sign_bpw": 1.5736849904060364
+  },
+  {
+   "name": "model.layers.16.self_attn.q_proj.weight",
+   "shape": [
+    2560,
+    2560
+   ],
+   "zero_frac": 0.4596908688545227,
+   "p_plus": 0.2699008285999298,
+   "p_minus": 0.2704083025455475,
+   "H_ternary": 1.5356154386965886,
+   "bitmap_sign_bpw": 1.5403091311454773
+  },
+  {
+   "name": "model.layers.16.self_attn.v_proj.weight",
+   "shape": [
+    640,
+    2560
+   ],
+   "zero_frac": 0.32487669587135315,
+   "p_plus": 0.33731505274772644,
+   "p_minus": 0.3378082513809204,
+   "H_ternary": 1.5847290989985636,
+   "bitmap_sign_bpw": 1.6751233041286469
+  },
+  {
+   "name": "model.layers.17.mlp.down_proj.weight",
+   "shape": [
+    2560,
+    6912
+   ],
+   "zero_frac": 0.379486083984375,
+   "p_plus": 0.3102158010005951,
+   "p_minus": 0.3102981150150299,
+   "H_ternary": 1.5781921587409964,
+   "bitmap_sign_bpw": 1.620513916015625
+  },
+  {
+   "name": "model.layers.17.mlp.gate_proj.weight",
+   "shape": [
+    6912,
+    2560
+   ],
+   "zero_frac": 0.43798545002937317,
+   "p_plus": 0.2802415192127228,
+   "p_minus": 0.28177303075790405,
+   "H_ternary": 1.5508862667060592,
+   "bitmap_sign_bpw": 1.5620145499706268
+  },
+  {
+   "name": "model.layers.17.mlp.up_proj.weight",
+   "shape": [
+    6912,
+    2560
+   ],
+   "zero_frac": 0.3981029987335205,
+   "p_plus": 0.30088144540786743,
+   "p_minus": 0.30101555585861206,
+   "H_ternary": 1.5717270777839691,
+   "bitmap_sign_bpw": 1.6018970012664795
+  },
+  {
+   "name": "model.layers.17.self_attn.k_proj.weight",
+   "shape": [
+    640,
+    2560
+   ],
+   "zero_frac": 0.5346001982688904,
+   "p_plus": 0.23284606635570526,
+   "p_minus": 0.23255373537540436,
+   "H_ternary": 1.4619425938612125,
+   "bitmap_sign_bpw": 1.4653998017311096
+  },
+  {
+   "name": "model.layers.17.self_attn.o_proj.weight",
+   "shape": [
+    2560,
+    2560
+   ],
+   "zero_frac": 0.3416059911251068,
+   "p_plus": 0.3290654122829437,
+   "p_minus": 0.32932859659194946,
+   "H_ternary": 1.5847411763849828,
+   "bitmap_sign_bpw": 1.6583940088748932
+  },
+  {
+   "name": "model.layers.17.self_attn.q_proj.weight",
+   "shape": [
+    2560,
+    2560
+   ],
+   "zero_frac": 0.4749516248703003,
+   "p_plus": 0.262473464012146,
+   "p_minus": 0.2625749111175537,
+   "H_ternary": 1.5232372483835284,
+   "bitmap_sign_bpw": 1.5250483751296997
+  },
+  {
+   "name": "model.layers.17.self_attn.v_proj.weight",
+   "shape": [
+    640,
+    2560
+   ],
+   "zero_frac": 0.448953241109848,
+   "p_plus": 0.27576109766960144,
+   "p_minus": 0.27528566122055054,
+   "H_ternary": 1.5435146794339891,
+   "bitmap_sign_bpw": 1.551046758890152
+  },
+  {
+   "name": "model.layers.18.mlp.down_proj.weight",
+   "shape": [
+    2560,
+    6912
+   ],
+   "zero_frac": 0.4078064560890198,
+   "p_plus": 0.2960244119167328,
+   "p_minus": 0.29616913199424744,
+   "H_ternary": 1.5675278207031318,
+   "bitmap_sign_bpw": 1.5921935439109802
+  },
+  {
+   "name": "model.layers.18.mlp.gate_proj.weight",
+   "shape": [
+    6912,
+    2560
+   ],
+   "zero_frac": 0.4126013219356537,
+   "p_plus": 0.2931431531906128,
+   "p_minus": 0.2942555248737335,
+   "H_ternary": 1.5652433921782598,
+   "bitmap_sign_bpw": 1.5873986780643463
+  },
+  {
+   "name": "model.layers.18.mlp.up_proj.weight",
+   "shape": [
+    6912,
+    2560
+   ],
+   "zero_frac": 0.3823174238204956,
+   "p_plus": 0.3088330328464508,
+   "p_minus": 0.3088495433330536,
+   "H_ternary": 1.5773448921154087,
+   "bitmap_sign_bpw": 1.6176825761795044
+  },
+  {
+   "name": "model.layers.18.self_attn.k_proj.weight",
+   "shape": [
+    640,
+    2560
+   ],
+   "zero_frac": 0.4467999339103699,
+   "p_plus": 0.2768579125404358,
+   "p_minus": 0.27634215354919434,
+   "H_ternary": 1.5450178737542761,
+   "bitmap_sign_bpw": 1.5532000660896301
+  },
+  {
+   "name": "model.layers.18.self_attn.o_proj.weight",
+   "shape": [
+    2560,
+    2560
+   ],
+   "zero_frac": 0.44334352016448975,
+   "p_plus": 0.2782137989997864,
+   "p_minus": 0.2784426808357239,
+   "H_ternary": 1.547374511837373,
+   "bitmap_sign_bpw": 1.5566564798355103
+  },
+  {
+   "name": "model.layers.18.self_attn.q_proj.weight",
+   "shape": [
+    2560,
+    2560
+   ],
+   "zero_frac": 0.45836547017097473,
+   "p_plus": 0.2705552577972412,
+   "p_minus": 0.27107927203178406,
+   "H_ternary": 1.5366267345528095,
+   "bitmap_sign_bpw": 1.5416345298290253
+  },
+  {
+   "name": "model.layers.18.self_attn.v_proj.weight",
+   "shape": [
+    640,
+    2560
+   ],
+   "zero_frac": 0.30347657203674316,
+   "p_plus": 0.34772706031799316,
+   "p_minus": 0.34879636764526367,
+   "H_ternary": 1.5820214521120293,
+   "bitmap_sign_bpw": 1.6965234279632568
+  },
+  {
+   "name": "model.layers.19.mlp.down_proj.weight",
+   "shape": [
+    2560,
+    6912
+   ],
+   "zero_frac": 0.41754868626594543,
+   "p_plus": 0.29125767946243286,
+   "p_minus": 0.2911936342716217,
+   "H_ternary": 1.5627459128963208,
+   "bitmap_sign_bpw": 1.5824513137340546
+  },
+  {
+   "name": "model.layers.19.mlp.gate_proj.weight",
+   "shape": [
+    6912,
+    2560
+   ],
+   "zero_frac": 0.3929567039012909,
+   "p_plus": 0.30290788412094116,
+   "p_minus": 0.30413541197776794,
+   "H_ternary": 1.5737226355584109,
+   "bitmap_sign_bpw": 1.607043296098709
+  },
+  {
+   "name": "model.layers.19.mlp.up_proj.weight",
+   "shape": [
+    6912,
+    2560
+   ],
+   "zero_frac": 0.4403800666332245,
+   "p_plus": 0.27986660599708557,
+   "p_minus": 0.27975332736968994,
+   "H_ternary": 1.549339249226961,
+   "bitmap_sign_bpw": 1.5596199333667755
+  },
+  {
+   "name": "model.layers.19.self_attn.k_proj.weight",
+   "shape": [
+    640,
+    2560
+   ],
+   "zero_frac": 0.4121820032596588,
+   "p_plus": 0.2945416271686554,
+   "p_minus": 0.2932763695716858,
+   "H_ternary": 1.5654480612170798,
+   "bitmap_sign_bpw": 1.5878179967403412
+  },
+  {
+   "name": "model.layers.19.self_attn.o_proj.weight",
+   "shape": [
+    2560,
+    2560
+   ],
+   "zero_frac": 0.3501240611076355,
+   "p_plus": 0.32484132051467896,
+   "p_minus": 0.32503461837768555,
+   "H_ternary": 1.5840547010846247,
+   "bitmap_sign_bpw": 1.6498759388923645
+  },
+  {
+   "name": "model.layers.19.self_attn.q_proj.weight",
+   "shape": [
+    2560,
+    2560
+   ],
+   "zero_frac": 0.43450653553009033,
+   "p_plus": 0.2826406955718994,
+   "p_minus": 0.28285276889801025,
+   "H_ternary": 1.5530811953619557,
+   "bitmap_sign_bpw": 1.5654934644699097
+  },
+  {
+   "name": "model.layers.19.self_attn.v_proj.weight",
+   "shape": [
+    640,
+    2560
+   ],
+   "zero_frac": 0.34858644008636475,
+   "p_plus": 0.3255590796470642,
+   "p_minus": 0.32585448026657104,
+   "H_ternary": 1.584212750186696,
+   "bitmap_sign_bpw": 1.6514135599136353
+  },
+  {
+   "name": "model.layers.2.mlp.down_proj.weight",
+   "shape": [
+    2560,
+    6912
+   ],
+   "zero_frac": 0.5048925876617432,
+   "p_plus": 0.24753011763095856,
+   "p_minus": 0.24757729470729828,
+   "H_ternary": 1.4950383392162738,
+   "bitmap_sign_bpw": 1.4951074123382568
+  },
+  {
+   "name": "model.layers.2.mlp.gate_proj.weight",
+   "shape": [
+    6912,
+    2560
+   ],
+   "zero_frac": 0.516173779964447,
+   "p_plus": 0.2422214150428772,
+   "p_minus": 0.24160480499267578,
+   "H_ternary": 1.4830707289544658,
+   "bitmap_sign_bpw": 1.483826220035553
+  },
+  {
+   "name": "model.layers.2.mlp.up_proj.weight",
+   "shape": [
+    6912,
+    2560
+   ],
+   "zero_frac": 0.5184831619262695,
+   "p_plus": 0.24076294898986816,
+   "p_minus": 0.2407538890838623,
+   "H_ternary": 1.4805308853765755,
+   "bitmap_sign_bpw": 1.4815168380737305
+  },
+  {
+   "name": "model.layers.2.self_attn.k_proj.weight",
+   "shape": [
+    640,
+    2560
+   ],
+   "zero_frac": 0.38225340843200684,
+   "p_plus": 0.3084210157394409,
+   "p_minus": 0.30932557582855225,
+   "H_ternary": 1.5773636351415576,
+   "bitmap_sign_bpw": 1.6177465915679932
+  },
+  {
+   "name": "model.layers.2.self_attn.o_proj.weight",
+   "shape": [
+    2560,
+    2560
+   ],
+   "zero_frac": 0.42653533816337585,
+   "p_plus": 0.2864498794078827,
+   "p_minus": 0.28701478242874146,
+   "H_ternary": 1.5578351266564547,
+   "bitmap_sign_bpw": 1.5734646618366241
+  },
+  {
+   "name": "model.layers.2.self_attn.q_proj.weight",
+   "shape": [
+    2560,
+    2560
+   ],
+   "zero_frac": 0.4232264757156372,
+   "p_plus": 0.2882447838783264,
+   "p_minus": 0.2885287404060364,
+   "H_ternary": 1.5596989657284304,
+   "bitmap_sign_bpw": 1.5767735242843628
+  },
+  {
+   "name": "model.layers.2.self_attn.v_proj.weight",
+   "shape": [
+    640,
+    2560
+   ],
+   "zero_frac": 0.383139044046402,
+   "p_plus": 0.308370977640152,
+   "p_minus": 0.30848997831344604,
+   "H_ternary": 1.5770898331588818,
+   "bitmap_sign_bpw": 1.616860955953598
+  },
+  {
+   "name": "model.layers.20.mlp.down_proj.weight",
+   "shape": [
+    2560,
+    6912
+   ],
+   "zero_frac": 0.42963600158691406,
+   "p_plus": 0.28507673740386963,
+   "p_minus": 0.2852872610092163,
+   "H_ternary": 1.5560305786212218,
+   "bitmap_sign_bpw": 1.570363998413086
+  },
+  {
+   "name": "model.layers.20.mlp.gate_proj.weight",
+   "shape": [
+    6912,
+    2560
+   ],
+   "zero_frac": 0.41426339745521545,
+   "p_plus": 0.2924618124961853,
+   "p_minus": 0.29327479004859924,
+   "H_ternary": 1.5644207830995922,
+   "bitmap_sign_bpw": 1.5857366025447845
+  },
+  {
+   "name": "model.layers.20.mlp.up_proj.weight",
+   "shape": [
+    6912,
+    2560
+   ],
+   "zero_frac": 0.4316462278366089,
+   "p_plus": 0.28444400429725647,
+   "p_minus": 0.28390976786613464,
+   "H_ternary": 1.5548298714846083,
+   "bitmap_sign_bpw": 1.5683537721633911
+  },
+  {
+   "name": "model.layers.20.self_attn.k_proj.weight",
+   "shape": [
+    640,
+    2560
+   ],
+   "zero_frac": 0.5378783941268921,
+   "p_plus": 0.23098815977573395,
+   "p_minus": 0.23113344609737396,
+   "H_ternary": 1.457977724910633,
+   "bitmap_sign_bpw": 1.462121605873108
+  },
+  {
+   "name": "model.layers.20.self_attn.o_proj.weight",
+   "shape": [
+    2560,
+    2560
+   ],
+   "zero_frac": 0.42513611912727356,
+   "p_plus": 0.2873489260673523,
+   "p_minus": 0.28751495480537415,
+   "H_ternary": 1.5586314156464187,
+   "bitmap_sign_bpw": 1.5748638808727264
+  },
+  {
+   "name": "model.layers.20.self_attn.q_proj.weight",
+   "shape": [
+    2560,
+    2560
+   ],
+   "zero_frac": 0.485432893037796,
+   "p_plus": 0.2570449709892273,
+   "p_minus": 0.2575221359729767,
+   "H_ternary": 1.5139544196104047,
+   "bitmap_sign_bpw": 1.514567106962204
+  },
+  {
+   "name": "model.layers.20.self_attn.v_proj.weight",
+   "shape": [
+    640,
+    2560
+   ],
+   "zero_frac": 0.3906121850013733,
+   "p_plus": 0.30435240268707275,
+   "p_minus": 0.30503541231155396,
+   "H_ternary": 1.5745807396292282,
+   "bitmap_sign_bpw": 1.6093878149986267
+  },
+  {
+   "name": "model.layers.21.mlp.down_proj.weight",
+   "shape": [
+    2560,
+    6912
+   ],
+   "zero_frac": 0.37897610664367676,
+   "p_plus": 0.31059134006500244,
+   "p_minus": 0.3104325532913208,
+   "H_ternary": 1.5783395314429753,
+   "bitmap_sign_bpw": 1.6210238933563232
+  },
+  {
+   "name": "model.layers.21.mlp.gate_proj.weight",
+   "shape": [
+    6912,
+    2560
+   ],
+   "zero_frac": 0.4057752192020416,
+   "p_plus": 0.2969745099544525,
+   "p_minus": 0.29725027084350586,
+   "H_ternary": 1.5684534809936626,
+   "bitmap_sign_bpw": 1.5942247807979584
+  },
+  {
+   "name": "model.layers.21.mlp.up_proj.weight",
+   "shape": [
+    6912,
+    2560
+   ],
+   "zero_frac": 0.38496676087379456,
+   "p_plus": 0.3074950575828552,
+   "p_minus": 0.3075381815433502,
+   "H_ternary": 1.5765077237955367,
+   "bitmap_sign_bpw": 1.6150332391262054
+  },
+  {
+   "name": "model.layers.21.self_attn.k_proj.weight",
+   "shape": [
+    640,
+    2560
+   ],
+   "zero_frac": 0.4376477003097534,
+   "p_plus": 0.28142210841178894,
+   "p_minus": 0.28093019127845764,
+   "H_ternary": 1.5511048853495568,
+   "bitmap_sign_bpw": 1.5623522996902466
+  },
+  {
+   "name": "model.layers.21.self_attn.o_proj.weight",
+   "shape": [
+    2560,
+    2560
+   ],
+   "zero_frac": 0.4342659115791321,
+   "p_plus": 0.28283295035362244,
+   "p_minus": 0.2829011380672455,
+   "H_ternary": 1.553230231789809,
+   "bitmap_sign_bpw": 1.565734088420868
+  },
+  {
+   "name": "model.layers.21.self_attn.q_proj.weight",
+   "shape": [
+    2560,
+    2560
+   ],
+   "zero_frac": 0.482919305562973,
+   "p_plus": 0.25891128182411194,
+   "p_minus": 0.25816941261291504,
+   "H_ternary": 1.516237949930644,
+   "bitmap_sign_bpw": 1.517080694437027
+  },
+  {
+   "name": "model.layers.21.self_attn.v_proj.weight",
+   "shape": [
+    640,
+    2560
+   ],
+   "zero_frac": 0.3923199474811554,
+   "p_plus": 0.30342528223991394,
+   "p_minus": 0.30425477027893066,
+   "H_ternary": 1.5739596199687649,
+   "bitmap_sign_bpw": 1.6076800525188446
+  },
+  {
+   "name": "model.layers.22.mlp.down_proj.weight",
+   "shape": [
+    2560,
+    6912
+   ],
+   "zero_frac": 0.4183610677719116,
+   "p_plus": 0.29084083437919617,
+   "p_minus": 0.2907980978488922,
+   "H_ternary": 1.562321677023078,
+   "bitmap_sign_bpw": 1.5816389322280884
+  },
+  {
+   "name": "model.layers.22.mlp.gate_proj.weight",
+   "shape": [
+    6912,
+    2560
+   ],
+   "zero_frac": 0.42261990904808044,
+   "p_plus": 0.2885100245475769,
+   "p_minus": 0.28887006640434265,
+   "H_ternary": 1.5600335063650683,
+   "bitmap_sign_bpw": 1.5773800909519196
+  },
+  {
+   "name": "model.layers.22.mlp.up_proj.weight",
+   "shape": [
+    6912,
+    2560
+   ],
+   "zero_frac": 0.3925689160823822,
+   "p_plus": 0.3037302792072296,
+   "p_minus": 0.3037008047103882,
+   "H_ternary": 1.5738684487592662,
+   "bitmap_sign_bpw": 1.6074310839176178
+  },
+  {
+   "name": "model.layers.22.self_attn.k_proj.weight",
+   "shape": [
+    640,
+    2560
+   ],
+   "zero_frac": 0.46673524379730225,
+   "p_plus": 0.26650023460388184,
+   "p_minus": 0.2667645215988159,
+   "H_ternary": 1.5300694911181267,
+   "bitmap_sign_bpw": 1.5332647562026978
+  },
+  {
+   "name": "model.layers.22.self_attn.o_proj.weight",
+   "shape": [
+    2560,
+    2560
+   ],
+   "zero_frac": 0.434395432472229,
+   "p_plus": 0.28249192237854004,
+   "p_minus": 0.28311264514923096,
+   "H_ternary": 1.5531495942798792,
+   "bitmap_sign_bpw": 1.565604567527771
+  },
+  {
+   "name": "model.layers.22.self_attn.q_proj.weight",
+   "shape": [
+    2560,
+    2560
+   ],
+   "zero_frac": 0.4609876871109009,
+   "p_plus": 0.26944518089294434,
+   "p_minus": 0.2695671319961548,
+   "H_ternary": 1.5346163764620369,
+   "bitmap_sign_bpw": 1.5390123128890991
+  },
+  {
+   "name": "model.layers.22.self_attn.v_proj.weight",
+   "shape": [
+    640,
+    2560
+   ],
+   "zero_frac": 0.3280438184738159,
+   "p_plus": 0.3356805443763733,
+   "p_minus": 0.3362756371498108,
+   "H_ternary": 1.5848710559582702,
+   "bitmap_sign_bpw": 1.671956181526184
+  },
+  {
+   "name": "model.layers.23.mlp.down_proj.weight",
+   "shape": [
+    2560,
+    6912
+   ],
+   "zero_frac": 0.4109838306903839,
+   "p_plus": 0.2945043444633484,
+   "p_minus": 0.2945118248462677,
+   "H_ternary": 1.5660303530333857,
+   "bitmap_sign_bpw": 1.589016169309616
+  },
+  {
+   "name": "model.layers.23.mlp.gate_proj.weight",
+   "shape": [
+    6912,
+    2560
+   ],
+   "zero_frac": 0.38117173314094543,
+   "p_plus": 0.3093796968460083,
+   "p_minus": 0.30944857001304626,
+   "H_ternary": 1.5776936401279253,
+   "bitmap_sign_bpw": 1.6188282668590546
+  },
+  {
+   "name": "model.layers.23.mlp.up_proj.weight",
+   "shape": [
+    6912,
+    2560
+   ],
+   "zero_frac": 0.3939778208732605,
+   "p_plus": 0.3030453026294708,
+   "p_minus": 0.3029768764972687,
+   "H_ternary": 1.5733408299319025,
+   "bitmap_sign_bpw": 1.6060221791267395
+  },
+  {
+   "name": "model.layers.23.self_attn.k_proj.weight",
+   "shape": [
+    640,
+    2560
+   ],
+   "zero_frac": 0.4790979027748108,
+   "p_plus": 0.2604864537715912,
+   "p_minus": 0.260415643453598,
+   "H_ternary": 1.5196411026508612,
+   "bitmap_sign_bpw": 1.5209020972251892
+  },
+  {
+   "name": "model.layers.23.self_attn.o_proj.weight",
+   "shape": [
+    2560,
+    2560
+   ],
+   "zero_frac": 0.3866947889328003,
+   "p_plus": 0.3067549169063568,
+   "p_minus": 0.3065502941608429,
+   "H_ternary": 1.575938583058315,
+   "bitmap_sign_bpw": 1.6133052110671997
+  },
+  {
+   "name": "model.layers.23.self_attn.q_proj.weight",
+   "shape": [
+    2560,
+    2560
+   ],
+   "zero_frac": 0.4844764769077301,
+   "p_plus": 0.2581106424331665,
+   "p_minus": 0.2574128806591034,
+   "H_ternary": 1.5148274094514513,
+   "bitmap_sign_bpw": 1.51552352309227
+  },
+  {
+   "name": "model.layers.23.self_attn.v_proj.weight",
+   "shape": [
+    640,
+    2560
+   ],
+   "zero_frac": 0.3842810094356537,
+   "p_plus": 0.3080505430698395,
+   "p_minus": 0.30766844749450684,
+   "H_ternary": 1.5767283530390146,
+   "bitmap_sign_bpw": 1.6157189905643463
+  },
+  {
+   "name": "model.layers.24.mlp.down_proj.weight",
+   "shape": [
+    2560,
+    6912
+   ],
+   "zero_frac": 0.3903779089450836,
+   "p_plus": 0.30492711067199707,
+   "p_minus": 0.3046949803829193,
+   "H_ternary": 1.5746650207280106,
+   "bitmap_sign_bpw": 1.6096220910549164
+  },
+  {
+   "name": "model.layers.24.mlp.gate_proj.weight",
+   "shape": [
+    6912,
+    2560
+   ],
+   "zero_frac": 0.40843087434768677,
+   "p_plus": 0.2957153916358948,
+   "p_minus": 0.29585373401641846,
+   "H_ternary": 1.567238292208419,
+   "bitmap_sign_bpw": 1.5915691256523132
+  },
+  {
+   "name": "model.layers.24.mlp.up_proj.weight",
+   "shape": [
+    6912,
+    2560
+   ],
+   "zero_frac": 0.41145947575569153,
+   "p_plus": 0.2942548394203186,
+   "p_minus": 0.29428568482398987,
+   "H_ternary": 1.565800999891831,
+   "bitmap_sign_bpw": 1.5885405242443085
+  },
+  {
+   "name": "model.layers.24.self_attn.k_proj.weight",
+   "shape": [
+    640,
+    2560
+   ],
+   "zero_frac": 0.4792858958244324,
+   "p_plus": 0.26026976108551025,
+   "p_minus": 0.2604443430900574,
+   "H_ternary": 1.5194756613807945,
+   "bitmap_sign_bpw": 1.5207141041755676
+  },
+  {
+   "name": "model.layers.24.self_attn.o_proj.weight",
+   "shape": [
+    2560,
+    2560
+   ],
+   "zero_frac": 0.4168240427970886,
+   "p_plus": 0.29163771867752075,
+   "p_minus": 0.2915382385253906,
+   "H_ternary": 1.563121022706372,
+   "bitmap_sign_bpw": 1.5831759572029114
+  },
+  {
+   "name": "model.layers.24.self_attn.q_proj.weight",
+   "shape": [
+    2560,
+    2560
+   ],
+   "zero_frac": 0.4900888204574585,
+   "p_plus": 0.25496092438697815,
+   "p_minus": 0.25495025515556335,
+   "H_ternary": 1.50962772467913,
+   "bitmap_sign_bpw": 1.5099111795425415
+  },
+  {
+   "name": "model.layers.24.self_attn.v_proj.weight",
+   "shape": [
+    640,
+    2560
+   ],
+   "zero_frac": 0.41695740818977356,
+   "p_plus": 0.29180604219436646,
+   "p_minus": 0.29123654961586,
+   "H_ternary": 1.5630518300855805,
+   "bitmap_sign_bpw": 1.5830425918102264
+  },
+  {
+   "name": "model.layers.25.mlp.down_proj.weight",
+   "shape": [
+    2560,
+    6912
+   ],
+   "zero_frac": 0.40060949325561523,
+   "p_plus": 0.2998100519180298,
+   "p_minus": 0.299580454826355,
+   "H_ternary": 1.5706964521142677,
+   "bitmap_sign_bpw": 1.5993905067443848
+  },
+  {
+   "name": "model.layers.25.mlp.gate_proj.weight",
+   "shape": [
+    6912,
+    2560
+   ],
+   "zero_frac": 0.3815576136112213,
+   "p_plus": 0.30933675169944763,
+   "p_minus": 0.30910563468933105,
+   "H_ternary": 1.5775770158284965,
+   "bitmap_sign_bpw": 1.6184423863887787
+  },
+  {
+   "name": "model.layers.25.mlp.up_proj.weight",
+   "shape": [
+    6912,
+    2560
+   ],
+   "zero_frac": 0.40213441848754883,
+   "p_plus": 0.2988561689853668,
+   "p_minus": 0.29900941252708435,
+   "H_ternary": 1.5700510176714668,
+   "bitmap_sign_bpw": 1.5978655815124512
+  },
+  {
+   "name": "model.layers.25.self_attn.k_proj.weight",
+   "shape": [
+    640,
+    2560
+   ],
+   "zero_frac": 0.405691534280777,
+   "p_plus": 0.2977526783943176,
+   "p_minus": 0.2965557873249054,
+   "H_ternary": 1.568489444349559,
+   "bitmap_sign_bpw": 1.594308465719223
+  },
+  {
+   "name": "model.layers.25.self_attn.o_proj.weight",
+   "shape": [
+    2560,
+    2560
+   ],
+   "zero_frac": 0.4283277988433838,
+   "p_plus": 0.28575193881988525,
+   "p_minus": 0.28592026233673096,
+   "H_ternary": 1.5567990111269903,
+   "bitmap_sign_bpw": 1.5716722011566162
+  },
+  {
+   "name": "model.layers.25.self_attn.q_proj.weight",
+   "shape": [
+    2560,
+    2560
+   ],
+   "zero_frac": 0.44644179940223694,
+   "p_plus": 0.2769746482372284,
+   "p_minus": 0.27658355236053467,
+   "H_ternary": 1.5452654143119708,
+   "bitmap_sign_bpw": 1.553558200597763
+  },
+  {
+   "name": "model.layers.25.self_attn.v_proj.weight",
+   "shape": [
+    640,
+    2560
+   ],
+   "zero_frac": 0.3513244688510895,
+   "p_plus": 0.32409971952438354,
+   "p_minus": 0.324575811624527,
+   "H_ternary": 1.5839206384888085,
+   "bitmap_sign_bpw": 1.6486755311489105
+  },
+  {
+   "name": "model.layers.26.mlp.down_proj.weight",
+   "shape": [
+    2560,
+    6912
+   ],
+   "zero_frac": 0.3655535578727722,
+   "p_plus": 0.3173448443412781,
+   "p_minus": 0.3171015977859497,
+   "H_ternary": 1.5816430863718918,
+   "bitmap_sign_bpw": 1.6344464421272278
+  },
+  {
+   "name": "model.layers.26.mlp.gate_proj.weight",
+   "shape": [
+    6912,
+    2560
+   ],
+   "zero_frac": 0.38523727655410767,
+   "p_plus": 0.30745577812194824,
+   "p_minus": 0.3073069453239441,
+   "H_ternary": 1.5764198111724892,
+   "bitmap_sign_bpw": 1.6147627234458923
+  },
+  {
+   "name": "model.layers.26.mlp.up_proj.weight",
+   "shape": [
+    6912,
+    2560
+   ],
+   "zero_frac": 0.4251120090484619,
+   "p_plus": 0.2876134216785431,
+   "p_minus": 0.287274569272995,
+   "H_ternary": 1.558644919516063,
+   "bitmap_sign_bpw": 1.574887990951538
+  },
+  {
+   "name": "model.layers.26.self_attn.k_proj.weight",
+   "shape": [
+    640,
+    2560
+   ],
+   "zero_frac": 0.4175555408000946,
+   "p_plus": 0.2909991443157196,
+   "p_minus": 0.2914453148841858,
+   "H_ternary": 1.5627421082597475,
+   "bitmap_sign_bpw": 1.5824444591999054
+  },
+  {
+   "name": "model.layers.26.self_attn.o_proj.weight",
+   "shape": [
+    2560,
+    2560
+   ],
+   "zero_frac": 0.4420727491378784,
+   "p_plus": 0.2789994776248932,
+   "p_minus": 0.2789277732372284,
+   "H_ternary": 1.5482233497705313,
+   "bitmap_sign_bpw": 1.5579272508621216
+  },
+  {
+   "name": "model.layers.26.self_attn.q_proj.weight",
+   "shape": [
+    2560,
+    2560
+   ],
+   "zero_frac": 0.4587348997592926,
+   "p_plus": 0.2705821096897125,
+   "p_minus": 0.2706829905509949,
+   "H_ternary": 1.5363462271069008,
+   "bitmap_sign_bpw": 1.5412651002407074
+  },
+  {
+   "name": "model.layers.26.self_attn.v_proj.weight",
+   "shape": [
+    640,
+    2560
+   ],
+   "zero_frac": 0.36490416526794434,
+   "p_plus": 0.31769776344299316,
+   "p_minus": 0.3173980712890625,
+   "H_ternary": 1.581774595270702,
+   "bitmap_sign_bpw": 1.6350958347320557
+  },
+  {
+   "name": "model.layers.27.mlp.down_proj.weight",
+   "shape": [
+    2560,
+    6912
+   ],
+   "zero_frac": 0.36840271949768066,
+   "p_plus": 0.31574803590774536,
+   "p_minus": 0.315849244594574,
+   "H_ternary": 1.5810350271656919,
+   "bitmap_sign_bpw": 1.6315972805023193
+  },
+  {
+   "name": "model.layers.27.mlp.gate_proj.weight",
+   "shape": [
+    6912,
+    2560
+   ],
+   "zero_frac": 0.43608009815216064,
+   "p_plus": 0.2821659743785858,
+   "p_minus": 0.28175392746925354,
+   "H_ternary": 1.5520983679667002,
+   "bitmap_sign_bpw": 1.5639199018478394
+  },
+  {
+   "name": "model.layers.27.mlp.up_proj.weight",
+   "shape": [
+    6912,
+    2560
+   ],
+   "zero_frac": 0.4300214946269989,
+   "p_plus": 0.2850082516670227,
+   "p_minus": 0.2849702537059784,
+   "H_ternary": 1.555802279623164,
+   "bitmap_sign_bpw": 1.569978505373001
+  },
+  {
+   "name": "model.layers.27.self_attn.k_proj.weight",
+   "shape": [
+    640,
+    2560
+   ],
+   "zero_frac": 0.45931029319763184,
+   "p_plus": 0.27030640840530396,
+   "p_minus": 0.2703832983970642,
+   "H_ternary": 1.5359072094216955,
+   "bitmap_sign_bpw": 1.5406897068023682
+  },
+  {
+   "name": "model.layers.27.self_attn.o_proj.weight",
+   "shape": [
+    2560,
+    2560
+   ],
+   "zero_frac": 0.41730377078056335,
+   "p_plus": 0.29122817516326904,
+   "p_minus": 0.2914680540561676,
+   "H_ternary": 1.5628729775933592,
+   "bitmap_sign_bpw": 1.5826962292194366
+  },
+  {
+   "name": "model.layers.27.self_attn.q_proj.weight",
+   "shape": [
+    2560,
+    2560
+   ],
+   "zero_frac": 0.46589186787605286,
+   "p_plus": 0.2670210301876068,
+   "p_minus": 0.26708710193634033,
+   "H_ternary": 1.530748757044833,
+   "bitmap_sign_bpw": 1.5341081321239471
+  },
+  {
+   "name": "model.layers.27.self_attn.v_proj.weight",
+   "shape": [
+    640,
+    2560
+   ],
+   "zero_frac": 0.33253419399261475,
+   "p_plus": 0.3339477479457855,
+   "p_minus": 0.33351805806159973,
+   "H_ternary": 1.5849602273400065,
+   "bitmap_sign_bpw": 1.6674658060073853
+  },
+  {
+   "name": "model.layers.28.mlp.down_proj.weight",
+   "shape": [
+    2560,
+    6912
+   ],
+   "zero_frac": 0.4038764238357544,
+   "p_plus": 0.29818984866142273,
+   "p_minus": 0.2979337275028229,
+   "H_ternary": 1.5692965375513093,
+   "bitmap_sign_bpw": 1.5961235761642456
+  },
+  {
+   "name": "model.layers.28.mlp.gate_proj.weight",
+   "shape": [
+    6912,
+    2560
+   ],
+   "zero_frac": 0.39616885781288147,
+   "p_plus": 0.30189016461372375,
+   "p_minus": 0.3019409775733948,
+   "H_ternary": 1.5724964962070986,
+   "bitmap_sign_bpw": 1.6038311421871185
+  },
+  {
+   "name": "model.layers.28.mlp.up_proj.weight",
+   "shape": [
+    6912,
+    2560
+   ],
+   "zero_frac": 0.421686589717865,
+   "p_plus": 0.2891784608364105,
+   "p_minus": 0.2891349494457245,
+   "H_ternary": 1.560544266064313,
+   "bitmap_sign_bpw": 1.578313410282135
+  },
+  {
+   "name": "model.layers.28.self_attn.k_proj.weight",
+   "shape": [
+    640,
+    2560
+   ],
+   "zero_frac": 0.4212316870689392,
+   "p_plus": 0.28937745094299316,
+   "p_minus": 0.2893908619880676,
+   "H_ternary": 1.560791268454877,
+   "bitmap_sign_bpw": 1.5787683129310608
+  },
+  {
+   "name": "model.layers.28.self_attn.o_proj.weight",
+   "shape": [
+    2560,
+    2560
+   ],
+   "zero_frac": 0.4374650716781616,
+   "p_plus": 0.28145158290863037,
+   "p_minus": 0.281083345413208,
+   "H_ternary": 1.5512214951892904,
+   "bitmap_sign_bpw": 1.5625349283218384
+  },
+  {
+   "name": "model.layers.28.self_attn.q_proj.weight",
+   "shape": [
+    2560,
+    2560
+   ],
+   "zero_frac": 0.4222019910812378,
+   "p_plus": 0.2888855040073395,
+   "p_minus": 0.28891250491142273,
+   "H_ternary": 1.560262938798739,
+   "bitmap_sign_bpw": 1.5777980089187622
+  },
+  {
+   "name": "model.layers.28.self_attn.v_proj.weight",
+   "shape": [
+    640,
+    2560
+   ],
+   "zero_frac": 0.38702088594436646,
+   "p_plus": 0.30614012479782104,
+   "p_minus": 0.3068389892578125,
+   "H_ternary": 1.575828625304819,
+   "bitmap_sign_bpw": 1.6129791140556335
+  },
+  {
+   "name": "model.layers.29.mlp.down_proj.weight",
+   "shape": [
+    2560,
+    6912
+   ],
+   "zero_frac": 0.40839120745658875,
+   "p_plus": 0.2958706319332123,
+   "p_minus": 0.295738160610199,
+   "H_ternary": 1.5672567561804516,
+   "bitmap_sign_bpw": 1.5916087925434113
+  },
+  {
+   "name": "model.layers.29.mlp.gate_proj.weight",
+   "shape": [
+    6912,
+    2560
+   ],
+   "zero_frac": 0.4382757246494293,
+   "p_plus": 0.28116902709007263,
+   "p_minus": 0.28055524826049805,
+   "H_ternary": 1.5507026908008381,
+   "bitmap_sign_bpw": 1.5617242753505707
+  },
+  {
+   "name": "model.layers.29.mlp.up_proj.weight",
+   "shape": [
+    6912,
+    2560
+   ],
+   "zero_frac": 0.3970043659210205,
+   "p_plus": 0.3013710379600525,
+   "p_minus": 0.301624596118927,
+   "H_ternary": 1.5721668235249415,
+   "bitmap_sign_bpw": 1.6029956340789795
+  },
+  {
+   "name": "model.layers.29.self_attn.k_proj.weight",
+   "shape": [
+    640,
+    2560
+   ],
+   "zero_frac": 0.40102478861808777,
+   "p_plus": 0.2994616627693176,
+   "p_minus": 0.2995135486125946,
+   "H_ternary": 1.570522109931411,
+   "bitmap_sign_bpw": 1.5989752113819122
+  },
+  {
+   "name": "model.layers.29.self_attn.o_proj.weight",
+   "shape": [
+    2560,
+    2560
+   ],
+   "zero_frac": 0.544942319393158,
+   "p_plus": 0.22760528326034546,
+   "p_minus": 0.22745239734649658,
+   "H_ternary": 1.4492218247924677,
+   "bitmap_sign_bpw": 1.455057680606842
+  },
+  {
+   "name": "model.layers.29.self_attn.q_proj.weight",
+   "shape": [
+    2560,
+    2560
+   ],
+   "zero_frac": 0.4235926866531372,
+   "p_plus": 0.2881651222705841,
+   "p_minus": 0.2882421910762787,
+   "H_ternary": 1.5594959925978167,
+   "bitmap_sign_bpw": 1.5764073133468628
+  },
+  {
+   "name": "model.layers.29.self_attn.v_proj.weight",
+   "shape": [
+    640,
+    2560
+   ],
+   "zero_frac": 0.44514283537864685,
+   "p_plus": 0.27714842557907104,
+   "p_minus": 0.2777087390422821,
+   "H_ternary": 1.5461562231753294,
+   "bitmap_sign_bpw": 1.5548571646213531
+  },
+  {
+   "name": "model.layers.3.mlp.down_proj.weight",
+   "shape": [
+    2560,
+    6912
+   ],
+   "zero_frac": 0.4616582691669464,
+   "p_plus": 0.26918596029281616,
+   "p_minus": 0.2691557705402374,
+   "H_ternary": 1.5340957843427994,
+   "bitmap_sign_bpw": 1.5383417308330536
+  },
+  {
+   "name": "model.layers.3.mlp.gate_proj.weight",
+   "shape": [
+    6912,
+    2560
+   ],
+   "zero_frac": 0.4426814317703247,
+   "p_plus": 0.2791631519794464,
+   "p_minus": 0.2781554162502289,
+   "H_ternary": 1.5478166673997342,
+   "bitmap_sign_bpw": 1.5573185682296753
+  },
+  {
+   "name": "model.layers.3.mlp.up_proj.weight",
+   "shape": [
+    6912,
+    2560
+   ],
+   "zero_frac": 0.4551199972629547,
+   "p_plus": 0.27246907353401184,
+   "p_minus": 0.27241092920303345,
+   "H_ternary": 1.5390603739053166,
+   "bitmap_sign_bpw": 1.5448800027370453
+  },
+  {
+   "name": "model.layers.3.self_attn.k_proj.weight",
+   "shape": [
+    640,
+    2560
+   ],
+   "zero_frac": 0.40649840235710144,
+   "p_plus": 0.2964593470096588,
+   "p_minus": 0.29704225063323975,
+   "H_ternary": 1.5681264008172207,
+   "bitmap_sign_bpw": 1.5935015976428986
+  },
+  {
+   "name": "model.layers.3.self_attn.o_proj.weight",
+   "shape": [
+    2560,
+    2560
+   ],
+   "zero_frac": 0.42272278666496277,
+   "p_plus": 0.28855088353157043,
+   "p_minus": 0.2887263298034668,
+   "H_ternary": 1.5599770324033262,
+   "bitmap_sign_bpw": 1.5772772133350372
+  },
+  {
+   "name": "model.layers.3.self_attn.q_proj.weight",
+   "shape": [
+    2560,
+    2560
+   ],
+   "zero_frac": 0.44365447759628296,
+   "p_plus": 0.27823975682258606,
+   "p_minus": 0.278105765581131,
+   "H_ternary": 1.5471654230956902,
+   "bitmap_sign_bpw": 1.556345522403717
+  },
+  {
+   "name": "model.layers.3.self_attn.v_proj.weight",
+   "shape": [
+    640,
+    2560
+   ],
+   "zero_frac": 0.3840753138065338,
+   "p_plus": 0.30789610743522644,
+   "p_minus": 0.30802857875823975,
+   "H_ternary": 1.5767941744250817,
+   "bitmap_sign_bpw": 1.6159246861934662
+  },
+  {
+   "name": "model.layers.4.mlp.down_proj.weight",
+   "shape": [
+    2560,
+    6912
+   ],
+   "zero_frac": 0.4189034402370453,
+   "p_plus": 0.29055485129356384,
+   "p_minus": 0.29054170846939087,
+   "H_ternary": 1.5620362651163973,
+   "bitmap_sign_bpw": 1.5810965597629547
+  },
+  {
+   "name": "model.layers.4.mlp.gate_proj.weight",
+   "shape": [
+    6912,
+    2560
+   ],
+   "zero_frac": 0.4211486876010895,
+   "p_plus": 0.290024071931839,
+   "p_minus": 0.28882724046707153,
+   "H_ternary": 1.5608344181107663,
+   "bitmap_sign_bpw": 1.5788513123989105
+  },
+  {
+   "name": "model.layers.4.mlp.up_proj.weight",
+   "shape": [
+    6912,
+    2560
+   ],
+   "zero_frac": 0.4291277825832367,
+   "p_plus": 0.28546395897865295,
+   "p_minus": 0.28540825843811035,
+   "H_ternary": 1.5563303456861437,
+   "bitmap_sign_bpw": 1.5708722174167633
+  },
+  {
+   "name": "model.layers.4.self_attn.k_proj.weight",
+   "shape": [
+    640,
+    2560
+   ],
+   "zero_frac": 0.4329150319099426,
+   "p_plus": 0.2835119664669037,
+   "p_minus": 0.2835730016231537,
+   "H_ternary": 1.5540603313490662,
+   "bitmap_sign_bpw": 1.5670849680900574
+  },
+  {
+   "name": "model.layers.4.self_attn.o_proj.weight",
+   "shape": [
+    2560,
+    2560
+   ],
+   "zero_frac": 0.41194671392440796,
+   "p_plus": 0.2941574156284332,
+   "p_minus": 0.2938958704471588,
+   "H_ternary": 1.5655645774958802,
+   "bitmap_sign_bpw": 1.588053286075592
+  },
+  {
+   "name": "model.layers.4.self_attn.q_proj.weight",
+   "shape": [
+    2560,
+    2560
+   ],
+   "zero_frac": 0.444791704416275,
+   "p_plus": 0.2773974537849426,
+   "p_minus": 0.27781084179878235,
+   "H_ternary": 1.5463955738580832,
+   "bitmap_sign_bpw": 1.555208295583725
+  },
+  {
+   "name": "model.layers.4.self_attn.v_proj.weight",
+   "shape": [
+    640,
+    2560
+   ],
+   "zero_frac": 0.3748638927936554,
+   "p_plus": 0.3128625452518463,
+   "p_minus": 0.3122735619544983,
+   "H_ternary": 1.5794693464933753,
+   "bitmap_sign_bpw": 1.6251361072063446
+  },
+  {
+   "name": "model.layers.5.mlp.down_proj.weight",
+   "shape": [
+    2560,
+    6912
+   ],
+   "zero_frac": 0.43007564544677734,
+   "p_plus": 0.2850382626056671,
+   "p_minus": 0.28488609194755554,
+   "H_ternary": 1.5557701049326476,
+   "bitmap_sign_bpw": 1.5699243545532227
+  },
+  {
+   "name": "model.layers.5.mlp.gate_proj.weight",
+   "shape": [
+    6912,
+    2560
+   ],
+   "zero_frac": 0.40537992119789124,
+   "p_plus": 0.29787009954452515,
+   "p_minus": 0.2967499792575836,
+   "H_ternary": 1.5686293381545395,
+   "bitmap_sign_bpw": 1.5946200788021088
+  },
+  {
+   "name": "model.layers.5.mlp.up_proj.weight",
+   "shape": [
+    6912,
+    2560
+   ],
+   "zero_frac": 0.4091832935810089,
+   "p_plus": 0.2953372597694397,
+   "p_minus": 0.2954794466495514,
+   "H_ternary": 1.566886315835626,
+   "bitmap_sign_bpw": 1.590816706418991
+  },
+  {
+   "name": "model.layers.5.self_attn.k_proj.weight",
+   "shape": [
+    640,
+    2560
+   ],
+   "zero_frac": 0.4655810594558716,
+   "p_plus": 0.2673834264278412,
+   "p_minus": 0.26703551411628723,
+   "H_ternary": 1.5309978561875197,
+   "bitmap_sign_bpw": 1.5344189405441284
+  },
+  {
+   "name": "model.layers.5.self_attn.o_proj.weight",
+   "shape": [
+    2560,
+    2560
+   ],
+   "zero_frac": 0.4382075369358063,
+   "p_plus": 0.2809843420982361,
+   "p_minus": 0.28080812096595764,
+   "H_ternary": 1.5507468959987691,
+   "bitmap_sign_bpw": 1.5617924630641937
+  },
+  {
+   "name": "model.layers.5.self_attn.q_proj.weight",
+   "shape": [
+    2560,
+    2560
+   ],
+   "zero_frac": 0.45229676365852356,
+   "p_plus": 0.2737596035003662,
+   "p_minus": 0.27394363284111023,
+   "H_ternary": 1.5411272041678277,
+   "bitmap_sign_bpw": 1.5477032363414764
+  },
+  {
+   "name": "model.layers.5.self_attn.v_proj.weight",
+   "shape": [
+    640,
+    2560
+   ],
+   "zero_frac": 0.39332032203674316,
+   "p_plus": 0.3033624291419983,
+   "p_minus": 0.30331724882125854,
+   "H_ternary": 1.5735885503513256,
+   "bitmap_sign_bpw": 1.6066796779632568
+  },
+  {
+   "name": "model.layers.6.mlp.down_proj.weight",
+   "shape": [
+    2560,
+    6912
+   ],
+   "zero_frac": 0.3761904537677765,
+   "p_plus": 0.3120911717414856,
+   "p_minus": 0.3117183744907379,
+   "H_ternary": 1.579116352032497,
+   "bitmap_sign_bpw": 1.6238095462322235
+  },
+  {
+   "name": "model.layers.6.mlp.gate_proj.weight",
+   "shape": [
+    6912,
+    2560
+   ],
+   "zero_frac": 0.4164418578147888,
+   "p_plus": 0.29201608896255493,
+   "p_minus": 0.29154205322265625,
+   "H_ternary": 1.5633173428214866,
+   "bitmap_sign_bpw": 1.5835581421852112
+  },
+  {
+   "name": "model.layers.6.mlp.up_proj.weight",
+   "shape": [
+    6912,
+    2560
+   ],
+   "zero_frac": 0.4181278944015503,
+   "p_plus": 0.29102230072021484,
+   "p_minus": 0.29084980487823486,
+   "H_ternary": 1.5624438097416968,
+   "bitmap_sign_bpw": 1.5818721055984497
+  },
+  {
+   "name": "model.layers.6.self_attn.k_proj.weight",
+   "shape": [
+    640,
+    2560
+   ],
+   "zero_frac": 0.4198925793170929,
+   "p_plus": 0.29051148891448975,
+   "p_minus": 0.28959593176841736,
+   "H_ternary": 1.5615102173122115,
+   "bitmap_sign_bpw": 1.580107420682907
+  },
+  {
+   "name": "model.layers.6.self_attn.o_proj.weight",
+   "shape": [
+    2560,
+    2560
+   ],
+   "zero_frac": 0.3890937864780426,
+   "p_plus": 0.3054946959018707,
+   "p_minus": 0.30541151762008667,
+   "H_ternary": 1.5751184516817505,
+   "bitmap_sign_bpw": 1.6109062135219574
+  },
+  {
+   "name": "model.layers.6.self_attn.q_proj.weight",
+   "shape": [
+    2560,
+    2560
+   ],
+   "zero_frac": 0.48646408319473267,
+   "p_plus": 0.2568961977958679,
+   "p_minus": 0.2566397190093994,
+   "H_ternary": 1.5130070956279655,
+   "bitmap_sign_bpw": 1.5135359168052673
+  },
+  {
+   "name": "model.layers.6.self_attn.v_proj.weight",
+   "shape": [
+    640,
+    2560
+   ],
+   "zero_frac": 0.34428346157073975,
+   "p_plus": 0.32798948884010315,
+   "p_minus": 0.3277270495891571,
+   "H_ternary": 1.5845752840118164,
+   "bitmap_sign_bpw": 1.6557165384292603
+  },
+  {
+   "name": "model.layers.7.mlp.down_proj.weight",
+   "shape": [
+    2560,
+    6912
+   ],
+   "zero_frac": 0.37743452191352844,
+   "p_plus": 0.3113560378551483,
+   "p_minus": 0.31120944023132324,
+   "H_ternary": 1.5787753891883742,
+   "bitmap_sign_bpw": 1.6225654780864716
+  },
+  {
+   "name": "model.layers.7.mlp.gate_proj.weight",
+   "shape": [
+    6912,
+    2560
+   ],
+   "zero_frac": 0.39635321497917175,
+   "p_plus": 0.3021012544631958,
+   "p_minus": 0.30154553055763245,
+   "H_ternary": 1.5724237652285717,
+   "bitmap_sign_bpw": 1.6036467850208282
+  },
+  {
+   "name": "model.layers.7.mlp.up_proj.weight",
+   "shape": [
+    6912,
+    2560
+   ],
+   "zero_frac": 0.39457178115844727,
+   "p_plus": 0.302717924118042,
+   "p_minus": 0.30271029472351074,
+   "H_ternary": 1.5731148109777497,
+   "bitmap_sign_bpw": 1.6054282188415527
+  },
+  {
+   "name": "model.layers.7.self_attn.k_proj.weight",
+   "shape": [
+    640,
+    2560
+   ],
+   "zero_frac": 0.4250854551792145,
+   "p_plus": 0.2874932885169983,
+   "p_minus": 0.28742125630378723,
+   "H_ternary": 1.5586600463063325,
+   "bitmap_sign_bpw": 1.5749145448207855
+  },
+  {
+   "name": "model.layers.7.self_attn.o_proj.weight",
+   "shape": [
+    2560,
+    2560
+   ],
+   "zero_frac": 0.40083953738212585,
+   "p_plus": 0.2996891736984253,
+   "p_minus": 0.29947128891944885,
+   "H_ternary": 1.5705999798703365,
+   "bitmap_sign_bpw": 1.5991604626178741
+  },
+  {
+   "name": "model.layers.7.self_attn.q_proj.weight",
+   "shape": [
+    2560,
+    2560
+   ],
+   "zero_frac": 0.4586543142795563,
+   "p_plus": 0.27073317766189575,
+   "p_minus": 0.270612508058548,
+   "H_ternary": 1.5364075541650613,
+   "bitmap_sign_bpw": 1.5413456857204437
+  },
+  {
+   "name": "model.layers.7.self_attn.v_proj.weight",
+   "shape": [
+    640,
+    2560
+   ],
+   "zero_frac": 0.3511846959590912,
+   "p_plus": 0.32458192110061646,
+   "p_minus": 0.32423338294029236,
+   "H_ternary": 1.5839368104436495,
+   "bitmap_sign_bpw": 1.6488153040409088
+  },
+  {
+   "name": "model.layers.8.mlp.down_proj.weight",
+   "shape": [
+    2560,
+    6912
+   ],
+   "zero_frac": 0.37673431634902954,
+   "p_plus": 0.31149032711982727,
+   "p_minus": 0.3117753565311432,
+   "H_ternary": 1.5789684722930564,
+   "bitmap_sign_bpw": 1.6232656836509705
+  },
+  {
+   "name": "model.layers.8.mlp.gate_proj.weight",
+   "shape": [
+    6912,
+    2560
+   ],
+   "zero_frac": 0.3981553912162781,
+   "p_plus": 0.30139583349227905,
+   "p_minus": 0.30044877529144287,
+   "H_ternary": 1.5717048691410342,
+   "bitmap_sign_bpw": 1.601844608783722
+  },
+  {
+   "name": "model.layers.8.mlp.up_proj.weight",
+   "shape": [
+    6912,
+    2560
+   ],
+   "zero_frac": 0.39501386880874634,
+   "p_plus": 0.3024986684322357,
+   "p_minus": 0.30248746275901794,
+   "H_ternary": 1.5729451966159904,
+   "bitmap_sign_bpw": 1.6049861311912537
+  },
+  {
+   "name": "model.layers.8.self_attn.k_proj.weight",
+   "shape": [
+    640,
+    2560
+   ],
+   "zero_frac": 0.46097227931022644,
+   "p_plus": 0.2692334055900574,
+   "p_minus": 0.2697943150997162,
+   "H_ternary": 1.534627906594622,
+   "bitmap_sign_bpw": 1.5390277206897736
+  },
+  {
+   "name": "model.layers.8.self_attn.o_proj.weight",
+   "shape": [
+    2560,
+    2560
+   ],
+   "zero_frac": 0.391154944896698,
+   "p_plus": 0.30434584617614746,
+   "p_minus": 0.30449920892715454,
+   "H_ternary": 1.574385859107044,
+   "bitmap_sign_bpw": 1.608845055103302
+  },
+  {
+   "name": "model.layers.8.self_attn.q_proj.weight",
+   "shape": [
+    2560,
+    2560
+   ],
+   "zero_frac": 0.4810415506362915,
+   "p_plus": 0.2591186463832855,
+   "p_minus": 0.259839802980423,
+   "H_ternary": 1.5179204028445044,
+   "bitmap_sign_bpw": 1.5189584493637085
+  },
+  {
+   "name": "model.layers.8.self_attn.v_proj.weight",
+   "shape": [
+    640,
+    2560
+   ],
+   "zero_frac": 0.34419676661491394,
+   "p_plus": 0.3281628489494324,
+   "p_minus": 0.3276403844356537,
+   "H_ternary": 1.584581149638603,
+   "bitmap_sign_bpw": 1.655803233385086
+  },
+  {
+   "name": "model.layers.9.mlp.down_proj.weight",
+   "shape": [
+    2560,
+    6912
+   ],
+   "zero_frac": 0.3752131760120392,
+   "p_plus": 0.31246304512023926,
+   "p_minus": 0.31232377886772156,
+   "H_ternary": 1.579377768052017,
+   "bitmap_sign_bpw": 1.6247868239879608
+  },
+  {
+   "name": "model.layers.9.mlp.gate_proj.weight",
+   "shape": [
+    6912,
+    2560
+   ],
+   "zero_frac": 0.41954368352890015,
+   "p_plus": 0.290589839220047,
+   "p_minus": 0.28986647725105286,
+   "H_ternary": 1.5616964546315097,
+   "bitmap_sign_bpw": 1.5804563164710999
+  },
+  {
+   "name": "model.layers.9.mlp.up_proj.weight",
+   "shape": [
+    6912,
+    2560
+   ],
+   "zero_frac": 0.3880285620689392,
+   "p_plus": 0.3059220016002655,
+   "p_minus": 0.3060494363307953,
+   "H_ternary": 1.5754869373226525,
+   "bitmap_sign_bpw": 1.6119714379310608
+  },
+  {
+   "name": "model.layers.9.self_attn.k_proj.weight",
+   "shape": [
+    640,
+    2560
+   ],
+   "zero_frac": 0.46711182594299316,
+   "p_plus": 0.26661011576652527,
+   "p_minus": 0.26627805829048157,
+   "H_ternary": 1.5297648402066812,
+   "bitmap_sign_bpw": 1.5328881740570068
+  },
+  {
+   "name": "model.layers.9.self_attn.o_proj.weight",
+   "shape": [
+    2560,
+    2560
+   ],
+   "zero_frac": 0.4382624924182892,
+   "p_plus": 0.2807309031486511,
+   "p_minus": 0.2810066044330597,
+   "H_ternary": 1.5507115712391388,
+   "bitmap_sign_bpw": 1.5617375075817108
+  },
+  {
+   "name": "model.layers.9.self_attn.q_proj.weight",
+   "shape": [
+    2560,
+    2560
+   ],
+   "zero_frac": 0.43520522117614746,
+   "p_plus": 0.28234437108039856,
+   "p_minus": 0.282450407743454,
+   "H_ternary": 1.5526467128807098,
+   "bitmap_sign_bpw": 1.5647947788238525
+  },
+  {
+   "name": "model.layers.9.self_attn.v_proj.weight",
+   "shape": [
+    640,
+    2560
+   ],
+   "zero_frac": 0.34847474098205566,
+   "p_plus": 0.3256823718547821,
+   "p_minus": 0.32584288716316223,
+   "H_ternary": 1.5842237187649897,
+   "bitmap_sign_bpw": 1.6515252590179443
+  }
+ ],
+ "weighted": {
+  "zero_frac": 0.4218949354763301,
+  "H_ternary": 1.5546138146291852,
+  "bitmap_sign_bpw": 1.5781050645236698
+ }
+}
